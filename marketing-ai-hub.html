@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marketing AI Hub</title>
+<style>
+:root{--bg:#f2f4f3;--card:#fff;--line:#e1e7e3;--ink:#15211a;--mut:#5b6962;--g:#1e9e57;--g2:#167c43;--gt:#e6f5ec;--gl:#6dbb8f;--amb:#8f5405;--ambt:#fdf2d8;--red:#b3362c;--redt:#fdebe9;--r:14px;--sh:0 1px 2px rgba(21,33,26,.05),0 6px 18px rgba(21,33,26,.05);--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+body.lock{overflow:hidden}
+h1,h2,h3,h4,h5,p,figure,ul,ol,dl,dd{margin:0}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--g2);outline-offset:2px}
+.wrap{max-width:1240px;margin:0 auto;padding:0 28px}
+
+/* header */
+.top{background:linear-gradient(180deg,#d5efdf 0,var(--bg) 100%);padding:28px 0 16px}
+.eyebrow{font-size:12px;font-weight:600;color:var(--g2);letter-spacing:.04em}
+h1{font-size:30px;letter-spacing:-.02em;margin:4px 0}
+.sub{color:var(--mut);max-width:76ch}
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.pill,.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:3px 10px;font-size:12px;color:var(--mut);white-space:nowrap}
+.pill b{color:var(--ink);font-weight:600}
+.pill.demo{background:var(--ambt);border-color:#efd9a0;color:var(--amb);font-weight:600}
+.pill i{width:7px;height:7px;border-radius:50%;background:var(--g)}
+.chip{padding:1px 8px;font-size:11.5px;background:#f5f7f6}
+.chip.k{background:var(--gt);border-color:#c5e6d2;color:var(--g2);font-weight:600}
+
+/* page sections and cards */
+main>section{margin:26px 0}
+.sh{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.sh h2{font-size:17px;letter-spacing:-.01em}
+.sh span{font-size:12px;color:var(--mut)}
+.sh p{flex-basis:100%;color:var(--mut);font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh)}
+.g3,.g2,.g5,.kpis{display:grid;gap:12px}
+.kpis{grid-template-columns:repeat(3,1fr);gap:16px;margin-top:8px}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g5{grid-template-columns:repeat(5,1fr)}
+.ic{flex:none;width:38px;height:38px;border-radius:10px;background:var(--gt);display:grid;place-items:center;font-size:18px}
+.btn{flex:none;border:0;background:var(--g2);color:#fff;font-weight:600;font-size:13px;border-radius:9px;padding:7px 14px;transition:background .15s}
+.btn:hover{background:#0f6335}
+.btn:disabled{background:#9db8a7;cursor:default}
+.btn.ghost{background:#fff;color:var(--g2);border:1px solid #bfe0cc}
+.link{border:0;background:none;color:var(--g2);font-weight:600;font-size:12.5px;padding:4px 0;text-decoration:underline;text-underline-offset:3px}
+
+.kpi{padding:18px 22px;position:relative;overflow:hidden}
+.kl{font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--g2);display:flex;justify-content:space-between}
+.kl span{color:var(--mut);font-weight:500;letter-spacing:0;text-transform:none}
+.kval{font-size:42px;font-weight:750;letter-spacing:-.03em;line-height:1.15;margin:4px 0 2px}
+.kd{font-size:12.5px;color:var(--mut)}
+.kpi svg{position:absolute;right:18px;bottom:16px;width:110px;height:34px}
+.d{font-weight:650;white-space:nowrap}.d.up{color:var(--g2)}.d.dn{color:var(--red)}
+
+.row{display:flex;gap:12px;align-items:center;padding:12px 14px}
+.rb{flex:1;min-width:0}
+.rb b,.fh b{font-size:14px}
+.rb p,.fh p,.agent p{color:var(--mut);font-size:12.5px;line-height:1.4}
+.src{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.flow{padding:16px;display:flex;flex-direction:column;gap:12px}
+.fh{display:flex;gap:12px}
+.chain{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.arw{color:var(--mut);font-size:12px}
+.ff{display:flex;justify-content:space-between;align-items:center;margin-top:auto;border-top:1px solid var(--line);padding-top:10px}
+.agent{padding:14px;display:flex;flex-direction:column;gap:8px}
+.agent .ic{width:32px;height:32px;font-size:16px}
+.agent b{font-size:14px}
+.task{display:flex;justify-content:space-between;gap:6px;width:100%;text-align:left;border:1px solid var(--line);background:#f7f9f8;border-radius:8px;padding:6px 9px;font-size:12px;font-weight:550}
+.task:hover{border-color:#bfe0cc;background:var(--gt)}
+.task span{color:var(--mut)}
+
+/* how it's built */
+.built{padding:20px;display:grid;gap:20px}.built>*{min-width:0}
+.arch{width:100%;height:auto;max-height:380px}
+.bx{fill:#fff;stroke:#cfd9d3}.bx.big{fill:var(--gt);stroke:#bfe0cc}.bx.mc{fill:#f5f7f6}
+.bt{font-size:13px;font-weight:650;fill:var(--ink);text-anchor:middle}
+.bs{font-size:10.5px;fill:var(--mut);text-anchor:middle}
+.col{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;fill:var(--mut);text-anchor:middle}
+.ar{stroke:#7f8f87;stroke-width:1.5;fill:none}.ahp{fill:#7f8f87}
+.notes{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.notes h4,.rs h4{font-size:11.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--mut);margin-bottom:8px}
+.notes p{font-size:13px}
+pre{margin:0;background:#0f1a14;color:#d5e7dc;border-radius:10px;padding:14px 16px;font:12px/1.55 var(--mono);overflow:auto}
+code{font:12px var(--mono);background:#eef2f0;border-radius:5px;padding:1px 5px}
+pre code{background:none;padding:0}
+footer{color:var(--mut);font-size:12px;padding:8px 0 40px}
+
+.install{margin-top:6px;padding:0}.install summary{font-size:15px}.install .two{padding:4px 18px 0;gap:24px}.install h4{font-size:13px;margin-bottom:8px}
+.install ol{padding-left:20px;display:grid;gap:8px;font-size:13px}.install>p{padding:12px 18px 16px;font-size:12px;color:var(--mut)}
+/* drawer */
+#scrim{position:fixed;inset:0;background:rgba(15,26,20,.38);opacity:0;pointer-events:none;transition:opacity .2s}
+#drawer{position:fixed;top:0;right:0;bottom:0;width:min(900px,96vw);background:var(--bg);box-shadow:-12px 0 40px rgba(15,26,20,.18);transform:translateX(102%);transition:transform .25s ease;display:flex;flex-direction:column;visibility:hidden}
+.open #scrim{opacity:1;pointer-events:auto}
+.open #drawer{transform:none;visibility:visible}
+#drawer>header{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 22px;background:#fff;border-bottom:1px solid var(--line)}
+#dh{display:flex;gap:12px;align-items:center}
+#dh h3{font-size:18px}
+.x{border:0;background:#f0f3f1;width:34px;height:34px;border-radius:9px;font-size:20px;line-height:1}
+.dbody{flex:1;overflow:auto;padding:18px 22px 40px}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:end;background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
+.form label{display:grid;gap:4px;font-size:12px;font-weight:600;color:var(--mut)}
+.form .wide{grid-column:1/-1}
+.form input,.form select{border:1px solid #cfd9d3;border-radius:8px;padding:7px 9px;background:#fff;font-weight:400;color:var(--ink);width:100%}
+.form .file{display:flex;align-items:center;gap:8px;border:1.5px dashed #b7c7be;border-radius:9px;padding:6px 10px;background:#f7f9f8}
+.form .file input{border:0;background:none;padding:2px}
+.form .file em{font-style:normal;font-weight:400;white-space:nowrap}
+.form .btn{justify-self:start;padding:9px 18px}
+.hint{color:var(--mut);font-size:13px}
+
+.trace{background:#0f1a14;color:#d5e7dc;border-radius:10px;padding:10px 14px;font:12px/1.6 var(--mono);margin-bottom:16px}
+.trh{color:#9fb8aa;display:flex;align-items:center;gap:8px}
+.tl{display:flex;gap:8px;animation:in .25s ease}.tl span{min-width:0;overflow-wrap:anywhere}
+.tl .ok{color:#62d394}.tl b{color:#9fd8ff;font-weight:500}.tl .res{margin-left:auto;color:#f1d58a;white-space:nowrap}
+.spin{width:11px;height:11px;border-radius:50%;border:2px solid #3d5548;border-top-color:#62d394;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+@keyframes in{from{opacity:0;transform:translateY(3px)}}
+.steps{list-style:none;padding:0;display:grid;gap:10px;margin-bottom:18px}
+.steps li{display:grid;grid-template-columns:28px 1fr;gap:12px;opacity:.5}
+.steps li.on,.steps li.done{opacity:1}
+.dot{width:28px;height:28px;border-radius:50%;background:#dfe6e2;display:grid;place-items:center;font-weight:700;font-size:12.5px}
+.on .dot{background:#fff;box-shadow:0 0 0 2px var(--g)}.done .dot{background:var(--g2);color:#fff}
+.steps .trace{margin:6px 0 0;padding:7px 12px}.steps .trace:empty{display:none}
+.note{font-size:12.5px;color:var(--g2);font-weight:600}
+.sum{font-size:16px;margin-bottom:12px;padding-top:14px;border-top:1px solid var(--line)}
+
+/* result building blocks */
+.rs{margin-bottom:18px;animation:in .3s ease}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:18px}
+.tile{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.tile span{font-size:11.5px;color:var(--mut);font-weight:600}
+.tile b{display:block;font-size:24px;letter-spacing:-.02em;line-height:1.2}
+.tile small{color:var(--mut);font-size:11.5px}
+.tile.warn b{color:var(--amb)}
+.tw{overflow-x:auto;background:#fff;border:1px solid var(--line);border-radius:12px}
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px;font-variant-numeric:tabular-nums}
+.tbl th{text-align:left;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--mut);padding:8px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+.tbl td{padding:8px 12px;border-bottom:1px solid #eef2f0;vertical-align:top}
+.tbl tr:last-child td{border-bottom:0}
+.tbl tr.flag td{background:var(--ambt)}
+.tbl small,.gh span{color:var(--mut)}
+.bul{padding-left:18px;display:grid;gap:6px;font-size:13px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+figure,.box{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+figcaption{font-size:12px;color:var(--mut);display:flex;justify-content:space-between;margin-bottom:4px;font-weight:600}
+.lg{display:flex;gap:6px;align-items:center;font-weight:400}.lg i{width:9px;height:9px;border-radius:2px}
+.ch{width:100%;height:auto;display:block}
+.b0{fill:var(--gl);background:var(--gl)}.b1{fill:var(--g2);background:var(--g2)}
+.ch rect:hover{opacity:.8}
+.cv{font-size:11px;font-weight:650;fill:var(--ink);text-anchor:middle}.cl{font-size:11px;fill:var(--mut);text-anchor:middle}
+.ax{stroke:#cfd9d3}.ln{fill:none;stroke:var(--g2);stroke-width:2}.pt{fill:var(--g2);stroke:#fff;stroke-width:2}
+.hb{display:grid;grid-template-columns:minmax(120px,46%) 1fr auto;gap:6px 10px;align-items:center;font-size:12.5px}
+.hbt{height:10px}.hbt i{display:block;height:100%;border-radius:0 4px 4px 0;min-width:3px}
+.hbt i.g{background:var(--g2)}.hbt i.r{background:#cf6a5f}.hbv{font-weight:650;font-variant-numeric:tabular-nums}
+.grp{margin-bottom:12px}.gh{display:flex;gap:8px;align-items:baseline;margin-bottom:6px;font-size:13px}.gh em{margin-left:auto;font-style:normal;font-weight:600;color:var(--amb);font-size:12px}
+.slack{display:grid;grid-template-columns:34px 1fr;gap:10px;background:#fff;border:1px solid var(--line);border-left:4px solid #4a154b;border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:12.5px}
+.slack .av{width:34px;height:34px;border-radius:8px;background:#d97757;color:#fff;display:grid;place-items:center;font-weight:700}
+.slack .who{font-weight:700}.slack .who span{font-weight:400;color:var(--mut);font-size:11.5px;margin-left:6px}
+.paper{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 20px;box-shadow:var(--sh)}
+.paper .rs:last-child{margin-bottom:0}
+.paper .tw,.paper figure{box-shadow:none}
+.ph{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid var(--g);padding-bottom:10px;margin-bottom:14px}
+.ph p{color:var(--mut);font-size:12.5px}
+.kv{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 16px;font-size:12.5px}
+.kv dt{color:var(--mut);font-size:11px;font-weight:600}.kv .w{grid-column:1/-1}
+.draft h3{font-size:17px;margin-bottom:8px}.draft h5{font-size:13px;margin:10px 0 2px}.draft p{margin-bottom:8px;font-size:13.5px}
+.draft .li{padding-left:16px;text-indent:-12px;margin-bottom:3px}.draft .li:before{content:"• "}
+.draft .new{background:var(--gt);border-left:3px solid var(--g);padding:6px 10px;border-radius:0 6px 6px 0}
+.refine{display:flex;align-items:center;gap:6px;margin-bottom:10px;font-size:12px;color:var(--mut);flex-wrap:wrap}
+.refine em{margin-left:auto;font-style:normal}
+.rchip{border:1px solid #bfe0cc;background:#fff;color:var(--g2);border-radius:999px;padding:3px 11px;font-size:12px;font-weight:600}
+.rchip.on{background:var(--g2);color:#fff;border-color:var(--g2)}
+.slides{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px}
+.sl{aspect-ratio:16/9;border-radius:6px;border:1px solid var(--line);position:relative;overflow:hidden;padding:8% 8% 6%;display:flex;flex-direction:column;gap:6px;font-size:10.5px;line-height:1.25}
+.sl b{font-size:13.5px;line-height:1.15}
+.sl .lgo{position:absolute;right:6%;bottom:7%;font-size:9px;font-weight:700}
+.sl .bars{display:flex;align-items:flex-end;gap:7%;height:52%;width:70%;margin-top:auto}
+.sl .bars i{flex:1;border-radius:2px 2px 0 0}
+.sl .bar{height:5px;border-radius:3px;background:#c9d5ce}
+.before{background:linear-gradient(135deg,#5b1a8f,#ff6a3d);color:#fff200;font-family:"Times New Roman",Times,serif}
+.before b{text-shadow:2px 2px 0 #000;text-transform:uppercase}
+.before .lgo{background:#d00;color:#fff;padding:2px 6px;transform:scaleX(1.7);transform-origin:right}
+.before.text{background:#fffbe0;color:#c2185b;font-family:"Comic Sans MS","Marker Felt",cursive;text-align:center}
+.before.chart{background:#dfe3f5;color:#1a237e}
+.after{background:#fff;color:var(--ink);border-left:6px solid var(--g)}
+.after .lgo{color:var(--g2)}
+.fix{display:grid;grid-template-columns:22px 90px 1fr;gap:8px;padding:8px 12px;border-bottom:1px solid #eef2f0;font-size:12.5px}
+.fix:last-child{border:0}.fix i{font-style:normal;color:var(--g2);font-weight:700}
+.plan{padding-left:20px;display:grid;gap:7px;font-size:13px}.plan code{margin-right:8px}
+.mix{display:flex;height:14px;border-radius:5px;overflow:hidden;gap:2px;margin-bottom:10px}
+details{background:#fff;border:1px solid var(--line);border-radius:12px;margin-bottom:8px}
+summary{cursor:pointer;padding:11px 14px;font-weight:650}summary span{font-weight:400;color:var(--mut);margin-left:8px;font-size:12.5px}
+details .paper{border:0;border-top:1px solid var(--line);border-radius:0 0 12px 12px;box-shadow:none}
+.link.md{font:600 11px var(--mono);padding:0 2px;margin-left:2px}
+.mdfile{background:#fff;color:var(--ink);border:1px solid var(--line);white-space:pre-wrap;font:12.5px/1.65 var(--mono);padding:18px 20px}
+.acts.bar{margin:0 0 12px;flex-wrap:wrap}
+.fine{font-size:12px;color:var(--mut);margin:8px 0 12px}.fine.warn{background:var(--ambt);color:var(--amb);border-radius:8px;padding:6px 10px}
+.acts{display:flex;gap:10px;align-items:center;margin-top:10px;font-size:12px;color:var(--mut)}
+#toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,20px);background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;opacity:0;pointer-events:none;transition:.2s;z-index:9}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+@media (max-width:1080px){.g3{grid-template-columns:1fr 1fr}.g5{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:720px){.g3,.g2,.g5,.kpis,.two,.notes,.form,.kv{grid-template-columns:1fr}.wrap{padding:0 16px}.kv{grid-template-columns:1fr 1fr}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <div class="eyebrow" id="co"></div>
+  <h1>Marketing AI Hub</h1>
+  <p class="sub">One place for marketers to launch Claude skills, multi-step workflows, and agents on go-to-market data. Press Run on any card to watch the tool calls and get the finished work product.</p>
+  <div class="pills" id="pills"></div>
+</div></header>
+
+<main class="wrap">
+  <details class="card install" open>
+    <summary>Add these skills to Claude<span>two ways, about a minute each</span></summary>
+    <div class="two">
+      <div><h4>All eight skills, as a plugin</h4><ol>
+        <li><button class="btn" data-act="plugin">Download marketing.plugin</button></li>
+        <li>In Claude, open <b>Customize</b> in the sidebar, then <b>Plugins</b>.</li>
+        <li>Choose the upload option and select <code>marketing.plugin</code>.</li>
+        <li>In a chat or a Cowork task, type <code>/</code> to pick a skill, or ask in plain words, for example "run CMO metrics".</li></ol></div>
+      <div><h4>One skill at a time</h4><ol>
+        <li>Open <b>SKILL.md</b> on any skill card below and choose <b>Download .zip</b>.</li>
+        <li>In Claude, go to <b>Customize</b>, then <b>Skills</b>. Click <b>+</b>, then <b>Create skill</b>, then <b>Upload a skill</b>, and select the ZIP.</li>
+        <li>Turn the skill on in your skills list.</li></ol></div>
+    </div>
+    <p>Plugins need a paid Claude plan, and uploading a skill needs "Code execution and file creation" turned on under Settings, Capabilities (on Team and Enterprise plans an owner controls both). For live data, connect Salesforce, Snowflake, Slack, and monday.com in Claude; without a connector, a skill asks for an export instead of guessing. The brand and voice reference files in the plugin are samples for this page's fictional company, so replace them with your own.</p>
+  </details>
+  <section class="kpis" id="kpis" aria-label="Headline metrics"></section>
+  <section><div class="sh"><h2>Skills</h2><span id="nSkills"></span><p>Single-purpose tools. Each one is a SKILL.md instruction file plus the MCP tools it may call. Open SKILL.md on any card to read it or download it as a ZIP.</p></div><div class="g3" id="skills"></div></section>
+  <section><div class="sh"><h2>Workflows</h2><span id="nFlows"></span><p>Skills chained in order. Run one here, or copy its prompt and paste it into Claude.</p></div><div class="g2" id="flows"></div></section>
+  <section><div class="sh"><h2>Art of the Possible</h2><span id="nAgents"></span><p>Role-based agents that plan their own steps. Pick a sample task to see the plan and a sample deliverable.</p></div><div class="g5" id="agents"></div></section>
+  <section><div class="sh"><h2>How it's built</h2><span>prototype-level detail</span></div>
+    <div class="card built">
+      <div id="arch"></div>
+      <div id="mcpTable"></div>
+      <div class="notes">
+        <div><h4>In production</h4><p>Each skill is a folder Claude loads when a request matches its description: <code>skills/&lt;name&gt;/SKILL.md</code> plus any reference files. Each MCP server authenticates with OAuth as the signed-in user (Salesforce, Slack, monday.com, Lucidchart) or with a scoped service account (Snowflake, limited to marketing views). Every server is read-only by default. Skills can write in only two places, a Slack message or a monday.com item, and each write waits for a button press. Agents can also create new Lucidchart diagrams; they never edit existing ones.</p></div>
+        <div><h4>In this prototype</h4><p>Nothing leaves the page. The eight SKILL.md files are stored in the page, open from the skill cards, and download together as <code>marketing.plugin</code>. The mock layer exposes the same tool names a real server would, and each tool returns rows from one sample <code>DATA</code> object. Skills only reach data through those tools, so the run trace, the KPI row, and every result agree, and swapping the mock for a real MCP client would not change the skill code.</p></div>
+      </div>
+      <div><h4 style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--mut);margin-bottom:8px">A mock MCP tool (simplified from this page's source)</h4>
+<pre><code>// Same tool name and arguments as the real Salesforce MCP server,
+// but it reads the page's sample DATA object instead of calling an API.
+const TOOLS = {
+  'salesforce.query_leads': ({ noActivityHours, campaign }) =&gt; {
+    let rows = DATA.slaLeads;                     // new leads, last 14 days
+    if (noActivityHours) rows = rows.filter(l =&gt; l.hrs &gt; noActivityHours);
+    if (campaign)        rows = rows.filter(l =&gt; l.camp === campaign);
+    return rows;
+  },
+};
+
+// Every skill reaches data through call(), which also writes the run trace.
+function call(tool, args = {}) {
+  const out = TOOLS[tool](args);
+  trace.push([tool, formatArgs(args), out.length + ' rows']);
+  return out;
+}
+
+// A skill is then just tool calls plus rendering:
+const late = call('salesforce.query_leads', { noActivityHours: 48 });
+// In production, call() becomes a real MCP request scoped by OAuth.</code></pre></div>
+    </div>
+  </section>
+  <footer>Portfolio prototype. The company, competitors, people, accounts, and every number on this page are fictional sample data.</footer>
+</main>
+
+<div id="scrim" data-act="close"></div>
+<aside id="drawer" role="dialog" aria-modal="true" aria-labelledby="dtitle">
+  <header><div id="dh"></div><button class="x" data-act="close" aria-label="Close">&times;</button></header>
+  <div class="dbody"><div id="dform"></div><div id="dout"></div></div>
+</aside>
+<div id="toast" role="status"></div>
+<script>
+/* ================= 1. SAMPLE DATA: the only source of numbers on this page =================
+   Money is in $K. Everything else (KPIs, traces, tables, charts, CSV) is derived from this object. */
+const DATA = {
+  asOf: '2026-09-30',
+  company: {name: 'Loomwright', what: 'AP and month-end close automation for mid-market finance teams', quarters: ['Q2 FY26', 'Q3 FY26']},
+  team: {cmo: 'Elena Marchetti', demand: 'Camille Arsenault, Demand Gen', mops: 'Dev Malhotra, Marketing Ops'},
+  months: [['Apr',0,2140,492,3900,96,1480], ['May',0,2260,531,4200,104,1610], ['Jun',0,2380,571,4500,112,1750], ['Jul',1,2450,564,4600,108,1720], ['Aug',1,2610,574,4900,113,1810], ['Sep',1,2890,607,5400,122,1990]]
+    .map(([m, q, mqls, sqls, pipe, won, arr]) => ({m, q, mqls, sqls, pipe, won, arr})),
+  weeks: {labels: ['Sep 14 to 20', 'Sep 21 to 27'], rows: [{mqls: 652, sqls: 148, pipe: 1180, won: 29, arr: 468}, {mqls: 741, sqls: 139, pipe: 1345, won: 27, arr: 441}]},
+  managers: [
+    {id: 'm1', name: 'Priya Raman', title: 'SDR Manager, West', slack: '@priya.raman'},
+    {id: 'm2', name: 'Marcus Oyelaran', title: 'SDR Manager, East', slack: '@marcus.oyelaran'},
+    {id: 'm3', name: 'Helena Voss', title: 'Director, Mid-Market Sales', slack: '@helena.voss'}],
+  // newLeads = leads assigned in the last 14 days; stale* = records with no activity in 90+ days
+  reps: [['r1','Jordan Whitfield','m1',22,96,38], ['r2','Aiko Tanabe','m1',20,88,41], ['r3','Luis Carranza','m1',19,141,57], ['r4','Dana Kowalczyk','m2',23,104,44],
+         ['r5','Theo Bassett','m2',21,163,61], ['r6','Nadia Farouk','m2',20,92,36], ['r7','Colin Ashby','m3',18,118,52], ['r8','Renee Thibault','m3',17,110,43]]
+    .map(([id, name, mgr, newLeads, staleLeads, staleContacts]) => ({id, name, mgr, newLeads, staleLeads, staleContacts})),
+  campaigns: [
+    {id: 'finops-summit', name: 'FinOps Forward Summit 2026', type: 'Event', newLeads: 58, pipe: 1640},
+    {id: 'close-faster', name: 'Close Faster Webinar Series', type: 'Webinar', newLeads: 38, pipe: 1210},
+    {id: 'roi-calculator', name: 'AP Automation ROI Calculator', type: 'Paid social', newLeads: 30, pipe: 980},
+    {id: 'analyst-syndication', name: 'Analyst Report Syndication', type: 'Content syndication', newLeads: 22, pipe: 540},
+    {id: 'roundtable-dinners', name: 'Controller Roundtable Dinners', type: 'Field event', newLeads: 12, pipe: 720}],
+  // new leads (last 14 days) with no activity within 48 hours of creation; hrs = hours since creation
+  slaLeads: [
+    ['Marguerite Okafor','Pinecrest Logistics','Controller','finops-summit','r5',96], ['Devon Halloran','Tallgrass Foods','VP Finance','finops-summit','r5',88],
+    ['Ines Castellano','Bluewater Dental Group','AP Manager','finops-summit','r5',71], ['Samir Dalal','Ironbridge Supply','CFO','finops-summit','r3',102],
+    ['Kaitlyn Brandt','Summit Ridge Health','Director of Accounting','finops-summit','r3',64], ['Owen Fitzgerald','Harborline Freight','Controller','finops-summit','r4',59],
+    ['Tamsin Ellery','Copperfield Hotels','VP Finance','finops-summit','r7',83], ['Rafael Monteiro','Greyrock Manufacturing','Finance Systems Lead','finops-summit','r7',55],
+    ['Yuki Hasegawa','Larkspur Biotech','Assistant Controller','finops-summit','r1',52], ["Bridget O'Malley",'Fenwick Staffing','Controller','close-faster','r5',120],
+    ['Anders Lindqvist','Northgate Packaging','AP Manager','close-faster','r5',67], ['Chidi Nwosu','Redwood Charter Schools','Director of Finance','close-faster','r3',74],
+    ['Leila Haddad','Brightwell Senior Living','CFO','close-faster','r6',61], ['Grant Pemberton','Stonemill Brewing','Controller','close-faster','r8',50],
+    ['Paloma Reyes','Vantage Auto Parts','AP Supervisor','roi-calculator','r3',90], ['Elliot Granger','Meridian Title Co.','VP Finance','roi-calculator','r4',66],
+    ['Sunita Verghese','Cascade Veterinary Partners','Controller','roi-calculator','r5',58], ['Hollis Drummond','Windrow Agritech','Finance Manager','roi-calculator','r2',53],
+    ['Farrah Delgado','Keystone Roofing Supply','CFO','analyst-syndication','r3',131], ['Winston Achebe','Lakeshore Credit Services','Director of Accounting','analyst-syndication','r4',77],
+    ['Noelle Bergstrom','Juniper Home Health','Controller','analyst-syndication','r7',69], ['Tobias Renner','Flintlock Engineering','AP Manager','analyst-syndication','r8',57],
+    ['Carmen Villasenor','Halvorsen Marine','CFO','roundtable-dinners','r1',63], ['Desmond Clarke','Orchard Lane Grocers','VP Finance','roundtable-dinners','r6',54]]
+    .map(([name, co, title, camp, rep, hrs]) => ({name, co, title, camp, rep, hrs})),
+  staleHighFit: 214,   // of all stale records, those with a fit score of 70+
+  stale: [   // best candidates among records idle 90+ days
+    ['Roland Achterberg','Sablewood Furniture','CFO','Contact',91,104,'Demo attended','r7'], ['Mei-Ling Soto','Crestline Energy Services','VP Finance','Lead',88,97,'Pricing page visit','r5'],
+    ['Arjun Bhatt','Halden Medical Supply','Controller','Lead',86,118,'Webinar attended','r3'], ['Josephine Tremblay','Wexford Insurance Group','Director of Accounting','Contact',84,132,'Demo attended','r8'],
+    ['Cormac Doyle','Atlas Ridge Construction','Controller','Lead',82,93,'ROI calculator completed','r4'], ['Imani Brooks','Solstice Hospitality','VP Finance','Lead',79,156,'Webinar attended','r5'],
+    ['Viktor Petrenko','Baywater Seafoods','AP Manager','Lead',77,101,'Pricing page visit','r1'], ['Lucinda Marsh','Thornbury Schools Trust','CFO','Contact',75,211,'Proposal sent','r7'],
+    ['Hamza Qureshi','Polaris Fleet Leasing','Finance Systems Lead','Lead',74,124,'ROI calculator completed','r6'], ['Greta Lindholm','Emberly Cosmetics','Controller','Lead',72,187,'Whitepaper download','r2'],
+    ['Nathaniel Okoro','Ridgeback Outdoor','AP Manager','Lead',70,143,'Whitepaper download','r3'], ['Beatriz Fonseca','Quarry Lane Dental','Director of Finance','Contact',68,265,'Email reply','r8'],
+    ['Silas Wheatley','Tern Harbor Shipping','AP Supervisor','Lead',66,98,'Webinar attended','r5'],
+    ['Odette Marchand','Kingsbridge Outfitters','CFO','Contact',93,99,'Demo attended','r4','do not contact'], ['Rupert Hale','Fenmoor Logistics','VP Finance','Lead',85,110,'Pricing page visit','r6','unsubscribed']]
+    .map(([name, co, title, type, score, idle, touch, rep, optOut]) => ({name, co, title, type, score, idle, touch, rep, optOut})),
+  // closed competitive opps, last 4 quarters
+  competitors: [
+    {id: 'orvanta', name: 'Orvanta', pos: 'Legacy finance suite that bundles an AP module into its ERP contract.', wins: 38, losses: 31,
+     winWhy: [['Faster implementation (6 weeks vs. 5 months)', 14], ['Easier for AP clerks to adopt', 11], ['Transparent per-entity pricing', 8], ['Stronger NetSuite and Sage Intacct connectors', 5]],
+     lossWhy: [['ERP bundle discount at renewal', 13], ['Multi-currency and intercompany depth', 9], ["On procurement's preferred-vendor list", 6], ['Perceived vendor-size risk', 3]],
+     improve: ['Ship multi-currency revaluation and intercompany netting, our second most common loss reason.', 'Give AEs a bundle-breaker TCO calculator before ERP renewal cycles start.', 'Publish two referenceable customers above 2,000 employees to answer the vendor-size objection.'],
+     say: [['AP is already included in your ERP license.', 'Included is not free. Their AP module typically needs a 5-month services project. We go live in 6 weeks and pay back in under 9 months.'],
+           ['Loomwright is a point solution you will outgrow.', 'We cover invoice capture through close with 40+ prebuilt reconciliations, and your ERP stays the system of record.'],
+           ['One vendor is simpler to manage.', 'One vendor also means one roadmap. We ship monthly. Ask for their AP release notes from the last year.']]},
+    {id: 'kettleworks', name: 'Kettleworks', pos: 'Low-cost invoice capture tool aimed at small finance teams.', wins: 44, losses: 19,
+     winWhy: [['Covers close and reconciliation, not just capture', 17], ['Approval workflows across multiple entities', 12], ['Audit trail and SOC 2 Type II controls', 9], ['ERP sync with no CSV uploads', 6]],
+     lossWhy: [['List price roughly 40% lower', 10], ['Buyer only needed invoice capture', 6], ['Faster self-serve trial', 3]],
+     improve: ['Offer a capture-only starter tier to stop single-use-case losses.', 'Stand up a 14-day guided trial with sample invoices.', 'Lead with total close-cycle savings instead of per-invoice price.'],
+     say: [['We do the same thing for 40% less.', 'For capture, that is close to true. Capture is about a fifth of the AP workload; approvals, matching, and close are where the hours go.'],
+           ['You can be live this afternoon.', 'Live on capture, yes. Our 6-week rollout adds approval routing, 3-way match, and ERP sync, which is what removes the manual work.'],
+           ['Loomwright is overkill for a team your size.', 'Finance teams of 4 to 40 run on us. Customers your size cut close from 10 days to 4.']]},
+    {id: 'driftmark', name: 'Driftmark', pos: 'AI-native upstart with aggressive pricing and a fast release cadence.', wins: 21, losses: 27,
+     winWhy: [['Proven accuracy on messy, multi-page invoices', 8], ["Reference customers in the buyer's industry", 6], ['Depth of implementation and support team', 4], ['Security review passed on the first attempt', 3]],
+     lossWhy: [['Autonomous approval-agent demo', 11], ['Multi-year discount of 30% or more', 8], ['Champion wanted the "AI-first" vendor', 5], ['Faster visible roadmap', 3]],
+     improve: ['Demo our AI coding assistant first; today it appears near the end of the standard deck.', 'Publish accuracy benchmarks run on real customer invoices.', 'Give AEs a multi-year pricing play to counter the discounting.'],
+     say: [['Our AI agent processes invoices with no human in the loop.', 'Auditors still want a person to approve exceptions. We auto-code 87% of invoices and route the rest with a full audit trail.'],
+           ['Legacy tools bolt AI on; we are built on it.', 'We have run ML extraction since 2021 on more than 30M invoices. Ask them for accuracy on multi-page and handwritten invoices.'],
+           ['We will beat any price.', 'Check years two and three. Our pricing is per entity with no per-invoice overage.']]}],
+  accounts: [
+    {id: 'marlowe-finch', name: 'Marlowe Finch Distribution', ind: 'Wholesale distribution', hq: 'Columbus, OH', emp: 1400, status: 'Prospect', arr: 0, owner: 'r7',
+     signal: '14 site sessions and 3 pricing-page visits in the last 30 days', meeting: {date: '2026-10-08', why: 'CFO proposal review'},
+     opps: [{name: 'AP Automation, 12 entities', stage: 'Proposal', amt: 186, close: '2026-11-14', comps: ['orvanta', 'driftmark']}],
+     people: [['Gwendolyn Pryce', 'CFO', 'Economic buyer'], ['Peter Okonjo', 'Controller', 'Champion'], ['Lena Fischbach', 'IT Director', 'Technical evaluator']],
+     activity: [['2026-09-26', 'Slack', 'Champion says Orvanta offered a renewal bundle discount'], ['2026-09-24', 'Salesforce', 'Proposal v2 sent with 12-entity pricing'], ['2026-09-18', 'Salesforce', 'Technical deep dive with IT; NetSuite sandbox sync validated']],
+     points: ['Their NetSuite sync was validated in a sandbox on Sep 18, across all 12 entities.', 'AP keys about 9,000 invoices a month by hand; our model returns 2.5 FTEs of time.', 'A 6-week rollout gets them live before the January audit.'],
+     risks: ['Orvanta is offering a bundle discount tied to the December ERP renewal.', 'IT has not signed off on SSO and data-residency questions.'],
+     asks: ['Agree a decision date ahead of the Nov 14 close date.', 'Sponsor a security review session with IT the week of Oct 12.']},
+    {id: 'calloway', name: 'Calloway Regional Health', ind: 'Healthcare', hq: 'Nashville, TN', emp: 3200, status: 'Customer', arr: 142, owner: 'r8',
+     signal: '48,200 invoices processed in the last 90 days, up 12% on the prior period', meeting: {date: '2026-10-13', why: 'Executive business review and expansion'},
+     opps: [{name: 'Close Automation expansion', stage: 'Negotiation', amt: 96, close: '2026-10-30', comps: ['orvanta']}],
+     people: [['Raymond Abara', 'CFO', 'Economic buyer'], ['Sofia Brennan', 'VP Finance', 'Champion'], ['Kenji Morita', 'Director of Accounting', 'End-user lead']],
+     activity: [['2026-09-25', 'Slack', 'CS flags a new CIO who favors consolidating on Orvanta'], ['2026-09-22', 'Salesforce', 'Redlines returned on the expansion order form'], ['2026-09-15', 'Salesforce', 'QBR held: 96% of invoices auto-coded, 2 support escalations closed']],
+     points: ['Anchor on AP results: 48,200 invoices in 90 days with 96% auto-coded.', 'Close Automation would take their 9-day close toward 5 using data already in Loomwright.', 'Offer a co-authored case study for their finance leadership conference.'],
+     risks: ['The new CIO prefers vendor consolidation on Orvanta.', 'Two escalations last quarter; confirm both are resolved from their side.'],
+     asks: ['CFO sign-off on the expansion by Oct 30.', 'An introduction to the new CIO before the architecture review.']},
+    {id: 'tidewater', name: 'Tidewater Building Products', ind: 'Manufacturing', hq: 'Norfolk, VA', emp: 850, status: 'Prospect', arr: 0, owner: 'r7',
+     signal: '6 site sessions and 1 ROI-calculator completion in the last 30 days', meeting: {date: '2026-10-15', why: 'Technical validation readout'},
+     opps: [{name: 'AP Automation, new logo', stage: 'Technical validation', amt: 74, close: '2026-12-12', comps: ['kettleworks']}],
+     people: [['Dolores Ferreira', 'Controller', 'Economic buyer'], ['Arlo Jennings', 'AP Manager', 'Champion'], ['Minh Tran', 'Systems Analyst', 'Technical evaluator']],
+     activity: [['2026-09-29', 'Slack', 'Kettleworks quoted roughly 40% below our list price'], ['2026-09-23', 'Salesforce', 'Pilot scoped: 500 sample invoices from 3 plants'], ['2026-09-11', 'Salesforce', 'Discovery call; 3-way match is the top pain']],
+     points: ['The pilot on 500 of their own invoices starts Oct 6; bring the accuracy results.', '3-way match against POs is their top pain, and Kettleworks does not offer it.', 'Sage Intacct sync removes the weekly CSV upload their AP team does today.'],
+     risks: ['The price gap versus Kettleworks is large in a capture-only comparison.', 'The Controller is new in role and cautious about a multi-step rollout.'],
+     asks: ['Agree pilot success criteria before it starts.', 'Bring the plant finance leads to the readout.']},
+    {id: 'aldergrove', name: 'Aldergrove Hospitality Group', ind: 'Hospitality', hq: 'Denver, CO', emp: 2100, status: 'Customer', arr: 88, owner: 'r8',
+     signal: '21,600 invoices processed in the last 90 days across 9 of 28 properties', meeting: {date: '2026-10-20', why: 'Multi-entity rollout proposal'},
+     opps: [{name: 'Multi-entity rollout, 28 properties', stage: 'Proposal', amt: 128, close: '2026-11-21', comps: ['driftmark', 'kettleworks']}],
+     people: [['Victor Salgado', 'CFO', 'Economic buyer'], ['Amara Diallo', 'VP Finance Operations', 'Champion'], ['Jocelyn Whitaker', 'Regional Controller', 'Influencer']],
+     activity: [['2026-09-28', 'Slack', 'Champion asks for per-property pricing instead of per-entity'], ['2026-09-25', 'Salesforce', 'Rollout proposal sent: 19 remaining properties in 3 waves'], ['2026-09-17', 'Salesforce', 'Driftmark demoed its approval agent to the CFO']],
+     points: ['The 9 live properties cut invoice cycle time from 11 days to 4.', 'A 3-wave rollout finishes before their fiscal year-end in March.', 'Show the AI coding assistant on their own hospitality vendor mix.'],
+     risks: ["The CFO was impressed by Driftmark's approval-agent demo.", 'The per-property pricing request could cut deal value by about 15%.'],
+     asks: ['Commit to wave 1 (7 properties) in November.', 'Let us run the AI coding demo on their own invoices.']},
+    {id: 'sorrel', name: 'Sorrel Financial Services', ind: 'Financial services', hq: 'Charlotte, NC', emp: 600, status: 'Prospect', arr: 0, owner: 'r8',
+     signal: '9 site sessions and 2 security-page visits in the last 30 days', meeting: {date: '2026-10-09', why: 'Final commercial negotiation'},
+     opps: [{name: 'AP and Close bundle', stage: 'Negotiation', amt: 112, close: '2026-10-23', comps: ['orvanta']}],
+     people: [['Eleanor Whitcombe', 'CFO', 'Economic buyer'], ['Rashad Coleman', 'Controller', 'Champion'], ['Ivy Castellanos', 'Head of Procurement', 'Gatekeeper']],
+     activity: [['2026-09-30', 'Slack', 'Procurement says Orvanta is on the preferred-vendor list'], ['2026-09-29', 'Salesforce', 'Security questionnaire completed and accepted'], ['2026-09-21', 'Salesforce', 'Pricing call; procurement asked for a 3-year term option']],
+     points: ['The security review is done, which removes the last technical blocker.', 'A 3-year term with per-entity pricing protects them from invoice-volume overages.', 'Signing in October gets them live for year-end close.'],
+     risks: ["Orvanta sits on procurement's preferred-vendor list.", 'Procurement may hold out for quarter-end discounting.'],
+     asks: ['A verbal commit from the CFO this week.', 'Procurement to confirm the paper process and a signature date.']}],
+  // campaign planning inputs kept on the monday.com board: benchmark cost per lead and channel mix by goal (%)
+  channels: {email: {name: 'Email nurture', cpl: 35}, paid: {name: 'Paid social', cpl: 180}, webinar: {name: 'Webinar', cpl: 95}, synd: {name: 'Content syndication', cpl: 70}, field: {name: 'Field dinners', cpl: 320}, sdr: {name: 'SDR outbound', cpl: 110}},
+  goals: {
+    'Generate net-new pipeline': [['paid', 35], ['synd', 25], ['webinar', 20], ['sdr', 20]],
+    'Launch a product': [['webinar', 30], ['paid', 30], ['field', 25], ['email', 15]],
+    'Expand existing customers': [['field', 40], ['webinar', 25], ['email', 20], ['sdr', 15]],
+    'Nurture event leads to SQL': [['sdr', 50], ['webinar', 30], ['email', 20]]},
+  brand: {deck: 'Q4_Field_Kickoff_v3.pptx', slides: 14, flags: [[6, 'Customer logo', 'Needs the customer to approve the current version'], [9, 'Customer quote', 'Wording belongs to the customer'], [12, 'Legal disclaimer', 'Needs legal review']], fixes: [
+    ['Fonts', 23, 'Times New Roman and Comic Sans text boxes set to Inter: 600 weight for headings, 400 for body.'],
+    ['Colors', 41, 'Off-palette fills and gradients mapped to Evergreen, Ink, and Mist. Charts use the green ramp.'],
+    ['Logo', 14, 'Stretched 2023 wordmark replaced with the current mark, with clear space restored on every slide.'],
+    ['Tone', 9, 'Hype headlines rewritten to be plain and specific: "Revolutionary synergies!!!" became "Close the books in 4 days".']]},
+  mcp: [
+    {id: 'salesforce', name: 'Salesforce', use: 'Leads, contacts, accounts, open opportunities, and win/loss history', tools: ['query_leads', 'query_opportunities', 'get_account'], access: 'Read'},
+    {id: 'snowflake', name: 'Snowflake', use: 'Funnel and pipeline metrics by month and week, plus account engagement', tools: ['run_query', 'list_views'], access: 'Read'},
+    {id: 'slack', name: 'Slack', use: 'Account-channel context, and SLA nudges to sales managers', tools: ['search_messages', 'post_message'], access: 'Read + write: messages'},
+    {id: 'monday', name: 'monday.com', use: 'Campaign board, channel benchmarks, and new campaign items', tools: ['get_board', 'list_items', 'create_item'], access: 'Read + write: items'},
+    {id: 'lucidchart', name: 'Lucidchart', use: 'Campaign flows and journey maps drawn by agents', tools: ['create_diagram', 'export_diagram'], access: 'Write: new diagrams'}]
+};
+
+/* ================= 2. HELPERS shared by every card and result ================= */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+const num = n => Math.round(n).toLocaleString('en-US');
+const usd = k => k >= 1000 ? `$${(k / 1000).toFixed(1)}M` : `$${+k.toFixed(k < 100 ? 1 : 0)}K`;   // input in $K
+const pct = (x, d = 1) => `${(x * 100).toFixed(d)}%`;
+const toDate = d => d instanceof Date ? d : new Date(d + 'T12:00:00');
+const fmtDate = (d, o = {month: 'short', day: 'numeric'}) => toDate(d).toLocaleDateString('en-US', o).replace(/ /g, '\u00a0');
+const addDays = (d, n) => { const x = new Date(toDate(d)); x.setDate(x.getDate() + n); return x; };
+const iso = d => toDate(d).toLocaleDateString('en-CA');
+const find = (k, id) => DATA[k].find(x => x.id === id);
+const Q = DATA.company.quarters;
+const sumOf = rows => { const t = {mqls: 0, sqls: 0, pipe: 0, won: 0, arr: 0}; rows.forEach(r => Object.keys(t).forEach(k => t[k] += r[k])); return {...t, rate: t.sqls / t.mqls}; };
+const qTotals = q => sumOf(DATA.months.filter(m => m.q === q));
+const staleCount = k => DATA.reps.reduce((s, r) => s + r[k], 0);
+const openOpps = () => DATA.accounts.flatMap(a => a.opps.map(o => ({...o, acct: a})));
+const winRate = c => c.wins / (c.wins + c.losses);
+const created = l => new Date(Date.parse(DATA.asOf + 'T18:00:00') - l.hrs * 36e5);
+const METRICS = [['MQLs', 'mqls', num], ['SQLs', 'sqls', num], ['MQL-to-SQL rate', 'rate', pct], ['Marketing-sourced pipeline', 'pipe', usd], ['Closed-won opps', 'won', num], ['Closed-won ARR', 'arr', usd]];
+
+const mdLink = s => `<button class="link md" data-act="md" data-arg="${s.id}" aria-label="View SKILL.md for ${s.name}">SKILL.md</button>`;
+const chips = (a, cls = '') => a.map(x => `<span class="chip ${cls}">${x}</span>`).join('');
+const fine = (t, warn) => `<p class="fine${warn ? ' warn' : ''}">${t}</p>`;
+const asOfLine = () => fine(`Data as of ${fmtDate(DATA.asOf, {month: 'short', day: 'numeric', year: 'numeric'})}. Sample data.`);
+const sampleNote = id => Object.entries(REFS[id]).filter(([, t]) => t.startsWith('> SAMPLE')).map(([f]) => `<code>${f}</code>`).join(' and ').replace(/^(.+)$/, m => fine(`Using the sample ${m} bundled with this skill. Replace with your own before using it on real work.`, 1));
+const sec = (title, body) => `<section class="rs"><h4>${title}</h4>${body}</section>`;
+const bullets = a => `<ul class="bul">${a.map(x => `<li>${x}</li>`).join('')}</ul>`;
+const tiles = a => `<div class="tiles">${a.map(([l, v, s, tone]) => `<div class="tile ${tone || ''}"><span>${l}</span><b>${v}</b><small>${s || ''}</small></div>`).join('')}</div>`;
+const table = (heads, rows) => `<div class="tw"><table class="tbl"><thead><tr>${heads.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr${r.flag ? ' class="flag"' : ''}>${r.map(c => `<td>${typeof c === 'number' ? num(c) : c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+const kv = a => `<dl class="kv">${a.map(([k, v, w]) => `<div class="${w ? 'w' : ''}"><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>`;
+const chg = (a, b, pts) => { const d = pts ? (b - a) * 100 : (b - a) / a * 100; return `<span class="d ${d >= 0 ? 'up' : 'dn'}">${d >= 0 ? '▲' : '▼'} ${Math.abs(d).toFixed(1)}${pts ? ' pts' : '%'}</span>`; };
+const metricTable = (a, b, heads = Q) => table(['Metric', ...heads, 'Change'], METRICS.map(([l, k, f]) => [l, f(a[k]), `<b>${f(b[k])}</b>`, chg(a[k], b[k], k === 'rate')]));
+const hbars = (rows, tone = 'g', fmt = v => v, max = Math.max(...rows.map(r => r[1]))) => `<div class="hb">${rows.map(([l, v]) => `<div>${l}</div><div class="hbt"><i class="${tone}" style="width:${v / max * 100}%"></i></div><div class="hbv">${fmt(v)}</div>`).join('')}</div>`;
+
+// Inline SVG charts. One y-axis each, direct value labels, native hover tooltips via <title>.
+function vbars(vals, labels, fmt, split, title) {
+  const W = 360, H = 180, base = H - 26, max = Math.max(...vals) * 1.18, bw = (W - 16) / vals.length;
+  return `<svg viewBox="0 0 ${W} ${H}" class="ch" role="img" aria-label="${title}">${vals.map((v, i) => { const h = v / max * (base - 10), x = 8 + i * bw;
+    return `<rect x="${x + 10}" y="${base - h}" width="${bw - 20}" height="${h}" rx="4" class="${i < split ? 'b0' : 'b1'}"><title>${labels[i]}: ${fmt(v)}</title></rect><text x="${x + bw / 2}" y="${base - h - 6}" class="cv">${fmt(v)}</text><text x="${x + bw / 2}" y="${H - 8}" class="cl">${labels[i]}</text>`; }).join('')}<line x1="8" x2="${W - 8}" y1="${base}" y2="${base}" class="ax"/></svg>`;
+}
+function lineChart(vals, labels, fmt, title) {
+  const W = 360, H = 180, base = H - 26, lo = Math.min(...vals), hi = Math.max(...vals), pad = (hi - lo) * .6;
+  const x = i => 34 + i * (W - 68) / (vals.length - 1), y = v => base - 12 - (v - lo + pad) / (hi - lo + 2 * pad) * (base - 44);
+  return `<svg viewBox="0 0 ${W} ${H}" class="ch" role="img" aria-label="${title}"><line x1="8" x2="${W - 8}" y1="${base}" y2="${base}" class="ax"/><polyline class="ln" points="${vals.map((v, i) => `${x(i)},${y(v)}`).join(' ')}"/>${vals.map((v, i) =>
+    `<circle cx="${x(i)}" cy="${y(v)}" r="4.5" class="pt"><title>${labels[i]}: ${fmt(v)}</title></circle><text x="${x(i)}" y="${y(v) - 11}" class="cv">${fmt(v)}</text><text x="${x(i)}" y="${H - 8}" class="cl">${labels[i]}</text>`).join('')}</svg>`;
+}
+const spark = vals => { const lo = Math.min(...vals), hi = Math.max(...vals); return `<svg viewBox="0 0 110 34" aria-hidden="true"><polyline class="ln" points="${vals.map((v, i) => `${4 + i * 20.4},${30 - (v - lo) / (hi - lo) * 26}`).join(' ')}"/></svg>`; };
+
+/* ================= 3. MOCK MCP LAYER: real tool names, answers come from DATA ================= */
+let trace = [];
+const TOOLS = {
+  'snowflake.run_query': ({view, account}) => ({mktg_funnel_monthly: DATA.months, mktg_funnel_weekly: DATA.weeks.rows, account_engagement: DATA.accounts.filter(a => a.id === account)}[view]),
+  'snowflake.list_views': () => ['mktg_funnel_monthly', 'mktg_funnel_weekly', 'account_engagement'],
+  'salesforce.query_opportunities': ({stage, quarter, competitor, account}) =>
+    stage === 'Closed Won' ? {count: qTotals(Q.indexOf(quarter)).won}
+    : stage === 'Closed' ? {count: find('competitors', competitor).wins + find('competitors', competitor).losses}
+    : openOpps().filter(o => (!competitor || o.comps.includes(competitor)) && (!account || o.acct.id === account)),
+  'salesforce.aggregate_reasons': ({competitor}) => { const c = find('competitors', competitor); return [...c.winWhy, ...c.lossWhy]; },
+  'salesforce.query_leads': ({noActivityDays, noActivityHours, campaign}) =>
+    noActivityDays ? {count: staleCount('staleLeads')}
+    : noActivityHours ? DATA.slaLeads.filter(l => l.hrs > noActivityHours && (!campaign || l.camp === campaign))
+    : {count: campaign ? find('campaigns', campaign).newLeads : DATA.reps.reduce((s, r) => s + r.newLeads, 0)},
+  'salesforce.query_contacts': ({account}) => account ? find('accounts', account).people : {count: staleCount('staleContacts')},
+  'salesforce.get_activity_history': () => DATA.stale,
+  'salesforce.query_campaigns': () => DATA.campaigns,
+  'salesforce.query_users': () => DATA.managers,
+  'salesforce.get_account': ({id}) => [find('accounts', id)],
+  'slack.search_messages': ({account}) => find('accounts', account).activity.filter(a => a[1] === 'Slack'),
+  'slack.post_message': () => ({note: 'sent (mock)'}),
+  'monday.get_board': () => DATA.campaigns,
+  'monday.list_items': () => Object.values(DATA.channels),
+  'monday.create_item': () => ({note: 'created (mock)'}),
+  'lucidchart.create_diagram': () => ({note: 'created (mock)'}),
+  'lucidchart.export_diagram': () => ({note: 'exported (mock)'})
+};
+function call(tool, args = {}) {   // every skill reads data through here, which also writes the run trace
+  const out = TOOLS[tool](args);
+  trace.push([tool, Object.entries(args).map(([k, v]) => `${k}=${v}`).join(', '), Array.isArray(out) ? `${out.length} row${out.length === 1 ? '' : 's'}` : out.count != null ? `${num(out.count)} rows` : out.note]);
+  return out;
+}
+const local = (tool, args, res) => trace.push([tool, args, res]);   // skill-local steps that are not MCP calls
+const last = {};   // state the result buttons need (Slack send, CSV, monday item, draft)
+
+/* ================= 4. SKILLS: each is data() with tool calls, then html() ================= */
+// --- CMO Metrics
+function cmoData() {
+  const months = call('snowflake.run_query', {view: 'mktg_funnel_monthly'});
+  const sf = Q.map(q => call('salesforce.query_opportunities', {stage: 'Closed Won', quarter: q}).count), t = [sumOf(months.filter(m => m.q === 0)), sumOf(months.filter(m => m.q === 1))];
+  const snow = t.map(x => x.won), drift = Math.max(...sf.map((n, i) => Math.abs(n - snow[i]) / n));
+  if (drift > .01) t.forEach((x, i) => x.won = sf[i]);   // SKILL.md step 3: past 1% apart, Salesforce wins
+  const late = call('salesforce.query_leads', {createdLastDays: 14, noActivityHours: 48});
+  return {months, p: t[0], c: t[1], late, sf, snow, drift};
+}
+function cmoHtml({months, p, c, late, sf, snow, drift}) {
+  const s = slaStats(), sep = months[5], ev = DATA.campaigns[0], labels = months.map(m => m.m), up = (k) => pct(c[k] / p[k] - 1);
+  return sec(`${Q[0]} vs ${Q[1]}`, metricTable(p, c) + (drift > .01 ? fine(`Closed-won counts differ by more than 1% between Salesforce (${sf.join(', ')}) and Snowflake (${snow.join(', ')}). The table uses the Salesforce count.`, 1)
+      : fine(`Reconciled: closed-won counts match between Salesforce and Snowflake for both quarters (${sf.join(' and ')}).`)))
+    + sec('Monthly trend', `<div class="two"><figure><figcaption>Marketing-sourced pipeline<span class="lg"><i class="b0"></i>${Q[0]}<i class="b1"></i>${Q[1]}</span></figcaption>${vbars(months.map(m => m.pipe), labels, usd, 3, 'Marketing-sourced pipeline by month')}</figure>
+      <figure><figcaption>MQL-to-SQL rate</figcaption>${lineChart(months.map(m => m.sqls / m.mqls), labels, pct, 'MQL-to-SQL rate by month')}</figure></div>`)
+    + sec('Key insights', bullets([
+      `<b>Pipeline grew ${up('pipe')} to ${usd(c.pipe)}.</b> September alone contributed ${usd(sep.pipe)}, the strongest month of the half, helped by ${ev.name} (${usd(ev.pipe)} sourced).`,
+      `<b>Lead quality is not keeping pace with volume.</b> MQLs rose ${up('mqls')}, but MQL-to-SQL rate fell from ${pct(p.rate)} to ${pct(c.rate)} and has dropped every month since June. ${late.length} of the ${s.total} leads created in the last 14 days had no activity within 48 hours.`,
+      `<b>Deals are getting larger.</b> Closed-won ARR rose ${up('arr')} on ${up('won')} more deals, lifting ARR per deal from ${usd(p.arr / p.won)} to ${usd(c.arr / c.won)}.`]))
+    + sec('Recommended actions', table(['Action', 'Owner', 'Due'], [
+      [`Work the ${late.length} leads past the 48-hour SLA and bring compliance from ${pct(s.pct)} to 90%+`, `${DATA.managers[0].name} and ${DATA.managers[1].name}, SDR managers`, fmtDate(addDays(DATA.asOf, 2))],
+      [`Launch a re-engagement nurture for the ${DATA.staleHighFit} high-fit records idle 90+ days`, DATA.team.demand, fmtDate(addDays(DATA.asOf, 9))],
+      ['Raise the MQL score threshold on syndication leads and review conversion weekly', DATA.team.mops, fmtDate(addDays(DATA.asOf, 16))]]));
+}
+
+// --- Abandoned Leads
+const seniority = t => /CFO|VP/.test(t) ? 20 : /Controller|Director/.test(t) ? 14 : 6;
+const recency = d => d <= 120 ? 15 : d <= 180 ? 8 : 0;
+const intent = t => /Demo|Proposal|Pricing/.test(t) ? 10 : /ROI|Webinar/.test(t) ? 5 : 0;
+const nextStep = t => /Demo|Proposal/.test(t) ? 'AE call that picks up where the demo left off' : /Pricing/.test(t) ? 'Send the mid-market pricing guide and offer a 15-minute call'
+  : /ROI/.test(t) ? 'Email their ROI result with a matching customer story' : /Webinar/.test(t) ? 'Invite to the next Close Faster session' : 'Add to the re-engagement nurture';
+function abandonedData() {
+  const leads = call('salesforce.query_leads', {noActivityDays: 90}).count, contacts = call('salesforce.query_contacts', {noActivityDays: 90}).count;
+  const all = call('salesforce.get_activity_history', {candidates: 'top scored'}), ranked = all.filter(l => !l.optOut)
+    .map(l => ({...l, pri: Math.round(l.score * .6 + seniority(l.title) + recency(l.idle) + intent(l.touch))})).sort((a, b) => b.pri - a.pri);
+  return {leads, contacts, total: leads + contacts, ranked, excluded: all.filter(l => l.optOut)};
+}
+const staleTable = (d, n) => table(['Priority', 'Name', 'Company', 'Title', 'Score', 'Days idle', 'Last touch', 'Owner', 'Suggested next step'], d.ranked.slice(0, n).map(l =>
+  [`<b>${l.pri}</b>`, `${l.name}<br><small>${l.type}</small>`, l.co, l.title, l.score, l.idle, `${l.touch}<br><small>${fmtDate(addDays(DATA.asOf, -l.idle))}</small>`, find('reps', l.rep).name, nextStep(l.touch)]));
+const abandonedHtml = d => tiles([['Idle 90+ days', num(d.total), 'leads and contacts'], ['Leads', num(d.leads)], ['Contacts', num(d.contacts)], ['High fit (score 70+)', DATA.staleHighFit, 'worth a personal touch']])
+  + sec('Top 10 to re-engage', staleTable(d, 10) + fine(`Left out ${d.excluded.length} high-scoring records: ${d.excluded.map(l => `${l.name}, ${l.co} (${l.optOut})`).join('; ')}.`))
+  + sec('How these are prioritized', bullets(['<b>Priority = fit score × 0.6 + seniority + recency + intent</b>, with a maximum of 105.', '<b>Seniority:</b> CFO or VP adds 20, Controller or Director adds 14, other titles add 6.',
+    '<b>Recency:</b> idle 90 to 120 days adds 15, 121 to 180 days adds 8, older adds nothing, because recently lapsed records respond best.', '<b>Intent:</b> a demo, proposal, or pricing-page visit as the last touch adds 10; an ROI calculator or webinar adds 5.']));
+
+// --- Lead Follow-Up SLA
+function slaStats(campaign) {
+  const late = DATA.slaLeads.filter(l => !campaign || l.camp === campaign);
+  const total = campaign ? find('campaigns', campaign).newLeads : DATA.reps.reduce((s, r) => s + r.newLeads, 0);
+  return {late, total, pct: 1 - late.length / total};
+}
+function slaData({campaign} = {}) {
+  const scope = campaign ? {campaign} : {};
+  const total = call('salesforce.query_leads', {createdLastDays: 14, ...scope}).count, late = call('salesforce.query_leads', {createdLastDays: 14, noActivityHours: 48, ...scope});
+  const groups = call('salesforce.query_users', {role: 'manager'}).map(m => { const reps = DATA.reps.filter(r => r.mgr === m.id).map(r => ({r, leads: late.filter(l => l.rep === r.id)}));
+    return {m, reps: reps.filter(x => x.leads.length), n: reps.reduce((s, x) => s + x.leads.length, 0), total: reps.reduce((s, x) => s + x.r.newLeads, 0)}; }).filter(g => g.n);
+  return {campaign, total, late, pct: 1 - late.length / total, groups};
+}
+function slaHtml(d) {
+  last.sla = d;
+  const camp = d.campaign && find('campaigns', d.campaign), ok = (n, t) => pct(1 - n / t);
+  const repRows = DATA.reps.map(r => [r.name, 1 - d.late.filter(l => l.rep === r.id).length / r.newLeads]).sort((a, b) => a[1] - b[1]);
+  return tiles([[`New leads, last 14 days`, d.total, camp ? camp.name : 'all campaigns'], ['No activity within 48 hours', d.late.length], ['SLA compliance', pct(d.pct), 'target 90%', d.pct < .9 ? 'warn' : '']])
+    + (camp ? '' : sec('Compliance by rep, lowest first', `<div class="box">${hbars(repRows, 'g', pct, 1)}</div>`))
+    + sec('Leads past SLA, by manager and rep', d.groups.map(g => `<div class="grp"><div class="gh"><b>${g.m.name}</b><span>${g.m.title}</span><em>${g.n} past SLA${camp ? '' : `, team at ${ok(g.n, g.total)}`}</em></div>${
+        table(['Rep', 'Lead', 'Company', 'Campaign', 'Created', 'Open'], g.reps.flatMap(({r, leads}) => leads.map((l, i) =>
+          [i ? '' : `<b>${r.name}</b>${camp ? '' : `<br><small>${ok(leads.length, r.newLeads)} compliant</small>`}`, `${l.name}<br><small>${l.title}</small>`, l.co, find('campaigns', l.camp).name, fmtDate(created(l)), `${l.hrs}h`])))}</div>`).join(''))
+    + sec('Slack message to each manager', d.groups.map(g => `<div class="slack"><div class="av">C</div><div><div class="who">Claude<span>APP · direct message to ${g.m.slack}</span></div>
+        <b>48-hour SLA check, ${fmtDate(DATA.asOf)}${camp ? `: ${camp.name}` : ''}</b><br>${g.n} new lead${g.n > 1 ? 's on your team have' : ' on your team has'} had no activity in the 48 hours after creation.<br>
+        ${g.reps.map(({r, leads}) => `• <b>${r.name}</b> (${leads.length}): ${leads.map(l => `${l.name}, ${l.co}, ${l.hrs}h`).join('; ')}`).join('<br>')}<br>
+        Please get a first touch logged today${camp ? '' : `. Team compliance is ${ok(g.n, g.total)} against a 90% target`}.</div></div>`).join('')
+      + `<div class="acts"><button class="btn" data-act="slack">Send to Slack (mock)</button>${d.groups.length} direct messages, one per manager</div>`);
+}
+
+// --- Battlecard
+function battleData({comp}) {
+  call('salesforce.query_opportunities', {stage: 'Closed', competitor: comp, window: '4 quarters'});
+  call('salesforce.aggregate_reasons', {competitor: comp, field: 'Win_Loss_Reason__c'});
+  return {c: find('competitors', comp), open: call('salesforce.query_opportunities', {stage: 'Open', competitor: comp})};
+}
+function battleHtml({c, open}, hideOpen) {
+  const n = c.wins + c.losses, low = n < 20, all = DATA.competitors.reduce((s, x) => ({w: s.w + x.wins, n: s.n + x.wins + x.losses}), {w: 0, n: 0});
+  return `<p class="rs"><b>${c.name}.</b> ${c.pos}</p>`
+    + tiles([[`Win rate vs ${c.name}${low ? ' (low confidence)' : ''}`, pct(winRate(c)), `${c.wins} won, ${c.losses} lost. ${n} closed opps ${low ? 'is under' : 'clears'} the 20-opp minimum`, low || winRate(c) < .5 ? 'warn' : ''], ['All competitive deals', pct(all.w / all.n), `${all.n} closed opps`], ['Open opps in play', open.length, `${usd(open.reduce((s, o) => s + o.amt, 0))} pipeline`]])
+    + `<div class="two"><div>${sec('Why we win (opps)', `<div class="box">${hbars(c.winWhy, 'g')}</div>`)}</div><div>${sec('Why we lose (opps)', `<div class="box">${hbars(c.lossWhy, 'r')}</div>`)}</div></div>`
+    + sec('Where we need to improve', bullets(c.improve)) + sec('They say / We say', table(['They say', 'We say'], c.say.map(([a, b]) => [`"${a}"`, b])))
+    + (hideOpen ? '' : sec('Open opportunities where this card applies', table(['Account', 'Opportunity', 'Stage', 'Amount', 'Close date'], open.map(o => [`<b>${o.acct.name}</b>`, o.name, o.stage, usd(o.amt), fmtDate(o.close)]))))
+    + fine('Internal use only. Do not paste into customer-facing material.');
+}
+
+// --- Brand Refresh
+function brandData({deck}) {
+  const b = DATA.brand, n = b.fixes.reduce((s, f) => s + f[1], 0), out = deck.replace(/(\.pptx)?$/i, '_branded.pptx');
+  local('skill.read_reference', 'references/brand-guidelines.md', `${b.fixes.length} rule groups`); local('files.parse_pptx', deck, `${b.slides} slides`);
+  local('skill.audit_slides', 'fonts, colors, logo, tone', `${n} issues, ${b.flags.length} flagged`); local('files.write_pptx', out, `${b.slides} slides`);
+  return {deck, out, n};
+}
+function brandHtml({deck, out, n}) {
+  const b = DATA.brand, growth = pct(qTotals(1).pipe / qTotals(0).pipe - 1, 0), rainbow = ['#e53935', '#1e88e5', '#fdd835', '#8e24aa'];
+  const slide = (v, kind, title, sub) => `<div class="sl ${v} ${kind}"><b>${title}</b>${kind === 'chart' ? `<div class="bars">${DATA.months.slice(2).map((m, i) => `<i style="height:${m.pipe / 54}%;background:${v === 'before' ? rainbow[i] : i === 3 ? 'var(--g)' : 'var(--gl)'}"></i>`).join('')}</div>`
+    : sub ? `<span>${sub}</span>` : [88, 72, 80].map(w => `<span class="bar" style="width:${w}%"></span>`).join('')}<span class="lgo">${v === 'before' ? 'LOOMWRIGHT' : '◆ Loomwright'}</span></div>`;
+  last.file = out;
+  return sampleNote('brand') + tiles([['Slides refreshed', b.slides, esc(deck)], ['Issues fixed', n, `saved as ${esc(out)}`], ['Rule groups checked', b.fixes.length, b.fixes.map(f => f[0].toLowerCase()).join(', ')], ['Flagged for review', b.flags.length, 'left as written']])
+    + sec('Before', `<div class="slides">${slide('before', 'title', 'Q4 Field Kickoff!!!', 'The BEST quarter EVER')}${slide('before', 'chart', 'Pipeline is EXPLODING')}${slide('before', 'text', 'Revolutionary synergies!!!', 'We leverage best-in-class paradigms to supercharge your finance transformation journey end to end')}</div>`)
+    + sec('After', `<div class="slides">${slide('after', 'title', 'Q4 Field Kickoff', 'Plan, targets, and plays')}${slide('after', 'chart', `Pipeline grew ${growth} in Q3`)}${slide('after', 'text', 'Close the books in 4 days')}</div>`)
+    + sec('Fixes applied', `<div class="tw">${b.fixes.map(([k, c, t]) => `<div class="fix"><i>✓</i><b>${k}</b><span><b>${c} changes.</b> ${t}</span></div>`).join('')}</div>${fine(`Not changed: numbers, chart data, and slide order (${b.slides} of ${b.slides} slides in their original position).`)}`)
+    + sec('Flagged for review, not changed', table(['Slide', 'Item', 'Why it was left alone'], b.flags.map(([n, k, why]) => [`Slide ${n}`, k, why])) + `
+      <div class="acts"><button class="btn" data-act="dl">Download ${esc(out)} (mock)</button></div>`);
+}
+
+// --- Campaign Brief
+const NURTURE = ['SDR call and a personal email to every lead, referencing their session at the event', 'Email 2 with the on-demand recording and the ROI calculator; second call attempt', 'Invite to the next Close Faster webinar; LinkedIn touch from the lead owner', 'Final touch; route engaged leads to AEs and return the rest to the standard nurture'];
+const mixRows = (goal, budget) => DATA.goals[goal].map(([ch, p]) => { const c = DATA.channels[ch], amt = budget * p / 100; return {name: c.name, p, amt, leads: Math.round(amt / c.cpl)}; });
+function briefData(i) { call('monday.get_board', {board: 'Campaigns FY26'}); call('monday.list_items', {group: 'Channel benchmarks'}); return {...i, budget: +i.budget}; }
+function briefHtml({goal, audience, budget, launch, size}) {
+  const mix = mixRows(goal, budget), q = qTotals(1), perSql = q.pipe / q.sqls, money = n => '$' + num(n), tones = ['#136b3a', '#1e9e57', '#6dbb8f', '#a3d3b7'];
+  const leads = size || mix.reduce((s, m) => s + m.leads, 0), sqls = Math.max(1, Math.round(leads * q.rate)), pipe = sqls * perSql;
+  const std = ['Brief approved; copy and creative in production', 'Audiences built in Salesforce; UTMs and tracking checked; SDR talk track ready', `Launch ${mix[0].name} and ${mix[1].name}`, `${mix[2].name} goes live; first read on cost per lead`,
+    'Move up to 15% of budget to the best-performing channel', `${mix[mix.length - 1].name} push; SDRs follow up every engaged lead within 48 hours`, 'Wrap report: pipeline sourced against target'];
+  const weeks = size ? NURTURE.map((t, w) => [w, t]) : std.map((t, w) => [w - 2, t]);
+  last.brief = `${goal}, ${fmtDate(launch)} launch`;
+  return `<div class="paper"><div class="ph"><div><h3>Campaign brief: ${esc(goal)}</h3><p>Launch ${fmtDate(launch, {weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'})} · Budget ${money(budget)}</p></div><span class="chip">Draft</span></div>`
+    + sec('Objective', `<p>${esc(goal)} for ${esc(audience)}, sourcing <b>${usd(pipe)}</b> in pipeline from <b>${sqls}</b> SQL${sqls > 1 ? 's' : ''} within ${weeks.length - (size ? 0 : 2)} weeks of launch.</p>`)
+    + sec('Audience', `<p>${esc(audience)}</p>`)
+    + sec('Channel mix and budget split', `<div class="mix" role="img" aria-label="Budget split by channel">${mix.map((m, i) => `<i style="flex:${m.p};background:${tones[i]}" title="${m.name}: ${m.p}%"></i>`).join('')}</div>`
+      + table(['Channel', 'Share', 'Budget', ...(size ? [] : ['Expected leads'])], mix.map((m, i) => [`<span class="lg"><i style="background:${tones[i]}"></i>${m.name}</span>`, m.p + '%', money(m.amt), ...(size ? [] : [m.leads])])))
+    + sec('Timeline', table(['Week', 'Starts', 'Milestone'], weeks.map(([w, t]) => [w < 0 ? `Launch ${w}` : w ? `Launch +${w}` : '<b>Launch</b>', fmtDate(addDays(launch, w * 7)), t])))
+    + sec('KPIs and targets', table(['KPI', 'Target', 'Basis'], [[size ? 'Leads re-engaged' : 'Leads generated', num(leads), size ? 'Every lead in scope' : 'Budget per channel divided by benchmark cost per lead'],
+      ['SQLs', sqls, `${Q[1]} MQL-to-SQL rate of ${pct(q.rate)}`], ['Marketing-sourced pipeline', usd(pipe), `${Q[1]} pipeline per SQL of ${usd(perSql)}`], ['Pipeline to spend', (pipe * 1000 / budget).toFixed(1) + 'x', 'Pipeline target divided by budget'], ['Lead follow-up SLA', '90%+', 'First touch within 48 hours']]))
+    + `<div class="acts"><button class="btn" data-act="monday">Create in monday.com (mock)</button>Adds this brief as an item on the Campaigns FY26 board</div></div>`;
+}
+
+// --- Content Creator
+const TYPES = {email: 'Email', blog: 'Blog post', social: 'Social post', onepager: 'One-pager', case: 'Case study'};
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+const DRAFTS = {
+  email: t => [['h', `Subject: ${cap(t)}: a 20-minute walkthrough`], ['p', 'Hi {{first_name}},'],
+    ['p', `Most finance teams tell us the same thing about ${t}: the work is not hard, it is scattered. Invoices sit in email, approvals sit in chat, and reconciliations sit in a spreadsheet only one person understands.`],
+    ['p', 'Loomwright pulls those steps into one workflow that syncs with your ERP every day. Mid-market teams using it auto-code 87% of invoices and close in 4 days instead of 10.'],
+    ['p', 'I can show you how it would look with your entity structure in 20 minutes. Does Tuesday or Thursday work?'], ['p', 'Best,<br>{{sender_name}}']],
+  blog: t => [['h', `${cap(t)}: a practical guide for mid-market finance teams`],
+    ['p', `Ask a controller what stands in the way of ${t} and you rarely hear "software". You hear about chasing approvals, re-keying invoices, and reconciling accounts by hand. Three changes move the number.`],
+    ['h3', '1. Stop keying invoices'], ['p', 'Manual entry is the slowest and most error-prone step in AP. Automated capture and coding handles 87% of invoices without a keystroke, so the team reviews exceptions instead of typing.'],
+    ['h3', '2. Route approvals where people already work'], ['p', 'Approvals stall in inboxes. Routing them by entity, amount, and cost center, with reminders in Slack and email, removes the wait most teams accept as normal.'],
+    ['h3', '3. Reconcile continuously'], ['p', 'When subledgers sync to the ERP daily, reconciliation becomes a review instead of a project. Teams on Loomwright close in 4 days, down from 10.'],
+    ['p', 'None of this needs a new ERP. It needs the steps around the ERP to stop depending on spreadsheets. Start with the step that costs you the most days.']],
+  social: t => [['p', `${cap(t)} is a handoff problem before it is a software problem.`], ['p', 'Three handoffs slow down most mid-market finance teams:'], ['li', 'Invoices keyed by hand'], ['li', 'Approvals stuck in inboxes'], ['li', 'Reconciliations saved for the last week'],
+    ['p', 'Teams that fix all three close in 4 days instead of 10. We wrote up how they did it; the link is in the comments.'], ['p', '#FinanceOps #AccountsPayable #MonthEndClose']],
+  onepager: t => [['h', cap(t)], ['p', 'For controllers and finance leaders at companies with 200 to 2,000 employees.'],
+    ['h3', 'The problem'], ['p', 'AP and close still run on email, spreadsheets, and manual entry. Every added entity adds days to the close.'],
+    ['h3', 'How Loomwright helps'], ['li', 'Captures and auto-codes 87% of invoices'], ['li', 'Routes approvals by entity, amount, and cost center'], ['li', 'Syncs with NetSuite and Sage Intacct daily, with 40+ prebuilt reconciliations'],
+    ['h3', 'Proof'], ['p', 'Customers go live in 6 weeks and cut close from 10 days to 4. Aldergrove Hospitality Group cut invoice cycle time from 11 days to 4 across its first 9 properties.'],
+    ['p', 'Next step: book a 20-minute walkthrough using your own entity structure.']],
+  case: t => [['h', `How Aldergrove Hospitality Group approached ${t}`],
+    ['h3', 'Challenge'], ['p', 'With 28 properties and a five-person AP team, Aldergrove keyed every invoice by hand and paid vendors 11 days after receipt on average. Month-end meant late nights for the whole team.'],
+    ['h3', 'Solution'], ['p', 'Aldergrove rolled Loomwright out to its first 9 properties in 6 weeks, with invoice capture, approval routing by property, and a daily ERP sync. No ERP change was needed.'],
+    ['h3', 'Results'], ['li', 'Invoice cycle time down from 11 days to 4'], ['li', '21,600 invoices processed in 90 days'], ['li', 'Rollout to the remaining 19 properties planned in 3 waves'],
+    ['p', 'Customer quote: to be supplied and approved by the champion, Amara Diallo, VP Finance Operations.']]
+};
+const first = s => (s.match(/^.*?[.!?](?=\s|$)/) || [s])[0];
+const REFINE = {
+  Original: b => b,
+  Shorter: b => b.filter(([k], i) => k !== 'li' || b[i - 2]?.[0] !== 'li' || b[i - 1][0] !== 'li').map(([k, t]) => [k, k === 'p' ? first(t) : t]),
+  'More technical': b => { let i = b.findIndex(([k, t]) => k === 'p' && /Loomwright/.test(t)); if (i < 0) i = b.map(x => x[0]).lastIndexOf('li');
+    return [...b.slice(0, i + 1), ['new', 'Under the hood: OCR plus a line-item coding model trained on 30M+ invoices assigns GL account, entity, and cost center. Invoices are matched 2- and 3-way against POs and receipts, and every approval lands in an immutable audit log.'],
+      ['new', 'Integration: REST API and webhooks, SAML SSO, SOC 2 Type II, and native connectors for NetSuite (SuiteTalk) and Sage Intacct (Web Services) with a daily delta sync.'], ...b.slice(i + 1)]; },
+  Punchier: b => [b[0][0] === 'h' ? ['h', b[0][1].replace(/: [^:]*$/, '') + '. No new ERP required.'] : b[0], ['new', 'Ten days is a habit. Four is a decision.'],
+    ...b.slice(1).map(([k, t]) => [k, k === 'p' ? (t.match(/[^.!?]+[.!?]*\s*/g) || [t]).slice(0, 2).join('<br>') : t])]
+};
+const blocksHtml = b => b.map(([k, t]) => ({h: `<h3>${t}</h3>`, h3: `<h5>${t}</h5>`, li: `<p class="li">${t}</p>`, p: `<p>${t}</p>`, new: `<p class="new">${t}</p>`}[k])).join('');
+const words = html => html.replace(/<[^>]+>/g, ' ').trim().split(/\s+/).length;
+function contentData({type, topic}) {
+  const blocks = DRAFTS[type](esc(topic.trim().replace(/[.!?]+$/, '') || topic0)), d = {type, blocks, words: words(blocksHtml(blocks))};
+  local('skill.read_reference', 'references/voice-and-tone.md', '6 rules'); local('skill.read_reference', 'references/templates.md', `${type} template`); local('skill.draft', `type=${type}`, `${d.words} words`);
+  return last.draft = d;
+}
+function draftBox(kind = 'Original') {
+  const b = REFINE[kind](last.draft.blocks), html = blocksHtml(b);
+  return `<div class="refine"><span>Refine:</span>${Object.keys(REFINE).map(k => `<button class="rchip${k === kind ? ' on' : ''}" data-act="refine" data-arg="${k}" aria-pressed="${k === kind}">${k}</button>`).join('')}
+    <em>${words(html)} words${kind === 'Original' ? '' : `, was ${last.draft.words}${kind === 'Shorter' ? '' : '. Additions are highlighted'}`}</em></div><div class="paper draft">${html}</div>`;
+}
+
+// --- Exec Meeting Brief
+function execData({account}, lite) {
+  const a = call('salesforce.get_account', {id: account})[0], opps = call('salesforce.query_opportunities', {stage: 'Open', account});
+  if (!lite) { call('salesforce.query_contacts', {account}); call('snowflake.run_query', {view: 'account_engagement', account}); call('slack.search_messages', {account, channel: '#acct-' + account}); }
+  return {a, opps};
+}
+function execHtml({a, opps}, embed) {
+  const owner = find('reps', a.owner), mgr = find('managers', owner.mgr), comps = [...new Set(opps.flatMap(o => o.comps))].map(id => find('competitors', id));
+  return `<div class="paper"><div class="ph"><div><h3>${a.name}</h3><p>${a.meeting.why} · ${fmtDate(a.meeting.date, {weekday: 'long', month: 'short', day: 'numeric'})}</p></div><span class="chip ${a.status === 'Customer' ? 'k' : ''}">${a.status}</span></div>`
+    + sec('Account snapshot', kv([['Industry', a.ind], ['Headquarters', a.hq], ['Employees', num(a.emp)], ['Current ARR', a.arr ? usd(a.arr) : 'None, new logo'], ['Open pipeline', usd(opps.reduce((s, o) => s + o.amt, 0))], ['Account owner', owner.name], ['Engagement (Snowflake)', a.signal, 1]]))
+    + sec('Open opportunities', table(['Opportunity', 'Stage', 'Amount', 'Close date', 'Competitors'], opps.map(o => [o.name, o.stage, usd(o.amt), fmtDate(o.close), o.comps.map(id => find('competitors', id).name).join(', ')])))
+    + sec('Attendees and roles', table(['Name', 'Title', 'Role'], [...a.people, [owner.name, 'Account Executive, Loomwright', 'Deal lead'], [mgr.name, mgr.title + ', Loomwright', 'Executive sponsor'], [DATA.team.cmo, 'CMO, Loomwright', 'Executive attendee']]))
+    + sec('Recent activity', table(['Date', 'Source', 'What happened'], a.activity.map(([d, s, t]) => [fmtDate(d), s, t])))
+    + sec('Competitors in play', bullets(comps.map(c => `<b>${c.name}:</b> we win ${pct(winRate(c), 0)} of head-to-head deals. ${c.pos}`)))
+    + `<div class="two"><div>${sec('Talking points', bullets(a.points))}</div><div>${sec('Risks', bullets(a.risks))}${sec('Asks', bullets(a.asks))}</div></div>`
+    + (embed ? sec(`Positioning against ${embed.name}`, `<p style="margin-bottom:8px">Lead with our two most common win reasons against them: <b>${embed.winWhy[0][0]}</b> and <b>${embed.winWhy[1][0]}</b>.</p>` + table(['If they say', 'We say'], embed.say.map(([x, y]) => [`"${x}"`, y]))) : '') + '</div>';
+}
+
+const opt = (k, f = x => x.name) => DATA[k].map(x => [x.id, f(x)]);
+const SKILLS = [
+  {id: 'cmo', icon: '📊', name: 'CMO Metrics', desc: 'Two-quarter funnel scorecard with trend, insights, and owned actions.', src: ['Snowflake', 'Salesforce'], run: () => cmoHtml(cmoData())},
+  {id: 'battlecard', icon: '⚔️', name: 'Battlecard', desc: 'Win/loss-backed positioning and rebuttals for one competitor.', src: ['Salesforce'], form: [{k: 'comp', label: 'Competitor', opts: opt('competitors')}], run: i => battleHtml(battleData(i))},
+  {id: 'brand', icon: '🎨', name: 'Brand Refresh', desc: 'Restyle an off-brand deck to the current guidelines.', src: ['Brand guidelines'], form: [{k: 'deck', label: 'Deck to refresh (mock upload)', type: 'file', def: DATA.brand.deck, wide: 1}], run: i => brandHtml(brandData(i))},
+  {id: 'abandoned', icon: '🕸️', name: 'Abandoned Leads', desc: 'Leads and contacts idle 90+ days, ranked for re-engagement.', src: ['Salesforce'], run: () => abandonedHtml(abandonedData())},
+  {id: 'brief', icon: '📋', name: 'Campaign Brief', desc: 'Turn an intake into a brief with mix, timeline, and KPI targets.', src: ['monday.com'], form: [
+    {k: 'goal', label: 'Goal', opts: Object.keys(DATA.goals).slice(0, 3).map(g => [g, g])}, {k: 'budget', label: 'Budget (USD)', type: 'number', def: 75000},
+    {k: 'audience', label: 'Audience', def: 'Controllers and VPs of Finance at companies with 200 to 2,000 employees', wide: 1}, {k: 'launch', label: 'Launch date', type: 'date', def: '2026-10-26'}],
+    run: i => +i.budget < 1000 ? fine(`A budget of $${num(+i.budget)} is under the $1,000 minimum this skill plans for, so no brief was produced. Enter a realistic budget and run again.`, 1) : briefHtml(briefData(i))},
+  {id: 'content', icon: '✏️', name: 'Content Creator', desc: 'On-brand first drafts you can refine in one click.', src: ['Voice and tone guide'], run: i => { contentData(i); return sampleNote('content') + sec(`Draft: ${TYPES[i.type]}`, `<div id="draftBox">${draftBox()}</div>`); }, form: [
+    {k: 'type', label: 'Content type', opts: Object.entries(TYPES)}, {k: 'topic', label: 'Topic', def: 'cutting month-end close from 10 days to 4'}]},
+  {id: 'sla', icon: '⏱️', name: 'Lead Follow-Up SLA', desc: 'New leads untouched after 48 hours, by manager and rep.', src: ['Salesforce', 'Slack'], run: () => slaHtml(slaData())},
+  {id: 'exec', icon: '🤝', name: 'Exec Meeting Brief', desc: 'One-page account brief before an executive meeting.', src: ['Salesforce', 'Snowflake', 'Slack'], form: [{k: 'account', label: 'Account', opts: opt('accounts'), wide: 1}], run: i => execHtml(execData(i))}
+];
+
+/* ================= 4b. SKILL.md + PLUGIN: one source for the SKILL.md viewer, the per-skill ZIP, and marketing.plugin ================= */
+const MD_BEFORE = ['Check that every source listed under Data sources is available in this session. If one is missing, name it and offer to continue from an export the user uploads. Never fill a gap with sample or estimated numbers.',
+  'View, field, and board names in this file (for example `mktg_funnel_monthly`) are examples. If the connected system uses different names, find the closest match and confirm it with the user once before running.'];
+const MD_COMMON = ['State the as-of date of the data in the first line of the result.', 'Use only numbers the sources return. If a query returns nothing, say so and stop; do not estimate.', 'Read-only unless a step above names a write, and every write waits for the user to confirm.'];
+const SKILL_MD = {
+  cmo: {slug: 'cmo-metrics',
+    when: 'Builds the two-quarter marketing funnel scorecard for the CMO (MQLs, SQLs, MQL-to-SQL rate, marketing-sourced pipeline, closed-won opps, ARR) with a monthly trend, three insights, and three owned actions. Use when the user asks for "CMO metrics", a "funnel scorecard", "marketing performance this quarter", quarter-over-quarter numbers, or figures for a board or QBR slide.',
+    inputs: ['None. Runs on the last two complete fiscal quarters.'],
+    sources: [['Snowflake', 'the monthly funnel view (`mktg_funnel_monthly`) for the last six months'], ['Salesforce', 'closed-won opportunity count per quarter, and new leads with no activity within 48 hours']],
+    steps: ['Query the monthly funnel view for the last two complete fiscal quarters.', 'Sum MQLs, SQLs, marketing-sourced pipeline, closed-won opps, and closed-won ARR by quarter. Compute MQL-to-SQL rate from the quarter totals (SQLs divided by MQLs), never as an average of monthly rates.',
+      'Count closed-won opportunities per quarter in Salesforce. If they differ from Snowflake by more than 1%, say so above the table and use the Salesforce count.', 'Compute quarter-over-quarter change: percent for counts and dollars, percentage points for the rate.',
+      'Chart pipeline by month and MQL-to-SQL rate by month as two separate charts. Never put both on one chart with two y-axes.', 'Pull new leads from the last 14 days with no activity within 48 hours, as context for conversion insights.',
+      'Write three insights. Each names a metric, the size of the move, and a likely cause backed by a second data point.', 'Write three actions. Each has one named owner and a due date within three weeks.'],
+    output: ['Scorecard table: metric, prior quarter, current quarter, change, with a reconciliation line under it.', 'Two monthly charts with value labels.', 'Three insights as bullets with a bold lead sentence.', 'Action table: action, owner, due date.'],
+    rules: ['Show dollars as $M with one decimal at $1M and above, otherwise as $K.', 'The headline numbers must match any dashboard that reads the same view. If they do not, stop and report the mismatch.']},
+  battlecard: {slug: 'battlecard',
+    when: 'Builds a competitor battlecard from Salesforce win/loss data: win rate, top win and loss reasons with opp counts, where to improve, and a They say / We say rebuttal table. Use when the user asks for a "battlecard", "how do we do against" a named competitor, a "win/loss analysis", or objection handling for a competitive deal.',
+    inputs: ['Competitor (required): one competitor tagged on Salesforce opportunities.'],
+    sources: [['Salesforce', 'closed opportunities with the competitor tagged for the last four quarters, their win/loss reason (`Win_Loss_Reason__c`), and open opportunities with the competitor tagged']],
+    steps: ['Pull closed opportunities with the competitor tagged for the last four quarters.', 'Win rate = won divided by (won + lost). Show the counts beside the rate, and the win rate across all competitive deals for comparison.', 'Group by win/loss reason. List the top four win reasons and top four loss reasons with opportunity counts.',
+      'Write three improvements from the loss reasons, most frequent first. Each names a product, pricing, or enablement change.', 'Write three or four rebuttals. "They say" is a claim reps actually hear. "We say" answers it with a specific fact or number about us.', 'List open opportunities where the competitor is tagged, so the reader knows where the card applies.'],
+    output: ['One line of positioning for the competitor.', 'Tiles: win rate with counts and whether the sample clears 20 closed opps, win rate across all competitive deals, open opps in play with pipeline.', 'Two bar charts: why we win, why we lose, with opp counts.', 'Where we need to improve: three bullets.', 'They say / We say table.', 'Table of open opportunities where the card applies.', 'A closing line: internal use only.'],
+    rules: ['With fewer than 20 closed opportunities, label the win rate as low confidence.', 'Rebuttals state facts about us. Do not make claims about the competitor that are not in the win/loss notes.', 'Internal use only. Never paste a battlecard into customer-facing material.']},
+  brand: {slug: 'brand-refresh',
+    when: 'Restyles an off-brand slide deck to the brand guidelines and reports what changed. Use when the user uploads a .pptx and asks to "fix the branding", "apply the brand template", "make this deck on-brand", or "refresh" a deck.',
+    inputs: ['Deck (required): one .pptx file.'],
+    sources: [['Uploaded file', 'the deck to restyle'], ['Bundled file', '`references/brand-guidelines.md`, the four rule groups: fonts, colors, logo, tone']],
+    steps: ['Read `references/brand-guidelines.md` before opening the deck. If its first line still says SAMPLE, tell the user and ask whether to use it or guidelines they provide.', 'Open the deck (with the pptx skill when it is available) and audit every slide against the four rule groups.',
+      'Fonts: set every text box to the heading and body fonts in the guidelines.', 'Colors: map every off-palette fill and gradient to the nearest palette color. Charts use the chart ramp.', 'Logo: replace old or stretched marks with the current mark and restore clear space.',
+      'Tone: rewrite hype headlines so they state one specific fact. Keep the meaning and every number.', 'Save as `<original name>_branded.pptx`. Never overwrite the original.'],
+    output: ['Tiles: slides refreshed, issues fixed, rule groups checked, items flagged for review.', 'Before and after thumbnails for three representative slides.', 'Checklist of fixes by rule group, each with a change count and one example, and a line confirming numbers, chart data, and slide order are unchanged.', 'Table of items flagged for review: slide, item, and why it was left alone.', 'The restyled deck as a download.'],
+    rules: ['Do not change numbers, chart data, or slide order.', 'Flag legal text, customer quotes, and customer logos for review instead of rewriting them.']},
+  abandoned: {slug: 'abandoned-leads',
+    when: 'Finds leads and contacts with no activity in 90 or more days and ranks the best ones to re-engage. Use when the user asks about "stale leads", "abandoned leads", "neglected" or "untouched" records, or wants a "re-engagement list".',
+    inputs: ['None. Uses a 90-day idle threshold and returns the top 10.'],
+    sources: [['Salesforce', 'leads and contacts with no activity in 90+ days, plus the last touch and date for the highest-scored candidates']],
+    steps: ['Count leads and contacts whose last activity is 90 or more days ago. Report both counts and the total.', 'For the highest-scored candidates, pull the last touch and its date.',
+      'Score each candidate: priority = fit score x 0.6 + seniority + recency + intent.\n   - Seniority: CFO or VP 20, Controller or Director 14, other titles 6.\n   - Recency: idle 90 to 120 days 15, 121 to 180 days 8, older 0.\n   - Intent, from the last touch: demo, proposal, or pricing page 10; ROI calculator or webinar 5; anything else 0.',
+      'Sort by priority, highest first, and keep the top 10.', 'Suggest a next step that matches the last touch: an AE call after a demo or proposal, the pricing guide after a pricing-page visit, a customer story after an ROI calculator, a webinar invite after a webinar, otherwise the re-engagement nurture.'],
+    output: ['Tiles: total idle 90+ days, leads, contacts, high-fit count.', 'Top-10 table: priority, name, company, title, score, days idle, last touch, owner, suggested next step.', 'A line naming any high-scoring records left out, and why.', 'The scoring logic, stated below the table.'],
+    rules: ['Leave out records marked do-not-contact or unsubscribed.', 'Adjust the seniority titles to the buying roles of the business if they differ, and say which titles were used.', 'Do not change owners, statuses, or scores. This skill only reads.']},
+  brief: {slug: 'campaign-brief',
+    when: 'Turns a campaign intake (goal, audience, budget, launch date) into a full brief with channel mix, timeline, and KPI targets, and creates it on the monday.com campaign board when asked. Use when the user asks for a "campaign brief", a "campaign plan", or to "kick off a campaign".',
+    inputs: ['Goal (required): one of the goals defined on the campaign board.', 'Audience (required): who the campaign targets, in one sentence.', 'Budget (required): total in USD.', 'Launch date (required).'],
+    sources: [['monday.com', 'the campaign board (campaigns already planned) and the channel benchmarks group (cost per lead, and channel mix by goal)'], ['cmo-metrics skill', 'current-quarter MQL-to-SQL rate and pipeline per SQL']],
+    steps: ['Read the campaign board and the channel benchmarks.', 'Take the channel mix for the goal and split the budget by share.', 'Expected leads per channel = channel budget divided by benchmark cost per lead.',
+      'Targets: SQLs = leads x the current-quarter MQL-to-SQL rate. Pipeline = SQLs x current-quarter pipeline per SQL. Take both rates from cmo-metrics.', 'Build a week-by-week timeline: two preparation weeks, launch week, and four weeks after launch. For a nurture of existing leads, skip the preparation weeks.',
+      'Write the objective as one sentence that includes the pipeline target and the time frame.', 'Show the brief. WRITE: create one new item on the monday.com board only when the user asks for it.'],
+    output: ['Objective and audience.', 'Channel mix table with share, budget, and expected leads.', 'Timeline table: week, start date, milestone.', 'KPI table: KPI, target, and the basis for each target.'],
+    rules: ['Every target shows the rate or benchmark it was calculated from.', 'If the budget is under $1,000, ask for a realistic budget instead of producing a brief.', 'One write per run: a single new item. Never edit or delete existing board items.']},
+  content: {slug: 'content-creator',
+    when: 'Drafts marketing content in the brand voice (email, blog post, social post, one-pager, or case study) and refines it on request. Use when the user asks to "write an email", "draft a blog post", "write a LinkedIn post", create a "one-pager" or "case study", or rewrite marketing copy.',
+    inputs: ['Content type (required): email, blog, social, one-pager, or case study.', 'Topic (required): a short phrase.'],
+    sources: [['Bundled file', '`references/voice-and-tone.md`: six voice rules, the approved proof points, referenceable customers, and technical facts'], ['Bundled file', '`references/templates.md`: structure and length for each content type']],
+    steps: ['Read `references/voice-and-tone.md` and the template for the content type in `references/templates.md`. If either file still says SAMPLE on its first line, tell the user before drafting.', 'Draft to the template structure and length.',
+      'Use only the proof points, customer results, and technical facts listed in the voice file. Do not invent statistics.', 'Leave merge fields such as {{first_name}} for the sending tool to fill.', 'Offer three refinements: Shorter, More technical, Punchier. Apply the chosen one to the original draft, not to an earlier refinement.'],
+    output: ['The draft, with a word count.', 'Refine options. After a refinement, show the new word count and point out added text.'],
+    rules: ['Never invent a customer quote. Mark quotes as to be supplied and approved by the customer.', 'Name a customer only if it is listed as referenceable in the voice file.', 'Make no claims about competitors.']},
+  sla: {slug: 'lead-follow-up-sla',
+    when: 'Checks whether new leads got a first touch within 48 hours, groups the misses by manager and rep, and drafts a Slack message to each manager. Use when the user asks about "lead follow-up", "SLA compliance", "speed to lead", or "untouched new leads", including for a single campaign or event.',
+    inputs: ['Campaign (optional): scope the check to one campaign. Default is all campaigns.', 'Window: leads created in the last 14 days.'],
+    sources: [['Salesforce', 'leads created in the window, the ones with no activity within 48 hours of creation, and each owner with their manager'], ['Slack', 'one direct message per manager (write, on confirmation only)']],
+    steps: ['Count leads created in the last 14 days, scoped to the campaign if one is given.', 'Find the leads with no logged activity within 48 hours of creation.', 'SLA compliance = 1 minus (late leads divided by new leads). The target is 90%.',
+      'Group late leads by manager, then by rep. When the check covers all campaigns, also show compliance per rep and per team.', 'Draft one Slack direct message per manager, listing each rep with their late leads, company, and hours open.', 'Show the message previews. WRITE: send the Slack messages only when the user confirms.'],
+    output: ['Tiles: new leads, leads past SLA, compliance against target.', 'Compliance by rep, lowest first (all-campaign runs only).', 'One table per manager: rep, lead, company, campaign, created date, hours open.', 'Slack message preview for each manager.'],
+    rules: ['Send by direct message to the manager, never to a public channel.', 'One message per manager per run.', 'State facts and the ask: names, hours open, and a first touch today. Do not assign blame.']},
+  exec: {slug: 'exec-meeting-brief',
+    when: 'Prepares a one-page account brief before an executive meeting: snapshot, open opportunities, attendees, recent activity, competitors, talking points, risks, and asks. Use when the user asks for a "meeting brief", "account prep", an "exec briefing", or to "prep me for my meeting with" a named account.',
+    inputs: ['Account (required): one Salesforce account.', 'Battlecard (optional): when the battlecard skill has run for a competitor on this account, embed its positioning and rebuttals.'],
+    sources: [['Salesforce', 'the account record, open opportunities, and contacts with their buying roles'], ['Snowflake', 'account engagement (`account_engagement`): product usage for customers, web activity for prospects'], ['Slack', "the account's channel, last 30 days (read only)"]],
+    steps: ['Pull the account record, open opportunities, and contacts with their buying roles.', 'Pull engagement from Snowflake.', "Search the account's Slack channel for the last 30 days. Keep only messages that change the picture of the deal.", 'List the three most recent activities with date and source.',
+      'For each competitor tagged on an open opportunity, give our head-to-head win rate and one line of positioning. If a battlecard is available, add its rebuttal table.', 'Write three talking points, two risks, and two asks. Each one ties to a fact shown earlier in the brief.'],
+    output: ['Header: account, meeting purpose and date, customer or prospect.', 'Sections in this order: account snapshot, open opportunities, attendees and roles, recent activity, competitors in play, talking points, risks, asks.'],
+    rules: ['Keep it to one page.', 'Give the source (Salesforce or Slack) for every activity line.', 'Summarize Slack messages. Do not quote colleagues by name.']}
+};
+const SAMPLE = `> SAMPLE FILE for the fictional company ${DATA.company.name}. Replace it with your own before using this skill on real work.\n\n`;
+const REFS = {   // reference files bundled with a skill, relative to its folder
+  brand: {'references/brand-guidelines.md': SAMPLE + ['# Brand guidelines', '', '## Fonts', '- Headings: Inter, weight 600.', '- Body: Inter, weight 400.', '- No other typefaces. No all-caps headlines.', '', '## Colors', '- Evergreen #1E9E57: accents, key numbers, chart highlight.', '- Ink #15211A: all text.', '- Mist #EEF3F0: backgrounds and dividers.',
+    '- Charts: the green ramp from #136B3A (darkest) to #6DBB8F (lightest). No gradients.', '', '## Logo', '- Use the current mark: a diamond followed by the wordmark.', '- Place it bottom right on every slide. Never stretch or recolor it.', '- Keep clear space equal to the height of the diamond on all sides.', '',
+    '## Tone', '- Headlines state one specific fact, with a number when there is one.', '- No exclamation marks, hype words, or superlatives.', '- Sentence case.', ''].join('\n')},
+  content: {'references/voice-and-tone.md': SAMPLE + ['# Voice and tone', '', '## Rules', "1. Write to one finance leader, in the second person.", "2. Lead with the reader's problem, then the product.", '3. Use plain words. No hype and no exclamation marks.', '4. Back every claim with a number from the approved proof points.', '5. One call to action per piece.', '6. Short sentences, one idea per paragraph.', '',
+    '## Approved proof points', '- 87% of invoices are auto-coded.', '- Customers close the month in 4 days instead of 10.', '- Customers go live in 6 weeks.', '- 40+ prebuilt reconciliations, with a daily sync to NetSuite and Sage Intacct.', '', '## Referenceable customers', '- Aldergrove Hospitality Group (28 properties, five-person AP team): live on its first 9 properties in 6 weeks; invoice cycle time cut from 11 days to 4; 21,600 invoices processed in 90 days; remaining 19 properties planned in 3 waves.', '',
+    '## Technical facts', '- Line-item coding model trained on 30M+ invoices; assigns GL account, entity, and cost center.', '- 2- and 3-way match against POs and receipts; immutable audit log on every approval.', '- REST API and webhooks, SAML SSO, SOC 2 Type II.', '- Native connectors for NetSuite (SuiteTalk) and Sage Intacct (Web Services) with a daily delta sync.', ''].join('\n'),
+    'references/templates.md': SAMPLE + ['# Templates', '', '## email', 'Subject line, greeting with {{first_name}}, the problem in two or three sentences, what we do with one proof point, one call to action, sign-off with {{sender_name}}. About 110 words.', '', '## blog', 'Headline, a short intro that names the problem, three numbered sections with one idea each, and a close that tells the reader where to start.', '',
+    '## social', 'A one-line hook, a three-item list, one proof point with a pointer to the link, and three hashtags. Under 80 words.', '', '## onepager', 'Headline, who it is for, The problem, How we help (three bullets), Proof, Next step.', '', '## case', 'Headline naming the customer, Challenge, Solution, Results (three bullets with numbers), and a placeholder for a customer quote to be supplied and approved.', ''].join('\n')}
+};
+const skillMd = s => { const m = SKILL_MD[s.id], ul = a => a.map(x => `- ${x}`).join('\n');
+  return `---\nname: ${m.slug}\ndescription: >\n  ${m.when}\n---\n\n# ${s.name}\n\n## Inputs\n${ul(m.inputs)}\n\n## Data sources\n${ul(m.sources.map(([k, v]) => `${k}: ${v}`))}\n\n## Before starting\n${ul(MD_BEFORE)}\n\n## Steps\n${m.steps.map((x, i) => `${i + 1}. ${x}`).join('\n')}\n\n## Output\n${ul(m.output)}\n\n## Rules\n${ul([...m.rules, ...MD_COMMON])}\n`; };
+const skillFiles = s => ({'SKILL.md': skillMd(s), ...REFS[s.id]});
+const under = (dir, files) => Object.fromEntries(Object.entries(files).map(([k, v]) => [dir + k, v]));
+const PLUGIN = {name: 'marketing', version: '0.1.1', author: {name: 'Marketing AI Hub'}, description: 'Eight marketing skills from the Marketing AI Hub: CMO metrics, battlecards, brand refresh, abandoned leads, campaign briefs, content drafts, lead follow-up SLA checks, and exec meeting briefs.', keywords: ['marketing', 'salesforce', 'snowflake', 'slack', 'monday.com']};
+const readme = () => `# Marketing plugin\n\n${PLUGIN.description}\n\n## Skills\n\n| Skill | What it does | Needs |\n| --- | --- | --- |\n${SKILLS.map(s => `| \`${SKILL_MD[s.id].slug}\` | ${s.desc} | ${s.src.join(', ')} |`).join('\n')}
+\n## Setup\n\n1. Connect the sources you use (Salesforce, Snowflake, Slack, monday.com) from Customize in Claude. The plugin does not bundle connectors. Without one, a skill names what is missing and offers to work from an export you upload.\n2. Replace the sample reference files with your own: \`skills/brand-refresh/references/brand-guidelines.md\`, \`skills/content-creator/references/voice-and-tone.md\`, and \`skills/content-creator/references/templates.md\`. They describe a fictional company.\n3. View, field, and board names in the skills are examples. Claude confirms the closest match in your systems the first time a skill runs.
+\n## Use\n\nType \`/\` and pick a skill, or ask in plain words, for example "run CMO metrics" or "build a battlecard for <competitor>".\n\n## Workflows\n\nPaste one of these prompts to chain skills. Swap in your own campaign and competitor names.\n\n${WORKFLOWS.map(w => `### ${w.name}\n\n${w.prompt}`).join('\n\n')}\n`;
+const pluginFiles = () => ({'.claude-plugin/plugin.json': JSON.stringify(PLUGIN, null, 2) + '\n', 'README.md': readme(), ...Object.assign({}, ...SKILLS.map(s => under(`skills/${SKILL_MD[s.id].slug}/`, skillFiles(s))))});
+
+// Minimal ZIP writer (stored, no compression) so the page can hand out marketing.plugin and per-skill ZIPs without a library.
+const crc32 = (() => { const t = Array.from({length: 256}, (_, n) => { for (let k = 0; k < 8; k++) n = n & 1 ? 0xEDB88320 ^ (n >>> 1) : n >>> 1; return n >>> 0; }); return b => { let c = -1; for (const x of b) c = t[(c ^ x) & 255] ^ (c >>> 8); return (c ^ -1) >>> 0; }; })();
+function zip(files) {
+  const enc = new TextEncoder(), d = new Date(), local = [], central = []; let off = 0;
+  const rec = (...f) => { const b = new Uint8Array(f.reduce((s, x) => s + x[1], 0)), v = new DataView(b.buffer); let o = 0; f.forEach(([val, n]) => { n === 2 ? v.setUint16(o, val, true) : v.setUint32(o, val, true); o += n; }); return b; };
+  for (const [path, text] of Object.entries(files)) {
+    const name = enc.encode(path), data = enc.encode(text);   // fields below: version, UTF-8 flag, method 0, time, date, crc, sizes, name length, extra length
+    const head = [[20, 2], [0x0800, 2], [0, 2], [d.getHours() << 11 | d.getMinutes() << 5, 2], [(d.getFullYear() - 1980) << 9 | (d.getMonth() + 1) << 5 | d.getDate(), 2], [crc32(data), 4], [data.length, 4], [data.length, 4], [name.length, 2], [0, 2]];
+    local.push(rec([0x04034b50, 4], ...head), name, data);
+    central.push(rec([0x02014b50, 4], [20, 2], ...head, [0, 2], [0, 2], [0, 2], [0, 4], [off, 4]), name);
+    off += 30 + name.length + data.length;
+  }
+  const n = central.length / 2, size = central.reduce((s, b) => s + b.length, 0);
+  return new Blob([...local, ...central, rec([0x06054b50, 4], [0, 2], [0, 2], [n, 2], [n, 2], [size, 4], [off, 4], [0, 2])], {type: 'application/zip'});
+}
+
+/* ================= 5. WORKFLOWS: steps reuse the skill functions, then a combined summary ================= */
+const toCsv = rows => rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+const WORKFLOWS = [
+  {id: 'pulse', icon: '📈', name: 'Weekly Ops Pulse', desc: 'Monday read on the funnel: quarter metrics, stale leads, and anything that moved more than 10% week over week.', chain: ['CMO Metrics', 'Abandoned Leads', 'WoW flags'],
+   prompt: 'Run the cmo-metrics skill for the current quarter. Then run abandoned-leads. Then compare last week with the week before for every CMO metric and flag anything that moved more than 10%. Deliver one Weekly Ops Pulse: three headline bullets first, then the scorecard, the stale-lead summary with the top 5, and the week-over-week table with flags.',
+   steps: [
+    ['CMO Metrics for the current quarter', c => { c.m = cmoData(); return `${Q[1]}: ${usd(c.m.c.pipe)} pipeline, ${c.m.c.won} closed-won opps, ${usd(c.m.c.arr)} ARR`; }],
+    ['Abandoned Leads', c => { c.ab = abandonedData(); return `${num(c.ab.total)} leads and contacts idle 90+ days`; }],
+    ['Flag metrics that moved more than 10% week over week', c => { const [a, b] = call('snowflake.run_query', {view: 'mktg_funnel_weekly'}).map(w => sumOf([w]));
+      c.wow = METRICS.map(([l, k, f]) => ({l, a: f(a[k]), b: f(b[k]), d: b[k] / a[k] - 1})); c.flags = c.wow.filter(r => Math.abs(r.d) > .1); return `${c.flags.length} of ${c.wow.length} metrics flagged`; }]],
+   summary: c => bullets([`<b>${Q[1]} pipeline is ${usd(c.m.c.pipe)}</b>, ${pct(c.m.c.pipe / c.m.p.pipe - 1)} ahead of ${Q[0]}, with ${c.m.c.won} closed-won opps worth ${usd(c.m.c.arr)} in ARR.`,
+      `<b>${num(c.ab.total)} leads and contacts are idle 90+ days</b>; ${DATA.staleHighFit} of them are high fit. The top record is ${c.ab.ranked[0].name}, ${c.ab.ranked[0].title} at ${c.ab.ranked[0].co}.`,
+      `<b>${c.flags.length} metrics moved more than 10% last week:</b> ${c.flags.map(r => `${r.l} (${r.d > 0 ? '+' : ''}${pct(r.d)})`).join(', ')}.`]) + '<br>'
+     + sec(`${Q[1]} scorecard`, metricTable(c.m.p, c.m.c)) + sec('Stale leads: top 5 to re-engage', staleTable(c.ab, 5))
+     + sec(`Week over week: ${DATA.weeks.labels[0]} vs ${DATA.weeks.labels[1]}`, table(['Metric', ...DATA.weeks.labels, 'Change', 'Flag'], c.wow.map(r => Object.assign([r.l, r.a, r.b, `${r.d > 0 ? '+' : ''}${pct(r.d)}`, Math.abs(r.d) > .1 ? '⚑ Moved 10%+' : ''], {flag: Math.abs(r.d) > .1}))))},
+  {id: 'event', icon: '🎪', name: 'Event Debrief', desc: 'Check follow-up on one event, export the leads that were missed, and kick off a nurture brief for them.', chain: ['Lead Follow-Up SLA', 'Export CSV', 'Campaign Brief'],
+   form: [{k: 'campaign', label: 'Event campaign', opts: DATA.campaigns.filter(c => /vent/.test(c.type)).map(c => [c.id, c.name]), wide: 1}],
+   prompt: 'Run lead-follow-up-sla scoped to the campaign "FinOps Forward Summit 2026". Export the leads that missed the 48-hour SLA as a CSV with owner and manager columns. Then run campaign-brief to kick off a nurture campaign for those leads, launching one week from today.',
+   steps: [
+    ['SLA follow-up check for the event', c => { c.sla = slaData(c.input); return `${c.sla.late.length} of ${c.sla.total} event leads past the 48-hour SLA (${pct(c.sla.pct)} compliant)`; }],
+    ['Export results as CSV', c => { const k = find('campaigns', c.input.campaign);
+      const rows = c.sla.late.map(l => { const r = find('reps', l.rep); return [l.name, l.co, l.title, k.name, r.name, find('managers', r.mgr).name, iso(created(l)), l.hrs]; });
+      c.csv = last.csv = {name: `${k.id}-sla-breaches-${DATA.asOf}.csv`, n: rows.length, text: toCsv([['lead_name', 'company', 'title', 'campaign', 'owner', 'manager', 'created_date', 'hours_without_activity'], ...rows])};
+      local('files.write_csv', c.csv.name, `${rows.length} rows`); return `${c.csv.name} ready`; }],
+    ['Kick off a nurture Campaign Brief', c => { const n = c.sla.late.length, k = find('campaigns', c.input.campaign);
+      c.brief = briefData({goal: 'Nurture event leads to SQL', audience: `the ${n} ${k.name} lead${n > 1 ? 's' : ''} that had no follow-up within 48 hours`, budget: n * 250, launch: iso(addDays(DATA.asOf, 6)), size: n}); return `Brief drafted for ${n} lead${n > 1 ? 's' : ''}, launching ${fmtDate(c.brief.launch)}`; }]],
+   summary: c => slaHtml(c.sla) + sec('CSV export', `<pre>${esc(c.csv.text.split('\n').slice(0, 4).join('\n'))}\n…</pre><div class="acts"><button class="btn" data-act="csv">Download ${c.csv.name}</button>${c.csv.n} rows plus header, built in the browser from the sample data</div>`) + sec('Nurture campaign brief', briefHtml(c.brief))},
+  {id: 'health', icon: '🩺', name: 'Lead Pipeline Health Check', desc: 'Stale leads plus SLA compliance by campaign, rolled into pipeline at risk and who needs help.', chain: ['Abandoned Leads', 'SLA by campaign', 'At-risk pipeline'],
+   prompt: 'Run abandoned-leads, then lead-follow-up-sla grouped by campaign. Estimate at-risk pipeline from high-fit stale records and SLA-breached leads using the current MQL-to-SQL rate and pipeline per SQL. Report the at-risk pipeline in dollars, the three reps holding the most stale leads, and three recommendations with owners.',
+   steps: [
+    ['Abandoned Leads', c => { c.ab = abandonedData(); return `${num(c.ab.total)} leads and contacts idle 90+ days`; }],
+    ['SLA compliance by campaign', c => { const ks = call('salesforce.query_campaigns', {newLeadsLastDays: 14}); call('salesforce.query_leads', {createdLastDays: 14, noActivityHours: 48});
+      c.all = slaStats(); c.camps = ks.map(k => ({k, ...slaStats(k.id)})).sort((a, b) => a.pct - b.pct); return `${pct(c.all.pct)} overall across ${ks.length} campaigns`; }],
+    ['Size the pipeline at risk', c => { const q = qTotals(1); c.perLead = q.rate * q.pipe / q.sqls; c.n = DATA.staleHighFit + c.all.late.length; c.risk = c.n * c.perLead;
+      local('claude.estimate', 'high-fit stale records + leads past SLA', usd(c.risk)); return `${usd(c.risk)} of expected pipeline at risk`; }]],
+   summary: c => { const q = qTotals(1), top = DATA.reps.map(r => ({...r, n: r.staleLeads + r.staleContacts})).sort((a, b) => b.n - a.n).slice(0, 3), worst = c.camps[0];
+     return tiles([['Pipeline at risk', usd(c.risk), `${c.n} leads at ${usd(c.perLead)} each`, 'warn'], ['Idle 90+ days', num(c.ab.total), `${DATA.staleHighFit} high fit`], ['SLA compliance', pct(c.all.pct), `${c.all.late.length} of ${c.all.total} leads late`, 'warn']])
+     + sec('How pipeline at risk is estimated', `<p>${DATA.staleHighFit} high-fit stale records plus ${c.all.late.length} leads past SLA, multiplied by the ${Q[1]} MQL-to-SQL rate (${pct(q.rate)}) and pipeline per SQL (${usd(q.pipe / q.sqls)}).</p>`)
+     + sec('Top 3 reps by stale leads', table(['Rep', 'Manager', 'Stale leads', 'Stale contacts', 'Total', 'Share of all stale'], top.map(r => [`<b>${r.name}</b>`, find('managers', r.mgr).name, r.staleLeads, r.staleContacts, r.n, pct(r.n / c.ab.total)])))
+     + sec('SLA compliance by campaign, lowest first', `<div class="box">${hbars(c.camps.map(x => [`${x.k.name} <small style="color:var(--mut)">${x.late.length} of ${x.total} late</small>`, x.pct]), 'g', pct, 1)}</div>`)
+     + sec('Recommendations', bullets([`<b>Rebalance stale books.</b> ${top[0].name} and ${top[1].name} hold ${pct((top[0].n + top[1].n) / c.ab.total, 0)} of all stale records. Move their oldest 50 each into the re-engagement nurture. Owners: ${[...new Set(top.slice(0, 2).map(r => find('managers', r.mgr).name))].join(' and ')}.`,
+        `<b>Fix follow-up on ${worst.k.name}.</b> It has the lowest compliance at ${pct(worst.pct)}. Route its new leads round-robin with a 24-hour Slack reminder. Owner: ${DATA.team.mops}.`,
+        `<b>Recover the high-fit segment first.</b> A nurture to the ${DATA.staleHighFit} high-fit records protects about ${usd(DATA.staleHighFit * c.perLead)} of the at-risk pipeline. Owner: ${DATA.team.demand}.`])); }},
+  {id: 'intel', icon: '🧭', name: 'Competitive Intel Package', desc: 'Build a battlecard, find the open deals where that competitor is tagged, and brief each account with the rebuttals embedded.', chain: ['Battlecard', 'Open-opp accounts', 'Exec Meeting Brief × N'],
+   form: [{k: 'comp', label: 'Competitor', opts: opt('competitors'), wide: 1}],
+   prompt: 'Run battlecard for Orvanta from Salesforce win/loss data. Find every account with an open opportunity where Orvanta is tagged as a competitor. For each account, run exec-meeting-brief and embed the battlecard positioning and the They say / We say rebuttals. Return the battlecard, the account list, and one brief per account.',
+   steps: [
+    ['Build the battlecard from win/loss data', c => { c.b = battleData(c.input); return `${pct(winRate(c.b.c))} win rate vs ${c.b.c.name} across ${c.b.c.wins + c.b.c.losses} closed opps`; }],
+    ['Find open-opp accounts where the competitor is tagged', c => { c.open = call('salesforce.query_opportunities', {stage: 'Open', competitor: c.input.comp}); c.ids = [...new Set(c.open.map(o => o.acct.id))]; return `${c.ids.length} accounts, ${usd(c.open.reduce((s, o) => s + o.amt, 0))} open pipeline`; }],
+    ['Generate an Exec Meeting Brief for each account', c => { c.briefs = c.ids.map(id => execData({account: id}, true)); return `${c.briefs.length} briefs with ${c.b.c.name} positioning embedded`; }]],
+   summary: c => sec('Battlecard', battleHtml(c.b, true))
+     + sec(`Open opportunities with ${c.b.c.name} tagged`, table(['Account', 'Opportunity', 'Stage', 'Amount', 'Close date', 'Owner'], c.open.map(o => [`<b>${o.acct.name}</b>`, o.name, o.stage, usd(o.amt), fmtDate(o.close), find('reps', o.acct.owner).name])))
+     + sec('Exec meeting briefs', c.briefs.map((d, i) => `<details${i ? '' : ' open'}><summary>${d.a.name}<span>${d.a.meeting.why}, ${fmtDate(d.a.meeting.date)}</span></summary>${execHtml(d, c.b.c)}</details>`).join(''))}
+];
+
+/* ================= 6. AGENTS: a plan naming the tools, plus a short sample deliverable ================= */
+const topic0 = 'cutting month-end close from 10 days to 4';
+const AGENTS = [
+  {icon: '🔍', name: 'Market Researcher', desc: 'Competitive intel, win/loss analysis, battlecards, and audience and ICP definition.', tasks: [
+    {t: 'Build Orvanta battlecard', plan: ['salesforce.query_opportunities: Pull closed opps tagged Orvanta for the last 4 quarters', 'slack.search_messages: Scan #competitive-intel for field notes', 'claude: Cluster win and loss reasons and draft rebuttals', 'lucidchart.create_diagram: Map their ERP bundle against our modules'],
+     out: () => { const c = find('competitors', 'orvanta'); return `<p class="rs"><b>${c.name}:</b> ${pct(winRate(c))} win rate (${c.wins} won, ${c.losses} lost). ${c.pos}</p>` + table(['They say', 'We say'], c.say.map(([a, b]) => [`"${a}"`, b])); }},
+    {t: 'Win/loss analysis', plan: ['salesforce.query_opportunities: Pull every closed competitive opp, last 4 quarters', 'claude: Group by competitor and reason code', 'claude: Rank the gaps by deals lost'],
+     out: () => table(['Competitor', 'Won', 'Lost', 'Win rate', 'Top loss reason'], DATA.competitors.map(c => [c.name, c.wins, c.losses, pct(winRate(c)), `${c.lossWhy[0][0]} (${c.lossWhy[0][1]})`]))},
+    {t: 'Define the ICP', plan: ['salesforce.query_opportunities: Profile closed-won accounts by size and industry', 'snowflake.run_query: Compare product usage by segment', 'claude: Write the ICP with triggers and disqualifiers'],
+     out: () => table(['Dimension', 'Ideal customer profile'], [['Company size', '200 to 2,000 employees with 5 or more legal entities'], ['Finance stack', 'NetSuite or Sage Intacct, with AP still run on email and spreadsheets'], ['Trigger events', 'New CFO or Controller, ERP migration, audit finding, acquisition'], ['Buying group', 'Controller as champion, CFO as economic buyer, IT for security'], ['Disqualifiers', 'Single entity with fewer than 500 invoices a month']])}]},
+  {icon: '✏️', name: 'Content Creator', desc: 'Email, blog, social, one-pagers, and case studies in the brand voice.', tasks: [
+    {t: 'Write nurture sequence', plan: ['salesforce.query_leads: Pull the stale high-fit segment', 'claude: Draft three emails in the brand voice', 'monday.create_item: Add the sequence to the content calendar'],
+     out: () => table(['Email', 'Send day', 'Subject', 'Call to action'], [[1, 'Day 0', 'Still closing the books on day 10?', 'Read the 4-day close guide'], [2, 'Day 4', 'How a 28-property group cut invoice time from 11 days to 4', 'See the case study'], [3, 'Day 9', '20 minutes to see it with your entities', 'Book a walkthrough']])},
+    {t: 'Draft LinkedIn post', plan: ['claude: Load the voice and tone guide', 'claude: Draft the post with a hook and three points', 'slack.post_message: Share the draft in #social-review'], out: () => `<div class="paper draft">${blocksHtml(DRAFTS.social(topic0))}</div>`},
+    {t: 'Customer case study', plan: ['salesforce.get_account: Pull the Aldergrove account record', 'snowflake.run_query: Get usage results for the live properties', 'claude: Write challenge, solution, and results'], out: () => `<div class="paper draft">${blocksHtml(DRAFTS.case(topic0))}</div>`}]},
+  {icon: '🧮', name: 'Data Analyst', desc: 'Funnel and pipeline analysis, CMO dashboards, and ad hoc Salesforce and Snowflake questions.', tasks: [
+    {t: 'Run CMO dashboard', plan: ['snowflake.run_query: Query the monthly funnel view', 'salesforce.query_opportunities: Count closed-won opps per quarter', 'claude: Compare the last two quarters'], out: () => metricTable(qTotals(0), qTotals(1))},
+    {t: 'Pipeline by campaign', plan: ['snowflake.run_query: Query sourced pipeline by campaign', 'salesforce.query_leads: Count new leads per campaign', 'claude: Rank and compute share of total'],
+     out: () => table(['Campaign', 'Type', `${Q[1]} sourced pipeline`, 'Share of total'], DATA.campaigns.map(c => [c.name, c.type, usd(c.pipe), pct(c.pipe / qTotals(1).pipe)]))},
+    {t: 'Monthly funnel conversion', plan: ['snowflake.run_query: Query MQLs and SQLs by month', 'claude: Compute the conversion rate and trend'], out: () => table(['Month', 'MQLs', 'SQLs', 'MQL-to-SQL rate'], DATA.months.map(m => [m.m, m.mqls, m.sqls, pct(m.sqls / m.mqls)]))},
+    {t: 'Who holds the stale leads?', plan: ['salesforce.query_leads: Count leads idle 90+ days by owner', 'salesforce.query_contacts: Count contacts idle 90+ days by owner', 'claude: Rank the owners'],
+     out: () => table(['Rep', 'Stale leads', 'Stale contacts', 'Total'], DATA.reps.map(r => [r.name, r.staleLeads, r.staleContacts, r.staleLeads + r.staleContacts]).sort((a, b) => b[3] - a[3]))}]},
+  {icon: '🖌️', name: 'Creative Designer', desc: 'Branded decks, ad concepts, and image prompts that follow the brand guidelines.', tasks: [
+    {t: 'QBR deck outline', plan: ['snowflake.run_query: Pull the quarter scorecard', 'salesforce.query_opportunities: Pull win rates by competitor', 'claude: Outline six slides on the brand template', 'lucidchart.create_diagram: Draw the funnel diagram for slide 2'],
+     out: () => { const p = qTotals(0), c = qTotals(1), s = slaStats(); return `<ol class="plan">${[`<b>Title.</b> ${Q[1]} Marketing QBR`, `<b>Scorecard.</b> ${usd(c.pipe)} pipeline (${pct(c.pipe / p.pipe - 1)} QoQ), ${c.won} closed-won opps, ${usd(c.arr)} ARR`, `<b>What worked.</b> ${DATA.campaigns[0].name} sourced ${usd(DATA.campaigns[0].pipe)}`,
+       `<b>What did not.</b> MQL-to-SQL rate fell to ${pct(c.rate)}; follow-up SLA is at ${pct(s.pct)}`, `<b>Competitive.</b> ${DATA.competitors.map(x => `${x.name} ${pct(winRate(x), 0)}`).join(', ')}`, '<b>Q4 plan and asks.</b>'].map(x => `<li>${x}</li>`).join('')}</ol>`; }},
+    {t: 'Ad creative concepts', plan: ['claude: Load the brand guidelines and ICP', 'claude: Write three concepts with headline and visual', 'lucidchart.create_diagram: Lay out a storyboard for the top concept'],
+     out: () => table(['Concept', 'Headline', 'Visual', 'Format'], [['The calendar', 'Day 4. Books closed.', 'A wall calendar with days 5 to 10 crossed out in green', 'LinkedIn single image'], ['The inbox', 'Your approvals are stuck in here.', 'An overflowing inbox resolving into one tidy queue', 'LinkedIn video, 15 seconds'], ['The spreadsheet', 'Only one person understands this file.', 'A spreadsheet tab named FINAL_v7_real', 'Carousel, 4 frames']])},
+    {t: 'Hero image prompts', plan: ['claude: Load the brand palette and photo style', 'claude: Write three prompts with composition notes'],
+     out: () => bullets(['A calm finance team at a shared desk on day 4 of the month, soft morning light, evergreen accents, shallow depth of field, no visible screens.', 'Flat isometric illustration of invoices flowing from an inbox into one green pipeline and out to a ledger, white background.', 'Close-up of a wall calendar with the last week of the month left blank, a single green check mark on day 4.'])}]},
+  {icon: '🚀', name: 'Campaign Strategist', desc: 'End-to-end campaign strategy covering audience, channels, timeline, and launch.', tasks: [
+    {t: 'ABM plan for open deals', plan: ['salesforce.query_opportunities: List open opps with competitors tagged', 'snowflake.run_query: Pull engagement by account', 'claude: Assign a play per account', 'monday.create_item: Create one item per account play'],
+     out: () => table(['Account', 'Open pipeline', 'Competitors', 'Play'], openOpps().sort((a, b) => b.amt - a.amt).map(o => [o.acct.name, usd(o.amt), o.comps.map(id => find('competitors', id).name).join(', '), o.acct.status === 'Customer' ? 'Executive dinner plus a customer-results one-pager' : 'CFO direct mail plus a tailored ROI model']))},
+    {t: 'Full launch plan', plan: ['monday.get_board: Read the campaign board and channel benchmarks', 'snowflake.run_query: Pull current conversion rates', 'claude: Build the channel mix, timeline, and targets', 'lucidchart.create_diagram: Draw the campaign flow', 'monday.create_item: Create the campaign with tasks'],
+     out: () => { const mix = mixRows('Launch a product', 90000); return `<p class="rs">Close Automation launch, $90,000 budget, targeting ${num(mix.reduce((s, m) => s + m.leads, 0))} leads.</p>` + table(['Channel', 'Share', 'Budget', 'Expected leads'], mix.map(m => [m.name, m.p + '%', '$' + num(m.amt), m.leads])); }},
+    {t: 'Event follow-up plan', plan: ['salesforce.query_leads: Pull event leads and first-touch times', 'slack.post_message: Send each manager the leads past SLA', 'claude: Sequence the follow-up touches'],
+     out: () => { const s = slaStats('finops-summit'); return `<p class="rs">${DATA.campaigns[0].name}: ${s.late.length} of ${s.total} leads are past the 48-hour SLA.</p>` + table(['When', 'Touch'], NURTURE.map((t, i) => [`Week ${i + 1}`, t])); }}]}
+];
+
+/* ================= 7. PAGE RENDER ================= */
+function archSvg() {
+  const y = i => 58 + i * 58, box = (x, y, w, h, t, s, c = '') => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="10" class="bx ${c}"/><text x="${x + w / 2}" y="${y + h / 2 - 2}" class="bt">${t}</text><text x="${x + w / 2}" y="${y + h / 2 + 13}" class="bs">${s}</text>`;
+  const arrow = (x1, y1, x2) => `<line x1="${x1}" y1="${y1}" x2="${x2 - 7}" y2="${y1}" class="ar" marker-end="url(#ah)"/>`;
+  return `<svg viewBox="0 0 1000 356" class="arch" role="img" aria-label="Architecture: the Hub UI calls Claude, Claude calls MCP servers, and each MCP server reaches one business system">
+    <defs><marker id="ah" viewBox="0 0 8 8" refX="1" refY="4" markerWidth="7" markerHeight="7" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0L8 4L0 8z" class="ahp"/></marker></defs>
+    ${['Hub UI', 'Claude', 'MCP servers', 'Systems'].map((t, i) => `<text x="${[95, 355, 635, 890][i]}" y="24" class="col">${t}</text>`).join('')}
+    ${box(20, 150, 150, 76, 'Marketing AI Hub', 'cards, forms, Run drawer')}<rect x="230" y="40" width="250" height="300" rx="14" class="bx big"/>
+    ${[['Skills', `${SKILLS.length} single-purpose tools`], ['Workflows', `${WORKFLOWS.length} chains of skills, run in order`], ['Agents', `${AGENTS.length} roles that plan their own steps`]].map(([t, s], i) => box(250, 62 + i * 88, 210, 68, t, s)).join('')}
+    ${arrow(170, 188, 230)}<path d="M480 188H515M515 ${y(0) + 22}V${y(4) + 22}" class="ar"/>
+    ${DATA.mcp.map((s, i) => box(550, y(i), 170, 44, `${s.id} MCP`, s.tools[0] + '()', 'mc') + box(800, y(i), 180, 44, s.name, s.access) + arrow(515, y(i) + 22, 550) + arrow(720, y(i) + 22, 800)).join('')}</svg>`;
+}
+function render() {
+  const [p, c] = [qTotals(0), qTotals(1)];
+  $('#co').textContent = `◆ ${DATA.company.name} · ${DATA.company.what}`;
+  $('#pills').innerHTML = `<span class="pill">Data as of <b>${fmtDate(DATA.asOf, {month: 'short', day: 'numeric', year: 'numeric'})}</b></span><span class="pill demo">Demo: sample data</span>` + DATA.mcp.map(s => `<span class="pill"><i></i><b>${s.name}</b> connected (mock)</span>`).join('');
+  $('#kpis').innerHTML = [['Marketing-Sourced Pipeline', 'pipe', usd], ['Closed-Won Opps', 'won', num], ['Closed-Won ARR', 'arr', usd]].map(([l, k, f]) =>
+    `<article class="card kpi"><div class="kl">${l}<span>${Q[1]}</span></div><div class="kval">${f(c[k])}</div><div class="kd">${chg(p[k], c[k])} QoQ, from ${f(p[k])} in ${Q[0]}</div>${spark(DATA.months.map(m => m[k]))}</article>`).join('');
+  $('#nSkills').textContent = `${SKILLS.length} available`; $('#nFlows').textContent = `${WORKFLOWS.length} multi-step`; $('#nAgents').textContent = `${AGENTS.length} agents`;
+  $('#skills').innerHTML = SKILLS.map(s => `<article class="card row"><span class="ic">${s.icon}</span><div class="rb"><b>${s.name}</b><p>${s.desc}</p><div class="src">${chips(s.src)}${mdLink(s)}</div></div><button class="btn" data-act="skill" data-arg="${s.id}" aria-label="Run ${s.name}">Run</button></article>`).join('');
+  $('#flows').innerHTML = WORKFLOWS.map(w => `<article class="card flow"><div class="fh"><span class="ic">${w.icon}</span><div><b>${w.name}</b><p>${w.desc}</p></div></div><div class="chain">${w.chain.map(x => `<span class="chip">${x}</span>`).join('<span class="arw">→</span>')}</div>
+    <div class="ff"><button class="link" data-act="copy" data-arg="${w.id}">Copy prompt</button><button class="btn" data-act="flow" data-arg="${w.id}" aria-label="Run ${w.name}">Run</button></div></article>`).join('');
+  $('#agents').innerHTML = AGENTS.map((a, i) => `<article class="card agent"><span class="ic">${a.icon}</span><b>${a.name}</b><p>${a.desc}</p>${a.tasks.map((t, j) => `<button class="task" data-act="task" data-arg="${i}.${j}">${t.t}<span>↗</span></button>`).join('')}</article>`).join('');
+  $('#arch').innerHTML = archSvg();
+  const usedBy = s => [...SKILLS.filter(k => k.src.includes(s.name)).map(k => k.name), ...AGENTS.filter(a => a.tasks.some(t => t.plan.some(x => x.startsWith(s.id + '.')))).map(a => a.name + ' agent')];
+  $('#mcpTable').innerHTML = table(['MCP server', 'Used for', 'Example tools', 'Access', 'Used by'], DATA.mcp.map(s => [`<b>${s.name}</b>`, s.use, s.tools.map(t => `<code>${t}</code>`).join(' '), s.access, usedBy(s).join(', ')]));
+}
+
+/* ================= 8. DRAWER: form, run trace, stepper, result buttons ================= */
+let runId = 0, cur = null, opener = null;
+const formHtml = (f, name) => `<form class="form">${f.map(x => `<label class="${x.wide ? 'wide' : ''}">${x.label}${
+  x.opts ? `<select name="${x.k}">${x.opts.map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select>`
+  : x.type === 'file' ? `<span class="file">📎<input name="${x.k}" value="${x.def}" required><em>sample file, ${DATA.brand.slides} slides</em></span>`
+  : `<input name="${x.k}" type="${x.type || 'text'}" value="${x.def}" required${x.type === 'number' ? ' min="1" step="any"' : ''}>`}</label>`).join('')}<button class="btn" type="submit">Run ${name}</button></form>`;
+function openDrawer(item, kind, tags, extra = '') {
+  runId++; cur = {item, kind}; if (!document.body.classList.contains('open')) opener = document.activeElement;
+  $('#dh').innerHTML = `<span class="ic">${item.icon}</span><div><h3 id="dtitle">${item.name}</h3><div class="src">${chips([kind], 'k')}${chips(tags)}${extra}</div></div>`;
+  $('#dform').innerHTML = item.form ? formHtml(item.form, item.name) : '';
+  $('#dout').innerHTML = item.form ? '<p class="hint">Defaults are filled in. Press Run to start, or change them first.</p>' : '';
+  document.body.classList.add('open', 'lock'); $('.dbody').scrollTop = 0; $('#drawer .x').focus();
+}
+function closeDrawer() { runId++; document.body.classList.remove('open', 'lock'); opener && opener.focus(); }
+function play(lines, box, ms, done) {   // one trace line every `ms`; a newer run or a close cancels it
+  const id = runId; let i = 0;
+  const tick = () => { if (id !== runId) return; if (i === lines.length) return done();
+    const [tool, args, res] = lines[i++];
+    box.insertAdjacentHTML('beforeend', `<div class="tl"><span class="ok">✓</span><span><b>${tool}</b>(${esc(args)})</span><span class="res">→ ${esc(res)}</span></div>`);
+    box.lastChild.scrollIntoView({block: 'nearest'}); setTimeout(tick, ms); };
+  setTimeout(tick, ms);
+}
+function start() {
+  const f = $('#dform form'), input = f ? Object.fromEntries(new FormData(f)) : {}, {item, kind} = cur;
+  runId++;
+  if (kind === 'Skill') {
+    trace = []; const mcp = item.src.filter(n => DATA.mcp.some(m => m.name === n)); if (mcp.length) local('session.check_connectors', mcp.join(', '), 'connected (mock)');
+    const html = item.run(input), lines = trace;
+    $('#dout').innerHTML = `<div class="trace"><div class="trh"><span class="spin"></span>Running ${item.name}…</div></div><div id="result"></div>`;
+    play(lines, $('.trace'), 400, () => { $('.trh').textContent = `Run trace: ${lines.length} steps, complete`; $('#result').innerHTML = asOfLine() + html; });
+  } else {
+    const c = {input}, steps = item.steps.map(([label, fn]) => { trace = []; const note = fn(c); return {label, note, lines: trace}; }), html = item.summary(c);
+    $('#dout').innerHTML = `<ol class="steps">${steps.map((s, i) => `<li id="st${i}"><span class="dot">${i + 1}</span><div><b>${s.label}</b><div class="trace"></div><p class="note"></p></div></li>`).join('')}</ol><div id="result"></div>`;
+    const go = i => { if (i === steps.length) { $('#result').innerHTML = `<h3 class="sum">Combined summary</h3>${asOfLine()}${html}`; return $('#result').scrollIntoView({behavior: 'smooth', block: 'start'}); }
+      const li = $('#st' + i); li.className = 'on';
+      play(steps[i].lines, $('.trace', li), 300, () => { li.className = 'done'; $('.dot', li).textContent = '✓'; $('.note', li).textContent = steps[i].note; go(i + 1); }); };
+    go(0);
+  }
+}
+let toastTimer;
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2800); }
+async function copyText(text, msg = 'Prompt copied to clipboard') {
+  try { await navigator.clipboard.writeText(text); }
+  catch { const t = Object.assign(document.createElement('textarea'), {value: text}); document.body.append(t); t.select(); document.execCommand('copy'); t.remove(); }
+  toast(msg);
+}
+const download = (name, body, type) => { const a = Object.assign(document.createElement('a'), {href: URL.createObjectURL(body instanceof Blob ? body : new Blob([body], {type})), download: name}); document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); toast(`Downloaded ${name}`); };
+const sent = (btn, label) => { btn.disabled = true; btn.textContent = label; };
+const ACTIONS = {
+  skill: id => { const s = SKILLS.find(x => x.id === id); openDrawer(s, 'Skill', s.src, mdLink(s)); if (!s.form) start(); },
+  md: id => { const s = SKILLS.find(x => x.id === id), m = SKILL_MD[id], files = skillFiles(s), [md, ...refs] = Object.entries(files); last.md = {slug: m.slug, text: md[1], files};
+    openDrawer({icon: s.icon, name: s.name}, 'SKILL.md', [`skills/${m.slug}/SKILL.md`]);
+    $('#dout').innerHTML = `<div class="acts bar"><button class="btn" data-act="skill" data-arg="${id}">Run this skill</button><button class="btn ghost" data-act="mdcopy">Copy</button><button class="btn ghost" data-act="mdzip">Download .zip</button>Upload the ZIP in Claude under Customize, Skills</div><pre class="mdfile">${esc(md[1])}</pre>`
+      + refs.map(([path, text]) => `<details><summary>${path}<span>bundled sample reference file</span></summary><pre class="mdfile">${esc(text)}</pre></details>`).join(''); },
+  mdcopy: () => copyText(last.md.text, 'SKILL.md copied to clipboard'),
+  mdzip: () => download(`${last.md.slug}.zip`, zip(under(last.md.slug + '/', last.md.files))),
+  plugin: () => download('marketing.plugin', zip(pluginFiles())),
+  flow: id => { const w = WORKFLOWS.find(x => x.id === id); openDrawer(w, 'Workflow', w.chain); if (!w.form) start(); },
+  task: arg => { const [i, j] = arg.split('.'), a = AGENTS[i], t = a.tasks[j]; openDrawer({icon: a.icon, name: t.t}, 'Agent task', [a.name]);
+    $('#dout').innerHTML = sec('Plan', `<ol class="plan">${t.plan.map(x => { const k = x.indexOf(': '); return `<li><code>${x.slice(0, k)}</code>${x.slice(k + 2)}</li>`; }).join('')}</ol>`) + sec('Sample deliverable', t.out()); },
+  copy: id => copyText(WORKFLOWS.find(x => x.id === id).prompt),
+  close: closeDrawer,
+  refine: kind => { $('#draftBox').innerHTML = draftBox(kind); },
+  slack: (_, btn) => { last.sla.groups.forEach(g => call('slack.post_message', {channel: g.m.slack})); sent(btn, 'Sent ✓'); toast(`Sent ${last.sla.groups.length} messages to Slack (mock): ${last.sla.groups.map(g => g.m.slack).join(', ')}`); },
+  monday: (_, btn) => { call('monday.create_item', {board: 'Campaigns FY26', name: last.brief}); sent(btn, 'Created ✓'); toast(`Created "${last.brief}" on the Campaigns FY26 board (mock)`); },
+  dl: () => toast(`Downloaded ${last.file} (mock, no file is written)`),
+  csv: () => download(last.csv.name, last.csv.text, 'text/csv')
+};
+document.addEventListener('click', e => { const t = e.target.closest('[data-act]'); if (t) ACTIONS[t.dataset.act](t.dataset.arg, t); });
+document.addEventListener('submit', e => { e.preventDefault(); start(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.body.classList.contains('open')) closeDrawer(); });
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Business Value Realization – prototype</title>
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #eef0f3;
+    --card: #ffffff;
+    --ink: #1f2733;
+    --ink-2: #4a5464;
+    --muted: #6a7483;
+    --rule: #d6dbe2;
+    --grid: #e7eaef;
+    --slate: #44546a;
+    --slate-2: #3a485c;
+    --gold: #f5cd62;
+    --green: #1c7f3e;
+    --green-soft: #e7f3ea;
+    --orange: #d9731f;
+    --good: #1c7f3e;
+    --bad: #c5352b;
+    --warn-bg: #fff4d6;
+    --warn-ink: #7a5200;
+    --warn-rule: #e3b341;
+    --focus: #2563eb;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 14px/1.4 var(--font); -webkit-font-smoothing: antialiased;
+    display: flex; flex-direction: column; min-width: 320px;
+  }
+  button, select, input { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* ---------- header + tabs ---------- */
+  .top {
+    display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+    padding: 0 20px; background: var(--card); border-bottom: 1px solid var(--rule);
+  }
+  .top h1 { font-size: 16px; font-weight: 650; margin: 0; padding: 12px 0; letter-spacing: -0.01em; }
+  .tabs { display: flex; gap: 4px; align-self: stretch; }
+  .tabs button {
+    border: 0; background: none; padding: 0 12px; cursor: pointer; color: var(--muted);
+    font-weight: 550; border-bottom: 3px solid transparent; border-top: 3px solid transparent; min-height: 44px;
+  }
+  .tabs button:hover { color: var(--ink); }
+  .tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--green); }
+  .badge {
+    margin-left: auto; font-size: 12px; color: var(--ink-2); background: var(--bg);
+    border: 1px solid var(--rule); border-radius: 999px; padding: 3px 10px; white-space: nowrap;
+  }
+
+  /* ---------- filter bar ---------- */
+  .filters {
+    display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px 12px;
+    padding: 10px 20px 10px; background: var(--card); border-bottom: 1px solid var(--rule);
+  }
+  .f { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .f > .lab { font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: 0.02em; white-space: nowrap; }
+  .f select {
+    height: 32px; padding: 0 28px 0 10px; border: 1px solid var(--rule); border-radius: 6px;
+    background: var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%234a5464' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 10px center;
+    appearance: none; -webkit-appearance: none; cursor: pointer;
+  }
+  .f select:hover { border-color: #b5bdc9; }
+  .seg, .chips { display: flex; height: 32px; }
+  .seg label, .chips label { position: relative; display: flex; cursor: pointer; }
+  .seg input, .chips input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+  .seg span, .chips span {
+    display: flex; align-items: center; padding: 0 9px; border: 1px solid var(--rule);
+    background: var(--card); color: var(--ink-2); white-space: nowrap; user-select: none;
+  }
+  .seg label + label span { border-left: 0; }
+  .seg label:first-child span { border-radius: 6px 0 0 6px; }
+  .seg label:last-child span { border-radius: 0 6px 6px 0; }
+  .seg input:checked + span { background: var(--slate); border-color: var(--slate); color: #fff; font-weight: 600; }
+  .seg input:focus-visible + span, .chips input:focus-visible + span { outline: 2px solid var(--focus); outline-offset: 2px; z-index: 1; }
+  .chips { gap: 4px; }
+  .chips span { border-radius: 6px; padding: 0 8px; font-variant-numeric: tabular-nums; }
+  .chips input:checked + span { background: var(--green-soft); border-color: var(--green); color: #0f4a23; font-weight: 600; }
+  .chips input:not(:checked) + span { color: var(--muted); text-decoration: line-through; text-decoration-color: #b5bdc9; }
+  .labrow { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .f .labrow .lab { font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: 0.02em; }
+  .linkbtn { border: 0; background: none; color: var(--focus); cursor: pointer; padding: 0; font-size: 11px; line-height: 1.4; }
+  .linkbtn:hover { text-decoration: underline; }
+  .fcap { flex: 1 1 250px; min-height: 32px; display: flex; flex-direction: column; justify-content: center; gap: 1px; font-size: 12px; line-height: 1.3; color: var(--muted); }
+  .fcap .note { color: var(--warn-ink); }
+  .fcap .note[hidden] { display: none; }
+
+  /* ---------- dashboard grid ---------- */
+  .view { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+  .view[hidden] { display: none; }
+  .dash {
+    flex: 1 1 auto; min-height: 520px; max-height: 900px;
+    display: grid; gap: 14px; padding: 14px 20px 18px;
+    grid-template-columns: minmax(270px, 0.82fr) minmax(430px, 1.42fr) minmax(330px, 0.98fr);
+  }
+  .col { min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+  .col-title { font-size: 16px; font-weight: 650; margin: 0; letter-spacing: -0.01em; }
+  .col-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; min-height: 46px; padding-bottom: 10px; }
+
+  /* ---------- funnel ---------- */
+  .funnel-wrap { position: relative; flex: 1 1 auto; min-height: 0; }
+  .funnel-wrap svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .funnel {
+    position: absolute; inset: 0; display: grid; text-align: center;
+    grid-template-rows: minmax(0,1.35fr) minmax(0,1fr) minmax(0,1.35fr) minmax(0,1fr) minmax(0,1.35fr) minmax(0,1fr) minmax(0,1.9fr);
+  }
+  .tier, .step { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 0; }
+  .tier .n { font-size: clamp(18px, 1.75vw, 24px); font-weight: 650; line-height: 1.15; letter-spacing: -0.01em; }
+  .tier .l { font-size: 14px; color: #fff; line-height: 1.25; }
+  .tier.slate .n { color: var(--gold); }
+  .tier.green .n { color: #fff; }
+  .tier.last { justify-content: flex-start; padding-top: 7px; }
+  .tier.last .n { font-size: clamp(16px, 1.45vw, 20px); }
+  .tier.last .l { font-size: 12.5px; }
+  .step .p { font-size: 15px; font-weight: 600; color: var(--ink); line-height: 1.2; }
+  .step .d { font-size: 12px; color: var(--muted); line-height: 1.25; }
+
+  /* ---------- charts ---------- */
+  .charts { gap: 14px; }
+  .chart-card {
+    flex: 1 1 0; min-height: 0; display: flex; flex-direction: column;
+    background: var(--card); border: 1px solid var(--rule); border-radius: 8px; padding: 10px 6px 4px;
+  }
+  .chart-head { display: flex; align-items: baseline; gap: 8px 14px; flex-wrap: wrap; padding: 0 8px 2px; }
+  .chart-head h3 { margin: 0; font-size: 16px; font-weight: 650; }
+  .chart-head .sub { font-size: 12px; color: var(--muted); }
+  .legend { margin-left: auto; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px 12px; font-size: 12px; color: var(--ink-2); align-items: center; }
+  .legend .it { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+  .legend .sw { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+  .legend .ln { width: 18px; height: 10px; display: inline-block; position: relative; }
+  .legend .ln::before { content: ""; position: absolute; left: 0; right: 0; top: 4px; height: 2px; background: var(--orange); border-radius: 1px; }
+  .legend .ln::after { content: ""; position: absolute; left: 5px; top: 1px; width: 8px; height: 8px; border-radius: 50%; background: var(--orange); box-sizing: border-box; border: 1.5px solid #fff; }
+  .plot { position: relative; flex: 1 1 auto; min-height: 120px; }
+  .plot svg { position: absolute; inset: 0; display: block; }
+  .plot text { font-family: var(--font); }
+  .plot .empty {
+    position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 4px; text-align: center; color: var(--muted); padding: 0 24px;
+  }
+  .plot .empty b { color: var(--ink-2); font-weight: 600; }
+  .tt {
+    position: absolute; z-index: 5; pointer-events: none; min-width: 170px; max-width: 260px;
+    background: #fff; border: 1px solid var(--rule); border-radius: 8px; padding: 8px 10px;
+    box-shadow: 0 6px 20px rgba(20, 30, 45, 0.16); font-size: 12px;
+  }
+  .tt[hidden] { display: none; }
+  .tt .h { font-weight: 650; margin-bottom: 5px; }
+  .tt .h small { font-weight: 400; color: var(--muted); }
+  .tt .r { display: grid; grid-template-columns: 14px auto 1fr; gap: 6px; align-items: center; line-height: 1.5; }
+  .tt .r b { font-variant-numeric: tabular-nums; text-align: right; min-width: 52px; }
+  .tt .r span.nm { color: var(--ink-2); }
+  .tt .k { width: 12px; height: 3px; border-radius: 2px; display: inline-block; }
+  .tt .sep { border-top: 1px solid var(--grid); margin: 4px 0; }
+
+  /* ---------- value realized ---------- */
+  .renewal { display: flex; align-items: flex-end; gap: 8px; }
+  .renewal .box { display: flex; flex-direction: column; gap: 2px; }
+  .renewal .lab { font-size: 11px; font-weight: 600; color: var(--muted); }
+  .renewal .date {
+    min-width: 108px; padding: 4px 10px; border: 1px solid var(--rule); border-radius: 6px; background: var(--card);
+    font-weight: 650; font-variant-numeric: tabular-nums; text-align: center;
+  }
+  .renewal.soon .date { border-color: var(--warn-rule); background: var(--warn-bg); color: var(--warn-ink); }
+  .renewal .flag {
+    font-size: 12px; font-weight: 600; color: var(--warn-ink); background: var(--warn-bg);
+    border: 1px solid var(--warn-rule); border-radius: 999px; padding: 4px 9px; white-space: nowrap;
+  }
+  .tiles { display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: minmax(92px, 1fr); gap: 10px; flex: 0 1 370px; min-height: 300px; }
+  .tile {
+    position: relative; background: var(--card); border: 1px solid var(--rule); border-radius: 8px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+    padding: 8px 8px; cursor: help; min-width: 0;
+  }
+  .tile:hover, .tile:focus { border-color: #aab3c0; }
+  .tile .v { display: flex; align-items: center; gap: 8px; white-space: nowrap; font-size: clamp(24px, 2.35vw, 34px); font-weight: 550; line-height: 1.1; letter-spacing: -0.02em; color: var(--ink); }
+  .tile .v.long { font-size: clamp(20px, 1.95vw, 28px); }
+  .tile .lb { font-size: 14.5px; color: var(--ink-2); line-height: 1.25; margin-top: 3px; }
+  .tile .lb b { font-weight: 650; color: var(--ink); }
+  .tile .sm { font-size: 12px; color: var(--muted); margin-top: 3px; font-variant-numeric: tabular-nums; }
+  .tile .arr { width: 16px; height: 18px; flex: none; }
+  .tile .arr.good { color: var(--good); }
+  .tile .arr.bad { color: var(--bad); }
+  .tile .info { position: absolute; top: 6px; right: 7px; width: 14px; height: 14px; color: #a3acb9; }
+  .explain {
+    display: none; position: absolute; z-index: 6; top: calc(100% + 6px); width: min(320px, 86vw);
+    background: #1f2733; color: #f1f4f8; border-radius: 8px; padding: 10px 12px; text-align: left;
+    font-size: 12px; line-height: 1.5; box-shadow: 0 8px 24px rgba(20, 30, 45, 0.28); cursor: default;
+  }
+  .tile:nth-child(odd) .explain { left: 0; }
+  .tile:nth-child(even) .explain { right: 0; }
+  .tile:nth-child(n+5) .explain { top: auto; bottom: calc(100% + 6px); }
+  .tile:hover .explain, .tile:focus .explain, .tile:focus-within .explain { display: block; }
+  .explain .eh { font-weight: 650; color: #fff; margin-bottom: 2px; }
+  .explain .ef { color: #c9d2de; }
+  .explain .ec { font-variant-numeric: tabular-nums; color: #fff; margin-top: 4px; }
+  .explain .en { color: #c9d2de; margin-top: 4px; }
+  .breakdown {
+    margin-top: 10px; background: var(--card); border: 1px solid var(--rule); border-radius: 8px; padding: 10px 12px;
+  }
+  .breakdown h4 { margin: 0 0 6px; font-size: 12px; font-weight: 650; color: var(--ink-2); }
+  .breakdown .row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: baseline; font-size: 13px; padding: 2px 0; }
+  .breakdown .row b { font-variant-numeric: tabular-nums; font-weight: 600; }
+  .breakdown .row .why { color: var(--muted); font-size: 12px; }
+  .breakdown .row.tot { border-top: 1px solid var(--grid); margin-top: 4px; padding-top: 6px; }
+  .breakdown .scope { margin: 6px 0 0; font-size: 11.5px; color: var(--muted); }
+
+  /* ---------- measures tab ---------- */
+  .doc { padding: 16px 20px 28px; max-width: 1500px; }
+  .doc .lede { margin: 0 0 14px; font-size: 15px; font-weight: 600; }
+  .doc-grid { display: grid; grid-template-columns: minmax(260px, 0.42fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+  .panel { background: var(--card); border: 1px solid var(--rule); border-radius: 8px; padding: 14px 18px 16px; }
+  .panel + .panel { margin-top: 14px; }
+  .panel h2 { margin: 0 0 8px; font-size: 16px; font-weight: 650; }
+  .panel h2.c { text-align: center; }
+  .panel h3 { margin: 16px 0 4px; font-size: 13.5px; font-weight: 650; }
+  .panel h3:first-of-type { margin-top: 4px; }
+  .panel p, .panel li { font-size: 13.5px; color: var(--ink-2); }
+  .panel p { margin: 0 0 8px; }
+  .panel ul, .panel ol { margin: 0; padding-left: 18px; }
+  .panel li { margin: 3px 0; }
+  .panel li b, .panel p b { color: var(--ink); font-weight: 600; }
+  .panel code {
+    font: 12.5px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: #f3f5f8;
+    border: 1px solid var(--grid); border-radius: 4px; padding: 1px 5px; color: var(--ink);
+  }
+  .panel .src li { list-style: none; margin-left: -18px; }
+
+  @media (max-width: 1080px) {
+    body { display: block; }
+    .view { display: block; }
+    .dash { grid-template-columns: 1fr; max-height: none; min-height: 0; }
+    .col { min-height: auto; }
+    .funnel-wrap { flex: none; height: 480px; max-width: 520px; width: 100%; margin: 0 auto; }
+    .chart-card { flex: none; height: 320px; }
+    .tiles { flex: none; }
+    .doc-grid { grid-template-columns: 1fr; }
+    .badge { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>Business Value Realization</h1>
+  <div class="tabs" role="tablist" aria-label="Views">
+    <button role="tab" id="tab-dash" aria-controls="view-dash" aria-selected="true">Dashboard</button>
+    <button role="tab" id="tab-doc" aria-controls="view-doc" aria-selected="false" tabindex="-1">How to use / Measures</button>
+  </div>
+  <span class="badge">Prototype · synthetic data · Jan 2025 – Sep 2026</span>
+</header>
+
+<!-- ======================= DASHBOARD ======================= -->
+<section class="view" id="view-dash" role="tabpanel" aria-labelledby="tab-dash">
+  <div class="filters" id="filters">
+    <label class="f"><span class="lab">Customer (subdomain)</span><select id="f-customer"></select></label>
+    <label class="f"><span class="lab">Start month</span><select id="f-start"></select></label>
+    <label class="f"><span class="lab">End month</span><select id="f-end"></select></label>
+    <div class="f" role="radiogroup" aria-labelledby="lab-period"><span class="lab" id="lab-period">Time period</span>
+      <div class="seg">
+        <label><input type="radio" name="period" value="month" checked><span>Monthly</span></label>
+        <label><input type="radio" name="period" value="quarter"><span>Quarterly</span></label>
+      </div>
+    </div>
+    <div class="f" role="radiogroup" aria-labelledby="lab-urg"><span class="lab" id="lab-urg">Urgency</span>
+      <div class="seg">
+        <label><input type="radio" name="urgency" value="all" checked><span>All</span></label>
+        <label><input type="radio" name="urgency" value="high"><span>High</span></label>
+        <label><input type="radio" name="urgency" value="low"><span>Low</span></label>
+      </div>
+    </div>
+    <div class="f" role="group" aria-labelledby="lab-pri">
+      <div class="labrow"><span class="lab" id="lab-pri">Priority</span><button type="button" class="linkbtn" id="pri-all">Select all</button></div>
+      <div class="chips" id="f-priority"></div>
+    </div>
+    <div class="f" role="radiogroup" aria-labelledby="lab-seg"><span class="lab" id="lab-seg">Segment bars by</span>
+      <div class="seg">
+        <label><input type="radio" name="segment" value="none" checked><span>None</span></label>
+        <label><input type="radio" name="segment" value="urgency"><span>Urgency</span></label>
+        <label><input type="radio" name="segment" value="priority"><span>Priority</span></label>
+      </div>
+    </div>
+    <div class="fcap">
+      <span>Urgency and Priority filters don't apply to the funnel</span>
+      <span class="note" id="range-note" hidden></span>
+    </div>
+  </div>
+
+  <div class="dash">
+    <!-- funnel -->
+    <div class="col">
+      <div class="col-head"><h2 class="col-title">Cumulative Volume</h2></div>
+      <div class="funnel-wrap">
+        <svg id="funnel-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
+        <div class="funnel" id="funnel"></div>
+      </div>
+    </div>
+
+    <!-- charts -->
+    <div class="col charts">
+      <div class="chart-card">
+        <div class="chart-head">
+          <h3>MTTA</h3><span class="sub">Mean time to acknowledge</span>
+          <div class="legend" id="legend-ack"></div>
+        </div>
+        <div class="plot" id="plot-ack" role="img"></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-head">
+          <h3>MTTR</h3><span class="sub">Mean time to resolve</span>
+          <div class="legend" id="legend-res"></div>
+        </div>
+        <div class="plot" id="plot-res" role="img"></div>
+      </div>
+    </div>
+
+    <!-- value realized -->
+    <div class="col">
+      <div class="col-head">
+        <h2 class="col-title">Value Realized</h2>
+        <div class="renewal" id="renewal"></div>
+      </div>
+      <div class="tiles" id="tiles"></div>
+      <div class="breakdown" id="breakdown"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= HOW TO USE / MEASURES ======================= -->
+<section class="view" id="view-doc" role="tabpanel" aria-labelledby="tab-doc" hidden>
+  <div class="doc">
+    <p class="lede">The Business Value Realization dashboard provides insight into the incident management metrics for a subdomain and the value a customer is getting from the product over time.</p>
+    <div class="doc-grid">
+      <div>
+        <div class="panel">
+          <h2>How to use this Dashboard</h2>
+          <ul>
+            <li>Select the <b>customer</b>, then the <b>start month</b> and <b>end month</b> to set the timeframe.</li>
+            <li>On the graphs, use <b>Segment bars by</b> to split the bars by urgency or priority.</li>
+            <li><b>Time period</b> switches the graphs between monthly and quarterly. For quarterly, pick start and end months on quarter boundaries, not the middle of a quarter, because the value metrics compare the first and last period.</li>
+            <li>Customer, month and time period apply to the whole view. Urgency and priority apply to the graphs and the MTTA/MTTR metrics, not to the funnel.</li>
+            <li>Quarters are regular calendar quarters, not the fiscal calendar.</li>
+            <li>Hover or focus any Value Realized tile to see its formula with the current numbers.</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <h2 class="c">Data Sources</h2>
+          <ul class="src">
+            <li><code>ACCEPTED_EVENTS_AIOPS_VW</code> – events, alerts and suppression flags per month</li>
+            <li><code>INCIDENTS</code> – incident counts and time to acknowledge / resolve, by priority and urgency</li>
+            <li><code>ACCOUNT</code> – customer subdomain and renewal date</li>
+          </ul>
+          <p style="margin-top:8px"><b>Prototype:</b> every number here is synthetic, generated in the browser from a fixed seed, so it is identical on every load.</p>
+        </div>
+        <div class="panel">
+          <h2 class="c">Notes</h2>
+          <ul>
+            <li>The funnel only counts events received through the Events API. Incident counts on the graphs can differ from the funnel because they also cover incidents created manually, through ticketing integrations or the REST API.</li>
+            <li>Numbers can differ slightly from in-product analytics because of how MTTA and MTTR are benchmarked, time zone differences and data refresh timing. With all filters removed over the same period, the two match.</li>
+            <li>MTTA and MTTR are incident-weighted: total minutes divided by incident count for whatever period and filters are selected.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="panel">
+        <h2 class="c">Measures</h2>
+
+        <h3>Noise Reduction Funnel (Cumulative Volume)</h3>
+        <ul>
+          <li><b>Events:</b> number of accepted events</li>
+          <li><b>Alerts:</b> number of alerts after deduplication</li>
+          <li><b>Post Suppressed Alerts:</b> number of alerts where <code>is_suppressed = '0'</code></li>
+          <li><b>Incidents:</b> number of unique incidents</li>
+          <li><b>Reduction % between tiers:</b> <code>1 - (lower tier / upper tier)</code></li>
+        </ul>
+
+        <h3>Graphs</h3>
+        <ul>
+          <li>Number of incidents (segmented by urgency / priority)</li>
+          <li>MTTA / MTTR: Mean Time to Acknowledgement / Mean Time to Resolution, in minutes</li>
+        </ul>
+
+        <h3>Value Realized Metrics</h3>
+        <ul>
+          <li><b>Incidents Avoided:</b> <code>Alerts - Incidents</code></li>
+          <li><b>Noise Reduction:</b> <code>1 - (Incidents / Alerts)</code></li>
+          <li><b>MTTA Efficiency:</b> % change between the MTTA of the end period vs the start period. <code>1 - (End Period MTTA / Start Period MTTA)</code></li>
+          <li><b>MTTA Difference:</b> absolute difference between end and start period MTTA. <code>|End Period MTTA - Start Period MTTA|</code></li>
+          <li><b>MTTR Efficiency:</b> % change between the MTTR of the end period vs the start period. <code>1 - (End Period MTTR / Start Period MTTR)</code></li>
+          <li><b>MTTR Difference:</b> absolute difference between end and start period MTTR. <code>|End Period MTTR - Start Period MTTR|</code></li>
+          <li><b>Hours Re-Allocated (Hours saved):</b> Noise Reduction Hours + MTTA Difference Hours + MTTR Difference Hours
+            <ol>
+              <li>Noise Reduction Hours = <code>((0.5 * (Alerts - Post Suppressed Alerts)) + (10 * (Post Suppressed Alerts - Incidents))) / 60</code></li>
+              <li>MTTA Difference Hours = <code>Acknowledged Incidents * MTTA Difference * 0.25 / 60</code>. Set to 0 if MTTA got worse, since that would give negative hours.</li>
+              <li>MTTR Difference Hours = <code>Resolved Incidents * MTTR Difference * 0.1 / 60</code>. Set to 0 if MTTR got worse, since that would give negative hours.</li>
+            </ol>
+          </li>
+          <li><b>FTE Saved:</b> <code>Hours Re-Allocated / 2,000 working hours</code></li>
+        </ul>
+        <p style="margin-top:8px">Start period and end period are the first and last month (or calendar quarter) in the selected range.</p>
+
+        <h3>Automated Actions</h3>
+        <ul>
+          <li><b>Deduped Alerts:</b> avoids duplicate alerts by merging events into single alerts.</li>
+          <li><b>Escalations on Incidents:</b> to guarantee critical issues are addressed promptly, incidents automatically escalate to the next responders.</li>
+          <li><b>Notifications:</b> multiple notification channels contribute to faster acknowledgement times.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+(() => {
+'use strict';
+
+/* =====================================================================
+   1. CONSTANTS
+   ===================================================================== */
+const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const N_MONTHS = 21;                              // Jan 2025 .. Sep 2026
+const MONTHS = Array.from({ length: N_MONTHS }, (_, i) => {
+  const y = 2025 + Math.floor(i / 12), m = i % 12;
+  return { i, y, m, q: Math.floor(m / 3) + 1, short: MONTH_NAMES[m], label: MONTH_NAMES[m] + ' ' + y };
+});
+const PRIORITIES = ['P1', 'P2', 'P3', 'P4', 'P5', 'None'];
+const URGENCIES = ['High', 'Low'];
+const WORKING_HOURS = 2000;
+const AS_OF = new Date(2026, 8, 30);              // last day of the data, used for "renews in N days"
+const SEED = 'bvr-prototype-v1';
+
+const SEG_COLORS = {
+  // ordered green ramp (dark = most urgent), neutral for "None"
+  P1: '#0b3d1e', P2: '#18703a', P3: '#2f9e55', P4: '#6cc183', P5: '#b5e0bf', None: '#8590a0',
+  High: '#18703a', Low: '#8fd0a0'
+};
+const BAR = '#1c7f3e', LINE = '#d9731f';
+
+/* =====================================================================
+   2. SEEDED FAKE DATA
+   Stored shape, per customer:
+     months[i] = { events, alerts, supp,                 // funnel volumes
+                   cells[priority*2 + urgency] = { inc, ack, res, tta, ttr } }
+   tta / ttr are TOTAL minutes, so any roll-up is an incident-weighted mean.
+   ===================================================================== */
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function hashSeed(str) {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+const lerp = (a, b, t) => a + (b - a) * t;
+const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+const round1 = v => Math.round(v * 10) / 10;
+const jit = (r, amp) => 1 + amp * (2 * r() - 1);  // multiplicative noise in [1-amp, 1+amp]
+
+/* Split an integer total across weights (largest remainder), optionally capped per slot. Sum is exact. */
+function allocate(total, weights, caps) {
+  const n = weights.length, out = new Array(n).fill(0);
+  let free = [];
+  for (let i = 0; i < n; i++) if (weights[i] > 0 && (!caps || caps[i] > 0)) free.push(i);
+  let remaining = total;
+  while (free.length && remaining > 0) {
+    const wsum = free.reduce((s, i) => s + weights[i], 0);
+    const over = caps ? free.filter(i => remaining * weights[i] / wsum > caps[i]) : [];
+    if (over.length) {                              // pin capped slots, re-spread the rest
+      for (const i of over) { out[i] = caps[i]; remaining -= caps[i]; }
+      free = free.filter(i => !over.includes(i));
+      continue;
+    }
+    const raw = free.map(i => remaining * weights[i] / wsum);
+    const fl = raw.map(Math.floor);
+    let left = remaining - fl.reduce((a, b) => a + b, 0);
+    free.forEach((i, k) => { out[i] = fl[k]; });
+    const order = raw.map((v, k) => [v - fl[k], k]).sort((a, b) => b[0] - a[0] || a[1] - b[1]);
+    for (let pass = 0; pass < 3 && left > 0; pass++) {
+      for (const [, k] of order) {
+        if (left <= 0) break;
+        const i = free[k];
+        if (!caps || out[i] < caps[i]) { out[i]++; left--; }
+      }
+    }
+    break;
+  }
+  return out;
+}
+
+/* Split one month's totals into 12 priority x urgency cells that add back up exactly. */
+const PRI_SHARE   = [0.015, 0.04, 0.10, 0.16, 0.22, 0.465];  // higher priority = rarer
+const PRI_HIGH    = [0.95, 0.85, 0.60, 0.40, 0.25, 0.35];    // share of each priority that is high urgency
+const PRI_ACK_ODDS = [3.2, 2.4, 1.6, 1.0, 0.8, 0.65];        // higher priority = more likely acknowledged
+const PRI_TTA     = [0.15, 0.30, 0.55, 0.85, 1.10, 1.30];    // higher priority = faster to acknowledge
+const PRI_TTR     = [0.45, 0.60, 0.80, 1.00, 1.10, 1.15];
+function splitMonth(top, r) {
+  const w = [], ackOdds = [], ttaF = [], ttrF = [];
+  for (let p = 0; p < 6; p++) {
+    const share = PRI_SHARE[p] * jit(r, 0.14);
+    const hi = clamp(PRI_HIGH[p] + 0.06 * (2 * r() - 1), 0.03, 0.97);
+    for (let u = 0; u < 2; u++) {
+      w.push(share * (u === 0 ? hi : 1 - hi));
+      ackOdds.push(PRI_ACK_ODDS[p] * (u === 0 ? 1 : 0.3) * jit(r, 0.10));
+      ttaF.push(PRI_TTA[p] * (u === 0 ? 0.7 : 1.5) * jit(r, 0.12));
+      ttrF.push(PRI_TTR[p] * (u === 0 ? 0.8 : 1.25) * jit(r, 0.10));
+    }
+  }
+  const inc = allocate(top.incidents, w);
+  // acknowledged: find the base odds that reproduce the month's acknowledged total
+  let lo = -14, hi = 14;
+  const expected = L => inc.reduce((s, c, i) => { const o = Math.exp(L) * ackOdds[i]; return s + c * o / (1 + o); }, 0);
+  for (let k = 0; k < 50; k++) { const mid = (lo + hi) / 2; if (expected(mid) < top.acked) lo = mid; else hi = mid; }
+  const L = (lo + hi) / 2;
+  const ack = allocate(top.acked, inc.map((c, i) => { const o = Math.exp(L) * ackOdds[i]; return c * o / (1 + o); }), inc);
+  const res = allocate(top.resolved, inc.map(c => c * jit(r, 0.004)), inc);
+  const tta = allocate(Math.round(top.acked * top.mtta), ack.map((c, i) => c * ttaF[i]));
+  const ttr = allocate(Math.round(top.resolved * top.mttr), res.map((c, i) => c * ttrF[i]));
+  return {
+    events: top.events, alerts: top.alerts, supp: top.supp,
+    cells: inc.map((c, i) => ({ inc: c, ack: ack[i], res: res[i], tta: tta[i], ttr: ttr[i] }))
+  };
+}
+
+/* --- Customer 1 (default): anchored to the reference screenshot for Jan-Dec 2025 --- */
+const ANCHOR = {
+  events: 57195777, alerts: 11381349, supp: 9791134, incidents: 3425106,
+  acked:    [56510, 63217, 78433, 74856, 64353, 65168, 72225, 87444, 74744, 95740, 70010, 83084],
+  mtta:     [110.9, 119.1, 181.8, 102.5, 116.1, 77.8, 233.3, 252.7, 156.6, 102.5, 128.7, 86.0],
+  resolved: [236731, 263626, 294739, 357001, 230209, 238766, 295367, 300430, 302922, 326720, 267833, 268946],
+  mttr:     [522.1, 431.9, 346.8, 286.2, 361.7, 572.8, 4458.1, 2872.9, 3128.4, 2562.1, 2656.8, 972.9]
+};
+function seriesAnchored(r) {
+  const A = ANCHOR, out = [];
+  // funnel totals spread across 2025 in proportion to resolved incidents
+  const ev = allocate(A.events, A.resolved), al = allocate(A.alerts, A.resolved),
+        su = allocate(A.supp, A.resolved), inc = allocate(A.incidents, A.resolved);
+  for (let i = 0; i < 12; i++) {
+    out.push({ events: ev[i], alerts: al[i], supp: su[i], incidents: inc[i],
+               acked: A.acked[i], resolved: A.resolved[i], mtta: A.mtta[i], mttr: A.mttr[i] });
+  }
+  // Jan-Sep 2026: MTTA keeps improving, MTTR keeps recovering but stays above the Jan 2025 level
+  for (let i = 12; i < N_MONTHS; i++) {
+    const t = (i - 12) / (N_MONTHS - 13);
+    const resolved = Math.round(272000 * jit(r, 0.09));
+    const incidents = Math.round(resolved * 1.0124);
+    const alerts = Math.round(incidents * 3.32 * jit(r, 0.03));
+    out.push({
+      events: Math.round(alerts * 5.03 * jit(r, 0.04)), alerts,
+      supp: Math.round(alerts * 0.86 * jit(r, 0.012)), incidents,
+      acked: Math.round(resolved * 0.275 * jit(r, 0.08)), resolved,
+      mtta: round1(lerp(84, 64, t) * jit(r, 0.06)),
+      mttr: round1(lerp(930, 700, t) * jit(r, 0.07))
+    });
+  }
+  return out;
+}
+
+/* --- Customers 2-4: generated from a profile of how each measure moves over time (t = 0..1) --- */
+function seriesFromProfile(profile) {
+  return r => MONTHS.map((_, i) => {
+    const p = profile(i / (N_MONTHS - 1), r);
+    const incidents = Math.max(1, Math.round(p.incidents));
+    const alerts = Math.round(incidents / (1 - clamp(p.noise, 0, 0.98)));
+    return {
+      incidents, alerts,
+      supp: Math.max(incidents, Math.round(alerts * clamp(p.suppKeep, 0, 1))),
+      events: Math.round(alerts / (1 - clamp(p.dedup, 0, 0.98))),
+      acked: Math.round(incidents * clamp(p.ackRate, 0, 1)),
+      resolved: Math.round(incidents * clamp(p.resRate, 0, 1)),
+      mtta: round1(p.mtta), mttr: round1(p.mttr)
+    };
+  });
+}
+
+const CUSTOMER_DEFS = [
+  { id: 'meridian', name: 'Meridian Freight', sub: 'meridian-freight', renewal: [2027, 4, 28],
+    // strong noise reduction, MTTA improving, MTTR spikes mid-2025 and only partly recovers
+    series: seriesAnchored },
+  { id: 'larkspur', name: 'Larkspur Financial', sub: 'larkspur', renewal: [2027, 8, 15],
+    // healthy: MTTA and MTTR both improve steadily
+    series: seriesFromProfile((t, r) => ({
+      incidents: 46000 * (1 - 0.10 * t) * jit(r, 0.07), ackRate: 0.62 * jit(r, 0.03), resRate: 0.985,
+      mtta: (38 - 22 * t) * jit(r, 0.025), mttr: (410 - 215 * t) * jit(r, 0.02),
+      noise: 0.56 + 0.12 * t + 0.01 * (2 * r() - 1), suppKeep: 0.86 - 0.05 * t, dedup: 0.70 + 0.06 * t
+    })) },
+  { id: 'pinecrest', name: 'Pinecrest Labs', sub: 'pinecrest-labs', renewal: [2027, 3, 31],
+    // newly onboarded: low volume, weak noise reduction that improves as rules are tuned
+    series: seriesFromProfile((t, r) => ({
+      incidents: (450 + 6800 * Math.pow(t, 1.4)) * jit(r, 0.10), ackRate: 0.50 * jit(r, 0.06), resRate: 0.97,
+      mtta: (96 - 38 * t) * jit(r, 0.07), mttr: (880 - 240 * t) * jit(r, 0.07),
+      noise: 0.10 + 0.36 * Math.pow(t, 0.9) + 0.015 * (2 * r() - 1), suppKeep: 0.97 - 0.09 * t, dedup: 0.25 + 0.30 * t
+    })) },
+  { id: 'kestrel', name: 'Kestrel Telecom', sub: 'kestrel-telecom', renewal: [2026, 12, 15],
+    // large: high volume, flat response times, renewal inside 90 days
+    series: seriesFromProfile((t, r) => ({
+      incidents: 880000 * jit(r, 0.05), ackRate: 0.44 * jit(r, 0.02), resRate: 0.988,
+      mtta: 41.5 * jit(r, 0.03), mttr: 612 * jit(r, 0.03),
+      noise: 0.76 + 0.008 * (2 * r() - 1), suppKeep: 0.84 + 0.01 * (2 * r() - 1), dedup: 0.82 + 0.008 * (2 * r() - 1)
+    })) }
+];
+
+const DATA = {};
+for (const def of CUSTOMER_DEFS) {
+  const r = mulberry32(hashSeed(SEED + ':' + def.id));
+  const top = def.series(r);
+  DATA[def.id] = {
+    id: def.id, name: def.name, sub: def.sub,
+    renewal: new Date(def.renewal[0], def.renewal[1] - 1, def.renewal[2]),
+    months: top.map(t => splitMonth(t, r))
+  };
+}
+
+/* =====================================================================
+   3. STATE + CALCULATIONS (every displayed number comes from here)
+   ===================================================================== */
+const state = {
+  customer: 'meridian', start: 0, end: 11, period: 'month',
+  urgency: 'all', priorities: new Set(PRIORITIES), segment: 'none'
+};
+
+function getBuckets(s) {
+  const out = [];
+  for (let i = s.start; i <= s.end; i++) {
+    const M = MONTHS[i];
+    if (s.period === 'month') {
+      out.push({ key: 'm' + i, label: M.short, year: M.y, title: M.label, months: [i] });
+    } else {
+      const key = M.y + 'Q' + M.q;
+      let b = out[out.length - 1];
+      if (!b || b.key !== key) { b = { key, label: 'Q' + M.q, year: M.y, title: 'Q' + M.q + ' ' + M.y, months: [] }; out.push(b); }
+      b.months.push(i);
+    }
+  }
+  for (const b of out) {
+    b.partial = s.period === 'quarter' && b.months.length < 3;
+    const a = MONTHS[b.months[0]], z = MONTHS[b.months[b.months.length - 1]];
+    b.span = s.period === 'quarter' ? (a.i === z.i ? a.short : a.short + '–' + z.short) : '';
+  }
+  return out;
+}
+
+function compareEnds(startV, endV) {
+  if (startV == null || endV == null || !(startV > 0)) return { ok: false, start: startV, end: endV, improved: false, worse: false, diff: 0 };
+  return { ok: true, start: startV, end: endV, eff: 1 - endV / startV, diff: Math.abs(endV - startV),
+           improved: endV < startV, worse: endV > startV };
+}
+
+function compute(s) {
+  const c = DATA[s.customer];
+  const buckets = getBuckets(s);
+  const uSel = URGENCIES.map(u => s.urgency === 'all' || s.urgency === u.toLowerCase());
+  const pSel = PRIORITIES.map(p => s.priorities.has(p));
+  const segs = s.segment === 'urgency' ? URGENCIES.filter((_, k) => uSel[k])
+             : s.segment === 'priority' ? PRIORITIES.filter((_, k) => pSel[k]) : [];
+  const F = { events: 0, alerts: 0, supp: 0, incidents: 0 };          // funnel: never filtered by urgency/priority
+  const T = { ack: 0, res: 0, tta: 0, ttr: 0 };                        // filtered incident totals over the range
+  for (const b of buckets) {
+    b.ack = b.res = b.tta = b.ttr = 0; b.segAck = {}; b.segRes = {};
+    for (const k of segs) { b.segAck[k] = 0; b.segRes[k] = 0; }
+    for (const mi of b.months) {
+      const mo = c.months[mi];
+      F.events += mo.events; F.alerts += mo.alerts; F.supp += mo.supp;
+      for (let p = 0; p < 6; p++) for (let u = 0; u < 2; u++) {
+        const cell = mo.cells[p * 2 + u];
+        F.incidents += cell.inc;
+        if (!pSel[p] || !uSel[u]) continue;
+        b.ack += cell.ack; b.res += cell.res; b.tta += cell.tta; b.ttr += cell.ttr;
+        const k = s.segment === 'urgency' ? URGENCIES[u] : s.segment === 'priority' ? PRIORITIES[p] : null;
+        if (k) { b.segAck[k] += cell.ack; b.segRes[k] += cell.res; }
+      }
+    }
+    b.mtta = b.ack > 0 ? b.tta / b.ack : null;
+    b.mttr = b.res > 0 ? b.ttr / b.res : null;
+    T.ack += b.ack; T.res += b.res; T.tta += b.tta; T.ttr += b.ttr;
+  }
+  const first = buckets[0], last = buckets[buckets.length - 1];
+  const ratio = (lower, upper) => upper > 0 ? 1 - lower / upper : null;
+  const mtta = compareEnds(first.mtta, last.mtta), mttr = compareEnds(first.mttr, last.mttr);
+  const noiseHours = (0.5 * (F.alerts - F.supp) + 10 * (F.supp - F.incidents)) / 60;
+  const mttaHours = mtta.ok && mtta.improved ? T.ack * mtta.diff * 0.25 / 60 : 0;
+  const mttrHours = mttr.ok && mttr.improved ? T.res * mttr.diff * 0.1 / 60 : 0;
+  const hours = noiseHours + mttaHours + mttrHours;
+  return {
+    customer: c, buckets, segs, segment: s.segment, first, last, F, T,
+    red: [ratio(F.alerts, F.events), ratio(F.supp, F.alerts), ratio(F.incidents, F.supp)],
+    avoided: F.alerts - F.incidents, noise: ratio(F.incidents, F.alerts),
+    mtta, mttr, noiseHours, mttaHours, mttrHours, hours, fte: hours / WORKING_HOURS,
+    filtered: s.urgency !== 'all' || s.priorities.size < PRIORITIES.length,
+    noneSelected: s.priorities.size === 0
+  };
+}
+
+/* =====================================================================
+   4. FORMATTERS
+   ===================================================================== */
+const nf0 = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
+const nf1 = new Intl.NumberFormat('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const fInt = v => Number.isFinite(v) ? nf0.format(Math.round(v)) : '–';
+const fMin = v => Number.isFinite(v) ? nf1.format(v) : '–';
+const fPct = v => {
+  if (!Number.isFinite(v)) return '–';
+  const p = Math.round(v * 100);
+  return (p < 0 ? '−' : '') + Math.abs(p) + '%';
+};
+const trim = x => String(+x.toFixed(2));
+const fCompact = v => { const a = Math.abs(v); return a >= 1e6 ? trim(v / 1e6) + 'M' : a >= 1e3 ? trim(v / 1e3) + 'K' : trim(v); };
+const fDate = d => (d.getMonth() + 1) + '/' + d.getDate() + '/' + d.getFullYear();
+const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+
+/* =====================================================================
+   5. FUNNEL
+   ===================================================================== */
+const FUNNEL_ROWS = [1.35, 1, 1.35, 1, 1.35, 1, 1.9];   // must match .funnel grid-template-rows
+(function drawFunnelShapes() {
+  const total = FUNNEL_ROWS.reduce((a, b) => a + b, 0), cum = [0];
+  for (const f of FUNNEL_ROWS) cum.push(cum[cum.length - 1] + f / total);
+  const wAt = y => 100 - 76 * y;
+  const pt = (x, y) => (x).toFixed(2) + ',' + (y * 100).toFixed(2);
+  let html = '';
+  for (let k = 0; k < 4; k++) {
+    const y0 = cum[2 * k], y1 = cum[2 * k + 1], w0 = wAt(y0), fill = k < 2 ? 'var(--slate)' : 'var(--green)';
+    if (k < 3) {
+      const w1 = wAt(y1);
+      html += `<polygon fill="${fill}" points="${pt(50 - w0 / 2, y0)} ${pt(50 + w0 / 2, y0)} ${pt(50 + w1 / 2, y1)} ${pt(50 - w1 / 2, y1)}"/>`;
+    } else {                                              // last tier ends in a point
+      const ys = y0 + (1 - y0) * 0.6, ws = wAt(ys);
+      html += `<polygon fill="${fill}" points="${pt(50 - w0 / 2, y0)} ${pt(50 + w0 / 2, y0)} ${pt(50 + ws / 2, ys)} ${pt(50, 1)} ${pt(50 - ws / 2, ys)}"/>`;
+    }
+  }
+  document.getElementById('funnel-svg').innerHTML = html;
+})();
+
+function renderFunnel(R) {
+  const F = R.F;
+  const tier = (cls, n, label, title) => `<div class="tier ${cls}" title="${esc(title)}"><div class="n">${fInt(n)}</div><div class="l">${label}</div></div>`;
+  const step = (p, label, lower, upper, ln, un) =>
+    `<div class="step" title="${esc(`1 - (${ln} / ${un}) = 1 - (${fInt(lower)} / ${fInt(upper)})`)}"><div class="p">${fPct(p)} Reduction</div><div class="d">${label}</div></div>`;
+  document.getElementById('funnel').innerHTML =
+    tier('slate', F.events, 'Events', 'Number of accepted events') +
+    step(R.red[0], 'Deduplication &amp; Event Resolving', F.alerts, F.events, 'Alerts', 'Events') +
+    tier('slate', F.alerts, 'Alerts', 'Number of alerts after deduplication') +
+    step(R.red[1], 'Suppression &amp; Filtering', F.supp, F.alerts, 'Post Suppressed Alerts', 'Alerts') +
+    tier('green', F.supp, 'Post Suppressed Alerts', 'Alerts that were not suppressed') +
+    step(R.red[2], 'Alert Grouping &amp; Auto-Pause', F.incidents, F.supp, 'Incidents', 'Post Suppressed Alerts') +
+    tier('green last', F.incidents, 'Incidents', 'Number of unique incidents');
+}
+
+/* =====================================================================
+   6. VALUE REALIZED TILES
+   ===================================================================== */
+const ICON_INFO = '<svg class="info" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M8 7.2v4M8 4.8v.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+const ICON_DOWN = '<svg class="arr good" viewBox="0 0 16 18" role="img" aria-label="improved"><path d="M8 2v12M3 10l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ICON_UP = '<svg class="arr bad" viewBox="0 0 16 18" role="img" aria-label="got worse"><path d="M8 16V4M3 8l5-5 5 5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+function explainBox(head, formula, calc, note) {
+  return `<div class="explain" role="note"><div class="eh">${head}</div><div class="ef">${formula}</div>` +
+    (calc ? `<div class="ec">${calc}</div>` : '') + (note ? `<div class="en">${note}</div>` : '') + '</div>';
+}
+
+function effTile(R, name, e, word) {
+  const a = R.first.title, z = R.last.title, same = R.buckets.length === 1;
+  let value = '–', arrow = '', small, calc = '', note = '';
+  if (e.ok) {
+    value = fPct(e.eff);
+    arrow = e.improved ? ICON_DOWN : e.worse ? ICON_UP : '';
+    small = `${fMin(e.start)} → ${fMin(e.end)} min` + (e.improved ? ` · ${word[0]}` : e.worse ? ` · ${word[1]}` : ' · no change');
+    calc = `1 − (${fMin(e.end)} / ${fMin(e.start)}) = ${fPct(e.eff)}`;
+    note = `Start period ${a}, end period ${z}. ${name} ${e.improved ? 'improved' : e.worse ? 'got worse' : 'did not change'} by ${fMin(e.diff)} min.` +
+      (same ? ' Start and end period are the same, so there is nothing to compare.' : '') +
+      (R.filtered ? ' Urgency / Priority filters are applied.' : '');
+  } else {
+    small = R.noneSelected ? 'No priorities selected' : 'No incidents in the start or end period';
+    note = `Needs at least one ${name === 'MTTA' ? 'acknowledged' : 'resolved'} incident in both ${a} and ${z} for the current filters.`;
+  }
+  return `<div class="tile" tabindex="0" data-kpi="${name.toLowerCase()}-eff">${ICON_INFO}<div class="v"><span class="num">${value}</span>${arrow}</div>` +
+    `<div class="lb"><b>${name}</b> Efficiency</div><div class="sm">${small}</div>` +
+    explainBox(`${name} Efficiency`, `1 − (End period ${name} / Start period ${name})`, calc, note) + '</div>';
+}
+
+function renderTiles(R) {
+  const F = R.F;
+  const tile = (kpi, value, label, small, ex) =>
+    `<div class="tile" tabindex="0" data-kpi="${kpi}">${ICON_INFO}<div class="v${value.length > 9 ? ' long' : ''}"><span class="num">${value}</span></div><div class="lb">${label}</div>` +
+    (small ? `<div class="sm">${small}</div>` : '') + ex + '</div>';
+  document.getElementById('tiles').innerHTML =
+    tile('avoided', fInt(R.avoided), 'Incidents Avoided', '',
+      explainBox('Incidents Avoided', 'Alerts − Incidents', `${fInt(F.alerts)} − ${fInt(F.incidents)} = ${fInt(R.avoided)}`, 'Not affected by Urgency or Priority.')) +
+    tile('noise', fPct(R.noise), 'Noise Reduction', '',
+      explainBox('Noise Reduction', '1 − (Incidents / Alerts)', `1 − (${fInt(F.incidents)} / ${fInt(F.alerts)}) = ${fPct(R.noise)}`, 'Not affected by Urgency or Priority.')) +
+    effTile(R, 'MTTA', R.mtta, ['faster', 'slower']) +
+    effTile(R, 'MTTR', R.mttr, ['faster', 'slower']) +
+    tile('fte', nf1.format(R.fte) + ' FTE', 're-allocated to<br>high value work', '',
+      explainBox('FTE re-allocated', 'Hours saved / 2,000 working hours', `${fInt(R.hours)} / ${fInt(WORKING_HOURS)} = ${nf1.format(R.fte)}`, '')) +
+    tile('hours', fInt(R.hours), 'hours saved', '',
+      explainBox('Hours saved', 'Noise Reduction Hours + MTTA Hours + MTTR Hours', `${fInt(R.noiseHours)} + ${fInt(R.mttaHours)} + ${fInt(R.mttrHours)} = ${fInt(R.hours)}`, 'See the breakdown below the tiles.'));
+
+  const why = (e, name) => !e.ok ? 'no comparison available' : e.improved ? `${fMin(e.diff)} min faster` : e.worse ? `${name} got worse, counted as 0` : 'no change';
+  document.getElementById('breakdown').innerHTML =
+    '<h4>Hours saved breakdown</h4>' +
+    `<div class="row"><span>Noise reduction <span class="why">· alerts never worked</span></span><b data-part="noise">${fInt(R.noiseHours)}</b></div>` +
+    `<div class="row"><span>MTTA improvement <span class="why">· ${why(R.mtta, 'MTTA')}</span></span><b data-part="mtta">${fInt(R.mttaHours)}</b></div>` +
+    `<div class="row"><span>MTTR improvement <span class="why">· ${why(R.mttr, 'MTTR')}</span></span><b data-part="mttr">${fInt(R.mttrHours)}</b></div>` +
+    `<div class="row tot"><span>Hours saved</span><b data-part="total">${fInt(R.hours)}</b></div>` +
+    (R.filtered ? '<p class="scope">Urgency / Priority filters change the MTTA and MTTR rows only.</p>' : '');
+
+  const c = R.customer, days = Math.round((c.renewal - AS_OF) / 864e5), soon = days <= 90;
+  const el = document.getElementById('renewal');
+  el.className = 'renewal' + (soon ? ' soon' : '');
+  el.innerHTML = (soon ? `<span class="flag" title="Counted from the last day of data, ${fDate(AS_OF)}">Renews in ${days} days</span>` : '') +
+    `<div class="box"><span class="lab">Renewal Date</span><span class="date">${fDate(c.renewal)}</span></div>`;
+}
+
+/* =====================================================================
+   7. COMBO CHARTS (hand-drawn SVG, no external library)
+   ===================================================================== */
+const FONT = getComputedStyle(document.body).fontFamily;
+const mctx = document.createElement('canvas').getContext('2d');
+function textW(t, size, weight) { mctx.font = `${weight || 600} ${size || 10.5}px ${FONT}`; return mctx.measureText(t).width; }
+
+function niceAxis(max, integer) {
+  const n = 4;
+  if (!(max > 0)) return { max: n, step: 1, n };
+  const raw = max / n, p = Math.pow(10, Math.floor(Math.log10(raw))), f = raw / p;
+  let step = [1, 1.2, 1.25, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10].find(x => x >= f - 1e-9) * p;
+  if (integer && step < 10) step = Math.max(1, Math.ceil(step - 1e-9));
+  return { max: step * n, step, n };
+}
+const hit = (a, b) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.y1 > b.y0;
+
+const charts = {
+  ack: { host: document.getElementById('plot-ack'), legend: document.getElementById('legend-ack'),
+         barName: 'Acknowledged incidents', lineName: 'MTTA', cnt: b => b.ack, val: b => b.mtta, seg: b => b.segAck },
+  res: { host: document.getElementById('plot-res'), legend: document.getElementById('legend-res'),
+         barName: 'Resolved incidents', lineName: 'MTTR', cnt: b => b.res, val: b => b.mttr, seg: b => b.segRes }
+};
+let lastR = null;
+
+function renderLegend(ch, R) {
+  const stacked = R.segs.length > 0;
+  let html = '';
+  if (stacked) {
+    html += `<span class="it">Bars by ${R.segment}:</span>`;
+    for (const k of R.segs) html += `<span class="it"><span class="sw" style="background:${SEG_COLORS[k]}"></span>${k}</span>`;
+  } else {
+    html += `<span class="it"><span class="sw" style="background:${BAR}"></span>${ch.barName}</span>`;
+  }
+  html += `<span class="it"><span class="ln"></span>${ch.lineName} (min)</span>`;
+  ch.legend.innerHTML = html;
+}
+
+function drawChart(ch, R) {
+  const host = ch.host, W = host.clientWidth, H = host.clientHeight;
+  ch.geom = null;
+  const B = R.buckets, n = B.length;
+  const counts = B.map(ch.cnt), vals = B.map(ch.val);
+  const maxC = Math.max(0, ...counts), maxV = Math.max(0, ...vals.filter(v => v != null));
+  host.setAttribute('aria-label', `${ch.barName} (bars) and ${ch.lineName} in minutes (line) per ${state.period === 'month' ? 'month' : 'quarter'}.`);
+  if (maxC === 0) {
+    host.innerHTML = `<div class="empty"><b>No incidents match the current filters</b><span>${R.noneSelected ? 'Select at least one priority to see this chart.' : 'Try a wider date range, another urgency or more priorities.'}</span></div>`;
+    return;
+  }
+  if (W < 120 || H < 80) { host.innerHTML = ''; return; }
+
+  const m = { l: 56, r: 54, t: 14, b: 40 };
+  const pw = W - m.l - m.r, ph = H - m.t - m.b, base = m.t + ph;
+  const band = pw / n, bw = Math.max(4, Math.min(band * (n <= 8 ? 0.74 : 0.68), 60));
+  const cx = i => m.l + band * (i + 0.5);
+  const FS = 10.5;
+  const cLabels = counts.map(fInt), vLabels = vals.map(v => v == null ? '' : fMin(v));
+  const maxLW = Math.max(...cLabels.map(t => textW(t, FS, 600)));
+  const stacked = R.segs.length > 0;
+  // rotate bar labels when they don't fit: inside the bar (plain) or above it within the band (stacked)
+  const rot = stacked ? band < maxLW + 8 : bw < maxLW + 4;
+  const canLabelBars = !rot || bw >= 13;
+
+  const headPx = stacked && canLabelBars ? (rot ? maxLW : 12) + 10 : 4;
+  const axL = niceAxis(maxC * ph / Math.max(40, ph - headPx), true);
+  const axR = niceAxis(maxV * ph / Math.max(40, ph - 12), false);
+  const yL = v => base - v / axL.max * ph, yR = v => base - v / axR.max * ph;
+
+  let g = '';
+  /* gridlines + axis ticks */
+  for (let k = 0; k <= 4; k++) {
+    const y = Math.round(base - k / 4 * ph) + 0.5;
+    g += `<line x1="${m.l}" x2="${W - m.r}" y1="${y}" y2="${y}" stroke="${k === 0 ? '#9aa3b0' : '#e7eaef'}"/>`;
+    g += `<text x="${m.l - 7}" y="${y}" text-anchor="end" dominant-baseline="central" font-size="11" fill="#6a7483">${fCompact(axL.step * k)}</text>`;
+    g += `<text x="${W - m.r + 7}" y="${y}" dominant-baseline="central" font-size="11" fill="#6a7483">${axR.step * 4 < 20 ? trim(axR.step * k) : fInt(axR.step * k)}</text>`;
+  }
+  g += `<text transform="translate(12,${m.t + ph / 2}) rotate(-90)" text-anchor="middle" font-size="11" fill="#6a7483">${ch.barName}</text>`;
+  g += `<text transform="translate(${W - 8},${m.t + ph / 2}) rotate(90)" text-anchor="middle" font-size="11" fill="#6a7483">${ch.lineName} (min)</text>`;
+
+  /* x axis: bucket labels, year row */
+  const longOk = band >= 25;
+  B.forEach((b, i) => {
+    const lab = state.period === 'month' && !longOk ? b.label[0] : b.label;
+    g += `<text x="${cx(i)}" y="${base + 14}" text-anchor="middle" font-size="11" fill="#4a5464">${lab}${b.partial ? '*' : ''}</text>`;
+    if (i === 0 || B[i - 1].year !== b.year) {
+      if (i > 0) g += `<line x1="${m.l + band * i}" x2="${m.l + band * i}" y1="${base}" y2="${base + 32}" stroke="#d6dbe2"/>`;
+      g += `<text x="${m.l + band * i + 4}" y="${base + 29}" font-size="11" font-weight="600" fill="#6a7483">${b.year}</text>`;
+    }
+  });
+
+  /* hover highlight (behind the marks) */
+  g += `<rect class="hl" x="0" y="${m.t}" width="${band}" height="${ph}" fill="#1f2733" opacity="0" rx="3"/>`;
+
+  /* bars */
+  const tops = [];
+  B.forEach((b, i) => {
+    const x = cx(i) - bw / 2;
+    if (!stacked) {
+      const y = yL(counts[i]), h = base - y, rr = Math.min(3, bw / 2, h);
+      tops.push(y);
+      if (h > 0) g += `<path d="M${x},${base}V${y + rr}Q${x},${y} ${x + rr},${y}H${x + bw - rr}Q${x + bw},${y} ${x + bw},${y + rr}V${base}Z" fill="${BAR}"/>`;
+    } else {
+      let acc = 0; const sv = ch.seg(b);
+      for (const k of R.segs) {
+        const v = sv[k]; if (!(v > 0)) continue;
+        const y1 = yL(acc), y0 = yL(acc + v); acc += v;
+        const h = Math.max(0, y1 - y0 - (y1 - y0 > 3 ? 1.5 : 0));   // surface gap between segments
+        g += `<rect x="${x}" y="${y0}" width="${bw}" height="${h}" fill="${SEG_COLORS[k]}"/>`;
+      }
+      tops.push(yL(acc));
+    }
+  });
+
+  /* fixed obstacles: totals above stacked bars */
+  const pts = vals.map((v, i) => v == null ? null : { x: cx(i), y: yR(v) });
+  const lineY = x => {                                   // y of the line at x (null outside it)
+    for (let i = 0; i < n - 1; i++) {
+      const a = pts[i], z = pts[i + 1];
+      if (a && z && x >= a.x && x <= z.x) return a.y + (z.y - a.y) * (x - a.x) / (z.x - a.x);
+    }
+    return null;
+  };
+  const obstacles = [];
+  let barLabels = '';
+  if (stacked && canLabelBars) {
+    B.forEach((b, i) => {
+      if (!(counts[i] > 0)) return;
+      const t = cLabels[i], w = textW(t, FS, 600), x = cx(i), y = tops[i];
+      const rc = rot ? { x0: x - 7, x1: x + 7, y0: y - 6 - w, y1: y - 2 } : { x0: x - w / 2 - 2, x1: x + w / 2 + 2, y0: y - 17, y1: y - 2 };
+      const ys = [lineY(rc.x0), pts[i] ? pts[i].y : null, lineY(x), lineY(rc.x1)].filter(v => v != null);
+      if (rc.y0 < 0 || ys.some(v => v > rc.y0 - 7 && v < rc.y1 + 7)) return;   // the line runs through it: leave it to the tooltip
+      obstacles.push(rc);
+      const halo = ' font-size="' + FS + '" font-weight="600" fill="#1f2733" stroke="#fff" stroke-width="3" paint-order="stroke" stroke-linejoin="round"';
+      barLabels += rot
+        ? `<text transform="translate(${x},${y - 5}) rotate(-90)" dominant-baseline="central"${halo}>${t}</text>`
+        : `<text x="${x}" y="${y - 6}" text-anchor="middle"${halo}>${t}</text>`;
+    });
+  }
+
+  /* where a bar's own value label can sit inside the bar, given the line labels placed so far */
+  const barLab = i => {
+    const t = cLabels[i], w = textW(t, FS, 600), x = cx(i);
+    const hw = rot ? 7 : w / 2 + 2;
+    return { t, x, top: tops[i], len: rot ? w : 12, x0: x - hw - 2, x1: x + hw + 2 };
+  };
+  const barForbidden = (L, i, list) => {
+    const forb = [];
+    const ys = [lineY(L.x0), pts[i] ? pts[i].y : null, lineY(L.x), lineY(L.x1)].filter(v => v != null);
+    if (ys.length) forb.push([Math.min(...ys) - 7, Math.max(...ys) + 7]);
+    for (const q of list) {
+      if (q.x0 < L.x1 && q.x1 > L.x0) forb.push([q.y0 - 3, q.y1 + 3]);
+      if (q.far && q.i === i) forb.push([Math.min(q.y0, pts[i].y), Math.max(q.y1, pts[i].y)]);   // leader line
+    }
+    return forb;
+  };
+  const barInside = (i, list) => {
+    const L = barLab(i), forb = barForbidden(L, i, list);
+    const free = (s, e) => forb.every(f => e <= f[0] || s >= f[1]);
+    const ok = [L.top + 6, ...forb.map(f => f[1] + 1).sort((a, b) => a - b), base - 5 - L.len]
+      .filter(s => s >= L.top + 5 && s + L.len <= base - 4 && free(s, s + L.len));
+    return ok.length ? ok[0] : null;
+  };
+  const wantInside = !stacked && canLabelBars;
+
+  /* line value labels: greedy placement, extremes and endpoints first.
+     Each label tries next to its point (above / below), then one step further out with a leader line. */
+  const idx = pts.map((p, i) => p ? i : -1).filter(i => i >= 0);
+  const byVal = idx.slice().sort((a, b) => vals[b] - vals[a]);
+  const order = [...new Set([idx[0], idx[idx.length - 1], byVal[0], byVal[byVal.length - 1], ...idx])].filter(i => i != null);
+  const pills = [], PH = 16;
+  for (const i of order) {
+    const p = pts[i], t = vLabels[i], w = textW(t, FS, 600) + 7;
+    const prev = i > 0 ? vals[i - 1] : null, next = i < n - 1 ? vals[i + 1] : null;
+    const valley = (prev == null || prev > vals[i]) && (next == null || next > vals[i]) && (prev != null || next != null);
+    const sides = valley ? ['below', 'above'] : ['above', 'below'];
+    const valid = [];
+    for (const far of [0, 1]) for (const pos of sides) {
+      const off = 8 + far * 19;
+      const y0 = pos === 'above' ? p.y - off - PH : p.y + off;
+      const x0 = clamp(p.x - w / 2, m.l + 1, W - m.r - w - 1);
+      const rc = { x0, x1: x0 + w, y0, y1: y0 + PH, i, far, pos };
+      if (rc.y0 < 0 || rc.y1 > base - 1) continue;
+      if (pills.some(q => hit(q, rc)) || obstacles.some(q => hit(q, rc))) continue;
+      if (pts.some((q, j) => q && j !== i && q.x > rc.x0 - 5 && q.x < rc.x1 + 5 && q.y > rc.y0 - 5 && q.y < rc.y1 + 5)) continue;
+      valid.push(rc);
+    }
+    if (!valid.length) continue;                          // no clean spot: the tooltip carries the value
+    const needs = wantInside && counts[i] > 0;
+    pills.push((needs && valid.find(rc => barInside(i, pills.concat(rc)) != null)) || valid[0]);
+  }
+
+  /* bar value labels (unstacked): inside the bar, clear of the line and its labels; else above the bar */
+  if (wantInside) {
+    B.forEach((b, i) => {
+      if (!(counts[i] > 0)) return;
+      const L = barLab(i);
+      let s = barInside(i, pills), ink = '#fff', halo = '';
+      if (s == null) {
+        const forb = barForbidden(L, i, pills), s2 = L.top - 5 - L.len;
+        if (s2 >= 0 && forb.every(f => L.top - 3 <= f[0] || s2 >= f[1])) {
+          s = s2; ink = '#1f2733'; halo = ' stroke="#fff" stroke-width="3" paint-order="stroke" stroke-linejoin="round"';
+        }
+      }
+      if (s == null) return;                             // no clean spot: the tooltip carries the value
+      barLabels += rot
+        ? `<text transform="translate(${L.x},${s}) rotate(-90)" text-anchor="end" dominant-baseline="central" font-size="${FS}" font-weight="600" fill="${ink}"${halo}>${L.t}</text>`
+        : `<text x="${L.x}" y="${s + 6}" text-anchor="middle" dominant-baseline="central" font-size="${FS}" font-weight="600" fill="${ink}"${halo}>${L.t}</text>`;
+    });
+  }
+
+  /* line (with a surface-coloured casing so it reads over the bars), points, labels */
+  let d = '', pen = false;
+  pts.forEach(p => { if (!p) { pen = false; return; } d += (pen ? 'L' : 'M') + p.x.toFixed(1) + ',' + p.y.toFixed(1); pen = true; });
+  g += `<path d="${d}" fill="none" stroke="#fff" stroke-width="5" stroke-linejoin="round" stroke-linecap="round" opacity="0.9"/>`;
+  g += `<path d="${d}" fill="none" stroke="${LINE}" stroke-width="2.25" stroke-linejoin="round" stroke-linecap="round"/>`;
+  g += barLabels;
+  pts.forEach(p => { if (p) g += `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="4.5" fill="${LINE}" stroke="#fff" stroke-width="2"/>`; });
+  for (const q of pills) {
+    if (q.far) { const p = pts[q.i]; g += `<line x1="${p.x.toFixed(1)}" x2="${p.x.toFixed(1)}" y1="${(q.pos === 'above' ? p.y - 6 : p.y + 6).toFixed(1)}" y2="${(q.pos === 'above' ? q.y1 : q.y0).toFixed(1)}" stroke="${LINE}" stroke-opacity="0.7"/>`; }
+    g += `<rect x="${q.x0.toFixed(1)}" y="${q.y0.toFixed(1)}" width="${(q.x1 - q.x0).toFixed(1)}" height="16" rx="4" fill="#fff" fill-opacity="0.94" stroke="${LINE}" stroke-opacity="0.55"/>`;
+    g += `<text x="${((q.x0 + q.x1) / 2).toFixed(1)}" y="${(q.y0 + 8.5).toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${FS}" font-weight="600" fill="#1f2733">${vLabels[q.i]}</text>`;
+  }
+
+  host.innerHTML = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${g}</svg><div class="tt" hidden></div>`;
+  ch.geom = { m, band, n, W, H, ph };
+}
+
+/* hover: one tooltip per chart, the highlighted period is synced across both */
+function setHover(i, src, my) {
+  for (const key of Object.keys(charts)) {
+    const ch = charts[key], gm = ch.geom;
+    if (!gm) continue;
+    const hl = ch.host.querySelector('.hl'), tt = ch.host.querySelector('.tt');
+    if (i == null || i < 0 || i >= gm.n) { hl.setAttribute('opacity', 0); tt.hidden = true; continue; }
+    hl.setAttribute('x', gm.m.l + gm.band * i); hl.setAttribute('opacity', 0.07);
+    if (ch !== src) { tt.hidden = true; continue; }
+    const b = lastR.buckets[i];
+    tt.textContent = '';
+    const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+    const h = el('div', 'h', b.title + ' ');
+    if (b.span) h.appendChild(el('small', '', b.partial ? `(partial: ${b.span})` : `(${b.span})`));
+    tt.appendChild(h);
+    const row = (color, value, name) => {
+      const r = el('div', 'r'), k = el('span', 'k'); k.style.background = color;
+      r.appendChild(k); r.appendChild(el('b', '', value)); r.appendChild(el('span', 'nm', name)); tt.appendChild(r);
+    };
+    if (lastR.segs.length) {
+      const sv = ch.seg(b);
+      for (const k of lastR.segs.slice().reverse()) row(SEG_COLORS[k], fInt(sv[k]), k);
+      tt.appendChild(el('div', 'sep'));
+      row('#1f2733', fInt(ch.cnt(b)), ch.barName);
+    } else row(BAR, fInt(ch.cnt(b)), ch.barName);
+    const v = ch.val(b);
+    row(LINE, v == null ? '–' : fMin(v) + ' min', ch.lineName);
+    tt.hidden = false;
+    const tw = tt.offsetWidth, th = tt.offsetHeight, bx = gm.m.l + gm.band * (i + 0.5);
+    let left = bx + gm.band / 2 + 8;
+    if (left + tw > gm.W - 4) left = bx - gm.band / 2 - 8 - tw;
+    tt.style.left = Math.max(4, left) + 'px';
+    tt.style.top = clamp(my - th / 2, 4, Math.max(4, gm.H - th - 4)) + 'px';
+  }
+}
+for (const key of Object.keys(charts)) {
+  const ch = charts[key];
+  ch.host.addEventListener('pointermove', ev => {
+    const gm = ch.geom; if (!gm) return;
+    const rc = ch.host.getBoundingClientRect(), x = ev.clientX - rc.left, y = ev.clientY - rc.top;
+    const inside = x >= gm.m.l && x <= gm.W - gm.m.r && y >= gm.m.t - 6 && y <= gm.m.t + gm.ph + 34;
+    setHover(inside ? Math.min(gm.n - 1, Math.floor((x - gm.m.l) / gm.band)) : null, ch, y);
+  });
+  ch.host.addEventListener('pointerleave', () => setHover(null));
+}
+
+/* =====================================================================
+   8. RENDER + FILTER WIRING
+   ===================================================================== */
+function render() {
+  const R = lastR = compute(state);
+  renderFunnel(R);
+  renderTiles(R);
+  for (const key of Object.keys(charts)) { renderLegend(charts[key], R); drawChart(charts[key], R); }
+  const note = document.getElementById('range-note');
+  const partial = R.buckets.filter(b => b.partial).map(b => `${b.title} (${b.span})`);
+  note.hidden = !partial.length;
+  note.textContent = partial.length ? `* Partial quarter: ${partial.join(', ')}. Start and end on quarter boundaries for a fair comparison.` : '';
+}
+
+const $ = id => document.getElementById(id);
+$('f-customer').innerHTML = CUSTOMER_DEFS.map(c => `<option value="${c.id}">${esc(c.name)} (${esc(c.sub)})</option>`).join('');
+const monthOpts = MONTHS.map(M => `<option value="${M.i}">${M.label}</option>`).join('');
+$('f-start').innerHTML = monthOpts; $('f-end').innerHTML = monthOpts;
+$('f-priority').innerHTML = PRIORITIES.map(p => `<label><input type="checkbox" value="${p}" checked><span>${p}</span></label>`).join('');
+
+function syncControls() {
+  $('f-customer').value = state.customer; $('f-start').value = state.start; $('f-end').value = state.end;
+  for (const name of ['period', 'urgency', 'segment']) {
+    document.querySelectorAll(`input[name="${name}"]`).forEach(i => { i.checked = i.value === state[name]; });
+  }
+  document.querySelectorAll('#f-priority input').forEach(i => { i.checked = state.priorities.has(i.value); });
+  $('pri-all').style.visibility = state.priorities.size === PRIORITIES.length ? 'hidden' : 'visible';
+}
+function update() { syncControls(); render(); }
+
+$('f-customer').addEventListener('change', e => { state.customer = e.target.value; update(); });
+$('f-start').addEventListener('change', e => { state.start = +e.target.value; if (state.end < state.start) state.end = state.start; update(); });
+$('f-end').addEventListener('change', e => { state.end = +e.target.value; if (state.start > state.end) state.start = state.end; update(); });
+for (const name of ['period', 'urgency', 'segment']) {
+  document.querySelectorAll(`input[name="${name}"]`).forEach(i => i.addEventListener('change', () => { if (i.checked) { state[name] = i.value; update(); } }));
+}
+$('f-priority').addEventListener('change', e => {
+  if (e.target.matches('input')) { e.target.checked ? state.priorities.add(e.target.value) : state.priorities.delete(e.target.value); update(); }
+});
+$('pri-all').addEventListener('click', () => { state.priorities = new Set(PRIORITIES); update(); });
+
+/* tabs */
+const tabs = [['tab-dash', 'view-dash'], ['tab-doc', 'view-doc']];
+function showTab(id) {
+  for (const [t, v] of tabs) {
+    const on = t === id;
+    $(t).setAttribute('aria-selected', on); $(t).tabIndex = on ? 0 : -1; $(v).hidden = !on;
+  }
+  if (id === 'tab-dash') render();
+}
+for (const [t] of tabs) {
+  $(t).addEventListener('click', () => showTab(t));
+  $(t).addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { const o = t === 'tab-dash' ? 'tab-doc' : 'tab-dash'; showTab(o); $(o).focus(); }
+  });
+}
+
+/* redraw charts when their box changes size */
+let raf = 0;
+new ResizeObserver(() => {
+  cancelAnimationFrame(raf);
+  raf = requestAnimationFrame(() => { if (lastR && !$('view-dash').hidden) for (const key of Object.keys(charts)) drawChart(charts[key], lastR); });
+}).observe(document.querySelector('.charts'));
+
+update();
+
+/* exposed for inspection in the console */
+window.BVR = { state, compute, update, DATA, ANCHOR, MONTHS, PRIORITIES, URGENCIES };
+})();
+</script>
+</body>
+</html>

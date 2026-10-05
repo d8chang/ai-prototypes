@@ -1,0 +1,1825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<title>Sparky Prototype</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..700&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one app shell. Deep green header, a left roster of genies that lights up as requests are routed,
+   a single chat column with a docked request tracker, and the guide as a second tab in the same shell.
+   Light-only by design: the brief asks for greens on a light neutral ground. */
+:root{
+  --bg:#F3F5F0; --surface:#FFFFFF; --surface-2:#E9EDE6; --line:#D8DFD5;
+  --ink:#14231B; --ink-2:#44544A; --ink-3:#66756B;
+  --green-900:#0A3626; --green-800:#0E4732; --green-700:#12603E; --green-600:#1A7A4C;
+  --green-500:#2A9C63; --green-200:#BCE4CA; --green-100:#DCF1E2; --green-50:#EDF7EF;
+  --lime:#C9EC6C; --lime-2:#B5DC50; --on-dark:#EAF5EC; --on-dark-2:#A9CDB6; --dark-line:#1F5A41;
+  --scope-bg:#ECE8DF; --scope-fg:#5B5241; --scope-line:#B9B09A;
+  --scrim:rgba(10,54,38,.38);
+  --warn-bg:#FBF1D5; --warn-fg:#7A5200; --danger:#A6311E; --danger-bg:#FBE7E2;
+  --g-it-bg:#D2F0EC; --g-it-fg:#0A5C55;
+  --g-hr-bg:#D3F2E0; --g-hr-fg:#0B6640;
+  --g-stock-bg:#DDF1CE; --g-stock-fg:#33691A;
+  --g-costcap-bg:#EBF3BE; --g-costcap-fg:#566908;
+  --g-comp-bg:#C9E8D0; --g-comp-fg:#164F2B;
+  --g-audit-bg:#DEE8E1; --g-audit-fg:#33544A;
+  --g-collections-bg:#CDEFE2; --g-collections-fg:#0C6B53;
+  --g-orders-bg:#E3EDCC; --g-orders-fg:#486315;
+  --g-sales-bg:#D4F4D2; --g-sales-fg:#1E6A22;
+  --font-display:"Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --font-body:"Figtree","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --r-sm:8px; --r-md:14px; --r-pill:999px;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.5;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--green-500);outline-offset:2px}
+code,.mono{font-family:var(--font-mono);font-size:.88em}
+code{background:var(--surface-2);padding:1px 6px;border-radius:5px;overflow-wrap:anywhere}
+svg.i{width:1em;height:1em;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- header ---------- */
+.top{background:var(--green-900);color:var(--on-dark);display:flex;align-items:center;gap:12px 20px;flex-wrap:wrap;padding:10px 20px}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-mark{width:34px;height:34px;border-radius:10px;background:var(--green-700);display:grid;place-items:center;flex:none}
+.brand-mark svg{width:20px;height:20px;fill:var(--lime)}
+.brand-name{font-family:var(--font-display);font-weight:700;font-size:22px;line-height:1;letter-spacing:-.01em}
+.brand-sub{font-size:12px;color:var(--on-dark-2);line-height:1.2;margin-top:3px}
+.tabs{display:flex;gap:4px;background:var(--green-800);padding:4px;border-radius:var(--r-pill)}
+.tab{border:0;background:transparent;color:var(--on-dark-2);padding:6px 14px;border-radius:var(--r-pill);font-weight:600;font-size:14px}
+.tab[aria-selected="true"]{background:var(--lime);color:var(--green-900)}
+.tab:not([aria-selected="true"]):hover{color:var(--on-dark)}
+.top-right{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.demo-pill{font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--lime);border:1px dashed var(--lime-2);padding:4px 10px;border-radius:var(--r-pill)}
+.user{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--on-dark-2)}
+.avatar{width:28px;height:28px;border-radius:50%;background:var(--green-600);color:var(--on-dark);display:grid;place-items:center;font-size:11px;font-weight:700;flex:none}
+.user strong{color:var(--on-dark);font-weight:600}
+.ghost{border:1px solid var(--dark-line);background:transparent;color:var(--on-dark);padding:6px 12px;border-radius:var(--r-pill);font-size:13px;font-weight:600}
+.ghost:hover{background:var(--green-800)}
+
+/* ---------- shell ---------- */
+.shell{flex:1;min-height:0;display:grid;grid-template-columns:296px minmax(0,1fr)}
+.side{overflow:auto;border-right:1px solid var(--line);padding:18px 14px;display:flex;flex-direction:column;gap:18px;background:var(--bg)}
+.side h2{font-size:11.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:0 6px 8px}
+.roster{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.g-row{width:100%;display:flex;align-items:center;gap:10px;border:0;background:transparent;text-align:left;padding:7px 8px;border-radius:10px}
+.g-row:hover{background:var(--surface-2)}
+.g-ico{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;background:var(--gb);color:var(--gf);font-size:17px;flex:none}
+.g-name{font-weight:600;font-size:14px;line-height:1.2}
+.g-blurb{font-size:12px;color:var(--ink-3);line-height:1.25}
+.g-dot{margin-left:auto;width:8px;height:8px;border-radius:50%;background:transparent;flex:none}
+.g-row.active{background:var(--surface);box-shadow:0 0 0 1px var(--line)}
+.g-row.active .g-dot{background:var(--green-500)}
+.g-row.routing .g-dot{animation:pulse 1s ease-in-out infinite}
+.how{font-size:12.5px;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:12px 14px}
+.how ol{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.how p{margin:8px 0 0;color:var(--ink-3)}
+
+.g-it{--gb:var(--g-it-bg);--gf:var(--g-it-fg)} .g-hr{--gb:var(--g-hr-bg);--gf:var(--g-hr-fg)}
+.g-stock{--gb:var(--g-stock-bg);--gf:var(--g-stock-fg)} .g-costcap{--gb:var(--g-costcap-bg);--gf:var(--g-costcap-fg)}
+.g-comp{--gb:var(--g-comp-bg);--gf:var(--g-comp-fg)} .g-audit{--gb:var(--g-audit-bg);--gf:var(--g-audit-fg)}
+.g-collections{--gb:var(--g-collections-bg);--gf:var(--g-collections-fg)} .g-orders{--gb:var(--g-orders-bg);--gf:var(--g-orders-fg)}
+.g-sales{--gb:var(--g-sales-bg);--gf:var(--g-sales-fg)}
+
+/* ---------- chat ---------- */
+.chat{display:flex;flex-direction:column;min-height:0;min-width:0}
+.log{flex:1;overflow:auto;padding-block:24px;padding-inline:24px}
+.log-inner{max-width:820px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+.msg.user{align-self:flex-end;max-width:min(78%,560px);background:var(--green-100);color:var(--green-900);border-radius:16px 16px 4px 16px;padding:10px 14px;font-weight:500;overflow-wrap:anywhere}
+.msg.bot{display:flex;flex-direction:column;gap:10px;min-width:0}
+.reply{display:flex;flex-direction:column;gap:8px;align-items:flex-start;min-width:0}
+.badge{display:inline-flex;align-items:center;gap:6px;background:var(--gb);color:var(--gf);font-weight:700;font-size:12.5px;padding:4px 10px 4px 8px;border-radius:var(--r-pill)}
+.badge svg{font-size:15px}
+.badge.sparky{background:var(--green-900);color:var(--on-dark)}
+.badge.sparky svg{fill:var(--lime);stroke:none}
+.badge.scope{background:var(--scope-bg);color:var(--scope-fg)}
+.bubble{background:var(--surface);border:1px solid var(--line);border-radius:4px 16px 16px 16px;padding:14px 16px;max-width:min(100%,660px);min-width:0;overflow-wrap:anywhere}
+.bubble>*{margin:0}
+.bubble>*+*{margin-top:10px}
+.bubble ol,.bubble ul{padding-left:20px;display:flex;flex-direction:column;gap:4px}
+.bubble h4{font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+.bubble.wide{max-width:100%}
+.callout{background:var(--warn-bg);color:var(--warn-fg);border-radius:var(--r-sm);padding:10px 12px;font-size:14px}
+.callout.neutral{background:var(--surface-2);color:var(--ink)}
+.sources{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.sources-lbl{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-right:2px}
+.src{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:3px 8px 3px 3px}
+.src b{font-weight:700;font-size:11px;background:var(--surface-2);color:var(--green-800);padding:2px 6px;border-radius:4px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--green-200);background:var(--green-50);color:var(--green-800);border-radius:var(--r-pill);padding:6px 12px;font-size:13.5px;font-weight:500;text-align:left;line-height:1.3}
+.chip:hover{background:var(--green-100);border-color:var(--green-500)}
+.chip.g{display:inline-flex;align-items:center;gap:6px;background:var(--gb);color:var(--gf);border-color:transparent;font-weight:700}
+.chip.g:hover{border-color:var(--gf);background:var(--gb)}
+.chip.quiet{background:transparent;border-color:var(--line);color:var(--ink-2)}
+.prompt-groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px 18px}
+.prompt-group{display:flex;flex-direction:column;gap:8px;align-items:flex-start;min-width:0}
+.prompt-group h4{margin:0}
+.btn{border:0;background:var(--green-700);color:var(--on-dark);font-weight:700;padding:8px 16px;border-radius:var(--r-pill)}
+.btn:hover{background:var(--green-800)}
+.btn.secondary{background:var(--surface);color:var(--green-800);box-shadow:inset 0 0 0 1px var(--green-200)}
+.btn.secondary:hover{background:var(--green-50)}
+.btn.small{padding:6px 14px;font-size:13.5px}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.chosen:disabled{opacity:1;box-shadow:0 0 0 2px var(--lime-2)}
+.link{border:0;background:none;padding:0;color:var(--green-700);text-decoration:underline;text-underline-offset:2px;font-family:var(--font-mono);font-size:12.5px;overflow-wrap:anywhere;text-align:left}
+
+/* routing trace */
+.trace{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12.5px}
+.tstep{display:inline-flex;align-items:center;gap:6px;padding:3px 10px 3px 8px;border-radius:var(--r-pill);background:var(--surface-2);color:var(--ink-2);font-weight:500}
+.tstep.ok{color:var(--green-700)}
+.tstep.flag{background:var(--scope-bg);color:var(--scope-fg)}
+.tstep.pending{background:var(--green-100);color:var(--green-800);font-weight:600}
+.tsep{color:var(--ink-3)}
+.spin{width:12px;height:12px;border-radius:50%;border:2px solid var(--green-200);border-top-color:var(--green-600);animation:spin .8s linear infinite;flex:none}
+
+/* data table */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r-sm)}
+table.data{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums;min-width:440px}
+.data th,.data td{padding:8px 12px;text-align:right;white-space:nowrap}
+.data th:first-child,.data td:first-child{text-align:left}
+.data thead th{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--green-50);font-weight:700}
+.data tbody td{border-top:1px solid var(--line)}
+.data tfoot td{border-top:2px solid var(--green-200);font-weight:700;background:var(--green-50)}
+.ubar{display:inline-block;vertical-align:middle;width:56px;height:6px;border-radius:3px;background:var(--surface-2);margin-right:8px;overflow:hidden}
+.ubar i{display:block;height:100%;background:var(--green-500)}
+
+/* ticket card */
+.ticket{display:flex;flex-direction:column;gap:4px;border:1px solid var(--line);border-left:4px solid var(--gf,var(--g-it-fg));border-radius:var(--r-sm);padding:10px 12px;background:var(--bg)}
+.ticket-id{font-family:var(--font-mono);font-weight:500;font-size:13px;color:var(--gf,var(--g-it-fg))}
+.ticket-title{font-weight:600}
+.ticket-meta{font-size:12.5px;color:var(--ink-3)}
+
+/* approval card: a different surface on purpose, so the role switch is obvious */
+.approval{border-radius:var(--r-md);overflow:hidden;background:var(--green-900);color:var(--on-dark);box-shadow:0 14px 30px -16px var(--green-900)}
+.approval-band{background:repeating-linear-gradient(-45deg,var(--lime) 0 14px,var(--lime-2) 14px 28px);color:var(--green-900);padding:8px 16px;display:flex;justify-content:space-between;gap:4px 16px;flex-wrap:wrap;align-items:center}
+.approval-label{font-weight:800;font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;display:inline-flex;align-items:center;gap:8px}
+.approval-label svg{font-size:16px}
+.approval-acting{font-size:12.5px;font-weight:600}
+.approval-body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:14px}
+.approval h3{font-family:var(--font-display);font-size:19px;font-weight:700;margin:0;line-height:1.2;text-wrap:balance}
+.approval-sub{font-size:13px;color:var(--on-dark-2);margin:4px 0 0}
+.approval dl{margin:0;display:grid;grid-template-columns:max-content minmax(0,1fr);gap:6px 16px;font-size:14px}
+.approval dt{color:var(--on-dark-2)}
+.approval dd{margin:0;overflow-wrap:anywhere}
+.approval .mono{color:var(--lime)}
+.approval-actions{display:flex;gap:10px;flex-wrap:wrap}
+.a-approve{border:0;background:var(--lime);color:var(--green-900);font-weight:800;padding:9px 22px;border-radius:var(--r-pill)}
+.a-approve:hover{background:var(--lime-2)}
+.a-deny,.a-back{border:1px solid var(--on-dark-2);background:transparent;color:var(--on-dark);font-weight:700;padding:9px 22px;border-radius:var(--r-pill)}
+.a-deny:hover,.a-back:hover{background:var(--green-800)}
+.a-confirm{border:0;background:var(--danger-bg);color:var(--danger);font-weight:800;padding:9px 22px;border-radius:var(--r-pill)}
+.a-confirm:disabled{opacity:.45;cursor:default}
+.deny-form{display:flex;flex-direction:column;gap:10px}
+.deny-form label{font-size:13px;font-weight:600}
+.deny-form input{background:var(--green-800);border:1px solid var(--dark-line);border-radius:var(--r-sm);padding:9px 12px;color:var(--on-dark);width:100%}
+.deny-form input::placeholder{color:var(--on-dark-2)}
+.deny-quick{display:flex;gap:8px;flex-wrap:wrap}
+.deny-quick button{border:1px solid var(--dark-line);background:transparent;color:var(--on-dark-2);border-radius:var(--r-pill);padding:4px 10px;font-size:12.5px}
+.deny-quick button:hover{color:var(--on-dark);border-color:var(--on-dark-2)}
+.approval-result{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px}
+.approval-result svg{font-size:18px}
+.approval.resolved{box-shadow:none}
+.approval.resolved .approval-band{background:var(--green-800);color:var(--on-dark-2)}
+.approval.resolved dl{opacity:.75}
+.approval.denied .approval-result{color:var(--danger-bg)}
+.approval.approved .approval-result{color:var(--lime)}
+
+/* docked tracker */
+.tracker{border-bottom:1px solid var(--line);background:var(--surface);padding:12px 24px 14px}
+.tk-inner{max-width:820px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+.tk-head{display:flex;justify-content:space-between;align-items:center;gap:8px 12px;flex-wrap:wrap}
+.tk-title{display:flex;align-items:center;gap:8px 10px;flex-wrap:wrap;font-size:14.5px}
+.tk-title .g-ico{width:26px;height:26px;border-radius:7px;font-size:14px}
+.tk-ticket{color:var(--g-it-fg)}
+.tk-lim{font-size:12px;font-weight:600;color:var(--warn-fg);background:var(--warn-bg);padding:2px 8px;border-radius:var(--r-pill)}
+.tk-right{display:flex;align-items:center;gap:8px}
+.pill{font-size:12px;font-weight:700;padding:3px 10px;border-radius:var(--r-pill);background:var(--green-100);color:var(--green-800)}
+.pill.wait{background:var(--warn-bg);color:var(--warn-fg)}
+.pill.bad{background:var(--danger-bg);color:var(--danger)}
+.tk-x{border:0;background:transparent;color:var(--ink-3);font-size:18px;line-height:1;padding:2px 6px;border-radius:6px}
+.tk-x:hover{background:var(--surface-2)}
+.tk-now{display:none;margin:0;font-size:13px;font-weight:600;color:var(--ink-2)}
+.tk-steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px 6px}
+.tk-steps li{display:flex;flex-direction:column;gap:3px;min-width:0;border-top:4px solid var(--surface-2);padding-top:6px}
+.tk-lbl{font-size:12.5px;font-weight:600;line-height:1.25;color:var(--ink-3);display:flex;gap:5px;align-items:flex-start}
+.tk-lbl svg{font-size:14px;margin-top:1px}
+.tk-note{font-size:11.5px;color:var(--ink-3);overflow-wrap:anywhere;line-height:1.3}
+.tk-steps li.s-done{border-top-color:var(--green-500)}
+.tk-steps li.s-done .tk-lbl{color:var(--green-800)}
+.tk-steps li.s-active{border-top-color:var(--lime-2)}
+.tk-steps li.s-active .tk-lbl{color:var(--ink)}
+.tk-steps li.s-active{animation:barpulse 1.6s ease-in-out infinite}
+.tk-steps li.s-failed{border-top-color:var(--danger)}
+.tk-steps li.s-failed .tk-lbl{color:var(--danger)}
+.tk-steps li.s-skipped{opacity:.55}
+
+/* feedback */
+.fb{display:flex;flex-direction:column;gap:8px;align-self:stretch;max-width:660px}
+.fb-row{display:flex;align-items:center;gap:6px}
+.fb-q{font-size:12.5px;color:var(--ink-3);margin-right:2px}
+.fb-btn{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);display:grid;place-items:center;font-size:15px}
+.fb-btn:hover{border-color:var(--green-500);color:var(--green-700)}
+.fb-btn.down svg{transform:rotate(180deg)}
+.fb-btn[aria-pressed="true"]{background:var(--green-700);border-color:var(--green-700);color:var(--on-dark)}
+.fb-form{display:flex;flex-direction:column;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:12px}
+.fb-lbl{font-size:13px;font-weight:600}
+.fb-form textarea{border:1px solid var(--line);border-radius:var(--r-sm);padding:8px 10px;resize:vertical;width:100%;background:var(--bg)}
+.fb-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.fb-opt{font-size:12.5px;color:var(--ink-3)}
+.fb-thanks{margin:0;font-size:13.5px;color:var(--green-700);font-weight:600;display:flex;align-items:center;gap:6px}
+
+/* composer */
+.composer{border-top:1px solid var(--line);background:var(--surface);padding:12px 24px 14px}
+.composer-inner{max-width:820px;margin:0 auto;display:flex;flex-direction:column;gap:6px}
+.composer form{display:flex;gap:8px}
+.composer input{flex:1;min-width:0;border:1px solid var(--line);border-radius:var(--r-pill);padding:11px 18px;background:var(--bg)}
+.composer input:focus{outline:2px solid var(--green-500);outline-offset:0;border-color:transparent;background:var(--surface)}
+.composer-foot{display:flex;justify-content:space-between;gap:6px 12px;flex-wrap:wrap;font-size:12px;color:var(--ink-3)}
+.composer-foot button{border:0;background:none;padding:0;color:var(--green-700);font-weight:600;font-size:12px}
+
+/* ---------- guide ---------- */
+.guide{flex:1;overflow:auto;padding-block:36px 56px;padding-inline:24px}
+.guide-inner{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:40px}
+.guide h1{font-family:var(--font-display);font-size:34px;line-height:1.1;margin:0;letter-spacing:-.015em;text-wrap:balance}
+.guide h2{font-family:var(--font-display);font-size:22px;line-height:1.2;margin:0;text-wrap:balance}
+.guide section{display:flex;flex-direction:column;gap:14px}
+.guide p{margin:0;max-width:66ch;color:var(--ink-2)}
+.lead{font-size:17px}
+.facts{display:flex;flex-wrap:wrap;gap:8px}
+.fact{background:var(--green-100);color:var(--green-800);font-weight:600;font-size:13.5px;padding:5px 12px;border-radius:var(--r-pill)}
+.genie-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.genie-card{display:flex;flex-direction:column;gap:8px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:14px}
+.genie-card-head{display:flex;align-items:center;gap:10px}
+.genie-card .g-blurb{font-size:13px}
+.genie-card .chip{margin-top:auto}
+.walk{list-style:none;counter-reset:w;margin:0;padding:0;display:flex;flex-direction:column;gap:2px;max-width:720px}
+.walk li{counter-increment:w;display:grid;grid-template-columns:30px minmax(0,1fr);gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.walk li::before{content:counter(w);width:28px;height:28px;border-radius:50%;background:var(--green-700);color:var(--on-dark);display:grid;place-items:center;font-weight:700;font-size:13px}
+.walk li.approval-step::before{background:var(--lime);color:var(--green-900)}
+.walk strong{display:block}
+.walk span{color:var(--ink-2);font-size:14.5px}
+.tool-split{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;max-width:720px}
+.tool-box{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:14px;display:flex;flex-direction:column;gap:6px}
+.tool-box h3{margin:0;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.tool-box p{color:var(--ink);font-weight:600}
+.tool-box small{color:var(--ink-3);font-size:13px}
+.wont{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.wont-card{background:var(--scope-bg);border:1px dashed var(--scope-line);border-radius:var(--r-md);padding:16px;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.wont-card h3{margin:0;font-size:16px;color:var(--ink)}
+.wont-card p{color:var(--scope-fg);font-size:14.5px}
+.ex{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:6px 10px;font-size:14px;align-items:baseline}
+.ex dt{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--scope-fg)}
+.ex dd{margin:0;color:var(--ink)}
+
+.toast{z-index:30;position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--green-900);color:var(--on-dark);padding:9px 16px;border-radius:var(--r-pill);font-size:13.5px;font-weight:500;max-width:calc(100% - 32px);z-index:10}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{50%{opacity:.25}}
+@keyframes barpulse{50%{border-top-color:var(--green-500)}}
+@media (prefers-reduced-motion:reduce){.spin,.g-row.routing .g-dot,.tk-steps li.s-active{animation:none}}
+@media (max-width:900px){
+  .shell{grid-template-columns:minmax(0,1fr)}
+  .side{display:none}
+  .top{padding:10px 16px}
+  .log,.tracker,.composer,.guide{padding-inline:16px}
+  .user span{display:none}
+  .tk-now{display:block}
+  .tk-steps{grid-template-columns:repeat(var(--n,7),minmax(0,1fr));gap:4px}
+  .tk-steps li{padding-top:0}
+  .tk-lbl,.tk-note{display:none}
+  .msg.user{max-width:88%}
+  .approval dl{grid-template-columns:minmax(0,1fr);gap:0}
+  .approval dd{margin-bottom:8px}
+}
+
+/* ---------- round two: previews, reroute, requests, demo drawer ---------- */
+.tabs{max-width:100%;overflow-x:auto}
+.tab{white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.tab-count{min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--lime);color:var(--green-900);font-size:11px;font-weight:800;display:inline-grid;place-items:center}
+.tab[aria-selected="true"] .tab-count{background:var(--green-900);color:var(--lime)}
+
+.who-btn{border:0;background:none;padding:0;display:inline-flex;align-items:center;gap:6px;color:var(--ink-3);border-radius:var(--r-pill)}
+.who-btn>svg{font-size:15px}
+.who-btn:hover>svg,.who-btn[aria-expanded="true"]>svg{color:var(--green-700)}
+.trace.collapsed{display:none}
+.keep-trace .trace.collapsed{display:flex}
+.bubble .muted{font-size:13px;color:var(--ink-3)}
+
+button.src{cursor:pointer}
+button.src:hover{border-color:var(--green-500);color:var(--green-800)}
+.related{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chip.sm{padding:4px 10px;font-size:12.5px}
+
+.foot{display:flex;flex-direction:column;gap:8px;align-self:stretch;max-width:660px}
+.foot-row{display:flex;align-items:center;gap:4px;flex-wrap:wrap;min-height:28px}
+.fb-thumbs{display:inline-flex;gap:2px}
+.foot .fb-btn{width:28px;height:28px;border:0;background:transparent;color:var(--ink-3)}
+.foot .fb-btn:hover{background:var(--surface-2);color:var(--green-700)}
+.foot .fb-btn[aria-pressed="true"]{background:var(--green-700);color:var(--on-dark)}
+.foot-sep{width:1px;height:14px;background:var(--line);margin:0 6px}
+.foot-link{border:0;background:none;padding:2px 2px;color:var(--ink-3);font-size:12.5px;text-decoration:underline;text-underline-offset:2px}
+.foot-link:hover{color:var(--green-700)}
+.foot-link.strong{color:var(--green-700);font-weight:600;font-size:inherit}
+.msg.bot:not(:last-child) .foot:not(.open){opacity:.55}
+.msg.bot .foot:hover,.msg.bot .foot:focus-within{opacity:1}
+.reroute{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:12px;display:flex;flex-direction:column;gap:10px}
+.reroute p{margin:0;font-size:13.5px;color:var(--ink-2)}
+
+.tk-wait{display:flex;justify-content:space-between;align-items:center;gap:6px 12px;flex-wrap:wrap;font-size:13px;color:var(--ink-2);background:var(--bg);border-radius:var(--r-sm);padding:6px 6px 6px 12px}
+.tk-reminded{color:var(--green-700);font-weight:600;display:inline-flex;gap:5px;align-items:center;padding:5px 8px}
+.approval-reminder{align-self:flex-start;background:var(--green-800);color:var(--lime);font-size:12.5px;font-weight:700;padding:4px 10px;border-radius:var(--r-pill);display:inline-flex;gap:6px;align-items:center}
+
+.scrim{position:fixed;inset:0;background:var(--scrim);z-index:20}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(440px,100%);background:var(--surface);z-index:21;display:flex;flex-direction:column;box-shadow:-18px 0 40px -24px var(--green-900);padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.drawer-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:18px 20px 14px;border-bottom:1px solid var(--line)}
+.drawer-kicker{margin:0 0 4px;font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--green-700)}
+.drawer h2{margin:0;font-family:var(--font-display);font-size:20px;line-height:1.2;text-wrap:balance;overflow-wrap:anywhere}
+.drawer-x{border:0;background:var(--surface-2);width:32px;height:32px;border-radius:50%;font-size:20px;line-height:1;color:var(--ink-2);flex:none}
+.drawer-x:hover{background:var(--green-100)}
+.drawer-body{flex:1;overflow:auto;padding:18px 20px 24px;display:flex;flex-direction:column;gap:16px;align-items:flex-start}
+.drawer-body>*{margin:0;max-width:100%}
+.drawer-body h3{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.dr-meta{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:6px 14px;font-size:13.5px;align-self:stretch}
+.dr-meta dt{color:var(--ink-3)}
+.dr-meta dd{margin:0;overflow-wrap:anywhere}
+.dr-quote{align-self:stretch;background:var(--green-50);border-left:4px solid var(--green-500);border-radius:0 var(--r-sm) var(--r-sm) 0;padding:14px 16px;font-size:15px;line-height:1.55}
+.dr-note{font-size:12.5px;color:var(--ink-3)}
+.stale{font-size:12px;font-weight:600;color:var(--warn-fg);background:var(--warn-bg);padding:1px 8px;border-radius:var(--r-pill);margin-left:6px;white-space:nowrap}
+.demo-top{align-self:stretch;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.switch{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;cursor:pointer}
+.switch input{width:16px;height:16px;accent-color:var(--green-600);margin:0}
+.demo-group{display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.demo-item{display:flex;flex-direction:column;gap:4px;align-items:flex-start}
+.demo-item small,.demo-tip{font-size:13px;color:var(--ink-2);line-height:1.4}
+
+.reqs{flex:1;overflow:auto;padding-block:36px 56px;padding-inline:24px}
+.reqs-inner{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+.reqs h1{font-family:var(--font-display);font-size:30px;margin:0;line-height:1.1}
+.reqs-lead{margin:8px 0 0;color:var(--ink-2)}
+.reqs h2{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin:0}
+.reqs section{display:flex;flex-direction:column;gap:10px}
+.req{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.req.closed{background:transparent}
+.req-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.req-title{display:flex;flex-direction:column;min-width:0;flex:1}
+.req-title strong{line-height:1.25}
+.req-title .mono{color:var(--ink-3)}
+.req-bars{display:flex;gap:4px}
+.req-bars i{flex:1;height:5px;border-radius:3px;background:var(--surface-2)}
+.req-bars i.s-done{background:var(--green-500)}
+.req-bars i.s-active{background:var(--lime-2)}
+.req-bars i.s-failed{background:var(--danger)}
+.req-meta,.req-q{margin:0;font-size:13.5px;color:var(--ink-2)}
+.req-q{color:var(--ink)}
+.req-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.empty{border:1px dashed var(--line);border-radius:var(--r-md);padding:18px;color:var(--ink-3);font-size:14px;margin:0}
+.tag{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--surface-2);padding:2px 7px;border-radius:5px}
+
+.tips{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px 20px}
+.tip{display:flex;flex-direction:column;gap:4px;border-top:2px solid var(--green-200);padding-top:10px}
+.tip span{font-size:14px;color:var(--ink-2)}
+@media (max-width:900px){.reqs{padding-inline:16px}}
+.facts-box{background:var(--green-50);border-radius:var(--r-sm);padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.facts-box h4{margin:0;color:var(--green-800)}
+.facts-box ul{margin:0}
+.wont-card{border-style:solid}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2c.6 4.9 2.5 8.4 10 10-7.5 1.6-9.4 5.1-10 10-.6-4.9-2.5-8.4-10-10 7.5-1.6 9.4-5.1 10-10z"/></svg></div>
+    <div>
+      <div class="brand-name">Sparky</div>
+      <div class="brand-sub">Company Employee Assistant</div>
+    </div>
+  </div>
+  <div class="tabs" role="tablist" aria-label="Views">
+    <button class="tab" role="tab" id="tab-chat" aria-selected="true" aria-controls="view-chat" type="button">Chat</button>
+    <button class="tab" role="tab" id="tab-requests" aria-selected="false" aria-controls="view-requests" type="button">My requests<span class="tab-count" id="req-count" hidden></span></button>
+    <button class="tab" role="tab" id="tab-guide" aria-selected="false" aria-controls="view-guide" type="button">What Sparky can do</button>
+  </div>
+  <div class="top-right">
+    <span class="demo-pill">Prototype · mocked data</span>
+    <button class="ghost" type="button" id="demo-btn">Demo script</button>
+    <div class="user"><div class="avatar" aria-hidden="true">MO</div><span><strong>Maya Okafor</strong></span></div>
+  </div>
+</header>
+
+<div class="shell" id="view-chat" role="tabpanel" aria-labelledby="tab-chat">
+  <aside class="side" aria-label="Genies">
+    <div>
+      <h2>Genies</h2>
+      <ul class="roster" id="roster"></ul>
+    </div>
+    <div class="how">
+      <h2 style="margin-left:0">How a question travels</h2>
+      <ol>
+        <li>Sparky checks it's something it can help with.</li>
+        <li>It picks the genie for that topic.</li>
+        <li>The genie answers and cites its source.</li>
+      </ol>
+      <p>Sources come from Confluence, Jira, Google Drive, and PDFs. Everything here is mocked.</p>
+    </div>
+  </aside>
+
+  <main class="chat">
+    <section class="tracker" id="tracker" aria-live="polite" aria-label="Access request tracker" hidden></section>
+    <div class="log" id="log">
+      <div class="log-inner" id="log-inner" role="log" aria-live="polite"></div>
+    </div>
+    <div class="composer">
+      <div class="composer-inner">
+        <form id="composer-form" autocomplete="off">
+          <input id="composer-input" type="text" placeholder="Ask Sparky a work question…" aria-label="Message Sparky" maxlength="400">
+          <button class="btn" id="send-btn" type="submit">Send</button>
+        </form>
+        <div class="composer-foot">
+          <span>Demo prototype. Answers, sources, tickets, and approvals are simulated.</span>
+          <button type="button" id="suggest-btn">Show suggested prompts</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="reqs" id="view-requests" role="tabpanel" aria-labelledby="tab-requests" hidden>
+  <div class="reqs-inner" id="reqs-inner"></div>
+</div>
+
+<div class="guide" id="view-guide" role="tabpanel" aria-labelledby="tab-guide" hidden>
+  <div class="guide-inner" id="guide-inner"></div>
+</div>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title" hidden>
+  <header class="drawer-head">
+    <div><p class="drawer-kicker" id="drawer-kicker"></p><h2 id="drawer-title"></h2></div>
+    <button type="button" class="drawer-x" id="drawer-x" aria-label="Close panel">&times;</button>
+  </header>
+  <div class="drawer-body" id="drawer-body"></div>
+</aside>
+
+<div class="toast" id="toast" role="status" hidden></div>
+<script>
+/* ---------- Mocked data and simulated logic. Nothing here calls a real system. ---------- */
+const USER = {
+  name: 'Maya Okafor', first: 'Maya', login: 'maya.okafor', title: 'Senior Analyst', team: 'Revenue Operations',
+  manager: { name: 'Daniel Reyes', first: 'Daniel', title: 'Director, Revenue Operations' }
+};
+
+const GENIE_ORDER = ['it', 'hr', 'stock', 'costcap', 'comp', 'audit', 'collections', 'orders', 'sales'];
+const GENIES = {
+  it: { name: 'IT Genie', team: 'IT Support', blurb: 'Devices, sign-in, tool access',
+    dom: [[/\b(it support|help ?desk|service desk|wi-?fi|slack|zoom|email|printer|software|laptop|device|tech support)\b/, 3]],
+    weak: ['computer', 'install', 'apps?\\b', 'phone', 'badge', 'security', 'tool', 'account', 'login', 'screen'] },
+  hr: { name: 'HR Genie', team: 'People', blurb: 'Time off, leave, benefits',
+    dom: [[/\b(hr|human resources|people team|benefits?|handbook|insurance|medical|dental|vision|leave|bereavement)\b/, 3]],
+    weak: ['perk', 'travel', 'wellness', 'hire', 'onboarding', 'relocat', 'sick', 'family'] },
+  stock: { name: 'Stock Admin Genie', team: 'Stock Administration', blurb: 'ESPP, RSUs, trading windows',
+    dom: [[/\b(stocks?|equity|shares|espp|rsus?|stock options|vest\w*|brokerage|blackout)\b/, 3]],
+    weak: ['grant', 'tax', 'trade', 'trading', 'insider', 'option'] },
+  costcap: { name: 'Cost Cap Genie', team: 'FP&A', blurb: 'Caps, actuals, exceptions',
+    dom: [[/\bcost caps?\b/, 3], [/\b(budget\w*|cost cent(er|re)s?|spend caps?|fp&a)\b/, 3]],
+    weak: ['expense', 'cost', 'spend', 'forecast', 'headcount', 'cap', 'actuals'] },
+  comp: { name: 'Compensation Genie', team: 'Total Rewards', blurb: 'Pay bands, merit, bonuses',
+    dom: [[/\b(compensation|total rewards|salary|salaries|pay bands?|raises?|promotions?|level(l)?ing|bonus(es)?)\b/, 3]],
+    weak: ['comp', 'level', 'band', 'merit', 'pay', 'offer'] },
+  audit: { name: 'Internal Audit Genie', team: 'Internal Audit', blurb: 'Controls, SOX, audit plan',
+    dom: [[/\b(audit\w*|sox|compliance|internal controls?)\b/, 3]],
+    weak: ['approv', 'expense', 'polic', 'risk', 'fraud', 'control', 'segregation'] },
+  collections: { name: 'Collections Genie', team: 'Collections', blurb: 'Invoices, disputes, terms',
+    dom: [[/\b(collections?|invoic\w*|receivables?|remittance|overdue|past due)\b/, 3]],
+    weak: ['payment', 'customer', 'refund', 'credit', 'owed', 'billing'] },
+  orders: { name: 'Order Management Genie', team: 'Order Management', blurb: 'Bookings, status, changes',
+    dom: [[/\b(orders?|bookings?|purchase orders?|order forms?|renewals?|quotes?)\b/, 3]],
+    weak: ['contract', 'po', 'customer', 'deal desk', 'sku', 'subscription'] },
+  sales: { name: 'Sales Enablement Genie', team: 'Sales Enablement', blurb: 'Decks, battlecards, training',
+    dom: [[/\b(sales|pitch\w*|decks?|battle ?cards?|competit\w*|enablement|prospect\w*|playbooks?)\b/, 3]],
+    weak: ['customer', 'deal', 'demo', 'discovery', 'objection', 'training'] }
+};
+
+const TOOLS = {
+  tableau: { name: 'Tableau', re: /\btableau\b/, limited: true, owner: { name: 'Priya Nair', first: 'Priya', team: 'Data Platform' },
+    group: 'sg-tableau-creator', seats: { used: 288, total: 300 },
+    reasons: ['Building the weekly pipeline dashboard for RevOps', 'Maintaining the renewals forecast workbook'],
+    start: 'Getting Started with Tableau' },
+  snowflake: { name: 'Snowflake', re: /\bsnowflake\b/, group: 'sg-snowflake-analyst-ro',
+    reasons: ['Querying bookings data for quarterly forecasting', 'Validating order data for month-end close'],
+    start: 'Snowflake Access & Query Basics' },
+  claude: { name: 'Claude', re: /\bclaude\b/, limited: true, owner: { name: 'Tomás Becker', first: 'Tomás', team: 'AI Enablement' },
+    group: 'sg-claude-enterprise-users', seats: { used: 1164, total: 1200 },
+    reasons: ['Summarizing customer call notes and drafting QBR prep', 'Drafting first-pass analysis write-ups for RevOps'],
+    start: 'Getting Started with Claude' },
+  datadog: { name: 'Datadog', re: /\bdata ?dog\b/, group: 'sg-datadog-standard',
+    reasons: ['Monitoring the RevOps data pipeline jobs', 'Viewing dashboards for the billing sync service'],
+    start: 'Datadog Basics for New Users' },
+  lucidchart: { name: 'Lucidchart', re: /\blucid ?chart\b|\blucid\b/, group: 'sg-lucidchart-editors',
+    reasons: ['Mapping the quote-to-cash process for an audit walkthrough', 'Diagramming the new lead routing flow'],
+    start: 'Lucidchart Team Templates' },
+  onepassword: { name: '1Password', re: /\b(1|one) ?password\b/, group: 'sg-1password-members',
+    reasons: ['Storing shared vendor portal credentials securely', 'Joining the RevOps shared vault'],
+    start: '1Password Setup Guide' }
+};
+const TOOL_ORDER = ['tableau', 'snowflake', 'claude', 'datadog', 'lucidchart', 'onepassword'];
+
+/* Knowledge base: 2 to 3 mocked answers per genie. sources: [type, title] */
+const KB = [
+  /* ----- IT ----- */
+  { id: 'it-password', genie: 'it', q: 'How do I reset my SSO password?',
+    terms: [[/\bpasswords?\b/, 4], [/\breset\b/, 1], [/\blocked out\b/, 4], [/\bmfa\b|\b2fa\b|two[- ]factor/, 4], [/\bsso\b/, 2]],
+    html: `<p>You can reset it yourself in about two minutes:</p>
+      <ol><li>On the SSO sign-in page, choose <strong>Need help signing in?</strong></li>
+      <li>Pick <strong>Forgot password</strong> and approve the prompt in your MFA app.</li>
+      <li>Set a new password. It needs 14 or more characters and can't match your last 10.</li></ol>
+      <p>If you've lost your MFA device too, tell me and I'll open a ticket so the service desk can verify you.</p>`,
+    sources: [['Confluence', 'Password & MFA Reset Guide']] },
+  { id: 'it-vpn', genie: 'it', q: 'How do I connect to the VPN?',
+    terms: [[/\bvpn\b/, 5], [/\bremote access\b/, 4]],
+    html: `<p>The VPN client is already on company laptops. To connect:</p>
+      <ol><li>Open <strong>GlobalConnect</strong> from the menu bar or system tray.</li>
+      <li>Choose the gateway closest to you and select <strong>Connect</strong>.</li>
+      <li>Sign in with SSO and approve the MFA prompt.</li></ol>
+      <p>You only need the VPN for internal admin tools and finance systems. Most apps work without it.</p>`,
+    sources: [['Confluence', 'Remote Access (VPN) Setup'], ['PDF', 'Acceptable Use Policy']] },
+  { id: 'it-laptop', genie: 'it', q: 'How do I get a replacement laptop?',
+    terms: [[/\blaptops?\b|\bmacbooks?\b/, 4], [/\bhardware\b/, 4], [/\b(monitor|keyboard|headset)s?\b/, 4], [/\breplace\w*\b|\brefresh\b/, 1]],
+    html: `<p>Laptops are refreshed every 3 years, or sooner if yours is failing.</p>
+      <ul><li><strong>Due for refresh:</strong> you'll get an email 30 days ahead with a link to choose a model.</li>
+      <li><strong>Broken or very slow:</strong> open a Hardware request and IT will run diagnostics first. A loaner ships within 1 business day if needed.</li>
+      <li><strong>Accessories:</strong> monitors, keyboards, and headsets are a separate Hardware request with manager approval.</li></ul>`,
+    sources: [['Confluence', 'Hardware Refresh Policy'], ['Jira', 'ITHELP service desk: Hardware request']] },
+
+  /* ----- HR ----- */
+  { id: 'hr-pto', genie: 'hr', q: 'How do I request PTO?',
+    terms: [[/\bpto\b/, 5], [/\btime off\b|\btime-off\b/, 5], [/\bvacation\b/, 4], [/\bdays? off\b/, 4], [/\bsick (day|leave|time)\b/, 4]],
+    html: `<p>Time off is requested in the HR system and approved by your manager:</p>
+      <ol><li>Open the HR system and go to <strong>Time Off &rsaquo; Request Absence</strong>.</li>
+      <li>Pick your dates and the type: Vacation, Sick, or Personal.</li>
+      <li>Submit. Your manager is notified, and you can follow the status under <strong>My Absences</strong>.</li></ol>
+      <p>Good to know: for 5 or more days in a row, submit at least 2 weeks ahead. Approved time off appears on your calendar automatically.</p>`,
+    sources: [['Confluence', 'PTO Policy'], ['Confluence', 'Requesting Time Off: Step by Step']] },
+  { id: 'hr-holidays', genie: 'hr', q: 'What are the company holidays this year?',
+    terms: [[/\bholidays?\b/, 5], [/\bwellness days?\b/, 5], [/\boffices? closed\b/, 4]],
+    html: `<p>The US calendar has 11 company holidays in 2026, plus 4 company-wide wellness days. The ones still ahead:</p>
+      <ul><li>Thu Nov 26 and Fri Nov 27: Thanksgiving</li>
+      <li>Thu Dec 24 and Fri Dec 25: Winter holiday</li>
+      <li>Fri Jan 1, 2027: New Year's Day</li></ul>
+      <p>Holidays differ by country. The calendar has a tab for each location.</p>`,
+    sources: [['Google Drive', '2026 Company Holiday Calendar']] },
+  { id: 'hr-parental', genie: 'hr', q: 'How does parental leave work?',
+    terms: [[/\bparental\b|\bmaternity\b|\bpaternity\b/, 5], [/\bleave of absence\b/, 5], [/\b(baby|adoption|adopting|newborn)\b/, 4]],
+    html: `<p>All regular employees are eligible for paid parental leave after 90 days of employment:</p>
+      <ul><li><strong>16 weeks</strong> of fully paid leave for birth, adoption, or foster placement.</li>
+      <li>Take it in one block or split it into two within the first 12 months.</li>
+      <li>A 4-week gradual return at 80% hours on full pay is available afterward.</li></ul>
+      <p>To start, open a Leave of Absence request in the HR system about 60 days before your expected date. The leave team will walk you through the rest.</p>`,
+    sources: [['PDF', 'Parental Leave Guide'], ['Confluence', 'Leave of Absence Policy']] },
+
+  /* ----- Stock Admin ----- */
+  { id: 'st-espp', genie: 'stock', q: 'How does the ESPP work?',
+    terms: [[/\bespp\b/, 4], [/\bstock purchase\b/, 5], [/\b(work|works|explain|what is|what's)\b/, 1]],
+    html: `<p>The Employee Stock Purchase Plan lets you buy company stock through payroll deductions:</p>
+      <ul><li>You choose a contribution between 1% and 15% of eligible pay.</li>
+      <li>Contributions build up over a 6-month offering period.</li>
+      <li>On the purchase date, shares are bought at a 15% discount to the lower of the price at the start or the end of the period.</li>
+      <li>Shares are deposited in your brokerage account. Plan and IRS limits apply.</li></ul>
+      <p>That is how the plan works. Whether to take part, and how much to contribute, is a personal decision I can't advise on.</p>`,
+    sources: [['PDF', 'Equity Plan Guide'], ['Confluence', 'ESPP FAQ']] },
+  { id: 'st-window', genie: 'stock', q: 'When is the next ESPP enrollment window?',
+    terms: [[/\bespp\b/, 3], [/\benroll\w*\b/, 3], [/\bwindows?\b/, 2], [/\boffering periods?\b/, 4], [/\b(when|next|deadline)\b/, 1]],
+    html: `<p>The next enrollment window opens <strong>Mon, Nov 2, 2026</strong> and closes <strong>Fri, Nov 13, 2026</strong> at 5:00 pm PT. It covers the offering period that starts Dec 1.</p>
+      <ul><li>Enroll or change your contribution in the equity portal under <strong>ESPP &rsaquo; Enroll</strong>.</li>
+      <li>Already enrolled? Your current election carries over unless you change it.</li>
+      <li>After this window, the next one is in May 2027.</li></ul>`,
+    sources: [['Confluence', 'ESPP Enrollment Calendar'], ['PDF', 'Equity Plan Guide']] },
+  { id: 'st-rsu', genie: 'stock', q: 'How does RSU vesting work?',
+    terms: [[/\brsus?\b/, 4], [/\bvest\w*\b/, 4], [/\btrading windows?\b|\bblackout\b/, 5], [/\bgrants?\b/, 2]],
+    html: `<p>Here is how RSU grants vest in general:</p>
+      <ul><li>New-hire grants vest over 4 years: 25% after the first 12 months, then quarterly.</li>
+      <li>Quarterly vest dates are the 2nd of March, June, September, and December.</li>
+      <li>On each vest date, shares are released to your brokerage account. Some are withheld automatically to cover taxes.</li>
+      <li>Shares can only be traded during an open trading window.</li></ul>
+      <p>Your own grants and dates are in the equity portal under <strong>Holdings</strong>.</p>`,
+    sources: [['PDF', 'Equity Plan Guide'], ['Confluence', 'Trading Window Calendar']] },
+
+  /* ----- Cost Cap ----- */
+  { id: 'cc-q3', genie: 'costcap', q: 'What is the cost cap historical for FY26 Q3?',
+    terms: [[/\bcost caps?\b/, 2], [/\bfy ?'?2?6\b/, 2], [/\bq[1-4]\b|\bquarter\w*\b/, 2], [/\bhistor\w*\b|\bactuals?\b|\btrend\b/, 2]],
+    wide: true,
+    html: `<p>Here is the FY26 Q3 cost cap history, company total. Q3 runs August through October 2025.</p>
+      <div class="tbl-wrap"><table class="data">
+      <thead><tr><th>Month</th><th>Cost cap</th><th>Actual spend</th><th>Under cap</th><th>Cap used</th></tr></thead>
+      <tbody>
+      <tr><td>Aug 2025</td><td>$4.20M</td><td>$3.96M</td><td>$0.24M</td><td><span class="ubar"><i style="width:94.3%"></i></span>94.3%</td></tr>
+      <tr><td>Sep 2025</td><td>$4.20M</td><td>$4.11M</td><td>$0.09M</td><td><span class="ubar"><i style="width:97.9%"></i></span>97.9%</td></tr>
+      <tr><td>Oct 2025</td><td>$4.35M</td><td>$4.02M</td><td>$0.33M</td><td><span class="ubar"><i style="width:92.4%"></i></span>92.4%</td></tr>
+      </tbody>
+      <tfoot><tr><td>FY26 Q3</td><td>$12.75M</td><td>$12.09M</td><td>$0.66M</td><td><span class="ubar"><i style="width:94.8%"></i></span>94.8%</td></tr></tfoot>
+      </table></div>
+      <p>Q3 closed $0.66M under cap. September ran closest to the limit at 97.9%. October's cap was raised by $0.15M through an approved exception.</p>`,
+    sources: [['Google Drive', 'FY26 Cost Cap Tracker'], ['Confluence', 'Cost Cap Policy']] },
+  { id: 'cc-exceed', genie: 'costcap', q: 'What happens if my team goes over its cost cap?',
+    terms: [[/\bcost caps?\b/, 2], [/\b(exceed\w*|breach\w*|overage|over budget|overspen\w*)\b/, 4], [/\b(go|goes|going|went|run|runs) (over|above|past)\b/, 4]],
+    html: `<p>Going over a cap doesn't block spend on its own, but it does start a review:</p>
+      <ul><li><strong>At 90% of cap:</strong> the cost center owner gets an automatic heads-up.</li>
+      <li><strong>At 100%:</strong> new purchase requests for that cost center pause until FP&amp;A reviews them, usually within 2 business days.</li>
+      <li><strong>If the overage is expected:</strong> file an exception before month-end so it's approved rather than flagged.</li></ul>`,
+    sources: [['Confluence', 'Cost Cap Policy'], ['Google Drive', 'FY27 Cost Cap Tracker']] },
+  { id: 'cc-exception', genie: 'costcap', q: 'How do I request a cost cap exception?',
+    terms: [[/\bcost caps?\b/, 2], [/\bexceptions?\b/, 4], [/\b(increase|raise|lift) (the|my|our|a) cap\b/, 5], [/\bmore budget\b/, 4], [/\brequest\b/, 1]],
+    html: `<p>Exceptions go through a short FP&amp;A form:</p>
+      <ol><li>Open the <strong>Cost Cap Exception</strong> request in Jira.</li>
+      <li>Add the cost center, the amount, the months affected, and what's driving it.</li>
+      <li>Your VP approves first, then FP&amp;A. Requests under $50K are usually decided within 3 business days.</li></ol>
+      <p>Approved exceptions show up as an adjusted cap in the tracker.</p>`,
+    sources: [['Confluence', 'Cost Cap Exception Process'], ['Jira', 'FPA project: Cost Cap Exception request']] },
+
+  /* ----- Compensation ----- */
+  { id: 'co-bands', genie: 'comp', q: 'How do pay bands work?',
+    terms: [[/\b(pay|salary|comp|compensation) (bands?|ranges?)\b/, 5], [/\bbands?\b/, 3], [/\bcompa[- ]?ratio\b/, 5], [/\bjob levels?\b|\blevel(l)?ing\b/, 3]],
+    html: `<p>Every role maps to a job level, and every level has a pay band:</p>
+      <ul><li>A band has a minimum, a midpoint, and a maximum. The midpoint reflects the market rate for that role and location.</li>
+      <li>Bands are set by job family, level, and geographic zone, and are reviewed once a year against market data.</li>
+      <li>Where someone sits in a band depends on experience, performance, and time in level.</li></ul>
+      <p>This is the general policy. I can't see or discuss anyone's individual pay.</p>`,
+    sources: [['Confluence', 'Compensation Philosophy & Pay Bands']] },
+  { id: 'co-merit', genie: 'comp', q: 'When does the merit cycle run?',
+    terms: [[/\bmerit\b/, 5], [/\b(comp|compensation|salary|annual pay) (review|cycle)s?\b/, 5], [/\bcycles?\b/, 1], [/\braises? (happen|decided|effective|given)\b/, 4]],
+    html: `<p>The merit cycle runs once a year, after the fiscal year closes on Jan 31:</p>
+      <ul><li><strong>February:</strong> managers submit recommendations and leaders calibrate.</li>
+      <li><strong>Mid-March:</strong> decisions are finalized and managers share them with their teams.</li>
+      <li><strong>April 1:</strong> changes take effect and appear in the first April paycheck.</li></ul>
+      <p>You're eligible if you joined before Oct 1 of the previous year.</p>`,
+    sources: [['Google Drive', 'FY27 Merit Cycle Timeline'], ['Confluence', 'Compensation Philosophy & Pay Bands']] },
+  { id: 'co-bonus', genie: 'comp', q: 'How are bonuses structured?',
+    terms: [[/\bbonus(es)?\b/, 4], [/\b(structur\w*|plan|work|works|paid|payout|calculated)\b/, 1], [/\bcommissions?\b/, 3]],
+    html: `<p>The corporate bonus plan works like this:</p>
+      <ul><li>Each level has a target bonus, set as a percentage of base pay.</li>
+      <li>The company pool is funded on two measures: annual revenue and operating margin.</li>
+      <li>Individual payouts apply a performance multiplier to that funded target.</li>
+      <li>Bonuses are paid once a year, in April, after results are final.</li></ul>
+      <p>Sales roles are on commission plans instead, which have their own plan documents.</p>`,
+    sources: [['PDF', 'Corporate Bonus Plan Overview']] },
+
+  /* ----- Internal Audit ----- */
+  { id: 'ia-report', genie: 'audit', q: 'How do I report a control concern?',
+    terms: [[/\b(control|compliance|audit) (concern|issue|gap|deficienc\w*|problem)s?\b/, 5], [/\bwhistle ?blow\w*\b|\bethics (hot)?line\b/, 5], [/\breport\b/, 1], [/\bconcerns?\b/, 2]],
+    html: `<p>Thanks for raising it. There are two routes, and both are fine:</p>
+      <ul><li><strong>Tell Internal Audit directly:</strong> open a <em>Control Concern</em> ticket. It's visible only to the audit team, and you'll hear back within 2 business days.</li>
+      <li><strong>Report anonymously:</strong> use the Ethics Line, which is run by an outside provider.</li></ul>
+      <p>Include what you saw, which process it affects, and when. You don't need proof to raise a concern.</p>`,
+    sources: [['Confluence', 'Raising a Control Concern'], ['PDF', 'Code of Business Conduct']] },
+  { id: 'ia-sox', genie: 'audit', q: 'What evidence do I need for a SOX control?',
+    terms: [[/\bsox\b/, 4], [/\bevidence\b/, 4], [/\bwalkthroughs?\b/, 4], [/\bcontrol owners?\b/, 4]],
+    html: `<p>For each control you own, evidence should let someone else re-perform your check:</p>
+      <ul><li><strong>What was reviewed:</strong> the report or data, with the date range and where it came from.</li>
+      <li><strong>Who reviewed it and when:</strong> a dated sign-off from the control owner.</li>
+      <li><strong>What was done about exceptions:</strong> notes and follow-up tickets.</li></ul>
+      <p>Screenshots need a visible timestamp and system name. Upload evidence to the control's folder within 5 business days of period end.</p>`,
+    sources: [['PDF', 'SOX Evidence Standards'], ['Confluence', 'Control Owner Handbook']] },
+  { id: 'ia-plan', genie: 'audit', q: "When is my team's next internal audit?",
+    terms: [[/\baudit (plan|schedule|calendar)\b/, 5], [/\binternal audit\b/, 3], [/\baudits?\b/, 2], [/\b(next|when|schedule\w*|upcoming)\b/, 1]],
+    html: `<p>The FY27 audit plan lists every scheduled audit by quarter. For Revenue Operations:</p>
+      <ul><li><strong>Q3 (now):</strong> Quote-to-cash controls. Fieldwork runs Oct 12 to Oct 30.</li>
+      <li><strong>Q4:</strong> User access review for finance systems, starting in December.</li></ul>
+      <p>Process owners get a kickoff note about 3 weeks before fieldwork with the document request list.</p>`,
+    sources: [['Google Drive', 'FY27 Internal Audit Plan']] },
+
+  /* ----- Collections ----- */
+  { id: 'col-overdue', genie: 'collections', q: 'What happens when a customer invoice is overdue?',
+    terms: [[/\b(overdue|past due|unpaid|late)\b/, 4], [/\bdunning\b/, 5], [/\binvoices?\b/, 2]],
+    html: `<p>Overdue invoices follow a set reminder schedule:</p>
+      <ul><li><strong>Day 1 past due:</strong> automatic reminder to the customer's billing contact.</li>
+      <li><strong>Day 15:</strong> a Collections specialist reaches out and copies the account owner.</li>
+      <li><strong>Day 30:</strong> escalation to the customer's finance lead. The account owner is asked to help.</li>
+      <li><strong>Day 60:</strong> the account is reviewed for a service hold. Nothing is suspended without Sales leadership sign-off.</li></ul>`,
+    sources: [['Confluence', 'Collections Dunning Process']] },
+  { id: 'col-dispute', genie: 'collections', q: 'Who handles a customer payment dispute?',
+    terms: [[/\bdisput\w*\b/, 5], [/\bcharge ?backs?\b/, 5], [/\bshort[- ]?pa(y|id|yment)s?\b/, 4], [/\bpayments?\b/, 1]],
+    html: `<p>Collections owns disputes from start to finish. If a customer tells you they disagree with an invoice:</p>
+      <ol><li>Log it as a <strong>Dispute</strong> ticket with the invoice number and what the customer said.</li>
+      <li>Collections pauses reminders on that invoice while it's open.</li>
+      <li>A specialist works with Order Management and the account owner, and replies to the customer within 5 business days.</li></ol>`,
+    sources: [['Confluence', 'Dispute Handling Playbook'], ['Jira', 'COLL project: Dispute ticket']] },
+  { id: 'col-terms', genie: 'collections', q: 'What are our standard payment terms?',
+    terms: [[/\bpayment terms\b/, 6], [/\bnet[- ]?(15|30|45|60|90)\b/, 5]],
+    html: `<p>Standard terms are <strong>Net 30</strong> from the invoice date, billed annually in advance.</p>
+      <ul><li>Net 45 can be approved by the Collections manager.</li>
+      <li>Net 60 or longer needs Finance leadership approval through Deal Desk.</li>
+      <li>Accepted methods are ACH, wire, and card. Card is limited to invoices under $25K.</li></ul>`,
+    sources: [['PDF', 'Standard Payment Terms'], ['Confluence', 'Non-Standard Terms Approval Matrix']] },
+
+  /* ----- Order Management ----- */
+  { id: 'om-status', genie: 'orders', q: 'How do I check the status of a customer order?',
+    terms: [[/\border status\b|\bstatus of (a|an|my|the|this)? ?(customer )?order\b/, 6], [/\borders?\b/, 2], [/\b(status|track\w*|where is|stuck)\b/, 2]],
+    html: `<p>Each order has a status on the opportunity in the CRM, under <strong>Order Details</strong>:</p>
+      <ul><li><strong>Submitted:</strong> in the Order Management queue.</li>
+      <li><strong>In review:</strong> an analyst is checking the paperwork.</li>
+      <li><strong>Needs info:</strong> waiting on you. The missing item is listed on the order.</li>
+      <li><strong>Booked:</strong> complete. The account is provisioned within 1 business day.</li></ul>
+      <p>Complete orders are booked within 2 business days. In the last week of a quarter, it's the same day.</p>`,
+    sources: [['Confluence', 'Order Status Guide'], ['Jira', 'OM project: Order queue']] },
+  { id: 'om-book', genie: 'orders', q: 'What do I need to submit an order for booking?',
+    terms: [[/\bbooking\b|\bbook (an|a|the|this|my) (order|deal)\b/, 4], [/\border forms?\b/, 5], [/\bsubmit\w*\b/, 2], [/\borders?\b/, 2], [/\bchecklist\b/, 2]],
+    html: `<p>An order is ready to book when it has all four of these:</p>
+      <ol><li>A signed order form that matches the approved quote.</li>
+      <li>The customer's purchase order number, if they require one.</li>
+      <li>Billing contact and bill-to address.</li>
+      <li>Start date and term length.</li></ol>
+      <p>Missing one of these is the most common reason an order moves to <em>Needs info</em>.</p>`,
+    sources: [['Confluence', 'Order Booking Checklist'], ['PDF', 'Order Form Template']] },
+  { id: 'om-amend', genie: 'orders', q: 'How do I amend an order mid-term?',
+    terms: [[/\bamend\w*\b/, 5], [/\bco-?term\w*\b/, 5], [/\b(change|update|modify) (an|the|a|this|my) order\b/, 5], [/\bmid-?term\b/, 3], [/\badd(ing)? (seats|licenses|users)\b/, 3], [/\borders?\b/, 2]],
+    html: `<p>Mid-term changes go through an amendment rather than a new order:</p>
+      <ul><li><strong>Adding seats or products:</strong> create an amendment quote. It co-terms to the existing end date automatically.</li>
+      <li><strong>Changing billing details or PO number:</strong> open an Order Change request. No new signature is needed.</li>
+      <li><strong>Reducing scope:</strong> needs Deal Desk approval before the customer sees paperwork.</li></ul>`,
+    sources: [['Confluence', 'Amendments & Co-Terms'], ['Jira', 'OM project: Order Change request']] },
+
+  /* ----- Sales Enablement ----- */
+  { id: 'se-deck', genie: 'sales', q: 'Where can I find the latest pitch deck?',
+    terms: [[/\bpitch\w*\b/, 4], [/\bdecks?\b/, 4], [/\b(slides|presentation)\b/, 3]],
+    html: `<p>The current corporate pitch deck is <strong>FY27 Corporate Pitch, v3</strong>, updated in September.</p>
+      <ul><li>It's in the Sales Enablement shared drive under <strong>Pitch &rsaquo; Current</strong>.</li>
+      <li>Make a copy before editing. The master is view-only.</li>
+      <li>Industry versions for financial services, retail, and public sector are in the same folder.</li></ul>`,
+    sources: [['Google Drive', 'FY27 Corporate Pitch Deck v3'], ['Confluence', 'Pitch Deck Release Notes']] },
+  { id: 'se-battle', genie: 'sales', q: 'Where are the competitive battlecards?',
+    terms: [[/\bbattle ?cards?\b/, 6], [/\bcompetit\w*\b/, 4]],
+    html: `<p>Battlecards live on one Confluence page, with a card per competitor.</p>
+      <ul><li>Each card covers where we win, common objections with talk tracks, and landmines to set.</li>
+      <li>Cards are reviewed monthly. The review date is at the top of each one.</li>
+      <li>Seen something new in a deal? Post it in the competitive intel channel and it goes into the next review.</li></ul>`,
+    sources: [['Confluence', 'Competitive Battlecards'], ['Google Drive', 'Win/Loss Summary FY27 H1']] },
+  { id: 'se-onboard', genie: 'sales', q: 'What does new-hire sales onboarding cover?',
+    terms: [[/\bsales (onboarding|bootcamp|training|ramp)\b/, 6], [/\bcertif\w*\b/, 4], [/\bramp\w*\b/, 3], [/\benablement\b/, 2]],
+    html: `<p>New sellers follow a 30-60-90 day path:</p>
+      <ul><li><strong>First 30 days:</strong> product foundations, the pitch certification, and shadowing 5 customer calls.</li>
+      <li><strong>Days 31 to 60:</strong> discovery and demo certifications, then your first led calls with a mentor.</li>
+      <li><strong>Days 61 to 90:</strong> a full mock deal review with your manager.</li></ul>
+      <p>Live bootcamp sessions start the first Monday of every month.</p>`,
+    sources: [['Confluence', 'Sales Onboarding Path'], ['Google Drive', 'Certification Schedule']] }
+];
+
+/* ---------- Guardrails: checked on every message, before routing ---------- */
+const FIN_TOPIC = /\b(espp|rsus?|stocks?|shares|equity|stock options|options|401 ?\(?k\)?|invest\w*|contribut\w*|vest\w*|portfolio|my money|savings|retirement|hsa|bonus)\b/;
+const FIN_ADVICE = /\bshould i\b|\bhow much (should|ought)\b|\bhow much to (contribute|invest|put)\b|\bworth (it|doing|joining|enrolling|buying)\b|\b(good|bad|smart|wise) (idea|investment|deal|time|move)\b|\b(do|would|can) you (recommend|advise|suggest)\b|\brecommend\w*\b|\badvice\b|\badvise\b|\bbest time\b|\bbetter to\b|\b(sell|hold|keep) or (sell|hold|keep)\b|\b(smart|wise|risky|safe) to\b|\bwhat (should|would you) (i|you) do\b/;
+const FIN_DIRECT = /\b(will|is|are) (the |our |pd |pagerduty )?(stock|share price|shares) (going to )?(go|rise|drop|fall|recover|tank)/;
+
+const SALARY_RULES = [
+  { k: 'fair', re: /\b(paid|compensated) (fairly|enough|well|right|correctly|appropriately|equitably)\b|\bfair(ly)? (pay|paid|salary|compensat\w*)\b|\b(under|over)paid\b|\bam i (paid|being paid|compensated|making|earning)\b|\bis my (salary|pay|comp|compensation) (fair|competitive|low|high|right|enough|normal|at market|below|above)\b/ },
+  { k: 'other', re: /\b(coworker|co-worker|colleague|teammate|peer|manager|boss|director|vp|ceo)('s|s')? (salary|pay|compensation|comp|bonus|raise)\b|\bwhat (does|do|did) (my |our |the )?(coworker|co-worker|colleague|teammate|peer|manager|boss|director|vp|ceo|he|she|they|[a-z]+ [a-z]+)s? (make|earn|get paid)\b|\bhow much (does|do|did) (my |our |the )?(?!i\b)[\w-]+( [\w-]+)? (make|earn|get paid)\b|\b(his|her|their|someone else's|other people's|everyone's|everyone else's) (salary|pay|compensation|comp|bonus)\b|\bsalary of\b/ },
+  { k: 'raise', re: /\bwhat (raise|bonus|increase|merit increase) (will|am|do|should|can|would) i\b|\b(will|am|do) i (get|getting|going to get|receive) (a |my )?(raise|bonus|increase)\b|\bhow (big|much|large) (will|is|would) my (raise|bonus|increase)\b|\bmy (next )?raise\b/ },
+  { k: 'own', re: /\bwhat('s| is| was| are| will be) my (current )?(salary|pay|paycheck|compensation|comp|base|base pay|base salary|wage|total comp|bonus|income|pay rate|band|pay band|range|pay range)\b|\bhow much (do|did|will|would|should) i (make|earn|get paid|get|be paid)\b|\bwhat do i (make|earn|get paid)\b|\bmy (salary|compensation|total comp|base pay|base salary|pay rate)\b|\bmy pay\b(?! (stub|slip|period|date|day|schedule))/ }
+];
+
+function norm(t) { return String(t).toLowerCase().replace(/[‘’]/g, "'").replace(/\s+/g, ' ').trim(); }
+
+function checkGuardrails(raw) {
+  const t = norm(raw);
+  for (const r of SALARY_RULES) if (r.re.test(t)) return { rule: 'salary', variant: r.k };
+  if (FIN_DIRECT.test(t) || (FIN_ADVICE.test(t) && FIN_TOPIC.test(t))) {
+    const variant = /\bespp\b|contribut/.test(t) ? 'espp' : /\brsus?\b|vest|shares|stock|equity|options/.test(t) ? 'rsu' : 'general';
+    return { rule: 'financial', variant };
+  }
+  return null;
+}
+
+/* ---------- Intent classification and routing ---------- */
+const ACCESS_RE = /\b(access|licen[sc]es?|seat|onboard(ed|ing)?|set ?up|sign ?up|provision\w*|account|add me|need|request|want|get me|can i (get|have|use)|give me|install)\b/;
+const ACCESS_NO_TOOL_RE = /\b(access to|licen[sc]e for|a seat (for|in|on)|onboard(ed)? (to|onto|on)|which tools|what tools|tool access|software access|request (a |an )?(tool|app|software))\b/;
+
+function score(t, terms) { let s = 0; for (const [re, w] of terms) if (re.test(t)) s += w; return s; }
+function findTool(t) { for (const k of TOOL_ORDER) if (TOOLS[k].re.test(t)) return k; return null; }
+
+function classify(raw) {
+  const t = norm(raw);
+  const tool = findTool(t);
+  if (tool && (ACCESS_RE.test(t) || t.split(' ').length <= 2)) return { type: 'flow', genie: 'it', tool };
+  let best = null, bestS = 0;
+  for (const e of KB) { const s = score(t, e.terms); if (s > bestS) { best = e; bestS = s; } }
+  if (best && bestS >= 4) return { type: 'answer', genie: best.genie, entry: best };
+  if (ACCESS_NO_TOOL_RE.test(t)) return { type: 'catalog', genie: 'it' };
+  if (tool) return { type: 'domain', genie: 'it' };
+  let g = null, gS = 0;
+  for (const id of GENIE_ORDER) { const s = score(t, GENIES[id].dom); if (s > gS) { g = id; gS = s; } }
+  if (g && gS >= 3) return { type: 'domain', genie: g };
+  const closest = GENIE_ORDER
+    .map(id => ({ id, s: GENIES[id].weak.filter(w => new RegExp('\\b' + w).test(t)).length }))
+    .filter(x => x.s > 0).sort((a, b) => b.s - a.s).slice(0, 3).map(x => x.id);
+  return { type: 'none', closest };
+}
+
+/* ---------- Source passages, aliases, and "Did you mean" ---------- */
+const EXCERPTS = {
+  'it-password': ['Employees can reset their own SSO password from the sign-in page using Forgot password. A reset requires approval in the MFA app. New passwords must be at least 14 characters and cannot repeat any of the previous 10.'],
+  'it-vpn': ['GlobalConnect is pre-installed on all company laptops. Select the nearest gateway, then sign in with SSO and MFA. VPN is required only for internal admin tools and finance systems.', 'Section 4.2. Remote access to company systems must use the company-managed VPN client on a company-managed device.'],
+  'it-laptop': ['Laptops are replaced on a 3-year cycle. Employees are notified 30 days before their refresh date. Devices that fail diagnostics are replaced early, with a loaner shipped within 1 business day.', 'Request type: Hardware. Use for replacement laptops, repairs, and accessories. Accessory requests require manager approval.'],
+  'hr-pto': ['Time off is requested in the HR system and approved by the employee\'s manager. Requests of 5 or more consecutive days should be submitted at least 2 weeks in advance.', 'Go to Time Off, then Request Absence. Choose your dates and absence type, then submit. Track the request under My Absences. Approved absences sync to your calendar.'],
+  'hr-holidays': ['US tab: 11 company holidays and 4 company-wide wellness days. Remaining 2026 dates: Nov 26 and 27, Dec 24 and 25. Jan 1, 2027 is the first holiday of the new year.'],
+  'hr-parental': ['Eligible employees receive 16 weeks of fully paid parental leave for birth, adoption, or foster placement. Leave may be taken in one or two blocks within 12 months. A 4-week gradual return at 80% hours on full pay is available.', 'Eligibility begins after 90 days of employment. Open a Leave of Absence request about 60 days before the expected start date.'],
+  'st-espp': ['ESPP, section 3. Participants may contribute 1% to 15% of eligible pay. Shares are purchased at the end of each 6-month offering period at 85% of the lower of the closing price on the first day or the last day of the period.', 'Purchased shares are deposited in your brokerage account after each purchase date. Plan and IRS annual limits apply.'],
+  'st-window': ['Next enrollment window: Nov 2 to Nov 13, 2026, closing 5:00 pm PT. Offering period begins Dec 1, 2026. Following window: May 2027.', 'ESPP, section 2. Elections remain in effect for later offering periods unless the participant changes or withdraws them during an enrollment window.'],
+  'st-rsu': ['RSUs, section 5. New-hire grants vest 25% on the first anniversary of the vesting start date and quarterly thereafter over the following 3 years. Shares are withheld at vest to cover required taxes.', 'Quarterly vest dates fall on the 2nd of March, June, September, and December. Shares may be traded only during an open trading window.'],
+  'cc-q3': ['Tab: Q3 Summary. Aug: cap $4.20M, actual $3.96M. Sep: cap $4.20M, actual $4.11M. Oct: cap $4.35M including a $0.15M approved exception, actual $4.02M. Q3 total: cap $12.75M, actual $12.09M.', 'Cost caps are set per month and reported against actual spend at month-end close. Approved exceptions adjust the cap for the months they cover.'],
+  'cc-exceed': ['At 90% of cap the cost center owner is notified. At 100%, new purchase requests are held for FP&A review, normally completed within 2 business days.', 'Tab: Alerts. Cost centers at or above 90% of cap are listed here and refreshed daily.'],
+  'cc-exception': ['Submit the exception with cost center, amount, months affected, and driver. VP approval is required before FP&A review. Requests under $50K are typically decided within 3 business days.', 'Request type: Cost Cap Exception. Required fields: cost center, amount, months, justification, VP approver.'],
+  'co-bands': ['Each job level has a pay band with a minimum, midpoint, and maximum. Bands are defined by job family, level, and geographic zone, and are reviewed annually against market data.'],
+  'co-merit': ['February: manager recommendations and calibration. Mid-March: decisions finalized and communicated. April 1: effective date. Eligibility cutoff: hire date before Oct 1.', 'Merit increases are considered once a year, in the annual cycle that follows fiscal year close.'],
+  'co-bonus': ['Target bonus is a percentage of base pay set by level. The company pool is funded on annual revenue and operating margin. Individual payouts apply a performance multiplier and are paid in April.'],
+  'ia-report': ['Open a Control Concern ticket, visible only to Internal Audit. Describe what you observed, the process affected, and when. Internal Audit responds within 2 business days.', 'Employees may report concerns anonymously through the Ethics Line, operated by an independent provider. Retaliation for good-faith reports is prohibited.'],
+  'ia-sox': ['Evidence must show what was reviewed, by whom, and when, and how exceptions were resolved. Screenshots must show a system name and timestamp.', 'Upload evidence to the control\'s folder within 5 business days of period end.'],
+  'ia-plan': ['Revenue Operations. Q3: Quote-to-cash controls, fieldwork Oct 12 to Oct 30. Q4: User access review for finance systems, starting December.'],
+  'col-overdue': ['Day 1: automated reminder. Day 15: specialist outreach, account owner copied. Day 30: escalation to the customer\'s finance lead. Day 60: service hold review, which requires Sales leadership sign-off.'],
+  'col-dispute': ['Log a Dispute ticket with the invoice number and the customer\'s stated reason. Dunning is paused while the dispute is open. Customers receive a response within 5 business days.', 'Request type: Dispute. Required fields: invoice number, customer contact, dispute reason, amount in dispute.'],
+  'col-terms': ['Standard terms are Net 30 from invoice date, billed annually in advance. Accepted payment methods: ACH, wire, and card for invoices under $25K.', 'Net 45: Collections manager. Net 60 or longer: Finance leadership, through Deal Desk.'],
+  'om-status': ['Statuses: Submitted, In review, Needs info, Booked. Complete orders are booked within 2 business days, and the same day in the final week of a quarter.', 'Queue view: all submitted orders by status and age. Orders in Needs info list the missing item.'],
+  'om-book': ['Required to book: signed order form matching the approved quote, PO number where required, billing contact and bill-to address, start date and term.', 'Fields marked with an asterisk are required for booking: customer legal name, bill-to address, billing contact, start date, term, and signature block.'],
+  'om-amend': ['Add-ons use an amendment quote that co-terms to the existing end date. Scope reductions require Deal Desk approval before paperwork is sent.', 'Request type: Order Change. Use for billing detail or PO number updates. No new customer signature is required.'],
+  'se-deck': ['Version 3, updated September 2026. The master copy is view-only, so make a copy before editing. Industry variants are in the same folder.', 'v3: refreshed customer stories, a new platform overview slide, and an updated pricing appendix.'],
+  'se-battle': ['One card per competitor: where we win, common objections with talk tracks, and landmines to set. Cards are reviewed monthly.', 'Summary of competitive outcomes for the first half of the year, by competitor and segment.'],
+  'se-onboard': ['Days 1 to 30: product foundations, pitch certification, shadow 5 calls. Days 31 to 60: discovery and demo certifications. Days 61 to 90: mock deal review.', 'Live bootcamp sessions begin the first Monday of each month.']
+};
+const ALIAS = {
+  'it-password': 'password passcode login locked mfa authenticator sso reset forgot',
+  'it-vpn': 'vpn remote network connect globalconnect',
+  'it-laptop': 'laptop computer macbook hardware replacement broken slow monitor keyboard',
+  'hr-pto': 'pto vacation holiday time off leave days sick absence request',
+  'hr-holidays': 'holidays calendar company wellness days closed',
+  'hr-parental': 'parental maternity paternity leave baby adoption',
+  'st-espp': 'espp employee stock purchase plan discount',
+  'st-window': 'espp enrollment enroll window deadline offering period',
+  'st-rsu': 'rsu vesting vest schedule grant shares trading window',
+  'cc-q3': 'cost cap history historical actuals quarter fy26 spend',
+  'cc-exceed': 'cost cap exceed over overage budget',
+  'cc-exception': 'cost cap exception increase request approval',
+  'co-bands': 'pay bands salary ranges levels leveling band',
+  'co-merit': 'merit cycle raise review timeline annual',
+  'co-bonus': 'bonus structure plan payout target commission',
+  'ia-report': 'report control concern compliance issue ethics whistleblower',
+  'ia-sox': 'sox evidence control walkthrough testing',
+  'ia-plan': 'internal audit plan schedule next fieldwork',
+  'col-overdue': 'overdue invoice late unpaid dunning past due customer',
+  'col-dispute': 'payment dispute chargeback customer invoice disagree',
+  'col-terms': 'standard payment terms net30',
+  'om-status': 'order status check track customer booked',
+  'om-book': 'order booking submit form checklist requirements',
+  'om-amend': 'amend amendment order change midterm coterm seats',
+  'se-deck': 'pitch deck slides presentation latest corporate',
+  'se-battle': 'competitive battlecards competitor comparison',
+  'se-onboard': 'sales onboarding hire bootcamp certification training ramp'
+};
+const NEXT = {
+  'it-password': ['How do I connect to the VPN?', 'What tools can I get access to?'],
+  'it-vpn': ['How do I reset my SSO password?', 'What tools can I get access to?'],
+  'om-book': ['How do I check the status of a customer order?', 'What are our standard payment terms?'],
+  'col-terms': ['What happens when a customer invoice is overdue?', 'What do I need to submit an order for booking?'],
+  'cc-q3': ['What happens if my team goes over its cost cap?', 'How do I request a cost cap exception?']
+};
+
+const STOP = new Set(("how do i the a an is are was what when where who why my our your to for of in on me can you does it this that " +
+  "need get with and or at from we us be if about please there any find latest will would should could have has am its im").split(' '));
+const stem = w => (w.length > 4 && w.endsWith('s') ? w.slice(0, -1) : w);
+function toks(s) { return [...new Set(norm(s).replace(/[^a-z0-9 ]/g, ' ').split(' ').filter(w => w.length > 1 && !STOP.has(w)).map(stem))]; }
+function lev(a, b) {
+  if (Math.abs(a.length - b.length) > 2) return 3;
+  let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i];
+    for (let j = 1; j <= b.length; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    prev = cur;
+  }
+  return prev[b.length];
+}
+function near(a, b) {
+  if (a === b) return 1;
+  const L = Math.max(a.length, b.length);
+  if (L < 5) return 0;
+  const d = lev(a, b);
+  return d === 1 ? 0.85 : d === 2 && L >= 7 ? 0.7 : 0;
+}
+
+const DF = {};
+for (const e of KB) {
+  e.alias = ALIAS[e.id] || '';
+  e.sources = e.sources.map((s, i) => [s[0], s[1], (EXCERPTS[e.id] || [])[i] || '']);
+  e.toks = toks(e.q + ' ' + e.alias);
+  for (const t of e.toks) DF[t] = (DF[t] || 0) + 1;
+}
+const idf = t => 1 + Math.log(KB.length / (DF[t] || 1));
+
+/* Fuzzy nearest questions. Used only when keyword routing found nothing, and always offered as a question, never auto-answered. */
+function suggest(raw, onlyGenie) {
+  const mt = toks(raw);
+  if (!mt.length) return [];
+  const out = [];
+  for (const e of KB) {
+    if (onlyGenie && e.genie !== onlyGenie) continue;
+    let w = 0, n = 0, longest = 0;
+    for (const m of mt) {
+      let best = 0, bt = '';
+      for (const t of e.toks) { const s = near(m, t); if (s > best) { best = s; bt = t; } }
+      if (best > 0) { w += best * idf(bt); n++; longest = Math.max(longest, bt.length); }
+    }
+    if (!n) continue;
+    const frac = w / (w + 1.5 * (mt.length - n));
+    const ok = n >= 2 ? frac >= 0.5 : (frac >= 0.75 && longest >= 6);
+    if (ok) out.push({ e, s: w * frac });
+  }
+  out.sort((a, b) => b.s - a.s);
+  return out.filter((x, i) => i === 0 || (i === 1 && x.s >= out[0].s * 0.75)).map(x => x.e);
+}
+
+function genieSignal(gid, raw) {
+  const t = norm(raw);
+  let k = 0;
+  for (const e of KB) if (e.genie === gid) k = Math.max(k, score(t, e.terms));
+  return k + score(t, GENIES[gid].dom) + GENIES[gid].weak.filter(w => new RegExp('\\b' + w).test(t)).length;
+}
+function bestWithin(gid, raw) {
+  const t = norm(raw);
+  let best = null, bestS = 0;
+  for (const e of KB) if (e.genie === gid) { const s = score(t, e.terms); if (s > bestS) { best = e; bestS = s; } }
+  if (best && bestS >= 2) return best;
+  return suggest(raw, gid)[0] || null;
+}
+function relatedFor(e) {
+  return NEXT[e.id] || KB.filter(x => x.genie === e.genie && x.id !== e.id).slice(0, 2).map(x => x.q);
+}
+</script>
+<script>
+/* ---------- UI ---------- */
+const $ = (s, el = document) => el.querySelector(s);
+const h = html => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild; };
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+const ICONS = {
+  it: '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
+  hr: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><path d="M16 4.8a3.5 3.5 0 0 1 0 6.4M18.5 14.9c1.7.9 2.7 2.6 3 5.1"/>',
+  stock: '<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
+  costcap: '<path d="M4 18a9 9 0 1 1 16 0"/><path d="M12 14l4-5"/><circle cx="12" cy="14" r="1.2"/>',
+  comp: '<rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 10v4M18 10v4"/>',
+  audit: '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1"/><path d="M9 13l2 2 4-4"/>',
+  collections: '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>',
+  orders: '<path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/>',
+  sales: '<path d="M3 4h18M5 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4M12 15v3M8 21l4-3 4 3"/><path d="M9 11l2-2 2 1.5L15.5 8"/>',
+  spark: '<path d="M12 2c.6 4.9 2.5 8.4 10 10-7.5 1.6-9.4 5.1-10 10-.6-4.9-2.5-8.4-10-10 7.5-1.6 9.4-5.1 10-10z"/>',
+  check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  x: '<path d="M6 6l12 12M18 6L6 18"/>',
+  flag: '<path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17v.5"/>',
+  dash: '<path d="M6 12h12"/>',
+  signpost: '<path d="M12 3v18"/><path d="M12 5.5h6l2 2-2 2h-6z"/><path d="M12 11.5H6l-2 2 2 2h6z"/>',
+  dot: '<circle cx="12" cy="12" r="4"/>',
+  ring: '<circle cx="12" cy="12" r="7"/>',
+  swap: '<path d="M4 8h14l-3-3M20 16H6l3 3"/>',
+  info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.5v.5"/>',
+  bell: '<path d="M6 16v-5a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5h4"/>',
+  thumb: '<path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/>'
+};
+const ico = n => `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]}</svg>`;
+const badge = gid => `<span class="badge g-${gid}">${ico(gid)}<span>${GENIES[gid].name}</span></span>`;
+const SPARKY_BADGE = `<span class="badge sparky">${ico('spark')}<span>Sparky</span></span>`;
+const SCOPE_BADGE = `<span class="badge scope">${ico('signpost')}<span>Outside Sparky's scope</span></span>`;
+const chip = (label, prompt, cls = '') => `<button type="button" class="chip ${cls}" data-prompt="${esc(prompt || label)}">${esc(label)}</button>`;
+const genieChip = gid => `<button type="button" class="chip g g-${gid}" data-genie="${gid}">${ico(gid)}${GENIES[gid].name}</button>`;
+const qChip = e => `<button type="button" class="chip g g-${e.genie}" data-prompt="${esc(e.q)}">${ico(e.genie)}${esc(e.q)}</button>`;
+const fmt = n => n.toLocaleString('en-US');
+const QUEUE = { it: 'ITHELP', hr: 'HRHELP', stock: 'STOCK', costcap: 'FPA', comp: 'COMP', audit: 'IA', collections: 'COLL', orders: 'OM', sales: 'ENBL' };
+
+const seedRequests = () => [{ kind: 'person', genie: 'hr', ticket: 'HRHELP-1187', question: 'Can I carry over unused PTO into next year?', status: 'Answered', statusCls: '', when: 'Sep 22', ended: true, example: true }];
+const state = { busy: false, flow: null, gen: 0, ticketSeq: 4821, reqSeq: 1187, fbSeq: 0, cardSeq: 0, feedback: [], requests: seedRequests(), keepTrace: false };
+let CTX = [], SRC = [];
+const log = $('#log'), logInner = $('#log-inner'), input = $('#composer-input'), sendBtn = $('#send-btn');
+
+function scrollDown() { requestAnimationFrame(() => { log.scrollTop = log.scrollHeight; }); }
+function setBusy(b) { state.busy = b; sendBtn.disabled = b; if (!b) input.focus({ preventScroll: true }); }
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => { t.hidden = true; }, 2600); }
+function activeFlow() { return state.flow && !state.flow.ended ? state.flow : null; }
+
+/* ----- drawer (source previews and the demo script) ----- */
+let drawerOpener = null;
+function openDrawer(kicker, title, html, opener) {
+  $('#drawer-kicker').textContent = kicker; $('#drawer-title').textContent = title; $('#drawer-body').innerHTML = html;
+  $('#scrim').hidden = false; $('#drawer').hidden = false; drawerOpener = opener || null; $('#drawer-x').focus();
+}
+function closeDrawer() {
+  if ($('#drawer').hidden) return;
+  $('#drawer').hidden = true; $('#scrim').hidden = true;
+  if (drawerOpener && document.contains(drawerOpener)) drawerOpener.focus();
+  drawerOpener = null;
+}
+
+/* ----- sources ----- */
+const DEMO_TODAY = new Date(2026, 9, 5);
+const SRC_DATES = ['Sep 29, 2026', 'Sep 12, 2026', 'Aug 20, 2026', 'Jul 8, 2026', 'Jun 2, 2026', 'May 14, 2026', 'Mar 30, 2026', 'Feb 11, 2026'];
+const SRC_DATE_FIXED = { 'FY26 Cost Cap Tracker': 'Nov 14, 2025', 'Acceptable Use Policy': 'Jan 22, 2025', 'FY27 Corporate Pitch Deck v3': 'Sep 15, 2026', 'ESPP Enrollment Calendar': 'Sep 28, 2026', 'FY27 Internal Audit Plan': 'Aug 3, 2026', '2026 Company Holiday Calendar': 'Dec 9, 2025', 'FY27 Cost Cap Tracker': 'Oct 2, 2026' };
+function srcDate(title) {
+  if (SRC_DATE_FIXED[title]) return SRC_DATE_FIXED[title];
+  let x = 0; for (const ch of title) x = (x * 31 + ch.charCodeAt(0)) >>> 0;
+  return SRC_DATES[x % SRC_DATES.length];
+}
+function srcChips(sources, team) {
+  return sources.map(s => {
+    const i = SRC.push({ type: s[0], title: s[1], excerpt: s[2] || '', team, updated: (s[3] && s[3].updated) || srcDate(s[1]) }) - 1;
+    return `<button type="button" class="src" data-src="${i}" title="Preview this source"><b>${esc(s[0])}</b>${esc(s[1])}</button>`;
+  }).join('');
+}
+function openSource(i, opener) {
+  const s = SRC[i]; if (!s) return;
+  const where = s.type === 'Confluence' ? `Confluence, ${s.team} space` : s.type === 'Google Drive' ? `Google Drive, ${s.team} shared drive` : s.type === 'PDF' ? `Policy library, ${s.title}.pdf` : `Jira, ${s.team} queue`;
+  const d = new Date(s.updated), stale = !isNaN(d) && (DEMO_TODAY - d) / 864e5 > 365;
+  openDrawer(s.type, s.title, `
+    <dl class="dr-meta">
+      <dt>Location</dt><dd>${esc(where)}</dd>
+      <dt>Owner</dt><dd>${esc(s.team)} team</dd>
+      <dt>Last updated</dt><dd>${esc(s.updated)}${stale ? '<span class="stale">Over a year old</span>' : ''}</dd>
+    </dl>
+    ${stale ? `<p class="callout">This document hasn't been updated in more than a year. If something looks off, check with the ${esc(s.team)} team.</p>` : ''}
+    <h3>Passage used in this answer</h3>
+    <blockquote class="dr-quote">${esc(s.excerpt)}</blockquote>
+    <button type="button" class="btn small secondary" data-mock-open="${esc(s.type)}">Open in ${esc(s.type === 'PDF' ? 'the policy library' : s.type)}</button>
+    <p class="dr-note">Mocked preview. In the real product this opens the document at the quoted passage.</p>`, opener);
+}
+
+/* ----- message primitives ----- */
+function addUser(text) { logInner.append(h(`<div class="msg user">${esc(text)}</div>`)); scrollDown(); }
+function newBot() { const m = h('<article class="msg bot"></article>'); logInner.append(m); scrollDown(); return m; }
+function trace(m) {
+  const el = h('<div class="trace"></div>'); m.append(el);
+  const sep = () => { if (el.children.length) el.append(h('<span class="tsep" aria-hidden="true">&rsaquo;</span>')); };
+  let last = null;
+  const fill = (s, label, kind) => { s.className = 'tstep ' + (kind || ''); s.innerHTML = (kind === 'ok' ? ico('check') : kind === 'flag' ? ico('signpost') : ico('dash')) + `<span>${esc(label)}</span>`; };
+  return {
+    pending(label) { sep(); last = h(`<span class="tstep pending"><span class="spin"></span><span>${esc(label)}</span></span>`); el.append(last); scrollDown(); },
+    resolve(label, kind) { if (last) fill(last, label, kind); last = null; },
+    done(label, kind) { sep(); const s = h('<span></span>'); fill(s, label, kind); el.append(s); scrollDown(); }
+  };
+}
+/* Once the answer lands, the routing steps fold into the badge. Selecting the badge shows them again. */
+function body(m, o) {
+  const r = h('<div class="reply"></div>');
+  const tr = $('.trace', m);
+  if (tr) tr.classList.add('collapsed');
+  const who = tr ? `<button type="button" class="who-btn" aria-expanded="false" title="Show how this was routed">${o.who}${ico('info')}</button>` : o.who;
+  r.innerHTML = `<div class="who">${who}</div><div class="bubble${o.wide ? ' wide' : ''}">${o.html}</div>`;
+  if (o.sources && o.sources.length) r.insertAdjacentHTML('beforeend', `<div class="sources"><span class="sources-lbl">Sources</span>${srcChips(o.sources, o.team || 'IT Support')}</div>`);
+  if (o.related && o.related.length) r.insertAdjacentHTML('beforeend', `<div class="related"><span class="sources-lbl">Related</span>${o.related.map(q => chip(q, q, 'sm')).join('')}</div>`);
+  if (o.after) r.insertAdjacentHTML('beforeend', o.after);
+  if (o.feedback) r.append(foot(o));
+  m.append(r); scrollDown(); return r;
+}
+function say(o) { return body(newBot(), o); }
+const itSay = (html, o = {}) => say(Object.assign({ who: badge('it'), html }, o));
+
+function setActiveGenie(gid, routing) {
+  document.querySelectorAll('.g-row').forEach(r => {
+    const on = r.dataset.genie === gid;
+    r.classList.toggle('active', on); r.classList.toggle('routing', on && !!routing);
+  });
+}
+
+/* ----- answer footer: feedback icons, plus "Not the right genie?" when a genie answered ----- */
+function foot(o) {
+  const id = ++state.fbSeq, team = o.feedback, ctx = o.ctx || null;
+  const others = ctx ? GENIE_ORDER.filter(g => g !== ctx.genie).sort((a, b) => genieSignal(b, ctx.q) - genieSignal(a, ctx.q)) : [];
+  const el = h(`<div class="foot">
+    <div class="foot-row">
+      <span class="fb-thumbs">
+        <button type="button" class="fb-btn" data-v="up" aria-label="Thumbs up" title="Helpful" aria-pressed="false">${ico('thumb')}</button>
+        <button type="button" class="fb-btn down" data-v="down" aria-label="Thumbs down" title="Not helpful" aria-pressed="false">${ico('thumb')}</button>
+      </span>
+      ${ctx ? `<span class="foot-sep" aria-hidden="true"></span><button type="button" class="foot-link" data-foot="reroute" aria-expanded="false">Not the right genie?</button>` : ''}
+    </div>
+    ${ctx ? `<div class="reroute" hidden>
+      <p>Send your question to a different genie:</p>
+      <div class="chips">${others.map(g => `<button type="button" class="chip g g-${g}" data-reroute="${g}">${ico(g)}${GENIES[g].name}</button>`).join('')}</div>
+      <p>Or skip the genies and <button type="button" class="foot-link strong" data-foot="handoff">ask a person on the ${esc(GENIES[ctx.genie].team)} team</button>.</p>
+    </div>` : ''}
+    <form class="fb-form" hidden>
+      <label class="fb-lbl" for="fb-text-${id}"></label>
+      <textarea id="fb-text-${id}" rows="2" maxlength="500"></textarea>
+      <div class="fb-actions"><button type="submit" class="btn small">Submit feedback</button><span class="fb-opt">The comment is optional.</span></div>
+    </form>
+    <p class="fb-thanks" hidden></p></div>`);
+  let vote = null;
+  const form = $('.fb-form', el), lbl = $('.fb-lbl', el), ta = $('textarea', el), panel = $('.reroute', el), link = $('[data-foot="reroute"]', el), thanks = $('.fb-thanks', el);
+  const sync = () => el.classList.toggle('open', !form.hidden || (panel && !panel.hidden));
+  const note = html => { thanks.innerHTML = `${ico('check')}<span>${html}</span>`; thanks.hidden = false; };
+  el.querySelectorAll('.fb-btn').forEach(b => b.addEventListener('click', () => {
+    vote = b.dataset.v;
+    el.querySelectorAll('.fb-btn').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    lbl.textContent = vote === 'up' ? 'Glad it helped. Anything you want to add?' : 'Sorry about that. What was missing or wrong?';
+    ta.placeholder = vote === 'up' ? 'What worked well' : 'What you expected instead';
+    if (panel) { panel.hidden = true; link.setAttribute('aria-expanded', 'false'); }
+    form.hidden = false; sync(); scrollIfLast(el);
+  }));
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    state.feedback.push({ type: 'vote', vote, comment: ta.value.trim(), team, at: Date.now() });
+    form.hidden = true; $('.fb-thumbs', el).hidden = true; sync();
+    note(`Thanks, ${USER.first}. Your feedback goes to the ${esc(team)} team.`);
+  });
+  if (ctx) {
+    const closePanel = () => { panel.hidden = true; link.hidden = true; const sep = $('.foot-sep', el); if (sep) sep.hidden = true; sync(); };
+    link.addEventListener('click', () => {
+      panel.hidden = !panel.hidden; link.setAttribute('aria-expanded', String(!panel.hidden));
+      if (!panel.hidden) form.hidden = true;
+      sync(); scrollIfLast(el);
+    });
+    panel.addEventListener('click', e => {
+      const g = e.target.closest('[data-reroute]'), ho = e.target.closest('[data-foot="handoff"]');
+      if ((!g && !ho) || state.busy) return;
+      closePanel();
+      if (g) { note(`Sent to the ${GENIES[g.dataset.reroute].name}. Thanks for the correction.`); reroute(ctx, g.dataset.reroute); }
+      else { note(`Sent to a person on the ${esc(GENIES[ctx.genie].team)} team.`); handoff(ctx); }
+    });
+  }
+  return el;
+}
+function scrollIfLast(el) { if (el.closest('.msg') === logInner.lastElementChild) scrollDown(); }
+
+/* ----- content builders ----- */
+function welcome() {
+  say({
+    who: SPARKY_BADGE,
+    html: `<p><strong>Hi ${USER.first}, I'm Sparky.</strong> Ask me a work question and I'll send it to the genie for that team. You'll see who answered and where the answer came from.</p>
+      <p>A few things people ask:</p>
+      <div class="chips">${chip('How do I request PTO?')}${chip('What is the cost cap historical for FY26 Q3?')}${chip('How does the ESPP work?')}${chip('I need access to Claude')}</div>`
+  });
+}
+
+function genieMenu(gid, intro) {
+  const g = GENIES[gid];
+  setActiveGenie(gid);
+  const qs = KB.filter(e => e.genie === gid).map(e => chip(e.q)).join('');
+  const extra = gid === 'it' ? chip('I need access to a tool', 'What tools can I get access to?') : '';
+  say({ who: badge(gid), html: `<p>${intro || `I'm the ${g.name}. I answer from the ${esc(g.team)} team's own documents. Here is what I can help with in this demo:`}</p><div class="chips">${qs}${extra}</div>` });
+}
+function pickGenie(m, closest, lead) {
+  const some = closest && closest.length > 0, list = some ? closest : GENIE_ORDER;
+  body(m, {
+    who: SPARKY_BADGE,
+    html: `<p>${lead}</p>
+      <p>${some ? 'These look closest. Pick one and it will show what it can answer:' : "It doesn't look close to any of them. You can pick a genie to see what it covers, or try rephrasing:"}</p>
+      <div class="chips">${list.map(genieChip).join('')}${some ? '<button type="button" class="chip quiet" data-act="all-genies">Show all genies</button>' : ''}</div>`,
+    feedback: 'Sparky'
+  });
+}
+
+function declineContent(g, q) {
+  const facts = (title, items) => `<div class="facts-box"><h4>${title}</h4><ul>${items.map(i => `<li>${i}</li>`).join('')}</ul></div>`;
+  const src = (id, i) => KB.find(e => e.id === id).sources[i];
+  if (g.rule === 'financial') {
+    const v = {
+      espp: {
+        lead: `<p><strong>That one's a personal call, so I'll leave the decision with you.</strong> Whether to take part in the ESPP, and how much to put in, depends on your own finances and goals, and Sparky doesn't give financial advice.</p><p>What I can do is make sure you have the facts:</p>`,
+        facts: facts('The ESPP in short', ['You contribute 1% to 15% of eligible pay through payroll.', 'Every 6 months, shares are bought at a 15% discount to the lower of the start or end price.', 'The next enrollment window is Nov 2 to Nov 13, 2026.']),
+        chips: chip('How does the ESPP work?') + chip('When is the next ESPP enrollment window?'),
+        sources: [src('st-espp', 0), src('st-window', 0)]
+      },
+      rsu: {
+        lead: `<p><strong>That one's a personal call, so I'll leave the decision with you.</strong> What to do with your shares depends on your own finances, taxes, and goals, and Sparky doesn't give financial advice.</p><p>What I can do is make sure you have the facts:</p>`,
+        facts: facts('RSUs in short', ['Grants vest over 4 years: 25% after the first year, then quarterly.', 'Some shares are withheld at each vest to cover taxes.', 'You can only trade during an open trading window.']),
+        chips: chip('How does RSU vesting work?') + chip('How does the ESPP work?'),
+        sources: [src('st-rsu', 0), src('st-rsu', 1)]
+      },
+      general: {
+        lead: `<p><strong>That one's a personal call, so I'll leave the decision with you.</strong> Sparky explains how company programs work, but it doesn't give advice on what to do with your money.</p>`,
+        facts: '', chips: chip('How does the ESPP work?') + chip('How does RSU vesting work?'), sources: []
+      }
+    }[g.variant];
+    return {
+      team: 'Sparky', srcTeam: 'Stock Administration', sources: v.sources,
+      html: `${v.lead}${v.facts}<h4>Go deeper</h4><div class="chips">${v.chips}</div>
+        <h4>Who can help you decide</h4><p>A personal financial advisor or tax professional can look at your whole picture. Many people bring the plan guide to that conversation.</p>`
+    };
+  }
+  const ctxId = CTX.push({ q, genie: 'hr', hrbp: true }) - 1;
+  const follow = `<div class="chips"><button type="button" class="btn small secondary" data-act="handoff-hrbp" data-ctx="${ctxId}">Ask my HR business partner to follow up</button></div>`;
+  const v = {
+    fair: {
+      lead: `<p><strong>That's a fair thing to want to know, and it deserves a real answer from a person.</strong> Sparky can't see anyone's pay, yours included, so it isn't able to judge whether an individual's pay is fair.</p><p>Here's what I can share to help you have that conversation:</p>`,
+      facts: facts('How pay is set, in short', ['Every job level has a pay band with a minimum, midpoint, and maximum.', 'Where someone sits in the band depends on experience, performance, and time in level.', 'Bands are reviewed once a year against market data.']),
+      extra: `<h4>Questions worth bringing to your manager</h4><ul><li>Where do I sit in the band for my level?</li><li>What would move me toward the midpoint?</li></ul>`,
+      chips: chip('How do pay bands work?') + chip('When does the merit cycle run?'),
+      who: `<p>Your manager or your HR business partner can walk you through where you sit in your band. Your current pay details are in the HR system under <strong>Compensation</strong>.</p>${follow}`,
+      sources: [src('co-bands', 0)]
+    },
+    own: {
+      lead: `<p><strong>I can't look that up, but it's easy to find.</strong> Sparky can't see anyone's pay details, including yours.</p>`,
+      facts: facts('Where to see your pay', ['Open the HR system and go to <strong>Compensation</strong>.', 'You\'ll see your base pay, bonus target, and pay history.']),
+      extra: '', chips: chip('How do pay bands work?') + chip('How are bonuses structured?'),
+      who: `<p>If something there looks wrong or unclear, your manager or HR business partner can help.</p>${follow}`,
+      sources: []
+    },
+    raise: {
+      lead: `<p><strong>I can't tell you that, because I can't see it.</strong> Raise and bonus decisions are made in the merit cycle and shared by your manager. Sparky has no access to anyone's individual outcome.</p><p>Here's when you can expect to hear:</p>`,
+      facts: facts('The merit cycle in short', ['February: managers make recommendations.', 'Mid-March: decisions are finalized and shared with you.', 'April 1: changes take effect.']),
+      extra: '', chips: chip('When does the merit cycle run?') + chip('How are bonuses structured?'),
+      who: `<p>Your manager is the right person to talk to about what to expect this cycle.</p>${follow}`,
+      sources: [src('co-merit', 0)]
+    },
+    other: {
+      lead: `<p><strong>I can't share that.</strong> Everyone's pay is private, and Sparky can't see it or discuss it for anyone.</p><p>If you're trying to understand how pay is set in general, I can help with that:</p>`,
+      facts: '', extra: '', chips: chip('How do pay bands work?') + chip('How are bonuses structured?'),
+      who: `<p>For questions about your own pay, your manager or your HR business partner can help.</p>`,
+      sources: []
+    }
+  }[g.variant];
+  return {
+    team: 'Sparky', srcTeam: 'Total Rewards', sources: v.sources,
+    html: `${v.lead}${v.facts}${v.extra}<h4>Go deeper</h4><div class="chips">${v.chips}</div><h4>Who can answer this</h4>${v.who}`
+  };
+}
+
+function answerOpts(e, q, pre) {
+  const G = GENIES[e.genie];
+  return { who: badge(e.genie), html: (pre || '') + e.html, wide: e.wide, sources: e.sources, team: G.team, related: relatedFor(e), feedback: G.team, ctx: { q, genie: e.genie } };
+}
+function noAnswerOpts(gid, q, lead, sug) {
+  const G = GENIES[gid];
+  const first = (sug || []).map(e => e.id);
+  const qs = [...(sug || []), ...KB.filter(e => e.genie === gid && !first.includes(e.id))].map(e => chip(e.q)).join('');
+  return {
+    who: badge(gid),
+    html: `${lead}<p>${sug && sug.length ? 'Did you mean one of these? The closest match is first:' : 'Here is what I can answer today:'}</p><div class="chips">${qs}</div>
+      <p>For anything else, use <strong>Not the right genie?</strong> below to try another genie or ask a person on the ${esc(G.team)} team.</p>`,
+    team: G.team, feedback: G.team, ctx: { q, genie: gid }
+  };
+}
+
+/* ----- main pipeline: guardrails, then routing, then the genie's answer ----- */
+async function handle(text) {
+  text = String(text || '').trim();
+  if (!text || state.busy) return;
+  closeDrawer(); showTab('chat');
+  setBusy(true);
+  const gen = state.gen;
+  try {
+    addUser(text);
+    const m = newBot(), tr = trace(m);
+    tr.pending('Checking I can help with this…');
+    await sleep(550);
+    if (gen !== state.gen) return;
+    const g = checkGuardrails(text);
+    const f = activeFlow();
+    const awaitingReason = f && f.stage === 'reason';
+    if (g) {
+      tr.resolve(g.rule === 'financial' ? 'A personal money decision' : "A question about someone's pay", 'flag');
+      tr.done('Needs a person, not a genie');
+      setActiveGenie(null);
+      await sleep(300);
+      if (gen !== state.gen) return;
+      const d = declineContent(g, text);
+      body(m, { who: SCOPE_BADGE, html: d.html, sources: d.sources, team: d.srcTeam, feedback: d.team });
+      if (awaitingReason) remindReason();
+      return;
+    }
+    tr.resolve('OK to answer', 'ok');
+    const c = classify(text);
+
+    if (awaitingReason) {
+      if (/^(cancel|never ?mind|stop|forget it)\b/i.test(text)) { tr.done('Request cancelled'); cancelFlow(m); return; }
+      const looksLikeQuestion = /\?\s*$/.test(text) || (c.type === 'flow' && c.tool !== f.key);
+      if (!looksLikeQuestion) {
+        setActiveGenie('it', true);
+        tr.pending('Continuing with IT Genie…'); await sleep(450);
+        if (gen !== state.gen) return;
+        tr.resolve('Continuing with IT Genie', 'ok');
+        await submitReason(m, tr, text);
+        return;
+      }
+    }
+
+    if (c.type === 'none') {
+      tr.pending('Looking for the right genie…'); await sleep(850);
+      if (gen !== state.gen) return;
+      setActiveGenie(null);
+      const sug = suggest(text);
+      if (sug.length) {
+        tr.resolve('Not sure what was meant', '');
+        const ctxId = CTX.push({ closest: c.closest }) - 1;
+        body(m, {
+          who: SPARKY_BADGE,
+          html: `<p>I'm not sure I caught that, and I'd rather check than guess. Did you mean:</p>
+            <div class="chips">${sug.map(qChip).join('')}<button type="button" class="chip quiet" data-act="none-of-these" data-ctx="${ctxId}">None of these</button></div>`,
+          feedback: 'Sparky'
+        });
+      } else {
+        tr.resolve('No confident match', '');
+        pickGenie(m, c.closest, "I couldn't match that to one of my genies with confidence, so I won't guess.");
+      }
+      if (awaitingReason) remindReason();
+      return;
+    }
+
+    const gid = c.genie, G = GENIES[gid];
+    setActiveGenie(gid, true);
+    tr.pending(`Routing to ${G.name}…`); await sleep(900);
+    if (gen !== state.gen) return;
+    tr.resolve(`Routed to ${G.name}`, 'ok');
+    setActiveGenie(gid, false);
+
+    if (c.type === 'answer') {
+      body(m, answerOpts(c.entry, text));
+    } else if (c.type === 'flow') {
+      if (f) {
+        body(m, { who: badge('it'), html: `<p>You already have an open request for <strong>${f.tool.name}</strong>${f.ticket ? ` (<span class="mono">${f.ticket}</span>)` : ''}. I can start another one as soon as that's resolved. The tracker above shows where it stands.</p>`, feedback: G.team });
+      } else startFlow(m, c.tool);
+    } else if (c.type === 'catalog') {
+      body(m, {
+        who: badge('it'),
+        html: `<p>I can set up access to these six tools right here in chat. Pick one to start:</p>
+          <div class="chips">${TOOL_ORDER.map(k => chip(TOOLS[k].name + (TOOLS[k].limited ? ' (limited licenses)' : ''), 'I need access to ' + TOOLS[k].name)).join('')}</div>
+          <p>Tableau and Claude have limited licenses, so they need your manager and the license owner to approve. The others need your manager only. For any other software, open a Software request with the IT service desk.</p>`,
+        sources: [['Confluence', 'Software Catalog & Access Matrix', 'Self-service through Sparky: Tableau, Snowflake, Claude, Datadog, Lucidchart, 1Password. Tableau and Claude require manager and license owner approval. All others require manager approval only.']],
+        team: G.team, feedback: G.team, ctx: { q: text, genie: 'it' }
+      });
+    } else { // in a genie's area, but no sourced answer
+      body(m, noAnswerOpts(gid, text, `<p>That's in my area, but I don't have a sourced answer for it yet, and I'd rather not guess.</p>`, suggest(text, gid)));
+    }
+    if (awaitingReason && activeFlow() === f) remindReason();
+  } finally { if (gen === state.gen) setBusy(false); }
+}
+
+/* ----- "Not the right genie?": reroute to another genie, or hand off to a person ----- */
+async function reroute(ctx, gid) {
+  if (state.busy) return;
+  const G = GENIES[gid], gen = state.gen;
+  state.feedback.push({ type: 'reroute', q: ctx.q, from: ctx.genie, to: gid, at: Date.now() });
+  setBusy(true);
+  try {
+    const m = newBot(), tr = trace(m);
+    tr.done('Rerouted by you', 'ok');
+    setActiveGenie(gid, true);
+    tr.pending(`Routing to ${G.name}…`); await sleep(800);
+    if (gen !== state.gen) return;
+    tr.resolve(`Routed to ${G.name}`, 'ok'); setActiveGenie(gid, false);
+    const noted = `<p class="muted">Rerouted at your request. I've logged the correction so Sparky routes questions like this better.</p>`;
+    const e = bestWithin(gid, ctx.q);
+    if (e) body(m, answerOpts(e, ctx.q, noted));
+    else body(m, noAnswerOpts(gid, ctx.q, `${noted}<p>I checked the ${esc(G.team)} team's documents and don't have a sourced answer to &ldquo;${esc(ctx.q)}&rdquo;, and I'd rather not guess.</p>`));
+  } finally { if (gen === state.gen) setBusy(false); }
+}
+function handoff(ctx) {
+  const G = GENIES[ctx.genie];
+  const ticket = QUEUE[ctx.genie] + '-' + (ctx.genie === 'it' ? ++state.ticketSeq : ++state.reqSeq);
+  state.requests.unshift({ kind: 'person', genie: ctx.genie, ticket, question: ctx.q, status: 'With the team', statusCls: 'wait', openedAt: new Date(), ended: false });
+  updateReqs();
+  say({
+    who: badge(ctx.genie),
+    html: `<p>${ctx.hrbp
+        ? `Done. I've sent this privately to your <strong>HR business partner</strong>. Only they can see it, and they'll reach out to you directly.`
+        : `Done. I've sent your question to a person on the <strong>${esc(G.team)}</strong> team, with this conversation attached so you don't have to repeat yourself.`}</p>
+      <div class="ticket g-${ctx.genie}"><span class="ticket-id">${ticket}</span><span class="ticket-title">&ldquo;${esc(ctx.q)}&rdquo;</span>
+      <span class="ticket-meta">Sent to ${ctx.hrbp ? 'your HR business partner' : esc(G.team)} · They usually reply in Slack within 1 business day</span></div>
+      <p>You can follow it under <button type="button" class="foot-link strong" data-act="go-requests">My requests</button>.</p>`,
+    feedback: G.team
+  });
+}
+
+/* ----- tool onboarding flow (IT Genie) ----- */
+function buildSteps(tool) {
+  const s = [
+    { id: 'confirm', label: 'Tool confirmed', state: 'todo', note: tool.name },
+    { id: 'reason', label: 'Business reason', state: 'todo', note: '' },
+    { id: 'ticket', label: 'Jira ticket', state: 'todo', note: '' },
+    { id: 'manager', label: 'Manager approval', state: 'todo', note: USER.manager.name }
+  ];
+  if (tool.limited) s.push({ id: 'owner', label: 'License owner approval', state: 'todo', note: tool.owner.name });
+  s.push({ id: 'provision', label: 'Seat provisioned', state: 'todo', note: '' });
+  s.push({ id: 'verify', label: 'You confirm access', state: 'todo', note: '' });
+  return s;
+}
+function setStep(id, st, note) { const s = state.flow.steps.find(x => x.id === id); if (!s) return; s.state = st; if (note !== undefined) s.note = note; }
+function setStatus(text, cls) { state.flow.status = text; state.flow.statusCls = cls || ''; renderTracker(); updateReqs(); }
+function stepLine(f) {
+  const n = f.steps.length, bad = f.steps.findIndex(s => s.state === 'failed'), cur = f.steps.findIndex(s => s.state === 'active');
+  return bad >= 0 ? `Stopped at step ${bad + 1} of ${n}: ${f.steps[bad].label}` : cur >= 0 ? `Step ${cur + 1} of ${n}: ${f.steps[cur].label}` : `All ${n} steps complete`;
+}
+function waitInfo(f) {
+  if (f.ended || (f.stage !== 'manager' && f.stage !== 'owner')) return null;
+  const mgr = f.stage === 'manager';
+  return { name: mgr ? USER.manager.name : f.tool.owner.name, first: mgr ? USER.manager.first : f.tool.owner.first, usual: mgr ? 'Managers usually respond within 4 working hours.' : 'License owners usually respond within 1 business day.', reminded: !!f.reminded[f.stage] };
+}
+const remindBtn = w => w.reminded ? `<span class="tk-reminded">${ico('check')}Reminder sent to ${esc(w.first)}</span>` : `<button type="button" class="btn small secondary" data-act="remind">Send a reminder</button>`;
+
+function renderTracker() {
+  const el = $('#tracker'), f = state.flow;
+  if (!f) { el.hidden = true; el.innerHTML = ''; return; }
+  const stIco = { done: 'check', active: 'dot', todo: 'ring', failed: 'x', skipped: 'dash' };
+  const w = waitInfo(f);
+  el.hidden = false;
+  el.innerHTML = `<div class="tk-inner">
+    <div class="tk-head">
+      <div class="tk-title"><span class="g-ico g-it">${ico('it')}</span><strong>${f.tool.name} access request</strong>
+        ${f.ticket ? `<span class="mono tk-ticket">${f.ticket}</span>` : ''}
+        ${f.tool.limited ? '<span class="tk-lim">Limited licenses · 2 approvals</span>' : ''}</div>
+      <div class="tk-right"><span class="pill ${f.statusCls}">${esc(f.status)}</span>
+        ${f.ended ? '<button type="button" class="tk-x" data-act="dismiss-tracker" aria-label="Dismiss tracker">&times;</button>' : ''}</div>
+    </div>
+    <p class="tk-now">${stepLine(f)}</p>
+    <ol class="tk-steps" style="--n:${f.steps.length}">${f.steps.map((s, i) => `<li class="s-${s.state}"><span class="tk-lbl">${ico(stIco[s.state])}<span>${i + 1}. ${s.label}</span></span><span class="tk-note">${esc(s.note || '')}</span></li>`).join('')}</ol>
+    ${w ? `<div class="tk-wait"><span>Waiting on ${esc(w.name)}. ${w.usual}</span>${remindBtn(w)}</div>` : ''}
+  </div>`;
+}
+function remind() {
+  const f = activeFlow(), w = f && waitInfo(f);
+  if (!w || w.reminded) return;
+  f.reminded[f.stage] = true;
+  const card = f.cards[f.stage];
+  if (card && document.contains(card)) $('.approval-body', card).prepend(h(`<span class="approval-reminder">${ico('bell')}Reminder from ${USER.first}, just now</span>`));
+  renderTracker(); updateReqs();
+  toast(`Reminder sent to ${w.name}`);
+}
+
+function startFlow(m, key) {
+  const tool = TOOLS[key];
+  state.flow = { key, tool, stage: 'reason', steps: buildSteps(tool), ticket: null, reason: null, status: '', statusCls: '', ended: false, escalated: false, reminded: {}, cards: {} };
+  setStep('confirm', 'done'); setStep('reason', 'active', 'Waiting on you');
+  setStatus('Needs your reason', 'wait');
+  input.placeholder = 'Type a short business reason…';
+  body(m, {
+    who: badge('it'),
+    html: `<p>Happy to help you get <strong>${tool.name}</strong>.</p>
+      ${tool.limited
+        ? `<div class="callout"><strong>Heads up: ${tool.name} has limited licenses.</strong> It needs two approvals. First your manager, ${USER.manager.name}, then the ${tool.name} license owner, ${tool.owner.name} in ${tool.owner.team}.</div>`
+        : `<p>This one needs a single approval, from your manager, ${USER.manager.name}.</p>`}
+      <p>What's the business reason? One sentence is plenty. I'll put it on the ticket for your approver${tool.limited ? 's' : ''}.</p>
+      <div class="chips">${tool.reasons.map(r => chip(r)).join('')}<button type="button" class="chip quiet" data-act="cancel-flow">Cancel request</button></div>`
+  });
+}
+function remindReason() {
+  const f = activeFlow(); if (!f || f.stage !== 'reason') return;
+  itSay(`<p>Whenever you're ready, I still need a short business reason for your ${f.tool.name} request.</p><div class="chips">${f.tool.reasons.map(r => chip(r)).join('')}<button type="button" class="chip quiet" data-act="cancel-flow">Cancel request</button></div>`);
+}
+function cancelFlow(m) {
+  const f = activeFlow(); if (!f || f.stage !== 'reason') return;
+  f.ended = true; state.flow = null; renderTracker();
+  input.placeholder = 'Ask Sparky a work question…';
+  body(m || newBot(), { who: badge('it'), html: `<p>Cancelled. No ticket was created for ${f.tool.name}. Ask again any time.</p>`, feedback: 'IT Support' });
+}
+
+const mockLink = t => `<button type="button" class="link" data-mock-link>jira.sparky-demo.example/browse/${t}</button>`;
+function ticketCard(f) {
+  return `<div class="ticket g-it"><span class="ticket-id">${f.ticket}</span>
+    <span class="ticket-title">Access request: ${f.tool.name} for ${USER.name}</span>
+    <span class="ticket-meta">Jira · ITHELP · Reporter: ${USER.name} · Created by Sparky on your behalf</span>
+    ${mockLink(f.ticket)}</div>`;
+}
+
+async function submitReason(m, tr, text) {
+  const f = state.flow, tool = f.tool;
+  if (text.length < 8) {
+    body(m, { who: badge('it'), html: `<p>Could you add a little more? A few words on what you'll use ${tool.name} for is enough for your approver.</p>` });
+    return;
+  }
+  f.reason = text; f.stage = 'ticket';
+  input.placeholder = 'Ask Sparky a work question…';
+  setStep('reason', 'done', 'Provided'); setStep('ticket', 'active', 'Creating');
+  setStatus('Creating ticket');
+  tr.pending('Creating Jira ticket…'); await sleep(1000);
+  if (state.flow !== f) return;
+  f.ticket = 'ITHELP-' + (++state.ticketSeq);
+  tr.resolve(`Jira ticket ${f.ticket} created`, 'ok');
+  setStep('ticket', 'done', f.ticket); setStep('manager', 'active', `Waiting on ${USER.manager.name}`);
+  f.stage = 'manager';
+  state.requests.unshift({ kind: 'tool', flow: f, openedAt: new Date() });
+  setStatus('Waiting on manager', 'wait');
+  body(m, {
+    who: badge('it'),
+    html: `<p>Thanks. I've opened a ticket for you, so there's no form to fill in:</p>${ticketCard(f)}
+      <p>I've sent it to <strong>${USER.manager.name}</strong> for approval. The request is paused until ${USER.manager.first} responds, and I'll pick it up here as soon as there's a decision.</p>
+      <p class="muted">Managers usually respond within 4 working hours. If it's slow, use <strong>Send a reminder</strong> in the tracker above. You can keep asking me other things while you wait.</p>`
+  });
+  approvalCard('manager');
+}
+
+function approvalCard(level) {
+  const f = state.flow, tool = f.tool, id = ++state.cardSeq;
+  const isMgr = level === 'manager';
+  const who = isMgr
+    ? { name: USER.manager.name, first: USER.manager.first, role: `${USER.first}'s manager`, short: 'your manager', label: 'Manager view (demo)' }
+    : { name: tool.owner.name, first: tool.owner.first, role: `${tool.name} license owner, ${tool.owner.team}`, short: `the ${tool.name} license owner`, label: 'License owner view (demo)' };
+  const stepTxt = tool.limited ? (isMgr ? 'Approval 1 of 2' : 'Approval 2 of 2') : 'The only approval needed';
+  const quick = isMgr ? ['Not needed for current role', 'Budget is frozen this quarter'] : ['No seats available right now', 'A shared team seat covers this use'];
+  const el = h(`<section class="approval" aria-label="${who.label}">
+    <div class="approval-band"><span class="approval-label">${ico('swap')}${who.label}</span><span class="approval-acting">You are now acting as ${who.name}, not ${USER.first}</span></div>
+    <div class="approval-body">
+      <div><h3>${isMgr ? `${USER.first} is asking for ${tool.name} access` : `A ${tool.name} seat is requested for ${USER.first}`}</h3>
+        <p class="approval-sub">${stepTxt}. ${who.name}, ${who.role}.</p></div>
+      <dl>
+        <dt>Requested by</dt><dd>${USER.name}, ${USER.title}, ${USER.team}</dd>
+        <dt>Tool</dt><dd>${tool.name}${tool.limited ? ' (limited licenses)' : ''}</dd>
+        <dt>Business reason</dt><dd>&ldquo;${esc(f.reason)}&rdquo;</dd>
+        <dt>Jira ticket</dt><dd><span class="mono">${f.ticket}</span></dd>
+        ${isMgr ? '' : `<dt>Manager approval</dt><dd>Approved by ${USER.manager.name}</dd>
+        <dt>Seats</dt><dd>${fmt(tool.seats.used)} of ${fmt(tool.seats.total)} in use, ${fmt(tool.seats.total - tool.seats.used)} available</dd>`}
+        <dt>If approved</dt><dd>${isMgr && tool.limited ? `Goes to the license owner, ${tool.owner.name}` : `${USER.first} is added to <span class="mono">${tool.group}</span>`}</dd>
+      </dl>
+      <div class="approval-actions">
+        <button type="button" class="a-approve">Approve</button>
+        <button type="button" class="a-deny">Deny</button>
+      </div>
+      <form class="deny-form" hidden>
+        <label for="deny-reason-${id}">Why are you denying this? ${USER.first} will see your reason.</label>
+        <input id="deny-reason-${id}" type="text" maxlength="160" placeholder="A short reason">
+        <div class="deny-quick">${quick.map(q => `<button type="button">${q}</button>`).join('')}</div>
+        <div class="approval-actions"><button type="submit" class="a-confirm" disabled>Confirm denial</button><button type="button" class="a-back">Back</button></div>
+      </form>
+    </div></section>`);
+  f.cards[level] = el;
+  const actions = $('.approval-actions', el), form = $('.deny-form', el), inp = $('input', form), confirmBtn = $('.a-confirm', el);
+  const resolve = (ok, reason) => {
+    actions.remove(); form.remove();
+    el.classList.add('resolved', ok ? 'approved' : 'denied');
+    $('.approval-acting', el).textContent = `Decision recorded. Back to ${USER.first}'s chat.`;
+    $('.approval-body', el).append(h(`<div class="approval-result">${ico(ok ? 'check' : 'x')}<span>${ok ? 'Approved' : 'Denied'} by ${who.name}${ok ? '' : `: &ldquo;${esc(reason)}&rdquo;`}</span></div>`));
+  };
+  $('.a-approve', el).addEventListener('click', () => { if (state.flow !== f) return; resolve(true); onApprove(level); });
+  $('.a-deny', el).addEventListener('click', () => { actions.hidden = true; form.hidden = false; inp.focus(); scrollDown(); });
+  $('.a-back', el).addEventListener('click', () => { form.hidden = true; actions.hidden = false; });
+  inp.addEventListener('input', () => { confirmBtn.disabled = inp.value.trim().length < 3; });
+  form.querySelectorAll('.deny-quick button').forEach(b => b.addEventListener('click', () => { inp.value = b.textContent; confirmBtn.disabled = false; inp.focus(); }));
+  form.addEventListener('submit', e => { e.preventDefault(); const r = inp.value.trim(); if (r.length < 3 || state.flow !== f) return; resolve(false, r); onDeny(level, r, who); });
+  logInner.append(el); scrollDown();
+}
+
+function onApprove(level) {
+  const f = state.flow, tool = f.tool;
+  if (level === 'manager') {
+    setStep('manager', 'done', `Approved by ${USER.manager.name}`);
+    if (tool.limited) {
+      setStep('owner', 'active', `Waiting on ${tool.owner.name}`);
+      f.stage = 'owner'; setStatus('Waiting on license owner', 'wait');
+      itSay(`<p><strong>${USER.manager.name} approved your request.</strong> One more step: because ${tool.name} licenses are limited, it now goes to the license owner, <strong>${tool.owner.name}</strong> in ${tool.owner.team}.</p><p>Still paused until ${tool.owner.first} responds. License owners usually take up to 1 business day.</p>`);
+      approvalCard('owner');
+      return;
+    }
+  } else setStep('owner', 'done', `Approved by ${tool.owner.name}`);
+  provision();
+}
+
+async function provision() {
+  const f = state.flow, tool = f.tool;
+  f.stage = 'provision'; setStep('provision', 'active', 'In progress'); setStatus('Provisioning');
+  const m = newBot(), tr = trace(m);
+  tr.done(tool.limited ? 'Both approvals received' : 'Manager approved', 'ok');
+  tr.pending(`Adding you to ${tool.group}…`); await sleep(1300);
+  if (state.flow !== f) return;
+  tr.resolve(`Added to ${tool.group}`, 'ok');
+  setStep('provision', 'done', tool.group); setStep('verify', 'active', 'Waiting on you');
+  f.stage = 'verify'; setStatus('Waiting on you', 'wait');
+  body(m, {
+    who: badge('it'),
+    html: `<p><strong>You're approved, and your seat is ready.</strong> I added <code>${USER.login}</code> to the permissions group <code>${tool.group}</code> and noted it on <span class="mono">${f.ticket}</span>.</p>
+      <p>Open ${tool.name} from your SSO dashboard. It can take a minute to appear.</p>
+      <p><strong>Can you confirm you have access?</strong></p>`,
+    after: `<div class="chips verify"><button type="button" class="btn small" data-act="verify-yes">Yes, I'm in</button><button type="button" class="btn small secondary" data-act="verify-no">No, still blocked</button></div>`
+  });
+}
+
+function ticketSource(f, state_, text) { return ['Jira', `${f.ticket} (${state_})`, text, { updated: 'Today' }]; }
+function onVerify(ok, btn) {
+  const f = activeFlow(); if (!f || f.stage !== 'verify') return;
+  const tool = f.tool;
+  btn.parentElement.querySelectorAll('button').forEach(b => { b.disabled = true; });
+  btn.classList.add('chosen');
+  addUser(ok ? "Yes, I'm in" : 'No, still blocked');
+  f.ended = true; f.stage = 'closed';
+  const approvers = tool.limited ? `${USER.manager.name} and ${tool.owner.name}` : USER.manager.name;
+  if (ok) {
+    setStep('verify', 'done', 'Confirmed'); setStatus('Complete');
+    itSay(`<p>You're all set. I've closed <span class="mono">${f.ticket}</span> as Done.</p><p>If you're new to ${tool.name}, the guide below is a good place to start.</p>`, {
+      sources: [['Confluence', tool.start, `A short guide to signing in to ${tool.name} for the first time, with the team's recommended first steps and who to ask for help.`],
+        ticketSource(f, 'closed', `Access request: ${tool.name} for ${USER.name}. Status: Done. Approved by ${approvers}. Added to ${tool.group}. Access confirmed by requester.`)],
+      related: ['What tools can I get access to?'], feedback: 'IT Support'
+    });
+  } else {
+    f.escalated = true;
+    setStep('verify', 'failed', 'Escalated to IT'); setStatus('Reopened · escalated to IT', 'bad');
+    itSay(`<p>Sorry it isn't working yet. Here's what I've done:</p>
+      <ul><li>Reopened <span class="mono">${f.ticket}</span> and raised its priority.</li>
+      <li>Escalated it to the IT Support team with the provisioning log attached.</li></ul>
+      <p>Someone from IT will message you in Slack, usually within 4 business hours. You don't need to file anything else. It stays under <button type="button" class="foot-link strong" data-act="go-requests">My requests</button> until it's fixed.</p>`, {
+      sources: [ticketSource(f, 'reopened, assigned to IT Support', `Access request: ${tool.name} for ${USER.name}. Status: Reopened. Requester reports access is still blocked after being added to ${tool.group}. Assigned to IT Support with the provisioning log.`)],
+      feedback: 'IT Support'
+    });
+  }
+}
+
+function onDeny(level, reason, who) {
+  const f = state.flow, tool = f.tool;
+  setStep(level, 'failed', `Denied by ${who.name}`);
+  f.steps.forEach(s => { if (s.state === 'todo') { s.state = 'skipped'; s.note = 'Not reached'; } });
+  f.ended = true; f.stage = 'closed';
+  setStatus('Denied · ticket closed', 'bad');
+  const next = level === 'manager'
+    ? `<li>Talk it through with ${who.first}. If things change, I can open a fresh request in a few seconds.</li><li>Ask again with a more specific reason, such as the project and how often you'd use ${tool.name}.</li>`
+    : `<li>Ask ${who.first} about the ${tool.name} waitlist. Seats free up when unused licenses are reclaimed each quarter.</li><li>If your need changes or becomes more urgent, ask again and mention what's different.</li>`;
+  itSay(`<p>Your ${tool.name} request wasn't approved this time.</p>
+    <div class="callout neutral"><strong>${who.name}</strong>, ${who.short}, denied it: &ldquo;${esc(reason)}&rdquo;</div>
+    <p>I've closed <span class="mono">${f.ticket}</span> with that note, so nothing is left open on your side.</p>
+    <h4>What you can do next</h4><ul>${next}</ul>
+    <div class="chips">${chip(`Request ${tool.name} again`, 'I need access to ' + tool.name)}</div>`,
+    { sources: [ticketSource(f, 'closed, not approved', `Access request: ${tool.name} for ${USER.name}. Status: Closed, not approved. Denied by ${who.name} with the reason: ${reason}`)], feedback: 'IT Support' });
+}
+
+/* ----- My requests ----- */
+const reqOpen = r => r.kind === 'tool' ? (!r.flow.ended || r.flow.escalated) : !r.ended;
+const when = r => r.when || `today at ${r.openedAt.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
+function reqCard(r, i) {
+  const open = reqOpen(r);
+  if (r.kind === 'tool') {
+    const f = r.flow, w = waitInfo(f);
+    return `<article class="req${open ? '' : ' closed'}">
+      <div class="req-head"><span class="g-ico g-it">${ico('it')}</span>
+        <div class="req-title"><strong>${f.tool.name} access</strong><span class="mono">${f.ticket}</span></div>
+        <span class="pill ${f.statusCls}">${esc(f.status)}</span></div>
+      <div class="req-bars" aria-hidden="true">${f.steps.map(s => `<i class="s-${s.state}"></i>`).join('')}</div>
+      <p class="req-meta">Opened ${when(r)} · ${stepLine(f)}${w ? ` · Waiting on ${esc(w.name)}` : ''}</p>
+      <div class="req-actions"><button type="button" class="btn small secondary" data-act="req-view" data-req="${i}">View in chat</button>${w ? remindBtn(w) : ''}</div>
+    </article>`;
+  }
+  const G = GENIES[r.genie];
+  return `<article class="req${open ? '' : ' closed'}">
+    <div class="req-head"><span class="g-ico g-${r.genie}">${ico(r.genie)}</span>
+      <div class="req-title"><strong>Question for the ${esc(G.team)} team</strong><span class="mono">${r.ticket}</span></div>
+      ${r.example ? '<span class="tag">Example</span>' : ''}<span class="pill ${r.statusCls}">${esc(r.status)}</span></div>
+    <p class="req-q">&ldquo;${esc(r.question)}&rdquo;</p>
+    <p class="req-meta">Sent ${when(r)}${open ? ' · They usually reply in Slack within 1 business day' : ''}</p>
+  </article>`;
+}
+function updateReqs() {
+  const items = state.requests.map((r, i) => ({ r, i }));
+  const open = items.filter(x => reqOpen(x.r)), closed = items.filter(x => !reqOpen(x.r));
+  const c = $('#req-count'); c.textContent = open.length; c.hidden = open.length === 0;
+  $('#reqs-inner').innerHTML = `
+    <div><h1>My requests</h1><p class="reqs-lead">Tool access you've asked for and questions you've sent to a team.</p></div>
+    <section><h2>Open</h2>${open.length ? open.map(x => reqCard(x.r, x.i)).join('') : '<p class="empty">Nothing open right now. When you request a tool or ask a person, it shows up here.</p>'}</section>
+    ${closed.length ? `<section><h2>Closed</h2>${closed.map(x => reqCard(x.r, x.i)).join('')}</section>` : ''}`;
+}
+
+/* ----- demo script (for the presenter) ----- */
+function openDemo(opener) {
+  const item = (prompt, tip) => `<div class="demo-item">${chip(prompt)}<small>${tip}</small></div>`;
+  openDrawer('For the presenter', 'Demo script', `
+    <div class="demo-top"><label class="switch" for="keep-trace"><input type="checkbox" id="keep-trace"${state.keepTrace ? ' checked' : ''}>Keep routing steps visible</label>
+      <button type="button" class="btn small secondary" data-act="reset">Reset demo</button></div>
+    <div class="demo-group"><h3>Routing and sources</h3>
+      ${item('How do I request PTO?', 'Watch the routing step, then open a source to see the quoted passage and its date.')}
+      ${item('What is the cost cap historical for FY26 Q3?', 'The Cost Cap Genie answers with a table from the tracker.')}</div>
+    <div class="demo-group"><h3>What Sparky leaves to a person</h3>
+      ${item('How does the ESPP work?', 'Allowed. It explains the program.')}
+      ${item('Should I invest in the ESPP?', 'No advice given. Sparky shares the plan facts and says who can help decide.')}
+      ${item('Am I paid fairly for my level?', 'No answer on individual pay. Sparky explains how pay is set and offers a private follow-up from HR.')}</div>
+    <div class="demo-group"><h3>When Sparky isn't sure</h3>
+      ${item('How do I reset my pasword?', 'A typo. Sparky asks "Did you mean" instead of guessing.')}
+      ${item('Who approves my expense report?', 'No clear genie, so Sparky offers the closest ones.')}
+      <p class="demo-tip">On any answer, select <strong>Not the right genie?</strong> to reroute it or ask a person.</p></div>
+    <div class="demo-group"><h3>Tool onboarding</h3>
+      ${item('I need access to Claude', 'Two approvals. Give a reason, try Send a reminder, then approve as the manager and as the license owner.')}
+      ${item('I need access to Datadog', 'One approval. Select Deny on the manager card to show the denial path.')}
+      <p class="demo-tip">At the end, answer <strong>No, still blocked</strong> to show the ticket reopening, then open <strong>My requests</strong>.</p></div>`, opener);
+}
+
+/* ----- guide ----- */
+function renderGuide() {
+  const example = { it: 'How do I connect to the VPN?', hr: 'How do I request PTO?', stock: 'When is the next ESPP enrollment window?', costcap: 'What is the cost cap historical for FY26 Q3?', comp: 'When does the merit cycle run?', audit: 'How do I report a control concern?', collections: 'What are our standard payment terms?', orders: 'How do I check the status of a customer order?', sales: 'Where are the competitive battlecards?' };
+  const covers = { it: 'Sign-in, VPN, laptops, and access to tools.', hr: 'Time off, holidays, and leave.', stock: 'How the ESPP and RSUs work, and key dates.', costcap: 'Cost caps, past actuals, and exceptions.', comp: 'Pay bands, the merit cycle, and bonus plans.', audit: 'Raising concerns, SOX evidence, the audit plan.', collections: 'Overdue invoices, disputes, payment terms.', orders: 'Order status, booking, and amendments.', sales: 'Pitch decks, battlecards, and onboarding.' };
+  $('#guide-inner').innerHTML = `
+    <section>
+      <h1>What Sparky can do</h1>
+      <p class="lead">Sparky is one place to ask work questions. You ask in plain language. Sparky works out which team the question belongs to and hands it to that team's <strong>genie</strong>, an assistant that answers only from that team's own documents.</p>
+      <div class="facts"><span class="fact">9 genies, one per team</span><span class="fact">Every answer names its source</span><span class="fact">Tool access handled in chat</span><span class="fact">Says so when it isn't sure</span></div>
+    </section>
+    <section>
+      <h2>The genies</h2>
+      <p>Each answer shows a badge for the genie that replied. Select an example to try it.</p>
+      <div class="genie-grid">${GENIE_ORDER.map(id => `<div class="genie-card g-${id}">
+        <div class="genie-card-head"><span class="g-ico">${ico(id)}</span><span class="g-name">${GENIES[id].name}</span></div>
+        <span class="g-blurb">${covers[id]}</span>${chip(example[id])}</div>`).join('')}</div>
+    </section>
+    <section>
+      <h2>Getting more from an answer</h2>
+      <div class="tips">
+        <div class="tip"><strong>Check the source</strong><span>Select a source under any answer to see the exact passage and when it was last updated.</span></div>
+        <div class="tip"><strong>Wrong genie? Say so</strong><span>Select "Not the right genie?" to send your question to another genie or to a person on that team.</span></div>
+        <div class="tip"><strong>Keep going</strong><span>Related questions under each answer take you to the usual next step.</span></div>
+        <div class="tip"><strong>Track it</strong><span>My requests lists your tool requests and anything you've sent to a team.</span></div>
+      </div>
+    </section>
+    <section>
+      <h2>Getting a tool: onboarding to Claude</h2>
+      <p>Sparky can get you access to Tableau, Snowflake, Claude, Datadog, Lucidchart, and 1Password without a form. Here is what happens when you ask for Claude.</p>
+      <ol class="walk">
+        <li><div><strong>You ask.</strong><span>Type &ldquo;I need access to Claude.&rdquo; The IT Genie confirms the tool and tells you up front that Claude has limited licenses, so it needs two approvals.</span></div></li>
+        <li><div><strong>You give a short reason.</strong><span>One sentence on what you'll use it for.</span></div></li>
+        <li><div><strong>Sparky opens the ticket.</strong><span>A Jira ticket is created for you. You get the ticket number and can follow progress in the tracker at the top of the chat.</span></div></li>
+        <li class="approval-step"><div><strong>Approval 1: your manager.</strong><span>The request waits until your manager approves or denies it. If it's slow, you can send a reminder from the tracker.</span></div></li>
+        <li class="approval-step"><div><strong>Approval 2: the Claude license owner.</strong><span>Only Tableau and Claude have this second step, because their licenses are limited.</span></div></li>
+        <li><div><strong>Your seat is set up.</strong><span>Sparky adds you to the right permissions group.</span></div></li>
+        <li><div><strong>You confirm it works.</strong><span>If you're still blocked, Sparky reopens the ticket and sends it to IT.</span></div></li>
+      </ol>
+      <div class="tool-split">
+        <div class="tool-box"><h3>Two approvals</h3><p>Tableau, Claude</p><small>Your manager, then the license owner.</small></div>
+        <div class="tool-box"><h3>One approval</h3><p>Snowflake, Datadog, Lucidchart, 1Password</p><small>Your manager only.</small></div>
+      </div>
+      <p>If an approver says no, you'll see their reason, the ticket is closed, and Sparky tells you what you can do next.</p>
+      <div class="chips">${chip('Try it: I need access to Claude', 'I need access to Claude')}</div>
+    </section>
+    <section>
+      <h2>What Sparky won't do</h2>
+      <p>Two kinds of questions need a person, not an assistant. Sparky tells you so plainly, shares the facts it can, and points you to who can help.</p>
+      <div class="wont">
+        <div class="wont-card"><h3>Give financial advice</h3>
+          <p>Sparky explains how company programs work. It never tells you what to do with your money.</p>
+          <dl class="ex"><dt>Will answer</dt><dd>&ldquo;How does the ESPP work?&rdquo;</dd><dt>Won't answer</dt><dd>&ldquo;Should I invest in the ESPP?&rdquo;</dd><dt>You still get</dt><dd>The plan facts and the next enrollment dates</dd><dt>Go to</dt><dd>A personal financial advisor</dd></dl>
+          ${chip('See how Sparky responds', 'Should I invest in the ESPP?', 'quiet')}</div>
+        <div class="wont-card"><h3>Answer questions about anyone's pay</h3>
+          <p>Sparky explains general pay policy. It can't see or discuss any individual's pay, including yours.</p>
+          <dl class="ex"><dt>Will answer</dt><dd>&ldquo;How do pay bands work?&rdquo;</dd><dt>Won't answer</dt><dd>&ldquo;Am I paid fairly for my level?&rdquo;</dd><dt>You still get</dt><dd>How pay is set, and a private follow-up from HR if you want one</dd><dt>Go to</dt><dd>Your manager, your HR business partner, or the HR system</dd></dl>
+          ${chip('See how Sparky responds', 'Am I paid fairly for my level?', 'quiet')}</div>
+      </div>
+      <p>After any answer, a thumbs up or down tells the team behind that genie how it did.</p>
+    </section>`;
+}
+
+/* ----- shell wiring ----- */
+function showTab(name) {
+  for (const t of ['chat', 'requests', 'guide']) {
+    $('#view-' + t).hidden = t !== name;
+    $('#tab-' + t).setAttribute('aria-selected', String(t === name));
+  }
+  if (name === 'chat') scrollDown();
+}
+function renderRoster() {
+  $('#roster').innerHTML = GENIE_ORDER.map(id => `<li><button type="button" class="g-row g-${id}" data-genie="${id}">
+    <span class="g-ico">${ico(id)}</span><span><span class="g-name">${GENIES[id].name}</span><br><span class="g-blurb">${GENIES[id].blurb}</span></span><span class="g-dot"></span></button></li>`).join('');
+}
+function reset() {
+  state.gen++; logInner.innerHTML = ''; state.flow = null; state.busy = false; sendBtn.disabled = false;
+  state.requests = seedRequests(); CTX = []; SRC = [];
+  input.value = ''; input.placeholder = 'Ask Sparky a work question…';
+  closeDrawer(); renderTracker(); updateReqs(); setActiveGenie(null); showTab('chat'); welcome(); log.scrollTop = 0;
+}
+
+document.addEventListener('click', e => {
+  const wb = e.target.closest('.who-btn');
+  if (wb) {
+    const tr = $('.trace', wb.closest('.msg'));
+    if (tr) { const open = tr.classList.toggle('collapsed') === false; wb.setAttribute('aria-expanded', String(open)); }
+    return;
+  }
+  const t = e.target.closest('[data-prompt],[data-genie],[data-act],[data-mock-link],[data-mock-open],[data-src]');
+  if (!t) return;
+  if (t.dataset.prompt) return void handle(t.dataset.prompt);
+  if (t.dataset.src) return void openSource(+t.dataset.src, t);
+  if (t.dataset.genie) { if (state.busy) return; showTab('chat'); return void genieMenu(t.dataset.genie); }
+  if (t.hasAttribute('data-mock-link')) return void toast('Mocked link. No real Jira ticket exists in this demo.');
+  if (t.hasAttribute('data-mock-open')) return void toast('Mocked link. Nothing is connected in this demo.');
+  const act = t.dataset.act;
+  if (act === 'verify-yes') onVerify(true, t);
+  else if (act === 'verify-no') onVerify(false, t);
+  else if (act === 'cancel-flow') { if (!state.busy) cancelFlow(); }
+  else if (act === 'dismiss-tracker') { state.flow = null; renderTracker(); }
+  else if (act === 'remind') remind();
+  else if (act === 'reset') reset();
+  else if (act === 'go-requests') showTab('requests');
+  else if (act === 'handoff-hrbp') { const c = CTX[+t.dataset.ctx]; if (c && !state.busy) { t.disabled = true; t.textContent = 'Sent to your HR business partner'; handoff(c); } }
+  else if (act === 'req-view') {
+    const r = state.requests[+t.dataset.req];
+    if (r && r.kind === 'tool' && !activeFlow()) { state.flow = r.flow; renderTracker(); }
+    showTab('chat');
+  }
+  else if (act === 'none-of-these') { if (!state.busy) pickGenie(newBot(), (CTX[+t.dataset.ctx] || {}).closest, 'No problem.'); }
+  else if (act === 'all-genies') say({ who: SPARKY_BADGE, html: `<p>Here are all nine. Pick one to see what it covers:</p><div class="chips">${GENIE_ORDER.map(genieChip).join('')}</div>` });
+});
+document.addEventListener('change', e => {
+  if (e.target.id === 'keep-trace') { state.keepTrace = e.target.checked; logInner.classList.toggle('keep-trace', state.keepTrace); }
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+$('#scrim').addEventListener('click', closeDrawer);
+$('#drawer-x').addEventListener('click', closeDrawer);
+$('#composer-form').addEventListener('submit', e => { e.preventDefault(); const v = input.value; if (state.busy || !v.trim()) return; input.value = ''; handle(v); });
+for (const t of ['chat', 'requests', 'guide']) $('#tab-' + t).addEventListener('click', () => showTab(t));
+$('#demo-btn').addEventListener('click', e => openDemo(e.currentTarget));
+$('#suggest-btn').addEventListener('click', () => { if (!state.busy) welcome(); });
+
+renderRoster(); renderGuide(); updateReqs(); welcome(); log.scrollTop = 0;
+</script>
+</body>
+</html>
