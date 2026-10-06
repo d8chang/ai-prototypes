@@ -16,7 +16,7 @@ button{cursor:pointer}
 .wrap{max-width:1240px;margin:0 auto;padding:0 28px}
 
 /* header */
-.top{background:linear-gradient(180deg,#d5efdf 0,var(--bg) 100%);padding:28px 0 16px}
+.top{background:linear-gradient(180deg,#d5efdf 0,var(--bg) 100%);padding:28px 0 0}
 .eyebrow{font-size:12px;font-weight:600;color:var(--g2);letter-spacing:.04em}
 h1{font-size:30px;letter-spacing:-.02em;margin:4px 0}
 .sub{color:var(--mut);max-width:76ch}
@@ -29,7 +29,10 @@ h1{font-size:30px;letter-spacing:-.02em;margin:4px 0}
 .chip.k{background:var(--gt);border-color:#c5e6d2;color:var(--g2);font-weight:600}
 
 /* page sections and cards */
-main>section{margin:26px 0}
+.view>section{margin:26px 0}.view>section.kpis{margin-top:20px}
+.tabs{display:flex;gap:4px;margin-top:18px;border-bottom:1px solid var(--line)}
+.tabs button{border:0;background:none;padding:9px 16px;font-weight:650;font-size:14px;color:var(--mut);border-bottom:3px solid transparent;margin-bottom:-1px;border-radius:8px 8px 0 0}
+.tabs button:hover{color:var(--ink)}.tabs [aria-selected=true]{color:var(--g2);border-bottom-color:var(--g2);background:rgba(255,255,255,.6)}
 .sh{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:12px}
 .sh h2{font-size:17px;letter-spacing:-.01em}
 .sh span{font-size:12px;color:var(--mut)}
@@ -73,16 +76,23 @@ main>section{margin:26px 0}
 .task span{color:var(--mut)}
 
 /* how it's built */
-.built{padding:20px;display:grid;gap:20px}.built>*{min-width:0}
-.arch{width:100%;height:auto;max-height:380px}
+.pad{padding:16px 20px}.pad>*{min-width:0}
+.arch{width:100%;height:auto;max-height:440px}
 .bx{fill:#fff;stroke:#cfd9d3}.bx.big{fill:var(--gt);stroke:#bfe0cc}.bx.mc{fill:#f5f7f6}
 .bt{font-size:13px;font-weight:650;fill:var(--ink);text-anchor:middle}
 .bs{font-size:10.5px;fill:var(--mut);text-anchor:middle}
 .col{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;fill:var(--mut);text-anchor:middle}
 .ar{stroke:#7f8f87;stroke-width:1.5;fill:none}.ahp{fill:#7f8f87}
 .notes{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.notes h4,.rs h4{font-size:11.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--mut);margin-bottom:8px}
+.notes h4,.rs h4,#view-mcp h4{font-size:11.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--mut);margin-bottom:8px}
 .notes p{font-size:13px}
+.real{border-left:4px solid var(--g);background:var(--gt);border-radius:0 10px 10px 0;padding:14px 18px}.real p{font-size:13.5px;max-width:95ch}.real h4 .chip{text-transform:none;letter-spacing:0;margin-left:6px}
+#view-mcp h5{font-size:12px;margin:10px 0 4px}#view-mcp h5:first-child{margin-top:0}pre.w{white-space:pre-wrap;word-break:break-word}
+.code2{align-items:start}.code2>div{min-width:0}.code2 pre{font-size:11.5px}#mcpCards{align-items:start}.conn{padding:14px 16px;display:flex;flex-direction:column;gap:8px}.conn .hd{display:flex;align-items:center;gap:10px}.conn .hd b{font-size:15px;flex:1}.conn p{font-size:12.5px;color:var(--mut);line-height:1.45}.conn p b{color:var(--ink)}
+.chip.w{background:var(--ambt);border-color:#efd9a0;color:var(--amb);font-weight:600}
+.conn details,details.in{border:0;border-top:1px solid var(--line);border-radius:0;margin:auto 0 0;box-shadow:none}.conn summary,details.in summary{padding:9px 0 0;font-size:12.5px;color:var(--g2)}details.in{margin-top:12px}details.in pre{margin-top:10px}
+.conn dl{display:grid;gap:7px;font-size:12px;padding-top:8px}.conn dt{color:var(--mut);font-weight:600;font-size:11px}.conn code{overflow-wrap:anywhere;line-height:1.8}
+.stepc{padding:14px 16px;display:grid;grid-template-columns:28px 1fr;gap:4px 12px}.stepc .dot{background:var(--g2);color:#fff;grid-row:span 2}.stepc p{font-size:12.5px;color:var(--mut)}#callSteps{margin-bottom:10px}
 pre{margin:0;background:#0f1a14;color:#d5e7dc;border-radius:10px;padding:14px 16px;font:12px/1.55 var(--mono);overflow:auto}
 code{font:12px var(--mono);background:#eef2f0;border-radius:5px;padding:1px 5px}
 pre code{background:none;padding:0}
@@ -113,7 +123,7 @@ footer{color:var(--mut);font-size:12px;padding:8px 0 40px}
 .trace{background:#0f1a14;color:#d5e7dc;border-radius:10px;padding:10px 14px;font:12px/1.6 var(--mono);margin-bottom:16px}
 .trh{color:#9fb8aa;display:flex;align-items:center;gap:8px}
 .tl{display:flex;gap:8px;animation:in .25s ease}.tl span{min-width:0;overflow-wrap:anywhere}
-.tl .ok{color:#62d394}.tl b{color:#9fd8ff;font-weight:500}.tl .res{margin-left:auto;color:#f1d58a;white-space:nowrap}
+.tl .ok{color:#62d394}.tl.ag .ok,.tl.ag b{color:#e8b4ff}.tl b{color:#9fd8ff;font-weight:500}.tl .res{flex:none;margin-left:auto;color:#f1d58a;white-space:nowrap}
 .spin{width:11px;height:11px;border-radius:50%;border:2px solid #3d5548;border-top-color:#62d394;animation:sp .7s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 @keyframes in{from{opacity:0;transform:translateY(3px)}}
@@ -211,9 +221,11 @@ details .paper{border:0;border-top:1px solid var(--line);border-radius:0 0 12px 
   <h1>Marketing AI Hub</h1>
   <p class="sub">One place for marketers to launch Claude skills, multi-step workflows, and agents on go-to-market data. Press Run on any card to watch the tool calls and get the finished work product.</p>
   <div class="pills" id="pills"></div>
+  <nav class="tabs" role="tablist" aria-label="Sections"><button role="tab" id="tab-hub" data-act="tab" data-arg="hub">Hub</button><button role="tab" id="tab-mcp" data-act="tab" data-arg="mcp">MCP connections</button></nav>
 </div></header>
 
 <main class="wrap">
+ <div class="view" id="view-hub" role="tabpanel" aria-labelledby="tab-hub">
   <details class="card install" open>
     <summary>Add these skills to Claude<span>two ways, about a minute each</span></summary>
     <div class="two">
@@ -227,23 +239,117 @@ details .paper{border:0;border-top:1px solid var(--line);border-radius:0 0 12px 
         <li>In Claude, go to <b>Customize</b>, then <b>Skills</b>. Click <b>+</b>, then <b>Create skill</b>, then <b>Upload a skill</b>, and select the ZIP.</li>
         <li>Turn the skill on in your skills list.</li></ol></div>
     </div>
-    <p>Plugins need a paid Claude plan, and uploading a skill needs "Code execution and file creation" turned on under Settings, Capabilities (on Team and Enterprise plans an owner controls both). For live data, connect Salesforce, Snowflake, Slack, and monday.com in Claude; without a connector, a skill asks for an export instead of guessing. The brand and voice reference files in the plugin are samples for this page's fictional company, so replace them with your own.</p>
+    <p>Plugins need a paid Claude plan, and uploading a skill needs "Code execution and file creation" turned on under Settings, Capabilities (on Team and Enterprise plans an owner controls both). For live data, the plugin lists Slack, monday.com, Lucid, and Marketo on its Connectors tab (Marketo also needs API credentials from an admin); Salesforce and Snowflake need an admin to set up first, and the plugin README says how. Without a connector, a skill asks for an export instead of guessing. The brand and voice reference files in the plugin are samples for this page's fictional company, so replace them with your own.</p>
   </details>
   <section class="kpis" id="kpis" aria-label="Headline metrics"></section>
   <section><div class="sh"><h2>Skills</h2><span id="nSkills"></span><p>Single-purpose tools. Each one is a SKILL.md instruction file plus the MCP tools it may call. Open SKILL.md on any card to read it or download it as a ZIP.</p></div><div class="g3" id="skills"></div></section>
-  <section><div class="sh"><h2>Workflows</h2><span id="nFlows"></span><p>Skills chained in order. Run one here, or copy its prompt and paste it into Claude.</p></div><div class="g2" id="flows"></div></section>
+  <section><div class="sh"><h2>Workflows</h2><span id="nFlows"></span><p>Skills chained in order. The ones marked Agentic also decide what to fetch next from what they find, and stop for your approval before anything is written. Run one here, or copy its prompt and paste it into Claude.</p></div><div class="g2" id="flows"></div></section>
   <section><div class="sh"><h2>Art of the Possible</h2><span id="nAgents"></span><p>Role-based agents that plan their own steps. Pick a sample task to see the plan and a sample deliverable.</p></div><div class="g5" id="agents"></div></section>
-  <section><div class="sh"><h2>How it's built</h2><span>prototype-level detail</span></div>
-    <div class="card built">
-      <div id="arch"></div>
-      <div id="mcpTable"></div>
-      <div class="notes">
-        <div><h4>In production</h4><p>Each skill is a folder Claude loads when a request matches its description: <code>skills/&lt;name&gt;/SKILL.md</code> plus any reference files. Each MCP server authenticates with OAuth as the signed-in user (Salesforce, Slack, monday.com, Lucidchart) or with a scoped service account (Snowflake, limited to marketing views). Every server is read-only by default. Skills can write in only two places, a Slack message or a monday.com item, and each write waits for a button press. Agents can also create new Lucidchart diagrams; they never edit existing ones.</p></div>
-        <div><h4>In this prototype</h4><p>Nothing leaves the page. The eight SKILL.md files are stored in the page, open from the skill cards, and download together as <code>marketing.plugin</code>. The mock layer exposes the same tool names a real server would, and each tool returns rows from one sample <code>DATA</code> object. Skills only reach data through those tools, so the run trace, the KPI row, and every result agree, and swapping the mock for a real MCP client would not change the skill code.</p></div>
-      </div>
-      <div><h4 style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--mut);margin-bottom:8px">A mock MCP tool (simplified from this page's source)</h4>
-<pre><code>// Same tool name and arguments as the real Salesforce MCP server,
-// but it reads the page's sample DATA object instead of calling an API.
+
+ </div>
+ <div class="view" id="view-mcp" role="tabpanel" aria-labelledby="tab-mcp" hidden>
+  <section><div class="sh"><h2>How Claude reaches the data</h2><p>MCP connections sit between the skills and the business systems. This tab covers what was real, what each connection does, and how this page mocks it.</p></div>
+    <div class="real"><h4>From the real rollout <span class="chip k">not sample data</span></h4><ul class="bul">
+      <li>Salesforce, Snowflake, Slack, monday.com, and Lucidchart were all connected to Claude through MCP, using a mix of connectors from Claude's directory and custom MCP servers. Marketo was added for this prototype.</li>
+      <li>Everyone signed in with their own account (OAuth), so Claude could only read what that person was already allowed to see.</li>
+      <li>My part: I set the requirements for each connection (which systems, which data, read or write) and built the hub. Others configured the servers.</li></ul></div>
+  </section>
+  <section><div class="sh"><h2>The path of a request</h2><span>hub, Claude, MCP server, system</span></div><div class="card pad" id="arch"></div></section>
+  <section><div class="sh"><h2>The connections</h2><span>open Technical details on a card for the real server, endpoint, and tools</span></div><div class="g3" id="mcpCards"></div>
+    <p class="fine">Endpoints and tool names come from each vendor's documentation as of October 2026. Tool names differ from server to server, which is why each SKILL.md names the data it needs and not a tool.</p></section>
+  <section><div class="sh"><h2>What one call looks like</h2><span>the Lead Follow-Up SLA lookup</span></div>
+    <div class="g3" id="callSteps"></div>
+    <details><summary>Show the real tool definition, request, and response</summary><div class="pad"><div id="realCall" class="two"></div>
+      <p class="fine">The tool definition and the request follow Salesforce's published reference for its hosted <code>sobject-reads</code> server. The response is the standard MCP result shape filled with this page's sample rows; it was not captured from a live org. The SOQL rounds the 48-hour rule to whole days.</p></div></details></section>
+  <section><div class="sh"><h2>A custom MCP server, in code</h2><span>simple examples, Python SDK</span>
+      <p>A custom server is worth building when a vendor's server is too broad or signs in the wrong way. It exposes a few narrow tools, and Claude can only do what those tools allow. The stand-in tool names on this page, such as <code>query_leads</code> and <code>clone_program</code>, are the kind of tools a custom server offers in place of one generic query tool.</p></div>
+    <div class="two code2">
+      <div><h5>1. The server: one read-only tool and one draft-only write tool</h5><pre># server.py: a custom MCP server with two narrow tools.
+# Setup: pip install mcp   (Python SDK v2)
+from mcp.server.mcpserver import MCPServer
+from mcp.server.mcpserver.exceptions import ToolError
+from mcp.types import ToolAnnotations
+
+mcp = MCPServer(&quot;marketing-data&quot;)
+
+# Sample rows so this file runs as-is. In production, call your CRM
+# with the signed-in user&#x27;s token so their own permissions apply.
+LEADS = [
+    {&quot;name&quot;: &quot;M. Okafor&quot;, &quot;campaign&quot;: &quot;finops-summit&quot;, &quot;hours_idle&quot;: 96},
+    {&quot;name&quot;: &quot;G. Pemberton&quot;, &quot;campaign&quot;: &quot;close-faster&quot;, &quot;hours_idle&quot;: 50},
+    {&quot;name&quot;: &quot;A. Lund&quot;, &quot;campaign&quot;: &quot;close-faster&quot;, &quot;hours_idle&quot;: 12},
+]
+
+@mcp.tool(annotations=ToolAnnotations(read_only_hint=True))
+def query_leads(no_activity_hours: int = 48,
+                campaign: str | None = None) -&gt; list[dict]:
+    &quot;&quot;&quot;New leads with no logged activity for N hours. Read-only.&quot;&quot;&quot;
+    rows = [l for l in LEADS if l[&quot;hours_idle&quot;] &gt;= no_activity_hours]
+    return [l for l in rows if campaign in (None, l[&quot;campaign&quot;])]
+
+@mcp.tool(annotations=ToolAnnotations(destructive_hint=False))
+def clone_program(template: str, name: str) -&gt; dict:
+    &quot;&quot;&quot;Clone a Marketo program template as a DRAFT. Never sends.&quot;&quot;&quot;
+    if not name.startswith(&quot;FY&quot;):
+        raise ToolError(&quot;Name must follow the convention, &quot;
+                        &quot;e.g. FY26Q4-WBN-Topic-20261112&quot;)
+    # production: call the Marketo program-clone API here
+    return {&quot;program&quot;: name, &quot;template&quot;: template,
+            &quot;status&quot;: &quot;draft&quot;, &quot;activated&quot;: False}
+
+if __name__ == &quot;__main__&quot;:
+    # serves http://127.0.0.1:8000/mcp
+    mcp.run(transport=&quot;streamable-http&quot;, port=8000)</pre></div>
+      <div><h5>2. Run it and connect it to Claude</h5><pre>pip install mcp
+python server.py      # serves http://127.0.0.1:8000/mcp
+
+# Claude Code, for local testing
+claude mcp add --transport http marketing-data \
+  http://localhost:8000/mcp
+
+# Claude chat and Cowork: host it at an https URL, then in
+# Connectors choose &quot;Add custom connector&quot; and paste the URL</pre>
+        <h5>3. What Claude sees: the tool definition (trimmed)</h5><pre class="w">{
+  &quot;name&quot;: &quot;query_leads&quot;,
+  &quot;description&quot;: &quot;New leads with no logged activity for N hours. Read-only.&quot;,
+  &quot;inputSchema&quot;: {
+    &quot;type&quot;: &quot;object&quot;,
+    &quot;properties&quot;: {
+      &quot;no_activity_hours&quot;: {&quot;default&quot;: 48, &quot;type&quot;: &quot;integer&quot;},
+      &quot;campaign&quot;: {&quot;anyOf&quot;: [{&quot;type&quot;: &quot;string&quot;}, {&quot;type&quot;: &quot;null&quot;}], &quot;default&quot;: null}
+    }
+  },
+  &quot;annotations&quot;: {&quot;readOnlyHint&quot;: true}
+}</pre>
+        <h5>4. The guardrail at work</h5><pre class="w">clone_program(template=&quot;TEMPLATE - Webinar&quot;, name=&quot;bad name&quot;)
+→ isError: true
+  Error executing tool clone_program:
+  Name must follow the convention, e.g. FY26Q4-WBN-Topic-20261112
+
+clone_program(template=&quot;TEMPLATE - Webinar&quot;,
+              name=&quot;FY26Q4-WBN-Close-Faster-20261112&quot;)
+→ {
+    &quot;program&quot;: &quot;FY26Q4-WBN-Close-Faster-20261112&quot;,
+    &quot;template&quot;: &quot;TEMPLATE - Webinar&quot;,
+    &quot;status&quot;: &quot;draft&quot;,
+    &quot;activated&quot;: false
+  }</pre></div>
+    </div>
+    <p class="fine">Tested with version 2.2.0 of the MCP Python SDK: the tool definition and the results in boxes 3 and 4 are real output from this code, trimmed. In SDK version 1 the class is named <code>FastMCP</code>. The example has no sign-in and uses sample rows. A production server adds OAuth, so every call runs as the signed-in user, and swaps the sample rows for real API calls. It can also bridge a sign-in gap: Adobe's Marketo server expects API keys in request headers, while Claude's custom connector screen takes a URL and OAuth details, so a small server in front can hold the keys and allow drafts only.</p></section>
+  <section class="notes">
+    <div class="card pad"><h4>Safeguards in the design</h4><ul class="bul">
+      <li><b>Per-user sign-in.</b> No shared accounts on the five rollout systems, so each applies that person's own permissions. Marketo's server takes an API user instead, so its role is limited to drafts.</li>
+      <li><b>Read-only at the server where possible.</b> Salesforce through its read-only endpoint, Snowflake through a role limited to marketing views.</li>
+      <li><b>Three kinds of write only.</b> A Slack message, a monday.com item, or Marketo drafts, each after a button press. Claude never sends an email or activates a campaign.</li>
+      <li><b>Agents create, never edit.</b> They can add new Lucid diagrams but cannot change existing ones.</li></ul></div>
+    <div class="card pad"><h4>How this page mocks it</h4><ul class="bul">
+      <li><b>Nothing leaves the page.</b> There are no network calls.</li>
+      <li><b>Tool names here are stand-ins.</b> Each one maps to a real tool, listed on the cards above.</li>
+      <li><b>One sample data object.</b> Every stand-in reads it, so the trace, the KPIs, and every result agree.</li>
+      <li><b>Going live</b> means swapping each stand-in for its mapped call. The skill logic and the SKILL.md files stay the same.</li></ul>
+      <details class="in"><summary>Show a stand-in tool's code</summary>
+<pre><code>// A stand-in for a soqlQuery call on the real Salesforce server (see the table above).
+// It reads the page's sample DATA object instead of calling an API.
 const TOOLS = {
   'salesforce.query_leads': ({ noActivityHours, campaign }) =&gt; {
     let rows = DATA.slaLeads;                     // new leads, last 14 days
@@ -262,9 +368,9 @@ function call(tool, args = {}) {
 
 // A skill is then just tool calls plus rendering:
 const late = call('salesforce.query_leads', { noActivityHours: 48 });
-// In production, call() becomes a real MCP request scoped by OAuth.</code></pre></div>
-    </div>
+// In production this is an MCP tools/call request made with the user's OAuth token.</code></pre></details></div>
   </section>
+ </div>
   <footer>Portfolio prototype. The company, competitors, people, accounts, and every number on this page are fictional sample data.</footer>
 </main>
 
@@ -348,7 +454,7 @@ const DATA = {
            ['Legacy tools bolt AI on; we are built on it.', 'We have run ML extraction since 2021 on more than 30M invoices. Ask them for accuracy on multi-page and handwritten invoices.'],
            ['We will beat any price.', 'Check years two and three. Our pricing is per entity with no per-invoice overage.']]}],
   accounts: [
-    {id: 'marlowe-finch', name: 'Marlowe Finch Distribution', ind: 'Wholesale distribution', hq: 'Columbus, OH', emp: 1400, status: 'Prospect', arr: 0, owner: 'r7',
+    {id: 'marlowe-finch', eng: 72, name: 'Marlowe Finch Distribution', ind: 'Wholesale distribution', hq: 'Columbus, OH', emp: 1400, status: 'Prospect', arr: 0, owner: 'r7',
      signal: '14 site sessions and 3 pricing-page visits in the last 30 days', meeting: {date: '2026-10-08', why: 'CFO proposal review'},
      opps: [{name: 'AP Automation, 12 entities', stage: 'Proposal', amt: 186, close: '2026-11-14', comps: ['orvanta', 'driftmark']}],
      people: [['Gwendolyn Pryce', 'CFO', 'Economic buyer'], ['Peter Okonjo', 'Controller', 'Champion'], ['Lena Fischbach', 'IT Director', 'Technical evaluator']],
@@ -356,7 +462,7 @@ const DATA = {
      points: ['Their NetSuite sync was validated in a sandbox on Sep 18, across all 12 entities.', 'AP keys about 9,000 invoices a month by hand; our model returns 2.5 FTEs of time.', 'A 6-week rollout gets them live before the January audit.'],
      risks: ['Orvanta is offering a bundle discount tied to the December ERP renewal.', 'IT has not signed off on SSO and data-residency questions.'],
      asks: ['Agree a decision date ahead of the Nov 14 close date.', 'Sponsor a security review session with IT the week of Oct 12.']},
-    {id: 'calloway', name: 'Calloway Regional Health', ind: 'Healthcare', hq: 'Nashville, TN', emp: 3200, status: 'Customer', arr: 142, owner: 'r8',
+    {id: 'calloway', eng: 85, name: 'Calloway Regional Health', ind: 'Healthcare', hq: 'Nashville, TN', emp: 3200, status: 'Customer', arr: 142, owner: 'r8',
      signal: '48,200 invoices processed in the last 90 days, up 12% on the prior period', meeting: {date: '2026-10-13', why: 'Executive business review and expansion'},
      opps: [{name: 'Close Automation expansion', stage: 'Negotiation', amt: 96, close: '2026-10-30', comps: ['orvanta']}],
      people: [['Raymond Abara', 'CFO', 'Economic buyer'], ['Sofia Brennan', 'VP Finance', 'Champion'], ['Kenji Morita', 'Director of Accounting', 'End-user lead']],
@@ -364,7 +470,7 @@ const DATA = {
      points: ['Anchor on AP results: 48,200 invoices in 90 days with 96% auto-coded.', 'Close Automation would take their 9-day close toward 5 using data already in Loomwright.', 'Offer a co-authored case study for their finance leadership conference.'],
      risks: ['The new CIO prefers vendor consolidation on Orvanta.', 'Two escalations last quarter; confirm both are resolved from their side.'],
      asks: ['CFO sign-off on the expansion by Oct 30.', 'An introduction to the new CIO before the architecture review.']},
-    {id: 'tidewater', name: 'Tidewater Building Products', ind: 'Manufacturing', hq: 'Norfolk, VA', emp: 850, status: 'Prospect', arr: 0, owner: 'r7',
+    {id: 'tidewater', eng: 41, name: 'Tidewater Building Products', ind: 'Manufacturing', hq: 'Norfolk, VA', emp: 850, status: 'Prospect', arr: 0, owner: 'r7',
      signal: '6 site sessions and 1 ROI-calculator completion in the last 30 days', meeting: {date: '2026-10-15', why: 'Technical validation readout'},
      opps: [{name: 'AP Automation, new logo', stage: 'Technical validation', amt: 74, close: '2026-12-12', comps: ['kettleworks']}],
      people: [['Dolores Ferreira', 'Controller', 'Economic buyer'], ['Arlo Jennings', 'AP Manager', 'Champion'], ['Minh Tran', 'Systems Analyst', 'Technical evaluator']],
@@ -372,7 +478,7 @@ const DATA = {
      points: ['The pilot on 500 of their own invoices starts Oct 6; bring the accuracy results.', '3-way match against POs is their top pain, and Kettleworks does not offer it.', 'Sage Intacct sync removes the weekly CSV upload their AP team does today.'],
      risks: ['The price gap versus Kettleworks is large in a capture-only comparison.', 'The Controller is new in role and cautious about a multi-step rollout.'],
      asks: ['Agree pilot success criteria before it starts.', 'Bring the plant finance leads to the readout.']},
-    {id: 'aldergrove', name: 'Aldergrove Hospitality Group', ind: 'Hospitality', hq: 'Denver, CO', emp: 2100, status: 'Customer', arr: 88, owner: 'r8',
+    {id: 'aldergrove', eng: 64, name: 'Aldergrove Hospitality Group', ind: 'Hospitality', hq: 'Denver, CO', emp: 2100, status: 'Customer', arr: 88, owner: 'r8',
      signal: '21,600 invoices processed in the last 90 days across 9 of 28 properties', meeting: {date: '2026-10-20', why: 'Multi-entity rollout proposal'},
      opps: [{name: 'Multi-entity rollout, 28 properties', stage: 'Proposal', amt: 128, close: '2026-11-21', comps: ['driftmark', 'kettleworks']}],
      people: [['Victor Salgado', 'CFO', 'Economic buyer'], ['Amara Diallo', 'VP Finance Operations', 'Champion'], ['Jocelyn Whitaker', 'Regional Controller', 'Influencer']],
@@ -380,7 +486,7 @@ const DATA = {
      points: ['The 9 live properties cut invoice cycle time from 11 days to 4.', 'A 3-wave rollout finishes before their fiscal year-end in March.', 'Show the AI coding assistant on their own hospitality vendor mix.'],
      risks: ["The CFO was impressed by Driftmark's approval-agent demo.", 'The per-property pricing request could cut deal value by about 15%.'],
      asks: ['Commit to wave 1 (7 properties) in November.', 'Let us run the AI coding demo on their own invoices.']},
-    {id: 'sorrel', name: 'Sorrel Financial Services', ind: 'Financial services', hq: 'Charlotte, NC', emp: 600, status: 'Prospect', arr: 0, owner: 'r8',
+    {id: 'sorrel', eng: 58, name: 'Sorrel Financial Services', ind: 'Financial services', hq: 'Charlotte, NC', emp: 600, status: 'Prospect', arr: 0, owner: 'r8',
      signal: '9 site sessions and 2 security-page visits in the last 30 days', meeting: {date: '2026-10-09', why: 'Final commercial negotiation'},
      opps: [{name: 'AP and Close bundle', stage: 'Negotiation', amt: 112, close: '2026-10-23', comps: ['orvanta']}],
      people: [['Eleanor Whitcombe', 'CFO', 'Economic buyer'], ['Rashad Coleman', 'Controller', 'Champion'], ['Ivy Castellanos', 'Head of Procurement', 'Gatekeeper']],
@@ -388,6 +494,14 @@ const DATA = {
      points: ['The security review is done, which removes the last technical blocker.', 'A 3-year term with per-entity pricing protects them from invoice-volume overages.', 'Signing in October gets them live for year-end close.'],
      risks: ["Orvanta sits on procurement's preferred-vendor list.", 'Procurement may hold out for quarter-end discounting.'],
      asks: ['A verbal commit from the CFO this week.', 'Procurement to confirm the paper process and a signature date.']}],
+  // Marketo program templates the Program Intake agent can clone; leadDays = minimum notice marketing ops asks for
+  marketo: {folder: 'Marketing Activities / FY26 Programs', templates: [
+    {id: 'webinar', code: 'WBN', name: 'TEMPLATE - Webinar', type: 'Webinar', leadDays: 21, statuses: ['Invited', 'Registered', 'Attended', 'No Show'],
+     assets: [['Invite 1', 'Email'], ['Invite 2', 'Email'], ['Reminder', 'Email'], ['Follow-up: attended', 'Email'], ['Follow-up: no-show', 'Email'], ['Registration form', 'Form'], ['Registration page', 'Landing page'], ['01 Send invites', 'Smart campaign'], ['02 Registered', 'Smart campaign'], ['03 Reminder', 'Smart campaign'], ['04 Attendance and follow-up', 'Smart campaign']]},
+    {id: 'field', code: 'EVT', name: 'TEMPLATE - Field event', type: 'Field event', leadDays: 28, statuses: ['Invited', 'RSVP Yes', 'Attended', 'No Show'],
+     assets: [['Invitation', 'Email'], ['Confirmation', 'Email'], ['Reminder', 'Email'], ['Thank you', 'Email'], ['RSVP form', 'Form'], ['Event page', 'Landing page'], ['01 Send invitation', 'Smart campaign'], ['02 RSVP', 'Smart campaign'], ['03 Attendance', 'Smart campaign']]},
+    {id: 'nurture', code: 'NUR', name: 'TEMPLATE - Email nurture', type: 'Email nurture', leadDays: 7, statuses: ['Member', 'Engaged', 'Converted'],
+     assets: [['Email 1', 'Email'], ['Email 2', 'Email'], ['Email 3', 'Email'], ['01 Add members', 'Smart campaign'], ['02 Engagement', 'Smart campaign']]}]},
   // campaign planning inputs kept on the monday.com board: benchmark cost per lead and channel mix by goal (%)
   channels: {email: {name: 'Email nurture', cpl: 35}, paid: {name: 'Paid social', cpl: 180}, webinar: {name: 'Webinar', cpl: 95}, synd: {name: 'Content syndication', cpl: 70}, field: {name: 'Field dinners', cpl: 320}, sdr: {name: 'SDR outbound', cpl: 110}},
   goals: {
@@ -400,12 +514,30 @@ const DATA = {
     ['Colors', 41, 'Off-palette fills and gradients mapped to Evergreen, Ink, and Mist. Charts use the green ramp.'],
     ['Logo', 14, 'Stretched 2023 wordmark replaced with the current mark, with clear space restored on every slide.'],
     ['Tone', 9, 'Hype headlines rewritten to be plain and specific: "Revolutionary synergies!!!" became "Close the books in 4 days".']]},
+  // Server reference. `real` describes the vendor-hosted MCP server each stand-in maps to (from vendor docs, Oct 2026); bundle = listed in the plugin's .mcp.json.
   mcp: [
-    {id: 'salesforce', name: 'Salesforce', use: 'Leads, contacts, accounts, open opportunities, and win/loss history', tools: ['query_leads', 'query_opportunities', 'get_account'], access: 'Read'},
-    {id: 'snowflake', name: 'Snowflake', use: 'Funnel and pipeline metrics by month and week, plus account engagement', tools: ['run_query', 'list_views'], access: 'Read'},
-    {id: 'slack', name: 'Slack', use: 'Account-channel context, and SLA nudges to sales managers', tools: ['search_messages', 'post_message'], access: 'Read + write: messages'},
-    {id: 'monday', name: 'monday.com', use: 'Campaign board, channel benchmarks, and new campaign items', tools: ['get_board', 'list_items', 'create_item'], access: 'Read + write: items'},
-    {id: 'lucidchart', name: 'Lucidchart', use: 'Campaign flows and journey maps drawn by agents', tools: ['create_diagram', 'export_diagram'], access: 'Write: new diagrams'}]
+    {id: 'salesforce', icon: '☁️', signin: "Each person signs in with their own Salesforce login, so their record access applies.", name: 'Salesforce', use: 'Leads, contacts, accounts, open opportunities, and win/loss history', access: 'Read',
+     real: {server: 'Salesforce Hosted MCP server, sobject-reads', short: 'sobject-reads', url: 'https://api.salesforce.com/platform/mcp/v1/platform/sobject-reads', tool: 'soqlQuery',
+       auth: "OAuth through an External Client App (scopes mcp_api and refresh_token, PKCE). The signed-in user's object, field, and sharing permissions apply.",
+       setup: 'Not bundled. A Salesforce admin first creates an External Client App for Claude; then add the URL as a custom connector, or use the Salesforce connector from the Claude directory.'}},
+    {id: 'snowflake', icon: '❄️', signin: "Each person signs in; their Snowflake role decides which views Claude can read.", name: 'Snowflake', use: 'Funnel and pipeline metrics by month and week, plus account engagement', access: 'Read',
+     real: {server: 'Snowflake-managed MCP server', short: 'managed MCP server', url: 'https://<account_url>/api/v2/databases/<db>/schemas/<schema>/mcp-servers/<name>', tool: 'admin-named tool of type SYSTEM_EXECUTE_SQL',
+       auth: "Snowflake OAuth. An admin defines the tool list in CREATE MCP SERVER, and the user's role decides which views it can read.",
+       setup: 'Not bundled, because the URL is specific to your account. A Snowflake admin creates the MCP server; then add its URL as a custom connector, or use the Snowflake connector from the Claude directory.'}},
+    {id: 'slack', icon: '💬', signin: "Each person signs in; Claude sees only the channels they are in.", name: 'Slack', use: 'Account-channel context, and SLA nudges to sales managers', access: 'Read + write: messages',
+     real: {server: 'Slack MCP server', short: 'mcp.slack.com', url: 'https://mcp.slack.com/mcp', tool: 'slack_search_public_and_private', map: {post_message: 'slack_send_message'}, bundle: 'slack',
+       auth: 'OAuth. Every call runs as the signed-in user and sees only their channels.', setup: 'Bundled. Connect it from the plugin Connectors tab and sign in.'}},
+    {id: 'monday', icon: '📅', signin: "Each person signs in; anything Claude creates is created as them.", name: 'monday.com', use: 'Campaign board, channel benchmarks, and new campaign items', access: 'Read + write: items',
+     real: {server: 'monday.com platform MCP', short: 'mcp.monday.com', url: 'https://mcp.monday.com/mcp', tool: 'get_board_items_page', map: {get_board: 'get_board_info', create_item: 'create_item'}, bundle: 'monday',
+       auth: "OAuth. Calls run as the signed-in user and count toward the account's API limit.", setup: 'Bundled. Connect it from the plugin Connectors tab and sign in.'}},
+    {id: 'lucidchart', icon: '🔷', signin: "Each person signs in; Claude reaches only documents they can open.", name: 'Lucidchart', use: 'Campaign flows and journey maps drawn by agents', access: 'Write: new diagrams',
+     real: {server: 'Lucid MCP server', short: 'mcp.lucid.app', url: 'https://mcp.lucid.app/mcp', tool: 'lucid_create_diagram_from_specification', bundle: 'lucid',
+       auth: 'OAuth. Limited to documents the signed-in user can open.', setup: 'Bundled. Connect it from the plugin Connectors tab and sign in.'}},
+    {id: 'marketo', icon: '🟣', signin: 'An API user, not a personal login, so its role is limited to creating drafts.', name: 'Marketo', use: 'Program templates, and new programs built as drafts from an intake', access: 'Read + write: drafts',
+     real: {server: 'Adobe Marketo Engage MCP server', short: 'marketo-mcp.adobe.io', url: 'https://marketo-mcp.adobe.io/mcp', tool: 'Programs: browse', map: {get_channel: 'Instance structure: channels', clone_program: 'Programs: clone', update_email: 'Emails: update content'}, bundle: 'marketo',
+       headers: {'X-Marketo-Client-Id': '${MARKETO_CLIENT_ID}', 'X-Marketo-Client-Secret': '${MARKETO_CLIENT_SECRET}', 'X-Marketo-Munchkin-Id': '${MARKETO_MUNCHKIN_ID}'},
+       auth: "Marketo API credentials sent as request headers (client ID, client secret, Munchkin ID). Permissions come from the API user's role, and calls count toward the instance's API limits. Adobe documents operation groups, not individual tool names, and lists no landing page operations.",
+       setup: 'Bundled, but it signs in with API credentials, not a personal login. A Marketo admin creates an API user with a draft-only role and supplies MARKETO_CLIENT_ID, MARKETO_CLIENT_SECRET, and MARKETO_MUNCHKIN_ID where Claude runs. The custom connector screen in Claude takes a URL and OAuth details only, so in chat and Cowork this server may need a small custom MCP server in front of it.'}}]
 };
 
 /* ================= 2. HELPERS shared by every card and result ================= */
@@ -481,7 +613,10 @@ const TOOLS = {
   'monday.list_items': () => Object.values(DATA.channels),
   'monday.create_item': () => ({note: 'created (mock)'}),
   'lucidchart.create_diagram': () => ({note: 'created (mock)'}),
-  'lucidchart.export_diagram': () => ({note: 'exported (mock)'})
+  'marketo.get_programs': ({folder}) => folder ? DATA.marketo.templates : [],   // by name: no existing program in the sample data
+  'marketo.get_channel': ({name}) => DATA.marketo.templates.find(t => t.type === name).statuses,
+  'marketo.clone_program': () => ({note: 'created as draft (mock)'}),
+  'marketo.update_email': () => ({note: 'draft saved (mock)'})
 };
 function call(tool, args = {}) {   // every skill reads data through here, which also writes the run trace
   const out = TOOLS[tool](args);
@@ -550,7 +685,7 @@ function slaData({campaign} = {}) {
   return {campaign, total, late, pct: 1 - late.length / total, groups};
 }
 function slaHtml(d) {
-  last.sla = d;
+  last.sla = d; last.slack = d.groups.map(g => g.m.slack);
   const camp = d.campaign && find('campaigns', d.campaign), ok = (n, t) => pct(1 - n / t);
   const repRows = DATA.reps.map(r => [r.name, 1 - d.late.filter(l => l.rep === r.id).length / r.newLeads]).sort((a, b) => a[1] - b[1]);
   return tiles([[`New leads, last 14 days`, d.total, camp ? camp.name : 'all campaigns'], ['No activity within 48 hours', d.late.length], ['SLA compliance', pct(d.pct), 'target 90%', d.pct < .9 ? 'warn' : '']])
@@ -709,7 +844,8 @@ const SKILLS = [
 
 /* ================= 4b. SKILL.md + PLUGIN: one source for the SKILL.md viewer, the per-skill ZIP, and marketing.plugin ================= */
 const MD_BEFORE = ['Check that every source listed under Data sources is available in this session. If one is missing, name it and offer to continue from an export the user uploads. Never fill a gap with sample or estimated numbers.',
-  'View, field, and board names in this file (for example `mktg_funnel_monthly`) are examples. If the connected system uses different names, find the closest match and confirm it with the user once before running.'];
+  'View, field, and board names in this file (for example `mktg_funnel_monthly`) are examples. If the connected system uses different names, find the closest match and confirm it with the user once before running.',
+  'Tool names differ between servers. Use whichever query, search, and write tools the connected source exposes; this file names the data to fetch, not the tool.'];
 const MD_COMMON = ['State the as-of date of the data in the first line of the result.', 'Use only numbers the sources return. If a query returns nothing, say so and stop; do not estimate.', 'Read-only unless a step above names a write, and every write waits for the user to confirm.'];
 const SKILL_MD = {
   cmo: {slug: 'cmo-metrics',
@@ -797,11 +933,12 @@ const skillMd = s => { const m = SKILL_MD[s.id], ul = a => a.map(x => `- ${x}`).
   return `---\nname: ${m.slug}\ndescription: >\n  ${m.when}\n---\n\n# ${s.name}\n\n## Inputs\n${ul(m.inputs)}\n\n## Data sources\n${ul(m.sources.map(([k, v]) => `${k}: ${v}`))}\n\n## Before starting\n${ul(MD_BEFORE)}\n\n## Steps\n${m.steps.map((x, i) => `${i + 1}. ${x}`).join('\n')}\n\n## Output\n${ul(m.output)}\n\n## Rules\n${ul([...m.rules, ...MD_COMMON])}\n`; };
 const skillFiles = s => ({'SKILL.md': skillMd(s), ...REFS[s.id]});
 const under = (dir, files) => Object.fromEntries(Object.entries(files).map(([k, v]) => [dir + k, v]));
-const PLUGIN = {name: 'marketing', version: '0.1.1', author: {name: 'Marketing AI Hub'}, description: 'Eight marketing skills from the Marketing AI Hub: CMO metrics, battlecards, brand refresh, abandoned leads, campaign briefs, content drafts, lead follow-up SLA checks, and exec meeting briefs.', keywords: ['marketing', 'salesforce', 'snowflake', 'slack', 'monday.com']};
+const PLUGIN = {name: 'marketing', version: '0.3.0', author: {name: 'Marketing AI Hub'}, description: 'Eight marketing skills from the Marketing AI Hub: CMO metrics, battlecards, brand refresh, abandoned leads, campaign briefs, content drafts, lead follow-up SLA checks, and exec meeting briefs.', keywords: ['marketing', 'salesforce', 'snowflake', 'slack', 'monday.com']};
 const readme = () => `# Marketing plugin\n\n${PLUGIN.description}\n\n## Skills\n\n| Skill | What it does | Needs |\n| --- | --- | --- |\n${SKILLS.map(s => `| \`${SKILL_MD[s.id].slug}\` | ${s.desc} | ${s.src.join(', ')} |`).join('\n')}
-\n## Setup\n\n1. Connect the sources you use (Salesforce, Snowflake, Slack, monday.com) from Customize in Claude. The plugin does not bundle connectors. Without one, a skill names what is missing and offers to work from an export you upload.\n2. Replace the sample reference files with your own: \`skills/brand-refresh/references/brand-guidelines.md\`, \`skills/content-creator/references/voice-and-tone.md\`, and \`skills/content-creator/references/templates.md\`. They describe a fictional company.\n3. View, field, and board names in the skills are examples. Claude confirms the closest match in your systems the first time a skill runs.
-\n## Use\n\nType \`/\` and pick a skill, or ask in plain words, for example "run CMO metrics" or "build a battlecard for <competitor>".\n\n## Workflows\n\nPaste one of these prompts to chain skills. Swap in your own campaign and competitor names.\n\n${WORKFLOWS.map(w => `### ${w.name}\n\n${w.prompt}`).join('\n\n')}\n`;
-const pluginFiles = () => ({'.claude-plugin/plugin.json': JSON.stringify(PLUGIN, null, 2) + '\n', 'README.md': readme(), ...Object.assign({}, ...SKILLS.map(s => under(`skills/${SKILL_MD[s.id].slug}/`, skillFiles(s))))});
+\n## Setup\n\n1. Connect the sources you use (see Connectors below). Without one, a skill names what is missing and offers to work from an export you upload.\n2. Replace the sample reference files with your own: \`skills/brand-refresh/references/brand-guidelines.md\`, \`skills/content-creator/references/voice-and-tone.md\`, and \`skills/content-creator/references/templates.md\`. They describe a fictional company.\n3. View, field, and board names in the skills are examples. Claude confirms the closest match in your systems the first time a skill runs.
+\n## Connectors\n\nEvery connection signs in as you (OAuth), so each system applies your own permissions.\n\n| Source | Server | Endpoint | How to connect |\n| --- | --- | --- | --- |\n${DATA.mcp.map(s => `| ${s.name} | ${s.real.server} | \`${s.real.url}\` | ${s.real.setup} |`).join('\n')}\n\n## Use\n\nType \`/\` and pick a skill, or ask in plain words, for example "run CMO metrics" or "build a battlecard for <competitor>".\n\n## Workflows\n\nPaste one of these prompts to chain skills. Swap in your own campaign and competitor names. The last two are agentic: Claude decides what to fetch next and stops for your approval before it writes anything.\n\n${WORKFLOWS.map(w => `### ${w.name}\n\n${w.prompt}`).join('\n\n')}\n`;
+const mcpJson = () => JSON.stringify({mcpServers: Object.fromEntries(DATA.mcp.filter(s => s.real.bundle).map(s => [s.real.bundle, {type: 'http', url: s.real.url, ...(s.real.headers && {headers: s.real.headers})}]))}, null, 2) + '\n';
+const pluginFiles = () => ({'.claude-plugin/plugin.json': JSON.stringify(PLUGIN, null, 2) + '\n', '.mcp.json': mcpJson(), 'README.md': readme(), ...Object.assign({}, ...SKILLS.map(s => under(`skills/${SKILL_MD[s.id].slug}/`, skillFiles(s))))});
 
 // Minimal ZIP writer (stored, no compression) so the page can hand out marketing.plugin and per-skill ZIPs without a library.
 const crc32 = (() => { const t = Array.from({length: 256}, (_, n) => { for (let k = 0; k < 8; k++) n = n & 1 ? 0xEDB88320 ^ (n >>> 1) : n >>> 1; return n >>> 0; }); return b => { let c = -1; for (const x of b) c = t[(c ^ x) & 255] ^ (c >>> 8); return (c ^ -1) >>> 0; }; })();
@@ -874,6 +1011,86 @@ const WORKFLOWS = [
      + sec('Exec meeting briefs', c.briefs.map((d, i) => `<details${i ? '' : ' open'}><summary>${d.a.name}<span>${d.a.meeting.why}, ${fmtDate(d.a.meeting.date)}</span></summary>${execHtml(d, c.b.c)}</details>`).join(''))}
 ];
 
+/* ================= 5b. AGENTIC WORKFLOWS: Claude plans, decides what to fetch next from what it finds, and stops for approval before any write ================= */
+const daysTo = d => Math.round((toDate(d) - toDate(DATA.asOf)) / 864e5);
+const who = (a, r) => (a.people.find(p => p[2] === r) || a.people[0])[0];
+const weakest = o => o.comps.map(id => find('competitors', id)).sort((x, y) => winRate(x) - winRate(y))[0];
+const lc = t => /^[A-Z]{2}/.test(t) ? t : t[0].toLowerCase() + t.slice(1);
+const handle = n => '@' + n.toLowerCase().replace(/ /g, '.');
+const PLAYS = [   // score(account, opp) returns [points, reason] or nothing when the play does not apply
+  {id: 'comp', name: 'Competitive defense', rule: 'A competitor is tagged: 40 + 60 × (1 − win rate against them), plus 10 at Proposal or Negotiation.',
+   score: (a, o) => { const c = weakest(o); return c && [40 + (1 - winRate(c)) * 60 + (/Proposal|Negotiation/.test(o.stage) ? 10 : 0), `${c.name} is tagged and we win ${pct(winRate(c), 0)} of head-to-head deals`]; },
+   act: (a, o) => `Run Battlecard and Exec Meeting Brief for ${weakest(o).name} and send both to the owner before the ${lc(a.meeting.why)} on ${fmtDate(a.meeting.date)}.`},
+  {id: 'exec', name: 'Executive sponsor outreach', rule: 'Negotiation with 30 days or fewer to close: 60 + (30 − days to close) + amount in $K ÷ 10.',
+   score: (a, o) => o.stage === 'Negotiation' && daysTo(o.close) <= 30 && [60 + 30 - daysTo(o.close) + o.amt / 10, `${usd(o.amt)} in negotiation with ${daysTo(o.close)} days to close`],
+   act: (a, o) => `Ask ${find('managers', find('reps', a.owner).mgr).name} to call ${who(a, 'Economic buyer')} this week; the deal closes ${fmtDate(o.close)}.`},
+  {id: 'expand', name: 'Expansion proof pack', rule: 'Existing customer: 50 + 0.35 × engagement score.',
+   score: a => a.status === 'Customer' && [50 + a.eng * .35, `existing customer, engagement score ${a.eng}: ${a.signal}`],
+   act: a => `Send ${who(a, 'Champion')} a results one-pager built from their own usage, ahead of the ${lc(a.meeting.why)} on ${fmtDate(a.meeting.date)}.`},
+  {id: 'pilot', name: 'Pilot success plan', rule: 'In technical validation: 70 + 0.2 × (100 − engagement score).',
+   score: (a, o) => o.stage === 'Technical validation' && [70 + (100 - a.eng) * .2, `in technical validation and engagement is low at ${a.eng}`],
+   act: a => `Send ${who(a, 'Champion')} a one-page pilot success plan and confirm who attends the ${lc(a.meeting.why)} on ${fmtDate(a.meeting.date)}.`},
+  {id: 'reengage', name: 'Re-engage the buying group', rule: 'Engagement score under 50: 45 + (50 − engagement score).',
+   score: a => a.eng < 50 && [45 + 50 - a.eng, `engagement score is ${a.eng}, under 50`],
+   act: () => 'Invite the buying group to the next Close Faster session and send the ROI calculator.'}
+];
+const rank = r => r.cands.sort((x, y) => y.s - x.s);
+const progName = (t, i) => { const d = toDate(i.date); return `FY${String(d.getFullYear()).slice(2)}Q${Math.floor(d.getMonth() / 3) + 1}-${t.code}-${i.name.split(/[:,]/)[0].trim().replace(/[^A-Za-z0-9]+/g, '-')}-${iso(d).replace(/-/g, '')}`; };
+const BUILD = {Email: ['Cloned with the program', 'Draft'], Form: ['Cloned with the program', 'Draft'], 'Smart campaign': ['Cloned with the program and left inactive', 'Inactive'], 'Landing page': ['Cloned with the program; content edits are manual because the server has no landing page operations', 'Needs manual edit']};
+const buildTable = (c, built) => table(['Asset', 'Type', 'How it is built', 'Status'], c.assets.map(([n, kind], i) => [`${c.name} | ${n}`, kind, i ? BUILD[kind][0] : 'Cloned with the program, then Claude fills in the copy below', built ? `<b>${BUILD[kind][1]}</b>` : 'To create']));
+const traceLine = ([tool, args, res]) => `<div class="tl${tool.startsWith('agent.') ? ' ag' : ''}"><span class="ok">${tool.startsWith('agent.') ? '◆' : '✓'}</span><span><b>${tool}</b>(${esc(args)})</span><span class="res">→ ${esc(res)}</span></div>`;
+WORKFLOWS.push(
+  {id: 'nba', agentic: true, icon: '🎯', name: 'Next Best Action', desc: 'Reads every account with an open opportunity, weighs five possible plays against live signals, and drafts the one action most likely to move each deal.', src: ['Salesforce', 'Snowflake', 'Slack'],
+   chain: ['Gather signals', 'Score the plays', 'Tie-break if close', 'Draft', 'Your approval'], form: [{k: 'scope', label: 'Accounts', opts: [['all', 'All accounts with open opportunities'], ...opt('accounts')], wide: 1}],
+   prompt: 'For every account with an open opportunity, gather open opportunities and competitors from Salesforce, engagement from Snowflake, and win rates against each tagged competitor. Score these plays for each account: competitive defense, executive sponsor outreach, expansion proof pack, pilot success plan, re-engage the buying group. Pick the highest-scoring play. If the top two are within 2 points, look in the account Slack channel for a tie-breaker and say what you found. Return one next best action per account with the reason and owner, and draft one Slack message per owner. Do not send anything until I approve.',
+   steps: [
+    ['Plan the run', c => { c.accts = DATA.accounts.filter(a => c.input.scope === 'all' || a.id === c.input.scope); call('salesforce.query_opportunities', {stage: 'Open'});
+      local('agent.plan', `${c.accts.length} account${c.accts.length > 1 ? 's' : ''}, ${PLAYS.length} candidate plays each`, 'gather, score, tie-break, draft'); return `${c.accts.length} account${c.accts.length > 1 ? 's' : ''} in scope`; }],
+    ['Gather signals', c => { c.accts.forEach(a => call('snowflake.run_query', {view: 'account_engagement', account: a.id}));
+      const comps = [...new Set(c.accts.flatMap(a => a.opps[0].comps))]; comps.forEach(k => call('salesforce.query_opportunities', {stage: 'Closed', competitor: k, window: '4 quarters'})); return `Engagement for ${c.accts.length} account${c.accts.length > 1 ? 's' : ''}, win rates for ${comps.length} competitor${comps.length > 1 ? 's' : ''}`; }],
+    ['Score the plays, and look closer where it is tight', c => { c.ties = 0;
+      c.rows = c.accts.map(a => { const o = a.opps[0], r = {a, o, cands: PLAYS.map(p => { const x = p.score(a, o); return x && {p, s: Math.round(x[0]), why: x[1]}; }).filter(Boolean)}, [x, y] = rank(r);
+        if (y && x.s - y.s <= 2) { c.ties++; local('agent.decide', `${a.id}: ${x.p.name} ${x.s} vs ${y.p.name} ${y.s}`, 'too close, check Slack');
+          const msg = call('slack.search_messages', {account: a.id, channel: '#acct-' + a.id})[0], comp = r.cands.find(k => k.p.id === 'comp');
+          if (msg && comp && DATA.competitors.some(k => msg[2].includes(k.name))) { comp.s += 5; comp.why += `. Tie-breaker from Slack: ${lc(msg[2])}`; r.tie = true; rank(r); } }
+        local('agent.decide', a.id, `${r.cands[0].p.name}, score ${r.cands[0].s}`); return r; }).sort((x, y) => y.cands[0].s - x.cands[0].s);
+      return `${c.rows.reduce((n, r) => n + r.cands.length, 0)} applicable plays scored, ${c.ties} tie-break${c.ties === 1 ? '' : 's'}`; }],
+    ['Draft the actions and stop for approval', c => { const by = {}; c.rows.forEach(r => (by[r.a.owner] ||= []).push(r)); c.msgs = Object.entries(by).map(([id, rows]) => ({rep: find('reps', id), rows}));
+      local('agent.draft', `${c.msgs.length} Slack message${c.msgs.length > 1 ? 's' : ''}, one per account owner`, 'not sent'); local('agent.wait', 'your approval', 'nothing written'); return `${c.rows.length} action${c.rows.length > 1 ? 's' : ''} drafted for ${c.msgs.length} owner${c.msgs.length > 1 ? 's' : ''}`; }]],
+   summary: c => { last.slack = c.msgs.map(m => handle(m.rep.name));
+     return tiles([['Accounts reviewed', c.rows.length], ['Open pipeline covered', usd(c.rows.reduce((s, r) => s + r.o.amt, 0))], ['Plays scored', c.rows.reduce((n, r) => n + r.cands.length, 0), `${PLAYS.length} candidates per account`], ['Tie-breaks', c.ties, 'extra Slack lookups']])
+     + sec('Next best action by account, strongest case first', table(['Account', 'Next best action', 'Why', 'Owner', 'Score'], c.rows.map(r => { const [x, y] = r.cands;
+         return [`<b>${r.a.name}</b><br><small>${r.o.name}, ${usd(r.o.amt)}, closes ${fmtDate(r.o.close)}</small>`, `<b>${x.p.name}.</b> ${x.p.act(r.a, r.o)}`, cap(x.why) + '.', find('reps', r.a.owner).name, `<b>${x.s}</b>${y ? `<br><small>next: ${y.p.name} ${y.s}</small>` : ''}`]; })))
+     + sec('How the agent decided', bullets([...PLAYS.map(p => `<b>${p.name}.</b> ${p.rule}`), '<b>Tie-break.</b> When the top two plays are within 2 points, the agent reads the account Slack channel. A message naming a competitor adds 5 to Competitive defense.']))
+     + sec('Slack message to each account owner', c.msgs.map(m => `<div class="slack"><div class="av">C</div><div><div class="who">Claude<span>APP · direct message to ${handle(m.rep.name)}</span></div><b>Next best actions, ${fmtDate(DATA.asOf)}</b><br>
+         ${m.rows.map(r => `• <b>${r.a.name}</b> (${usd(r.o.amt)}, closes ${fmtDate(r.o.close)}): ${r.cands[0].p.act(r.a, r.o)} Why: ${r.cands[0].why}.`).join('<br>')}</div></div>`).join('')
+       + `<div class="acts"><button class="btn" data-act="slack">Approve and send to Slack (mock)</button>Nothing is sent until you approve. Salesforce and Snowflake are only read.</div>`); }},
+  {id: 'intake', agentic: true, icon: '🧩', name: 'Program Intake', desc: 'Takes a program request, checks it, picks the right Marketo template, plans every asset, drafts the first email, and builds it all as drafts once you approve.', src: ['Marketo', 'monday.com'],
+   chain: ['Check intake', 'Pick template', 'Plan and draft', 'Your approval', 'Build as drafts'],
+   form: [{k: 'type', label: 'Program type', opts: DATA.marketo.templates.map(t => [t.id, t.type])}, {k: 'date', label: 'Event or start date', type: 'date', def: '2026-11-12'}, {k: 'name', label: 'Program name', def: 'Close Faster: the 4-day close, live', wide: 1}, {k: 'audience', label: 'Audience', def: 'Controllers and VPs of Finance at companies with 200 to 2,000 employees', wide: 1}],
+   prompt: 'Take this program intake: type Webinar, name "Close Faster: the 4-day close, live", date 2026-11-12, audience Controllers and VPs of Finance at companies with 200 to 2,000 employees. Check that every field is present, that the lead time meets the minimum for the type, and that no Marketo program with this name exists. Pick the matching program template, name the new program by our convention, and list every asset the clone will create and which ones need manual edits. Draft the first email in the brand voice. Show me the build plan and stop. Only after I approve: clone the template, fill in that email, and leave every email as a draft and every smart campaign inactive.',
+   steps: [
+    ['Check the intake', c => { const i = c.input, t = c.t = DATA.marketo.templates.find(x => x.id === i.type); c.lead = daysTo(i.date); c.short = c.lead < t.leadDays; c.name = progName(t, i);
+      local('agent.check', 'required fields', '4 of 4 present'); local('agent.check', `lead time, ${lc(t.type)}`, `${c.lead} days against a ${t.leadDays}-day minimum: ${c.short ? 'short' : 'ok'}`);
+      if (c.short) local('agent.decide', 'lead time is short', 'keep going as drafts, flag for marketing ops');
+      call('marketo.get_programs', {name: c.name}); return c.short ? `Lead time is short (${c.lead} days); flagged` : `Intake complete, ${c.lead} days of lead time, no duplicate program`; }],
+    ['Pick the template', c => { call('marketo.get_programs', {folder: 'Templates'}); local('agent.decide', `type=${c.t.type}`, c.t.name); call('marketo.get_channel', {name: c.t.type}); return `${c.t.name}, statuses ${c.t.statuses.join(' > ')}`; }],
+    ['Plan the assets', c => { c.assets = c.t.assets; c.manual = c.assets.filter(a => a[1] === 'Landing page').length; local('agent.plan', `${c.assets.length} assets from one clone`, `${c.manual} need${c.manual === 1 ? 's' : ''} a manual edit`); return `${c.name}: ${c.assets.length} assets`; }],
+    ['Draft the first email', c => { const i = c.input, n = esc(i.name.trim()), live = c.t.id !== 'nurture';
+      c.draft = live ? [['h', `Subject: You're invited: ${n}`], ['p', 'Hi {{lead.First Name}},'], ['p', `Join us on ${fmtDate(i.date, {weekday: 'long', month: 'long', day: 'numeric'})} for ${n}. ${c.t.id === 'webinar' ? 'In 30 minutes we will show' : 'We will share'} how mid-market finance teams close the month in 4 days instead of 10.`], ['p', 'You will see:'],
+          ['li', '87% of invoices captured and coded without keying'], ['li', 'Approvals routed by entity, amount, and cost center'], ['li', 'Reconciliations that run daily, not at month end'], ['p', 'Save your seat: {{my.Registration URL}}'], ['p', 'Best,<br>{{lead.Lead Owner First Name}}']]
+        : DRAFTS.email(lc(n));
+      local('skill.read_reference', 'references/voice-and-tone.md', '6 rules'); local('skill.draft', `type=email, asset=${c.assets[0][0]}`, `${words(blocksHtml(c.draft))} words`); return `${c.assets[0][0]} drafted with the Content Creator voice rules`; }],
+    ['Stop for approval', c => { local('agent.wait', 'your approval', 'nothing written to Marketo'); return 'Build plan ready; nothing has been created'; }]],
+   summary: c => { const i = c.input, t = c.t; last.build = c; last.brief = c.name;
+     return (c.short ? fine(`Lead time is ${c.lead} days, under the ${t.leadDays}-day minimum for a program of this type (${lc(t.type)}). The plan still builds drafts only, and marketing ops should confirm the date before anything is activated.`, 1) : '')
+     + tiles([['Lead time', `${c.lead} days`, `minimum ${t.leadDays} for this program type`, c.short ? 'warn' : ''], ['Assets in the clone', c.assets.length, `${c.manual} need${c.manual === 1 ? 's' : ''} a manual edit`], ['Written to Marketo so far', '<span id="mkWritten">0</span>', 'waiting for your approval']])
+     + sec('Program', kv([['Program name', `<b>${c.name}</b>`, 1], ['Type and channel', t.type], ['Template', t.name], ['Date', fmtDate(i.date, {month: 'short', day: 'numeric', year: 'numeric'})], ['Folder', DATA.marketo.folder, 1], ['Audience', esc(i.audience), 1], ['Member statuses', t.statuses.join(' → '), 1]]))
+     + sec('Build plan', `<div id="buildBox">${buildTable(c)}</div>`) + sec(`First email: ${c.assets[0][0]}`, `<div class="paper draft">${blocksHtml(c.draft)}</div>`)
+     + sec('Before anything goes live', bullets(['Marketing ops reviews and approves each email in Marketo.', 'Send a test of every email and check that the tokens render.', 'Confirm the audience smart list and the suppression list.', 'A person activates the smart campaigns, in order. Claude never activates or sends.']))
+     + `<div class="acts"><button class="btn" data-act="build">Approve and build in Marketo (mock)</button><button class="btn ghost" data-act="monday">Create tracking item in monday.com (mock)</button>Nothing is written until you approve.</div>`; }}
+);
+
 /* ================= 6. AGENTS: a plan naming the tools, plus a short sample deliverable ================= */
 const topic0 = 'cutting month-end close from 10 days to 4';
 const AGENTS = [
@@ -915,30 +1132,50 @@ const AGENTS = [
 
 /* ================= 7. PAGE RENDER ================= */
 function archSvg() {
-  const y = i => 58 + i * 58, box = (x, y, w, h, t, s, c = '') => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="10" class="bx ${c}"/><text x="${x + w / 2}" y="${y + h / 2 - 2}" class="bt">${t}</text><text x="${x + w / 2}" y="${y + h / 2 + 13}" class="bs">${s}</text>`;
+  const n = DATA.mcp.length, y = i => 58 + i * 58, bottom = y(n - 1) + 44, mid = (y(0) + bottom) / 2, gap = (bottom + 6 - 40 - 3 * 68) / 4;
+  const box = (x, y, w, h, t, s, c = '') => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="10" class="bx ${c}"/><text x="${x + w / 2}" y="${y + h / 2 - 2}" class="bt">${t}</text><text x="${x + w / 2}" y="${y + h / 2 + 13}" class="bs">${s}</text>`;
   const arrow = (x1, y1, x2) => `<line x1="${x1}" y1="${y1}" x2="${x2 - 7}" y2="${y1}" class="ar" marker-end="url(#ah)"/>`;
-  return `<svg viewBox="0 0 1000 356" class="arch" role="img" aria-label="Architecture: the Hub UI calls Claude, Claude calls MCP servers, and each MCP server reaches one business system">
+  return `<svg viewBox="0 0 1000 ${bottom + 22}" class="arch" role="img" aria-label="Architecture: the Hub UI calls Claude, Claude calls MCP servers, and each MCP server reaches one business system">
     <defs><marker id="ah" viewBox="0 0 8 8" refX="1" refY="4" markerWidth="7" markerHeight="7" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0L8 4L0 8z" class="ahp"/></marker></defs>
     ${['Hub UI', 'Claude', 'MCP servers', 'Systems'].map((t, i) => `<text x="${[95, 355, 635, 890][i]}" y="24" class="col">${t}</text>`).join('')}
-    ${box(20, 150, 150, 76, 'Marketing AI Hub', 'cards, forms, Run drawer')}<rect x="230" y="40" width="250" height="300" rx="14" class="bx big"/>
-    ${[['Skills', `${SKILLS.length} single-purpose tools`], ['Workflows', `${WORKFLOWS.length} chains of skills, run in order`], ['Agents', `${AGENTS.length} roles that plan their own steps`]].map(([t, s], i) => box(250, 62 + i * 88, 210, 68, t, s)).join('')}
-    ${arrow(170, 188, 230)}<path d="M480 188H515M515 ${y(0) + 22}V${y(4) + 22}" class="ar"/>
-    ${DATA.mcp.map((s, i) => box(550, y(i), 170, 44, `${s.id} MCP`, s.tools[0] + '()', 'mc') + box(800, y(i), 180, 44, s.name, s.access) + arrow(515, y(i) + 22, 550) + arrow(720, y(i) + 22, 800)).join('')}</svg>`;
+    ${box(20, mid - 38, 150, 76, 'Marketing AI Hub', 'cards, forms, Run drawer')}<rect x="230" y="40" width="250" height="${bottom + 6 - 40}" rx="14" class="bx big"/>
+    ${[['Skills', `${SKILLS.length} single-purpose tools`], ['Workflows', `${WORKFLOWS.filter(w => !w.agentic).length} chained, ${WORKFLOWS.filter(w => w.agentic).length} agentic`], ['Agents', `${AGENTS.length} roles that plan their own steps`]].map(([t, s], i) => box(250, 40 + gap + i * (68 + gap), 210, 68, t, s)).join('')}
+    ${arrow(170, mid, 230)}<path d="M480 ${mid}H515M515 ${y(0) + 22}V${y(n - 1) + 22}" class="ar"/>
+    ${DATA.mcp.map((s, i) => box(550, y(i), 170, 44, `${s.id} MCP`, s.real.short, 'mc') + box(800, y(i), 180, 44, s.name, s.access) + arrow(515, y(i) + 22, 550) + arrow(720, y(i) + 22, 800)).join('')}</svg>`;
+}
+function realCallHtml() {   // one SLA lookup three ways: the mock call, the real tool definition, and the JSON-RPC exchange
+  const late = DATA.slaLeads, l = late[0], j = o => `<pre class="w">${esc(JSON.stringify(o, null, 2))}</pre>`;
+  const soql = 'SELECT Id, Name, Company, Title, Owner.Name, CreatedDate FROM Lead WHERE IsConverted = false AND CreatedDate = LAST_N_DAYS:14 AND CreatedDate < LAST_N_DAYS:2 AND LastActivityDate = null';
+  const payload = {totalSize: late.length, records: [{Name: l.name, Company: l.co, Title: l.title, Owner: {Name: find('reps', l.rep).name}, CreatedDate: created(l).toISOString()}, '…']};
+  return `<div><h5>On this page: the stand-in</h5><pre class="w">call('salesforce.query_leads', { createdLastDays: 14, noActivityHours: 48 })\n// trace: salesforce.query_leads(…) → ${late.length} rows</pre>
+    <h5>On the real server: tool definition from tools/list</h5>${j({name: 'soqlQuery', description: 'Executes a SOQL query to retrieve Salesforce records', inputSchema: {type: 'object', properties: {query: {type: 'string'}}, required: ['query']}})}</div>
+    <div><h5>Request (JSON-RPC over HTTP, with the user's OAuth token)</h5>${j({jsonrpc: '2.0', id: 7, method: 'tools/call', params: {name: 'soqlQuery', arguments: {query: soql}}})}
+    <h5>Response</h5>${j({jsonrpc: '2.0', id: 7, result: {content: [{type: 'text', text: JSON.stringify(payload)}], isError: false}})}</div>`;
 }
 function render() {
   const [p, c] = [qTotals(0), qTotals(1)];
   $('#co').textContent = `◆ ${DATA.company.name} · ${DATA.company.what}`;
-  $('#pills').innerHTML = `<span class="pill">Data as of <b>${fmtDate(DATA.asOf, {month: 'short', day: 'numeric', year: 'numeric'})}</b></span><span class="pill demo">Demo: sample data</span>` + DATA.mcp.map(s => `<span class="pill"><i></i><b>${s.name}</b> connected (mock)</span>`).join('');
+  $('#pills').innerHTML = `<span class="pill">Data as of <b>${fmtDate(DATA.asOf, {month: 'short', day: 'numeric', year: 'numeric'})}</b></span><span class="pill demo">Demo: sample data</span>` + DATA.mcp.map(s => `<span class="pill"><i></i><b>${s.name}</b> connected (mock)</span>`).join('') + '<button class="link" data-act="tab" data-arg="mcp">How these connect</button>';
   $('#kpis').innerHTML = [['Marketing-Sourced Pipeline', 'pipe', usd], ['Closed-Won Opps', 'won', num], ['Closed-Won ARR', 'arr', usd]].map(([l, k, f]) =>
     `<article class="card kpi"><div class="kl">${l}<span>${Q[1]}</span></div><div class="kval">${f(c[k])}</div><div class="kd">${chg(p[k], c[k])} QoQ, from ${f(p[k])} in ${Q[0]}</div>${spark(DATA.months.map(m => m[k]))}</article>`).join('');
-  $('#nSkills').textContent = `${SKILLS.length} available`; $('#nFlows').textContent = `${WORKFLOWS.length} multi-step`; $('#nAgents').textContent = `${AGENTS.length} agents`;
+  $('#nSkills').textContent = `${SKILLS.length} available`; $('#nFlows').textContent = `${WORKFLOWS.length} multi-step, ${WORKFLOWS.filter(w => w.agentic).length} agentic`; $('#nAgents').textContent = `${AGENTS.length} agents`;
   $('#skills').innerHTML = SKILLS.map(s => `<article class="card row"><span class="ic">${s.icon}</span><div class="rb"><b>${s.name}</b><p>${s.desc}</p><div class="src">${chips(s.src)}${mdLink(s)}</div></div><button class="btn" data-act="skill" data-arg="${s.id}" aria-label="Run ${s.name}">Run</button></article>`).join('');
-  $('#flows').innerHTML = WORKFLOWS.map(w => `<article class="card flow"><div class="fh"><span class="ic">${w.icon}</span><div><b>${w.name}</b><p>${w.desc}</p></div></div><div class="chain">${w.chain.map(x => `<span class="chip">${x}</span>`).join('<span class="arw">→</span>')}</div>
-    <div class="ff"><button class="link" data-act="copy" data-arg="${w.id}">Copy prompt</button><button class="btn" data-act="flow" data-arg="${w.id}" aria-label="Run ${w.name}">Run</button></div></article>`).join('');
+  const flowCard = w => `<article class="card flow"><div class="fh"><span class="ic">${w.icon}</span><div><b>${w.name}</b>${w.agentic ? ' <span class="chip k">Agentic</span>' : ''}<p>${w.desc}</p></div></div><div class="chain">${w.chain.map(x => `<span class="chip">${x}</span>`).join('<span class="arw">→</span>')}</div>
+    <div class="ff"><button class="link" data-act="copy" data-arg="${w.id}">Copy prompt</button><button class="btn" data-act="flow" data-arg="${w.id}" aria-label="Run ${w.name}">Run</button></div></article>`;
+  $('#flows').innerHTML = WORKFLOWS.map(flowCard).join('');
   $('#agents').innerHTML = AGENTS.map((a, i) => `<article class="card agent"><span class="ic">${a.icon}</span><b>${a.name}</b><p>${a.desc}</p>${a.tasks.map((t, j) => `<button class="task" data-act="task" data-arg="${i}.${j}">${t.t}<span>↗</span></button>`).join('')}</article>`).join('');
   $('#arch').innerHTML = archSvg();
-  const usedBy = s => [...SKILLS.filter(k => k.src.includes(s.name)).map(k => k.name), ...AGENTS.filter(a => a.tasks.some(t => t.plan.some(x => x.startsWith(s.id + '.')))).map(a => a.name + ' agent')];
-  $('#mcpTable').innerHTML = table(['MCP server', 'Used for', 'Example tools', 'Access', 'Used by'], DATA.mcp.map(s => [`<b>${s.name}</b>`, s.use, s.tools.map(t => `<code>${t}</code>`).join(' '), s.access, usedBy(s).join(', ')]));
+  const usedBy = s => [...SKILLS.filter(k => k.src.includes(s.name)).map(k => k.name), ...WORKFLOWS.filter(w => (w.src || []).includes(s.name)).map(w => w.name), ...[AGENTS.filter(a => a.tasks.some(t => t.plan.some(x => x.startsWith(s.id + '.')))).length].filter(Boolean).map(n => `${n} of ${AGENTS.length} agents`)];
+  const standIns = s => { const g = {}; Object.keys(TOOLS).filter(k => k.startsWith(s.id + '.')).forEach(k => { const t = k.split('.')[1]; (g[s.real.map?.[t] || s.real.tool] ||= []).push(t); });
+    return Object.entries(g).map(([real, a]) => `${a.map(t => `<code>${t}</code>`).join(' ')} → <code>${real}</code>`).join('<br>'); };
+  $('#mcpCards').innerHTML = DATA.mcp.map(s => `<article class="card conn"><div class="hd"><span class="ic">${s.icon}</span><b>${s.name}</b><span class="chip ${/write/i.test(s.access) ? 'w' : 'k'}">${s.access}</span></div>
+    <p>${s.use}.</p><p><b>Sign-in:</b> ${s.signin}</p><p><b>Used by:</b> ${usedBy(s).join(', ')}.</p>
+    <details><summary>Technical details</summary><dl><div><dt>Real MCP server</dt><dd>${s.real.server}</dd></div><div><dt>Endpoint</dt><dd><code>${esc(s.real.url)}</code></dd></div>
+      <div><dt>Stand-in on this page → real tool</dt><dd>${standIns(s)}</dd></div><div><dt>Auth</dt><dd>${s.real.auth}</dd></div><div><dt>In marketing.plugin</dt><dd>${s.real.setup}</dd></div></dl></details></article>`).join('');
+  const late = DATA.slaLeads.length;
+  $('#callSteps').innerHTML = [['The skill asks for data', 'Lead Follow-Up SLA needs every new lead with no activity in its first 48 hours.'], ['Claude calls a tool on the server', 'On Salesforce that is <code>soqlQuery</code> with a query. On this page it is the stand-in <code>salesforce.query_leads</code>.'],
+    ['The server answers as that user', `${late} rows come back, limited to the records that person is allowed to see.`]].map(([t, d], i) => `<article class="card stepc"><span class="dot">${i + 1}</span><b>${t}</b><p>${d}</p></article>`).join('');
+  $('#realCall').innerHTML = realCallHtml();
 }
 
 /* ================= 8. DRAWER: form, run trace, stepper, result buttons ================= */
@@ -946,7 +1183,7 @@ let runId = 0, cur = null, opener = null;
 const formHtml = (f, name) => `<form class="form">${f.map(x => `<label class="${x.wide ? 'wide' : ''}">${x.label}${
   x.opts ? `<select name="${x.k}">${x.opts.map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select>`
   : x.type === 'file' ? `<span class="file">📎<input name="${x.k}" value="${x.def}" required><em>sample file, ${DATA.brand.slides} slides</em></span>`
-  : `<input name="${x.k}" type="${x.type || 'text'}" value="${x.def}" required${x.type === 'number' ? ' min="1" step="any"' : ''}>`}</label>`).join('')}<button class="btn" type="submit">Run ${name}</button></form>`;
+  : `<input name="${x.k}" type="${x.type || 'text'}" value="${x.def}" required${x.type === 'number' ? ' min="1" step="any"' : ''}>`}</label>`).join('')}<button class="btn" type="button" data-act="run">Run ${name}</button></form>`;
 function openDrawer(item, kind, tags, extra = '') {
   runId++; cur = {item, kind}; if (!document.body.classList.contains('open')) opener = document.activeElement;
   $('#dh').innerHTML = `<span class="ic">${item.icon}</span><div><h3 id="dtitle">${item.name}</h3><div class="src">${chips([kind], 'k')}${chips(tags)}${extra}</div></div>`;
@@ -958,8 +1195,7 @@ function closeDrawer() { runId++; document.body.classList.remove('open', 'lock')
 function play(lines, box, ms, done) {   // one trace line every `ms`; a newer run or a close cancels it
   const id = runId; let i = 0;
   const tick = () => { if (id !== runId) return; if (i === lines.length) return done();
-    const [tool, args, res] = lines[i++];
-    box.insertAdjacentHTML('beforeend', `<div class="tl"><span class="ok">✓</span><span><b>${tool}</b>(${esc(args)})</span><span class="res">→ ${esc(res)}</span></div>`);
+    box.insertAdjacentHTML('beforeend', traceLine(lines[i++]));
     box.lastChild.scrollIntoView({block: 'nearest'}); setTimeout(tick, ms); };
   setTimeout(tick, ms);
 }
@@ -970,11 +1206,11 @@ function start() {
     trace = []; const mcp = item.src.filter(n => DATA.mcp.some(m => m.name === n)); if (mcp.length) local('session.check_connectors', mcp.join(', '), 'connected (mock)');
     const html = item.run(input), lines = trace;
     $('#dout').innerHTML = `<div class="trace"><div class="trh"><span class="spin"></span>Running ${item.name}…</div></div><div id="result"></div>`;
-    play(lines, $('.trace'), 400, () => { $('.trh').textContent = `Run trace: ${lines.length} steps, complete`; $('#result').innerHTML = asOfLine() + html; });
+    play(lines, $('.trace'), 400, () => { $('.trh').textContent = `Run trace: ${lines.length} steps, complete. Tool names are stand-ins; the MCP connections tab lists the real ones.`; $('#result').innerHTML = asOfLine() + html; });
   } else {
     const c = {input}, steps = item.steps.map(([label, fn]) => { trace = []; const note = fn(c); return {label, note, lines: trace}; }), html = item.summary(c);
     $('#dout').innerHTML = `<ol class="steps">${steps.map((s, i) => `<li id="st${i}"><span class="dot">${i + 1}</span><div><b>${s.label}</b><div class="trace"></div><p class="note"></p></div></li>`).join('')}</ol><div id="result"></div>`;
-    const go = i => { if (i === steps.length) { $('#result').innerHTML = `<h3 class="sum">Combined summary</h3>${asOfLine()}${html}`; return $('#result').scrollIntoView({behavior: 'smooth', block: 'start'}); }
+    const go = i => { if (i === steps.length) { $('#result').innerHTML = `<h3 class="sum">${item.agentic ? 'Ready for your approval' : 'Combined summary'}</h3>${asOfLine()}${html}`; return $('#result').scrollIntoView({behavior: 'smooth', block: 'start'}); }
       const li = $('#st' + i); li.className = 'on';
       play(steps[i].lines, $('.trace', li), 300, () => { li.className = 'done'; $('.dot', li).textContent = '✓'; $('.note', li).textContent = steps[i].note; go(i + 1); }); };
     go(0);
@@ -998,21 +1234,27 @@ const ACTIONS = {
   mdcopy: () => copyText(last.md.text, 'SKILL.md copied to clipboard'),
   mdzip: () => download(`${last.md.slug}.zip`, zip(under(last.md.slug + '/', last.md.files))),
   plugin: () => download('marketing.plugin', zip(pluginFiles())),
-  flow: id => { const w = WORKFLOWS.find(x => x.id === id); openDrawer(w, 'Workflow', w.chain); if (!w.form) start(); },
+  flow: id => { const w = WORKFLOWS.find(x => x.id === id); openDrawer(w, w.agentic ? 'Agentic workflow' : 'Workflow', w.chain); if (!w.form) start(); },
   task: arg => { const [i, j] = arg.split('.'), a = AGENTS[i], t = a.tasks[j]; openDrawer({icon: a.icon, name: t.t}, 'Agent task', [a.name]);
     $('#dout').innerHTML = sec('Plan', `<ol class="plan">${t.plan.map(x => { const k = x.indexOf(': '); return `<li><code>${x.slice(0, k)}</code>${x.slice(k + 2)}</li>`; }).join('')}</ol>`) + sec('Sample deliverable', t.out()); },
+  tab: id => { ['hub', 'mcp'].forEach(v => { $('#view-' + v).hidden = v !== id; $('#tab-' + v).setAttribute('aria-selected', v === id); });
+    if (document.body.classList.contains('open')) closeDrawer(); try { history.replaceState(null, '', '#' + id); } catch {} window.scrollTo(0, 0); },
+  run: () => { const f = $('#dform form'); if (!f || f.reportValidity()) start(); },
   copy: id => copyText(WORKFLOWS.find(x => x.id === id).prompt),
   close: closeDrawer,
   refine: kind => { $('#draftBox').innerHTML = draftBox(kind); },
-  slack: (_, btn) => { last.sla.groups.forEach(g => call('slack.post_message', {channel: g.m.slack})); sent(btn, 'Sent ✓'); toast(`Sent ${last.sla.groups.length} messages to Slack (mock): ${last.sla.groups.map(g => g.m.slack).join(', ')}`); },
+  slack: (_, btn) => { last.slack.forEach(to => call('slack.post_message', {channel: to})); sent(btn, 'Sent ✓'); toast(`Sent ${last.slack.length} message${last.slack.length > 1 ? 's' : ''} to Slack (mock): ${last.slack.join(', ')}`); },
+  build: (_, btn) => { const c = last.build; trace = []; call('marketo.clone_program', {template: c.t.name, name: c.name, folder: 'FY26 Programs'}); call('marketo.update_email', {email: `${c.name} | ${c.assets[0][0]}`, status: 'draft'});
+    $('#buildBox').innerHTML = `<div class="trace">${trace.map(traceLine).join('')}</div>${buildTable(c, true)}`; $('#mkWritten').textContent = c.assets.length; $('#mkWritten').closest('.tile').querySelector('small').textContent = 'assets, all drafts or inactive'; sent(btn, 'Built as drafts ✓'); toast(`Built ${c.name} in Marketo as drafts (mock). Nothing is active.`); },
   monday: (_, btn) => { call('monday.create_item', {board: 'Campaigns FY26', name: last.brief}); sent(btn, 'Created ✓'); toast(`Created "${last.brief}" on the Campaigns FY26 board (mock)`); },
   dl: () => toast(`Downloaded ${last.file} (mock, no file is written)`),
   csv: () => download(last.csv.name, last.csv.text, 'text/csv')
 };
 document.addEventListener('click', e => { const t = e.target.closest('[data-act]'); if (t) ACTIONS[t.dataset.act](t.dataset.arg, t); });
-document.addEventListener('submit', e => { e.preventDefault(); start(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.body.classList.contains('open')) closeDrawer(); });
+document.addEventListener('submit', e => e.preventDefault());
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.body.classList.contains('open')) closeDrawer(); if (e.key === 'Enter' && e.target.closest('#dform input')) { e.preventDefault(); ACTIONS.run(); } });
 render();
+ACTIONS.tab(location.hash === '#mcp' ? 'mcp' : 'hub');
 </script>
 </body>
 </html>

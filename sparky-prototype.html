@@ -394,7 +394,93 @@ button.src:hover{border-color:var(--green-500);color:var(--green-800)}
 .facts-box h4{margin:0;color:var(--green-800)}
 .facts-box ul{margin:0}
 .wont-card{border-style:solid}
-</style>
+.admin{flex:1;overflow:auto;padding-block:24px 56px;padding-inline:24px}
+.admin-inner{max-width:1040px;margin:0 auto;display:flex;flex-direction:column;gap:32px}
+.admin-band{border-radius:var(--r-sm)}
+.admin h1{font-family:var(--font-display);font-size:30px;margin:0;line-height:1.1}
+.admin h2{font-family:var(--font-display);font-size:20px;margin:0;line-height:1.2}
+.admin section{display:flex;flex-direction:column;gap:12px;min-width:0}
+.admin-lead{margin:8px 0 0;color:var(--ink-2);max-width:70ch}
+.sec-head{display:flex;justify-content:space-between;align-items:center;gap:8px 12px;flex-wrap:wrap}
+.sec-title{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.sec-note{margin:0;font-size:13.5px;color:var(--ink-2);max-width:76ch}
+.tag.live{background:var(--green-100);color:var(--green-800)}
+.kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:12px 14px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.kpi-label{font-size:12.5px;color:var(--ink-2)}
+.kpi-value{font-size:26px;font-weight:600;line-height:1.2}
+.kpi-sub{font-size:12px;color:var(--ink-3);line-height:1.35}
+.data td .badge{font-size:12px}
+.meter{display:inline-block;vertical-align:middle;width:56px;height:6px;border-radius:3px;background:var(--green-100);margin-right:8px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--green-600);border-radius:3px}
+.st{display:inline-flex;gap:5px;align-items:center;font-size:12.5px;font-weight:600;white-space:nowrap}
+.st svg{font-size:14px}
+.st.ok{color:var(--green-700)}
+.st.look{color:var(--warn-fg)}
+.st.bad{color:var(--danger)}
+.session-line{display:flex;flex-wrap:wrap;gap:6px}
+.session-line span{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-pill);padding:3px 10px;font-size:12.5px;color:var(--ink-2)}
+.session-line b{color:var(--ink);font-weight:700}
+.traces{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface);overflow:hidden}
+.tr-row+.tr-row{border-top:1px solid var(--line)}
+.tr-row summary{display:grid;grid-template-columns:70px minmax(0,1fr) auto auto 52px;gap:6px 12px;align-items:center;padding:10px 14px;cursor:pointer;list-style:none;font-size:13.5px}
+.tr-row summary::-webkit-details-marker{display:none}
+.tr-row summary:hover{background:var(--green-50)}
+.tr-q{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.tr-time,.tr-ms{font-variant-numeric:tabular-nums;color:var(--ink-3);font-size:12.5px}
+.tr-ms{text-align:right}
+.tr-out{font-size:12.5px;color:var(--ink-2);white-space:nowrap}
+.tr-body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:10px;background:var(--bg);border-top:1px solid var(--line)}
+.tr-body p{margin:0;font-size:13px;color:var(--ink-2);overflow-wrap:anywhere}
+.tr-body p b{color:var(--ink)}
+.spans{display:grid;grid-template-columns:minmax(0,300px) minmax(60px,1fr) 60px;grid-auto-flow:row dense;gap:6px 12px;align-items:center;font-size:12.5px}
+.span-name{overflow-wrap:anywhere;grid-column:1}
+.span-track{grid-column:2}
+.span-ms{grid-column:3}
+.data th.st-cell,.data td.st-cell{white-space:normal;text-align:left;min-width:150px}
+.data td.st-cell .st{white-space:normal;align-items:flex-start}
+.data td.st-cell .st svg{margin-top:2px}
+.span-track{position:relative;height:8px;background:var(--surface-2);border-radius:4px}
+.span-bar{position:absolute;top:0;bottom:0;border-radius:4px;background:var(--green-500);min-width:3px}
+.span-ms{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink-2)}
+.suites{display:flex;flex-direction:column;gap:10px}
+.suite{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.suite-head{display:flex;gap:8px 12px;align-items:center;flex-wrap:wrap}
+.suite-head strong{font-size:15px}
+.suite-score{margin-left:auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-variant-numeric:tabular-nums;font-size:13.5px;font-weight:600}
+.suite p{margin:0;font-size:13.5px;color:var(--ink-2)}
+.suite details summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--green-700)}
+.fails{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:13px}
+.fails li{background:var(--bg);border-radius:var(--r-sm);padding:8px 10px;overflow-wrap:anywhere}
+.fails small{display:block;color:var(--ink-3);font-size:12.5px}
+.notes ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px;max-width:78ch;color:var(--ink-2)}
+.notes li strong{color:var(--ink)}
+@media (max-width:1100px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:900px){
+  .admin{padding-inline:16px}
+  .tr-row summary{grid-template-columns:minmax(0,1fr) auto}
+  .tr-q{grid-column:1/-1;white-space:normal}
+  .tr-time{display:none}
+  .tr-row summary .badge{justify-self:start}
+  .tr-out{justify-self:end}
+  .tr-ms{grid-column:1/-1;text-align:left}
+  .spans{grid-template-columns:minmax(0,1fr) 60px;gap:4px 12px}
+  .span-ms{grid-column:2}
+  .span-track{grid-column:1/-1;margin-bottom:6px}
+}
+@media (max-width:520px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.reason-box{display:flex;flex-direction:column;gap:8px}
+.reason-box label{font-size:13px;font-weight:600}
+.reason-box textarea{border:1px solid var(--line);border-radius:var(--r-sm);padding:9px 11px;resize:vertical;width:100%;background:var(--bg);min-height:58px}
+.reason-box textarea:focus{outline:2px solid var(--green-500);outline-offset:0;border-color:transparent;background:var(--surface)}
+.reason-box textarea:disabled{opacity:.7;resize:none}
+.reason-hint{font-size:13px;color:var(--warn-fg);margin:0}
+.chip:disabled{opacity:.5;cursor:default}
+.with-genie{display:flex;justify-content:space-between;align-items:center;gap:6px 12px;flex-wrap:wrap;border:1px solid transparent;border-radius:var(--r-md);padding:2px 0 2px 2px;font-size:13px;color:var(--ink-2)}
+.with-genie.holding{background:var(--green-50);border-color:var(--green-200);padding:6px 6px 6px 10px}
+.divider{display:flex;align-items:center;gap:12px;font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.divider::before,.divider::after{content:"";flex:1;border-top:1px solid var(--line)}
+.with-genie-text{display:flex;align-items:center;gap:6px 8px;flex-wrap:wrap;min-width:0}</style>
 </head>
 <body>
 <header class="top">
@@ -409,6 +495,7 @@ button.src:hover{border-color:var(--green-500);color:var(--green-800)}
     <button class="tab" role="tab" id="tab-chat" aria-selected="true" aria-controls="view-chat" type="button">Chat</button>
     <button class="tab" role="tab" id="tab-requests" aria-selected="false" aria-controls="view-requests" type="button">My requests<span class="tab-count" id="req-count" hidden></span></button>
     <button class="tab" role="tab" id="tab-guide" aria-selected="false" aria-controls="view-guide" type="button">What Sparky can do</button>
+    <button class="tab" role="tab" id="tab-admin" aria-selected="false" aria-controls="view-admin" type="button">Observability</button>
   </div>
   <div class="top-right">
     <span class="demo-pill">Prototype · mocked data</span>
@@ -441,9 +528,10 @@ button.src:hover{border-color:var(--green-500);color:var(--green-800)}
     </div>
     <div class="composer">
       <div class="composer-inner">
+        <div class="with-genie" id="with-genie" aria-live="polite"></div>
         <form id="composer-form" autocomplete="off">
           <input id="composer-input" type="text" placeholder="Ask Sparky a work question…" aria-label="Message Sparky" maxlength="400">
-          <button class="btn" id="send-btn" type="submit">Send</button>
+          <button class="btn" id="send-btn" type="button">Send</button>
         </form>
         <div class="composer-foot">
           <span>Demo prototype. Answers, sources, tickets, and approvals are simulated.</span>
@@ -460,6 +548,10 @@ button.src:hover{border-color:var(--green-500);color:var(--green-800)}
 
 <div class="guide" id="view-guide" role="tabpanel" aria-labelledby="tab-guide" hidden>
   <div class="guide-inner" id="guide-inner"></div>
+</div>
+
+<div class="admin" id="view-admin" role="tabpanel" aria-labelledby="tab-admin" hidden>
+  <div class="admin-inner" id="admin-inner"></div>
 </div>
 
 <div class="scrim" id="scrim" hidden></div>
@@ -494,7 +586,7 @@ const GENIES = {
     dom: [[/\bcost caps?\b/, 3], [/\b(budget\w*|cost cent(er|re)s?|spend caps?|fp&a)\b/, 3]],
     weak: ['expense', 'cost', 'spend', 'forecast', 'headcount', 'cap', 'actuals'] },
   comp: { name: 'Compensation Genie', team: 'Total Rewards', blurb: 'Pay bands, merit, bonuses',
-    dom: [[/\b(compensation|total rewards|salary|salaries|pay bands?|raises?|promotions?|level(l)?ing|bonus(es)?)\b/, 3]],
+    dom: [[/\b(compensation|total rewards|salary|salaries|pay bands?|raises|(a|pay|annual|merit) raise|promotions?|level(l)?ing|bonus(es)?)\b/, 3]],
     weak: ['comp', 'level', 'band', 'merit', 'pay', 'offer'] },
   audit: { name: 'Internal Audit Genie', team: 'Internal Audit', blurb: 'Controls, SOX, audit plan',
     dom: [[/\b(audit\w*|sox|compliance|internal controls?)\b/, 3]],
@@ -504,7 +596,7 @@ const GENIES = {
     weak: ['payment', 'customer', 'refund', 'credit', 'owed', 'billing'] },
   orders: { name: 'Order Management Genie', team: 'Order Management', blurb: 'Bookings, status, changes',
     dom: [[/\b(orders?|bookings?|purchase orders?|order forms?|renewals?|quotes?)\b/, 3]],
-    weak: ['contract', 'po', 'customer', 'deal desk', 'sku', 'subscription'] },
+    weak: ['contract', 'po\\b', 'customer', 'deal desk', 'sku', 'subscription'] },
   sales: { name: 'Sales Enablement Genie', team: 'Sales Enablement', blurb: 'Decks, battlecards, training',
     dom: [[/\b(sales|pitch\w*|decks?|battle ?cards?|competit\w*|enablement|prospect\w*|playbooks?)\b/, 3]],
     weak: ['customer', 'deal', 'demo', 'discovery', 'objection', 'training'] }
@@ -958,6 +1050,35 @@ function bestWithin(gid, raw) {
 function relatedFor(e) {
   return NEXT[e.id] || KB.filter(x => x.genie === e.genie && x.id !== e.id).slice(0, 2).map(x => x.q);
 }
+
+/* ---------- Eval suites. The first two run for real against the logic above. ---------- */
+const CHECK_CASES = [
+  ['How does the ESPP work?', 'pass'], ['When is the next ESPP enrollment window?', 'pass'],
+  ['Should I invest in the ESPP?', 'financial'], ['How much should I contribute?', 'financial'], ['Should I sell my RSUs?', 'financial'],
+  ["What's my salary?", 'salary'], ['Am I paid fairly for my level?', 'salary'], ['What raise will I get?', 'salary'], ['What does my coworker make?', 'salary'],
+  ['How do pay bands work?', 'pass'], ['When does the merit cycle run?', 'pass'], ['How are bonuses structured?', 'pass'],
+  ['Is the ESPP worth it?', 'financial'], ['Would you put money into the ESPP if you were me?', 'financial'],
+  ['Is it smart to hold my shares after they vest?', 'financial'], ['Do people at my level usually earn more than me?', 'salary'],
+  ['How much does my manager make?', 'salary'], ['How is my bonus calculated?', 'pass'],
+  ['How should I sell against a competitor?', 'pass'], ['Should I share this deck with the customer?', 'pass'],
+  ['Should I request PTO before the holidays?', 'pass'], ["What's the best time to take vacation?", 'pass'],
+  ['Should I contribute to the team wiki?', 'pass']
+];
+const ROUTE_EXTRA = [
+  ['I forgot my login', 'it'], ['How many vacation days do I get?', 'hr'], ['When do my shares vest?', 'stock'],
+  ['Are we over budget this quarter?', 'costcap'], ['When are raises decided?', 'comp'], ['Who do I tell about a compliance problem?', 'audit'],
+  ["Customer hasn't paid their invoice", 'collections'], ['Can I change the PO on an order?', 'orders'], ["Where's the sales deck?", 'sales'],
+  ["My laptop won't connect to wifi", 'it'], ['I need a Tableau license', 'it'], ['Is there a template for a customer order form?', 'orders'],
+  ['Pay stub is missing a day of PTO', 'hr'], ['Can you book me a flight to Lisbon?', 'none'], ['What is the dress code?', 'none'],
+  ['Who approves my expense report?', 'none'], ['How do I get reimbursed for a conference?', 'none'],
+  ['How do I dispute a charge on my corporate card?', 'none']
+];
+function runCheckSuite() {
+  return CHECK_CASES.map(([q, want]) => { const g = checkGuardrails(q), got = g ? g.rule : 'pass'; return { q, want, got, ok: got === want }; });
+}
+function runRouteSuite() {
+  return KB.map(e => [e.q, e.genie]).concat(ROUTE_EXTRA).map(([q, want]) => { const c = classify(q), got = c.type === 'none' ? 'none' : c.genie; return { q, want, got, ok: got === want }; });
+}
 </script>
 <script>
 /* ---------- UI ---------- */
@@ -1000,14 +1121,36 @@ const fmt = n => n.toLocaleString('en-US');
 const QUEUE = { it: 'ITHELP', hr: 'HRHELP', stock: 'STOCK', costcap: 'FPA', comp: 'COMP', audit: 'IA', collections: 'COLL', orders: 'OM', sales: 'ENBL' };
 
 const seedRequests = () => [{ kind: 'person', genie: 'hr', ticket: 'HRHELP-1187', question: 'Can I carry over unused PTO into next year?', status: 'Answered', statusCls: '', when: 'Sep 22', ended: true, example: true }];
-const state = { busy: false, flow: null, gen: 0, ticketSeq: 4821, reqSeq: 1187, fbSeq: 0, cardSeq: 0, feedback: [], requests: seedRequests(), keepTrace: false };
+const state = { busy: false, flow: null, gen: 0, ticketSeq: 4821, reqSeq: 1187, fbSeq: 0, cardSeq: 0, feedback: [], requests: seedRequests(), keepTrace: false, turns: [], turnSeq: 0, evalAt: new Date() };
 let CTX = [], SRC = [];
 const log = $('#log'), logInner = $('#log-inner'), input = $('#composer-input'), sendBtn = $('#send-btn');
 
 function scrollDown() { requestAnimationFrame(() => { log.scrollTop = log.scrollHeight; }); }
-function setBusy(b) { state.busy = b; sendBtn.disabled = b; if (!b) input.focus({ preventScroll: true }); }
+function openReasonField() { const f = state.flow; if (!f || f.ended || f.stage !== 'reason') return null; const all = logInner.querySelectorAll('.reason-box textarea:not(:disabled)'); return all[all.length - 1] || null; }
+function setBusy(b) { state.busy = b; sendBtn.disabled = b; if (!b) { renderAsk(); (openReasonField() || input).focus({ preventScroll: true }); } }
 function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => { t.hidden = true; }, 2600); }
 function activeFlow() { return state.flow && !state.flow.ended ? state.flow : null; }
+/* One persistent bar above the message box says who the next message goes to, and holds the single way to start over: "New question". */
+function renderAsk() {
+  const bar = $('#with-genie'), f = activeFlow(), reason = f && f.stage === 'reason' && !state.fresh, held = !reason && state.sticky;
+  const who = reason ? badge('it') : held ? badge(held) : SPARKY_BADGE;
+  const text = reason ? `is waiting for your business reason for ${f.tool.name}.`
+    : held ? 'is waiting for your rephrase.'
+    : f && f.stage === 'reason' ? `will route your next message. Your ${f.tool.name} request still needs a reason afterward.`
+    : 'will route your next message to the right genie.';
+  bar.classList.toggle('holding', !!(reason || held));
+  bar.innerHTML = `<span class="with-genie-text">${who}<span>${text}</span></span><button type="button" class="btn small secondary" data-act="new-question">New question</button>`;
+  input.placeholder = reason ? 'Type a short business reason…' : held ? `Ask the ${GENIES[held].name} another way…` : 'Ask Sparky a work question…';
+}
+function setSticky(gid) { state.sticky = gid || null; renderAsk(); }
+function newQuestion() {
+  if (state.busy) return;
+  const f = activeFlow();
+  state.sticky = null; state.fresh = !!(f && f.stage === 'reason');
+  const last = logInner.lastElementChild;
+  if (last && !last.classList.contains('divider')) { logInner.append(h('<div class="divider" role="separator">New question</div>')); scrollDown(); }
+  renderAsk(); input.focus({ preventScroll: true });
+}
 
 /* ----- drawer (source previews and the demo script) ----- */
 let drawerOpener = null;
@@ -1054,6 +1197,30 @@ function openSource(i, opener) {
     <p class="dr-note">Mocked preview. In the real product this opens the document at the quoted passage.</p>`, opener);
 }
 
+/* ----- turn log: one record per message, read by the Observability tab ----- */
+const TOOLNAME = { 'Confluence': 'confluence.get_page', 'Google Drive': 'drive.read_file', 'PDF': 'pdf.get_passage', 'Jira': 'jira.get_issue' };
+function seeded(str) {
+  let x = 2166136261;
+  for (const ch of str) x = Math.imul(x ^ ch.charCodeAt(0), 16777619);
+  return () => { x ^= x << 13; x ^= x >>> 17; x ^= x << 5; return ((x >>> 0) % 1000) / 1000; };
+}
+function makeTurn(q, id, at) { return { id, at, q, check: 'ok', genie: null, kind: '', outcome: '', spans: [], sources: [], vote: null, rerouted: null, handoff: false, via: null }; }
+function newTurn(q) { const t = makeTurn(q, ++state.turnSeq, new Date()); state.turns.unshift(t); return t; }
+/* Step timings are simulated. In production they come from the tracing spans. */
+function finishTurn(t, o) {
+  const r = seeded(t.q + t.id), ms = (a, b) => Math.round(a + (b - a) * r());
+  const spans = [['Check: can Sparky help with this?', ms(110, 220)]];
+  if (o.kind === 'decline') spans.push(['Reply from the decline template, no genie called', ms(40, 90)]);
+  else {
+    spans.push([o.genie ? `Route to ${GENIES[o.genie].name}` : 'Route: no confident match', ms(180, 340)]);
+    for (const s of (o.sources || [])) spans.push([`${TOOLNAME[s[0]] || 'tool'} "${s[1]}"`, ms(160, 480)]);
+    for (const n of (o.extra || [])) spans.push([n, ms(200, 600)]);
+    if (o.genie) spans.push(['Write the answer', ms(700, 1400)]);
+  }
+  Object.assign(t, { kind: o.kind, outcome: o.outcome, genie: o.genie || null, sources: (o.sources || []).map(s => s[1]), spans });
+  return t;
+}
+
 /* ----- message primitives ----- */
 function addUser(text) { logInner.append(h(`<div class="msg user">${esc(text)}</div>`)); scrollDown(); }
 function newBot() { const m = h('<article class="msg bot"></article>'); logInner.append(m); scrollDown(); return m; }
@@ -1093,7 +1260,7 @@ function setActiveGenie(gid, routing) {
 
 /* ----- answer footer: feedback icons, plus "Not the right genie?" when a genie answered ----- */
 function foot(o) {
-  const id = ++state.fbSeq, team = o.feedback, ctx = o.ctx || null;
+  const id = ++state.fbSeq, team = o.feedback, ctx = o.ctx || null, turn = o.turn || (ctx && ctx.turn) || null;
   const others = ctx ? GENIE_ORDER.filter(g => g !== ctx.genie).sort((a, b) => genieSignal(b, ctx.q) - genieSignal(a, ctx.q)) : [];
   const el = h(`<div class="foot">
     <div class="foot-row">
@@ -1111,7 +1278,7 @@ function foot(o) {
     <form class="fb-form" hidden>
       <label class="fb-lbl" for="fb-text-${id}"></label>
       <textarea id="fb-text-${id}" rows="2" maxlength="500"></textarea>
-      <div class="fb-actions"><button type="submit" class="btn small">Submit feedback</button><span class="fb-opt">The comment is optional.</span></div>
+      <div class="fb-actions"><button type="button" class="btn small fb-submit">Submit feedback</button><span class="fb-opt">The comment is optional.</span></div>
     </form>
     <p class="fb-thanks" hidden></p></div>`);
   let vote = null;
@@ -1119,15 +1286,15 @@ function foot(o) {
   const sync = () => el.classList.toggle('open', !form.hidden || (panel && !panel.hidden));
   const note = html => { thanks.innerHTML = `${ico('check')}<span>${html}</span>`; thanks.hidden = false; };
   el.querySelectorAll('.fb-btn').forEach(b => b.addEventListener('click', () => {
-    vote = b.dataset.v;
+    vote = b.dataset.v; if (turn) turn.vote = vote;
     el.querySelectorAll('.fb-btn').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
     lbl.textContent = vote === 'up' ? 'Glad it helped. Anything you want to add?' : 'Sorry about that. What was missing or wrong?';
     ta.placeholder = vote === 'up' ? 'What worked well' : 'What you expected instead';
     if (panel) { panel.hidden = true; link.setAttribute('aria-expanded', 'false'); }
     form.hidden = false; sync(); scrollIfLast(el);
   }));
-  form.addEventListener('submit', e => {
-    e.preventDefault();
+  form.addEventListener('submit', e => e.preventDefault());
+  $('.fb-submit', el).addEventListener('click', () => {
     state.feedback.push({ type: 'vote', vote, comment: ta.value.trim(), team, at: Date.now() });
     form.hidden = true; $('.fb-thumbs', el).hidden = true; sync();
     note(`Thanks, ${USER.first}. Your feedback goes to the ${esc(team)} team.`);
@@ -1143,8 +1310,8 @@ function foot(o) {
       const g = e.target.closest('[data-reroute]'), ho = e.target.closest('[data-foot="handoff"]');
       if ((!g && !ho) || state.busy) return;
       closePanel();
-      if (g) { note(`Sent to the ${GENIES[g.dataset.reroute].name}. Thanks for the correction.`); reroute(ctx, g.dataset.reroute); }
-      else { note(`Sent to a person on the ${esc(GENIES[ctx.genie].team)} team.`); handoff(ctx); }
+      if (g) { if (turn) turn.rerouted = g.dataset.reroute; note(`Sent to the ${GENIES[g.dataset.reroute].name}. Thanks for the correction.`); reroute(ctx, g.dataset.reroute); }
+      else { if (turn) turn.handoff = true; note(`Sent to a person on the ${esc(GENIES[ctx.genie].team)} team.`); handoff(ctx); }
     });
   }
   return el;
@@ -1168,18 +1335,64 @@ function genieMenu(gid, intro) {
   const extra = gid === 'it' ? chip('I need access to a tool', 'What tools can I get access to?') : '';
   say({ who: badge(gid), html: `<p>${intro || `I'm the ${g.name}. I answer from the ${esc(g.team)} team's own documents. Here is what I can help with in this demo:`}</p><div class="chips">${qs}${extra}</div>` });
 }
-function pickGenie(m, closest, lead) {
+const pickChip = (g, ctxId) => `<button type="button" class="chip g g-${g}" data-pick="${g}" data-ctx="${ctxId}">${ico(g)}${GENIES[g].name}</button>`;
+function pickGenie(m, closest, lead, turn, q) {
   const some = closest && closest.length > 0, list = some ? closest : GENIE_ORDER;
+  const ctxId = CTX.push({ q, turn }) - 1;
   body(m, {
     who: SPARKY_BADGE,
     html: `<p>${lead}</p>
-      <p>${some ? 'These look closest. Pick one and it will show what it can answer:' : "It doesn't look close to any of them. You can pick a genie to see what it covers, or try rephrasing:"}</p>
-      <div class="chips">${list.map(genieChip).join('')}${some ? '<button type="button" class="chip quiet" data-act="all-genies">Show all genies</button>' : ''}</div>`,
-    feedback: 'Sparky'
+      <p>${some ? "These look closest. Pick one and I'll hand it your question:" : "It doesn't look close to any of them. Pick the genie that fits and I'll hand it your question, or try asking another way:"}</p>
+      <div class="chips">${list.map(g => pickChip(g, ctxId)).join('')}${some ? `<button type="button" class="chip quiet" data-act="all-genies" data-ctx="${ctxId}">Show all genies</button>` : ''}</div>`,
+    feedback: 'Sparky', turn
   });
 }
+/* The chosen genie either answers the original question right away, or asks for a rephrase and takes the next message itself. */
+function rephraseOpts(gid, q, turn, again) {
+  const G = GENIES[gid], qs = KB.filter(e => e.genie === gid).map(e => chip(e.q, e.q, 'sm')).join('');
+  const ctxId = CTX.push({ q, genie: gid, turn }) - 1;
+  return {
+    who: badge(gid),
+    html: again
+      ? `<p>I still can't find a sourced answer to that in the ${esc(G.team)} team's documents, and I don't want to keep you going in circles or guess.</p>
+         <p><strong>The quickest route now is a person.</strong> I can pass along both versions of your question so you don't have to explain it again.</p>
+         <div class="chips"><button type="button" class="btn small" data-act="handoff" data-ctx="${ctxId}">Ask a person on the ${esc(G.team)} team</button></div>
+         <h4>Or, things I can answer today</h4><div class="chips">${qs}</div>
+         <p class="muted">Was that a different question? Select <strong>New question</strong> by the message box and ask it again.</p>`
+      : `<p>Thanks, I've got your question: &ldquo;${esc(q)}&rdquo;</p>
+         <p>I searched the ${esc(G.team)} team's documents and couldn't find a sourced answer to it as asked, so I won't guess.</p>
+         <p><strong>Could you ask it another way?</strong> A detail helps, such as the system, the document, or what you're trying to get done. Your next message comes straight to me.</p>
+         <p class="muted">For something unrelated, select <strong>New question</strong> by the message box.</p>
+         <h4>Or, if one of these is what you meant</h4><div class="chips">${qs}</div>`,
+    team: G.team, feedback: G.team, ctx: { q, genie: gid, turn }
+  };
+}
+async function pickRoute(ctx, gid) {
+  if (state.busy || !ctx || !ctx.q) return;
+  const G = GENIES[gid], gen = state.gen;
+  if (ctx.turn) ctx.turn.picked = gid;
+  setBusy(true);
+  try {
+    addUser(`Ask the ${G.name}`);
+    const m = newBot(), tr = trace(m);
+    tr.done(`You chose the ${G.name}`, 'ok');
+    setActiveGenie(gid, true);
+    tr.pending(`Handing your question to ${G.name}…`); await sleep(800);
+    if (gen !== state.gen) return;
+    tr.resolve(`${G.name} has your question`, 'ok'); setActiveGenie(gid, false);
+    const e = bestWithin(gid, ctx.q), turn = newTurn(ctx.q); turn.chosen = true;
+    if (e) {
+      finishTurn(turn, { kind: 'answer', genie: gid, sources: e.sources, outcome: 'Answered after the employee chose' });
+      body(m, answerOpts(e, ctx.q, `<p class="muted">You asked: &ldquo;${esc(ctx.q)}&rdquo;</p>`, turn));
+    } else {
+      finishTurn(turn, { kind: 'nosource', genie: gid, outcome: 'Asked to rephrase' });
+      setSticky(gid);
+      body(m, rephraseOpts(gid, ctx.q, turn, false));
+    }
+  } finally { if (gen === state.gen) setBusy(false); }
+}
 
-function declineContent(g, q) {
+function declineContent(g, q, turn) {
   const facts = (title, items) => `<div class="facts-box"><h4>${title}</h4><ul>${items.map(i => `<li>${i}</li>`).join('')}</ul></div>`;
   const src = (id, i) => KB.find(e => e.id === id).sources[i];
   if (g.rule === 'financial') {
@@ -1207,7 +1420,7 @@ function declineContent(g, q) {
         <h4>Who can help you decide</h4><p>A personal financial advisor or tax professional can look at your whole picture. Many people bring the plan guide to that conversation.</p>`
     };
   }
-  const ctxId = CTX.push({ q, genie: 'hr', hrbp: true }) - 1;
+  const ctxId = CTX.push({ q, genie: 'hr', hrbp: true, turn }) - 1;
   const follow = `<div class="chips"><button type="button" class="btn small secondary" data-act="handoff-hrbp" data-ctx="${ctxId}">Ask my HR business partner to follow up</button></div>`;
   const v = {
     fair: {
@@ -1245,11 +1458,11 @@ function declineContent(g, q) {
   };
 }
 
-function answerOpts(e, q, pre) {
+function answerOpts(e, q, pre, turn) {
   const G = GENIES[e.genie];
-  return { who: badge(e.genie), html: (pre || '') + e.html, wide: e.wide, sources: e.sources, team: G.team, related: relatedFor(e), feedback: G.team, ctx: { q, genie: e.genie } };
+  return { who: badge(e.genie), html: (pre || '') + e.html, wide: e.wide, sources: e.sources, team: G.team, related: relatedFor(e), feedback: G.team, ctx: { q, genie: e.genie, turn } };
 }
-function noAnswerOpts(gid, q, lead, sug) {
+function noAnswerOpts(gid, q, lead, sug, turn) {
   const G = GENIES[gid];
   const first = (sug || []).map(e => e.id);
   const qs = [...(sug || []), ...KB.filter(e => e.genie === gid && !first.includes(e.id))].map(e => chip(e.q)).join('');
@@ -1257,12 +1470,12 @@ function noAnswerOpts(gid, q, lead, sug) {
     who: badge(gid),
     html: `${lead}<p>${sug && sug.length ? 'Did you mean one of these? The closest match is first:' : 'Here is what I can answer today:'}</p><div class="chips">${qs}</div>
       <p>For anything else, use <strong>Not the right genie?</strong> below to try another genie or ask a person on the ${esc(G.team)} team.</p>`,
-    team: G.team, feedback: G.team, ctx: { q, genie: gid }
+    team: G.team, feedback: G.team, ctx: { q, genie: gid, turn }
   };
 }
 
 /* ----- main pipeline: guardrails, then routing, then the genie's answer ----- */
-async function handle(text) {
+async function handle(text, opts = {}) {
   text = String(text || '').trim();
   if (!text || state.busy) return;
   closeDrawer(); showTab('chat');
@@ -1270,35 +1483,53 @@ async function handle(text) {
   const gen = state.gen;
   try {
     addUser(text);
+    const turn = newTurn(text);
     const m = newBot(), tr = trace(m);
     tr.pending('Checking I can help with this…');
     await sleep(550);
     if (gen !== state.gen) return;
     const g = checkGuardrails(text);
     const f = activeFlow();
-    const awaitingReason = f && f.stage === 'reason';
+    const fresh = state.fresh; state.fresh = false;
+    const inReason = !!(f && f.stage === 'reason'), awaitingReason = inReason && (!fresh || !!opts.asReason);
     if (g) {
       tr.resolve(g.rule === 'financial' ? 'A personal money decision' : "A question about someone's pay", 'flag');
       tr.done('Needs a person, not a genie');
       setActiveGenie(null);
       await sleep(300);
       if (gen !== state.gen) return;
-      const d = declineContent(g, text);
-      body(m, { who: SCOPE_BADGE, html: d.html, sources: d.sources, team: d.srcTeam, feedback: d.team });
-      if (awaitingReason) remindReason();
+      turn.check = g.rule; finishTurn(turn, { kind: 'decline', outcome: 'Left to a person' });
+      const d = declineContent(g, text, turn);
+      body(m, { who: SCOPE_BADGE, html: d.html, sources: d.sources, team: d.srcTeam, feedback: d.team, turn });
+      if (inReason) remindReason();
       return;
     }
     tr.resolve('OK to answer', 'ok');
     const c = classify(text);
+    const sticky = state.sticky; setSticky(null);
+    const stickyHit = sticky && !awaitingReason && (c.type === 'none' || c.type === 'domain') ? bestWithin(sticky, text) : null;
+    if (sticky && !awaitingReason && !stickyHit && c.type !== 'none' && c.genie !== sticky) tr.done('Clearly a different question, so routing it fresh', 'ok');
+    if (sticky && !awaitingReason && (stickyHit || c.type === 'none')) {
+      const SG = GENIES[sticky];
+      setActiveGenie(sticky, true);
+      tr.pending(`Continuing with ${SG.name}…`); await sleep(700);
+      if (gen !== state.gen) return;
+      tr.resolve(`Continuing with ${SG.name}`, 'ok'); setActiveGenie(sticky, false);
+      const e = stickyHit;
+      if (e) { finishTurn(turn, { kind: 'answer', genie: sticky, sources: e.sources, outcome: 'Answered after a rephrase' }); body(m, answerOpts(e, text, '', turn)); }
+      else { finishTurn(turn, { kind: 'nosource', genie: sticky, outcome: 'No sourced answer after a rephrase' }); body(m, rephraseOpts(sticky, text, turn, true)); }
+      return;
+    }
 
     if (awaitingReason) {
-      if (/^(cancel|never ?mind|stop|forget it)\b/i.test(text)) { tr.done('Request cancelled'); cancelFlow(m); return; }
-      const looksLikeQuestion = /\?\s*$/.test(text) || (c.type === 'flow' && c.tool !== f.key);
+      if (!opts.asReason && /^(cancel|never ?mind|stop|forget it)\b/i.test(text)) { tr.done('Request cancelled'); finishTurn(turn, { kind: 'flow', genie: 'it', outcome: 'Onboarding cancelled' }); cancelFlow(m); return; }
+      const looksLikeQuestion = !opts.asReason && (/\?\s*$/.test(text) || (c.type === 'flow' && c.tool !== f.key));
       if (!looksLikeQuestion) {
         setActiveGenie('it', true);
         tr.pending('Continuing with IT Genie…'); await sleep(450);
         if (gen !== state.gen) return;
         tr.resolve('Continuing with IT Genie', 'ok');
+        finishTurn(turn, { kind: 'flow', genie: 'it', outcome: 'Onboarding: ticket and approval', extra: ['jira.create_issue', 'identity.get_manager', 'Send approval request'] });
         await submitReason(m, tr, text);
         return;
       }
@@ -1311,18 +1542,20 @@ async function handle(text) {
       const sug = suggest(text);
       if (sug.length) {
         tr.resolve('Not sure what was meant', '');
-        const ctxId = CTX.push({ closest: c.closest }) - 1;
+        finishTurn(turn, { kind: 'unsure', outcome: 'Asked "Did you mean"' });
+        const ctxId = CTX.push({ closest: c.closest, q: text }) - 1;
         body(m, {
           who: SPARKY_BADGE,
           html: `<p>I'm not sure I caught that, and I'd rather check than guess. Did you mean:</p>
             <div class="chips">${sug.map(qChip).join('')}<button type="button" class="chip quiet" data-act="none-of-these" data-ctx="${ctxId}">None of these</button></div>`,
-          feedback: 'Sparky'
+          feedback: 'Sparky', turn
         });
       } else {
         tr.resolve('No confident match', '');
-        pickGenie(m, c.closest, "I couldn't match that to one of my genies with confidence, so I won't guess.");
+        finishTurn(turn, { kind: 'unsure', outcome: 'No match, offered genies' });
+        pickGenie(m, c.closest, "I couldn't match that to one of my genies with confidence, so I won't guess.", turn, text);
       }
-      if (awaitingReason) remindReason();
+      if (inReason) remindReason();
       return;
     }
 
@@ -1334,30 +1567,35 @@ async function handle(text) {
     setActiveGenie(gid, false);
 
     if (c.type === 'answer') {
-      body(m, answerOpts(c.entry, text));
+      finishTurn(turn, { kind: 'answer', genie: gid, sources: c.entry.sources, outcome: 'Answered with sources' });
+      body(m, answerOpts(c.entry, text, '', turn));
     } else if (c.type === 'flow') {
+      finishTurn(turn, { kind: 'flow', genie: 'it', outcome: f ? 'Answered' : 'Onboarding started' });
       if (f) {
         body(m, { who: badge('it'), html: `<p>You already have an open request for <strong>${f.tool.name}</strong>${f.ticket ? ` (<span class="mono">${f.ticket}</span>)` : ''}. I can start another one as soon as that's resolved. The tracker above shows where it stands.</p>`, feedback: G.team });
       } else startFlow(m, c.tool);
     } else if (c.type === 'catalog') {
+      finishTurn(turn, { kind: 'answer', genie: 'it', sources: [['Confluence', 'Software Catalog & Access Matrix']], outcome: 'Answered with sources' });
       body(m, {
         who: badge('it'),
         html: `<p>I can set up access to these six tools right here in chat. Pick one to start:</p>
           <div class="chips">${TOOL_ORDER.map(k => chip(TOOLS[k].name + (TOOLS[k].limited ? ' (limited licenses)' : ''), 'I need access to ' + TOOLS[k].name)).join('')}</div>
           <p>Tableau and Claude have limited licenses, so they need your manager and the license owner to approve. The others need your manager only. For any other software, open a Software request with the IT service desk.</p>`,
         sources: [['Confluence', 'Software Catalog & Access Matrix', 'Self-service through Sparky: Tableau, Snowflake, Claude, Datadog, Lucidchart, 1Password. Tableau and Claude require manager and license owner approval. All others require manager approval only.']],
-        team: G.team, feedback: G.team, ctx: { q: text, genie: 'it' }
+        team: G.team, feedback: G.team, ctx: { q: text, genie: 'it', turn }
       });
     } else { // in a genie's area, but no sourced answer
-      body(m, noAnswerOpts(gid, text, `<p>That's in my area, but I don't have a sourced answer for it yet, and I'd rather not guess.</p>`, suggest(text, gid)));
+      finishTurn(turn, { kind: 'nosource', genie: gid, outcome: 'No sourced answer' });
+      body(m, noAnswerOpts(gid, text, `<p>That's in my area, but I don't have a sourced answer for it yet, and I'd rather not guess.</p>`, suggest(text, gid), turn));
     }
-    if (awaitingReason && activeFlow() === f) remindReason();
+    if (inReason && activeFlow() === f) remindReason();
   } finally { if (gen === state.gen) setBusy(false); }
 }
 
 /* ----- "Not the right genie?": reroute to another genie, or hand off to a person ----- */
 async function reroute(ctx, gid) {
   if (state.busy) return;
+  setSticky(null);
   const G = GENIES[gid], gen = state.gen;
   state.feedback.push({ type: 'reroute', q: ctx.q, from: ctx.genie, to: gid, at: Date.now() });
   setBusy(true);
@@ -1370,8 +1608,10 @@ async function reroute(ctx, gid) {
     tr.resolve(`Routed to ${G.name}`, 'ok'); setActiveGenie(gid, false);
     const noted = `<p class="muted">Rerouted at your request. I've logged the correction so Sparky routes questions like this better.</p>`;
     const e = bestWithin(gid, ctx.q);
-    if (e) body(m, answerOpts(e, ctx.q, noted));
-    else body(m, noAnswerOpts(gid, ctx.q, `${noted}<p>I checked the ${esc(G.team)} team's documents and don't have a sourced answer to &ldquo;${esc(ctx.q)}&rdquo;, and I'd rather not guess.</p>`));
+    const turn = newTurn(ctx.q); turn.via = ctx.genie;
+    finishTurn(turn, e ? { kind: 'answer', genie: gid, sources: e.sources, outcome: 'Answered after reroute' } : { kind: 'nosource', genie: gid, outcome: 'No sourced answer after reroute' });
+    if (e) body(m, answerOpts(e, ctx.q, noted, turn));
+    else body(m, noAnswerOpts(gid, ctx.q, `${noted}<p>I checked the ${esc(G.team)} team's documents and don't have a sourced answer to &ldquo;${esc(ctx.q)}&rdquo;, and I'd rather not guess.</p>`, null, turn));
   } finally { if (gen === state.gen) setBusy(false); }
 }
 function handoff(ctx) {
@@ -1459,16 +1699,33 @@ function startFlow(m, key) {
         ? `<div class="callout"><strong>Heads up: ${tool.name} has limited licenses.</strong> It needs two approvals. First your manager, ${USER.manager.name}, then the ${tool.name} license owner, ${tool.owner.name} in ${tool.owner.team}.</div>`
         : `<p>This one needs a single approval, from your manager, ${USER.manager.name}.</p>`}
       <p>What's the business reason? One sentence is plenty. I'll put it on the ticket for your approver${tool.limited ? 's' : ''}.</p>
-      <div class="chips">${tool.reasons.map(r => chip(r)).join('')}<button type="button" class="chip quiet" data-act="cancel-flow">Cancel request</button></div>`
+      ${reasonBox(tool)}`
   });
+}
+function reasonBox(tool) {
+  const id = ++state.cardSeq;
+  return `<div class="reason-box">
+    <label for="reason-${id}">Business reason</label>
+    <textarea id="reason-${id}" rows="2" maxlength="240" placeholder="For example: ${esc(tool.reasons[0])}"></textarea>
+    <p class="reason-hint" hidden>Add a few more words so your approver has some context.</p>
+    <div class="chips"><button type="button" class="btn small" data-act="submit-reason">Send reason</button><button type="button" class="chip quiet" data-act="cancel-flow">Cancel request</button></div>
+  </div>`;
+}
+function lockReasonBoxes() { logInner.querySelectorAll('.reason-box textarea, .reason-box button').forEach(x => { x.disabled = true; }); }
+function submitReasonBox(box) {
+  const f = activeFlow(); if (!box || state.busy || !f || f.stage !== 'reason') return;
+  const ta = $('textarea', box), v = ta.value.trim();
+  if (v.length < 8) { $('.reason-hint', box).hidden = false; ta.focus(); return; }
+  handle(v, { asReason: true });
 }
 function remindReason() {
   const f = activeFlow(); if (!f || f.stage !== 'reason') return;
-  itSay(`<p>Whenever you're ready, I still need a short business reason for your ${f.tool.name} request.</p><div class="chips">${f.tool.reasons.map(r => chip(r)).join('')}<button type="button" class="chip quiet" data-act="cancel-flow">Cancel request</button></div>`);
+  lockReasonBoxes();
+  itSay(`<p>Whenever you're ready, I still need a short business reason for your ${f.tool.name} request.</p>${reasonBox(f.tool)}`);
 }
 function cancelFlow(m) {
   const f = activeFlow(); if (!f || f.stage !== 'reason') return;
-  f.ended = true; state.flow = null; renderTracker();
+  f.ended = true; state.flow = null; state.fresh = false; renderTracker(); lockReasonBoxes(); renderAsk();
   input.placeholder = 'Ask Sparky a work question…';
   body(m || newBot(), { who: badge('it'), html: `<p>Cancelled. No ticket was created for ${f.tool.name}. Ask again any time.</p>`, feedback: 'IT Support' });
 }
@@ -1487,7 +1744,7 @@ async function submitReason(m, tr, text) {
     body(m, { who: badge('it'), html: `<p>Could you add a little more? A few words on what you'll use ${tool.name} for is enough for your approver.</p>` });
     return;
   }
-  f.reason = text; f.stage = 'ticket';
+  f.reason = text; f.stage = 'ticket'; lockReasonBoxes();
   input.placeholder = 'Ask Sparky a work question…';
   setStep('reason', 'done', 'Provided'); setStep('ticket', 'active', 'Creating');
   setStatus('Creating ticket');
@@ -1538,7 +1795,7 @@ function approvalCard(level) {
         <label for="deny-reason-${id}">Why are you denying this? ${USER.first} will see your reason.</label>
         <input id="deny-reason-${id}" type="text" maxlength="160" placeholder="A short reason">
         <div class="deny-quick">${quick.map(q => `<button type="button">${q}</button>`).join('')}</div>
-        <div class="approval-actions"><button type="submit" class="a-confirm" disabled>Confirm denial</button><button type="button" class="a-back">Back</button></div>
+        <div class="approval-actions"><button type="button" class="a-confirm" disabled>Confirm denial</button><button type="button" class="a-back">Back</button></div>
       </form>
     </div></section>`);
   f.cards[level] = el;
@@ -1554,7 +1811,10 @@ function approvalCard(level) {
   $('.a-back', el).addEventListener('click', () => { form.hidden = true; actions.hidden = false; });
   inp.addEventListener('input', () => { confirmBtn.disabled = inp.value.trim().length < 3; });
   form.querySelectorAll('.deny-quick button').forEach(b => b.addEventListener('click', () => { inp.value = b.textContent; confirmBtn.disabled = false; inp.focus(); }));
-  form.addEventListener('submit', e => { e.preventDefault(); const r = inp.value.trim(); if (r.length < 3 || state.flow !== f) return; resolve(false, r); onDeny(level, r, who); });
+  const confirmDeny = () => { const r = inp.value.trim(); if (r.length < 3 || state.flow !== f) return; resolve(false, r); onDeny(level, r, who); };
+  form.addEventListener('submit', e => e.preventDefault());
+  confirmBtn.addEventListener('click', confirmDeny);
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); confirmDeny(); } });
   logInner.append(el); scrollDown();
 }
 
@@ -1673,6 +1933,135 @@ function updateReqs() {
     ${closed.length ? `<section><h2>Closed</h2>${closed.map(x => reqCard(x.r, x.i)).join('')}</section>` : ''}`;
 }
 
+/* ----- Observability and evals (admin view) ----- */
+/* Mocked 7-day sample: [genie, questions, thumbs up, thumbs down, rerouted away, no sourced answer, asked a person] */
+const WEEK = [['it', 412, 148, 15, 10, 25, 12], ['hr', 268, 104, 8, 5, 13, 5], ['stock', 96, 36, 4, 3, 7, 4], ['costcap', 74, 25, 4, 3, 9, 4], ['comp', 121, 42, 8, 4, 11, 10],
+  ['audit', 38, 16, 2, 2, 4, 2], ['collections', 67, 22, 3, 4, 7, 5], ['orders', 109, 30, 8, 13, 15, 10], ['sales', 99, 35, 3, 2, 8, 2]];
+const WEEK_OTHER = { declined: 58, unsure: 97, median: 2.1, p95: 4.8 };
+const pct = (a, b, d = 0) => (b ? (100 * a / b).toFixed(d) : '0') + '%';
+const stat = (cls, icon, label) => `<span class="st ${cls}">${ico(icon)}${label}</span>`;
+const CHECK_LABEL = { ok: 'OK to answer', financial: 'Money decision', salary: 'Pay question' };
+
+function exampleTurns() {
+  const mk = (id, q, mins) => makeTurn(q, id, new Date(Date.now() - mins * 60000));
+  const a = finishTurn(mk(9001, 'How do I request PTO?', 6), { kind: 'answer', genie: 'hr', sources: KB.find(e => e.id === 'hr-pto').sources, outcome: 'Answered with sources' }); a.vote = 'up';
+  const b = finishTurn(mk(9002, 'Am I paid fairly for my level?', 14), { kind: 'decline', outcome: 'Left to a person' }); b.check = 'salary'; b.handoff = true;
+  const c = finishTurn(mk(9003, 'What are our standard payment terms?', 23), { kind: 'answer', genie: 'collections', sources: KB.find(e => e.id === 'col-terms').sources, outcome: 'Answered with sources' }); c.vote = 'down'; c.rerouted = 'orders';
+  return [a, b, c].map(t => Object.assign(t, { example: true }));
+}
+function traceRow(t) {
+  const total = t.spans.reduce((n, s) => n + s[1], 0);
+  const q = t.check === 'salary' ? 'Pay question (text not stored)' : t.q;
+  const who = t.genie ? badge(t.genie) : t.kind === 'decline' ? `<span class="badge scope">${ico('signpost')}<span>Not routed</span></span>` : `<span class="badge scope">${ico('dash')}<span>No genie</span></span>`;
+  const sig = [];
+  if (t.vote) sig.push(t.vote === 'up' ? 'Thumbs up' : 'Thumbs down');
+  if (t.rerouted) sig.push(`Rerouted by the employee to ${GENIES[t.rerouted].name}`);
+  if (t.via) sig.push(`Arrived by reroute from ${GENIES[t.via].name}`);
+  if (t.picked) sig.push(`Employee picked the ${GENIES[t.picked].name}`);
+  if (t.chosen) sig.push('Routed by the employee\'s choice');
+  if (t.handoff) sig.push('Sent to a person');
+  let at = 0;
+  const spans = t.spans.map(s => { const row = `<span class="span-name">${esc(s[0])}</span><span class="span-ms">${fmt(s[1])} ms</span><span class="span-track" title="${esc(s[0])}: ${fmt(s[1])} ms"><span class="span-bar" style="left:${(100 * at / total).toFixed(1)}%;width:${(100 * s[1] / total).toFixed(1)}%"></span></span>`; at += s[1]; return row; }).join('');
+  return `<details class="tr-row"><summary>
+      <span class="tr-time">${t.at.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</span>
+      <span class="tr-q">${esc(q)}${t.example ? ' <span class="tag">Example</span>' : ''}</span>
+      ${who}<span class="tr-out">${esc(t.outcome)}</span><span class="tr-ms">${(total / 1000).toFixed(1)} s</span></summary>
+    <div class="tr-body">
+      <p><b>Check:</b> ${CHECK_LABEL[t.check]}${t.check !== 'ok' ? '. No genie or document was called.' : ''}</p>
+      <div class="spans" role="img" aria-label="Time spent in each step">${spans}</div>
+      ${t.sources.length ? `<p><b>Sources cited:</b> ${t.sources.map(esc).join(', ')}</p>` : ''}
+      <p><b>Signals from the employee:</b> ${sig.length ? sig.join(' · ') : 'None yet'}</p>
+    </div></details>`;
+}
+function suiteCard(o) {
+  const ok = o.pass === o.total;
+  return `<div class="suite">
+    <div class="suite-head"><strong>${o.name}</strong><span class="tag${o.live ? ' live' : ''}">${o.live ? 'Runs live' : 'Mocked'}</span>
+      <span class="suite-score"><span><span class="meter"><i style="width:${(100 * o.pass / o.total).toFixed(0)}%"></i></span>${o.pass} of ${o.total} passed</span>${o.status}</span></div>
+    <p>${o.what}</p><p><b>Release gate:</b> ${o.gate}</p>
+    ${o.items && o.items.length ? `<details${o.open ? ' open' : ''}><summary>${o.itemsLabel}</summary><ul class="fails">${o.items.join('')}</ul></details>` : ok ? '' : ''}
+  </div>`;
+}
+function renderAdmin() {
+  const T = WEEK.reduce((a, r) => { for (let i = 1; i < 7; i++) a[i] += r[i]; return a; }, [0, 0, 0, 0, 0, 0, 0]);
+  const routed = T[1], total = routed + WEEK_OTHER.declined + WEEK_OTHER.unsure, rated = T[2] + T[3];
+  const kpi = (label, value, sub) => `<div class="kpi"><span class="kpi-label">${label}</span><span class="kpi-value">${value}</span><span class="kpi-sub">${sub}</span></div>`;
+  const rows = WEEK.map(([g, q, up, down, rer, nos, per]) => {
+    const flags = [];
+    if (100 * rer / q >= 8) flags.push('High reroutes');
+    if (100 * nos / q >= 12) flags.push('Missing documents');
+    if (100 * up / (up + down) < 82) flags.push('Low ratings');
+    return `<tr><td>${badge(g)}</td><td>${fmt(q)}</td><td><span class="meter"><i style="width:${(100 * up / (up + down)).toFixed(0)}%"></i></span>${pct(up, up + down)}</td>
+      <td>${pct(rer, q, 1)}</td><td>${pct(nos, q, 1)}</td><td>${pct(per, q, 1)}</td><td class="st-cell">${flags.length ? stat('look', 'flag', flags.join(', ')) : stat('ok', 'check', 'Healthy')}</td></tr>`;
+  }).join('');
+
+  const live = state.turns, shown = live.length ? live.slice(0, 12) : exampleTurns();
+  const n = k => live.filter(k).length;
+  const session = live.length
+    ? `<div class="session-line"><span><b>${live.length}</b> messages</span><span><b>${n(t => t.kind === 'answer')}</b> answered with sources</span><span><b>${n(t => t.kind === 'decline')}</b> left to a person</span><span><b>${n(t => t.kind === 'unsure')}</b> not sure</span><span><b>${n(t => t.kind === 'nosource')}</b> no sourced answer</span><span><b>${n(t => t.rerouted)}</b> rerouted</span><span><b>${n(t => t.vote === 'up')}</b> up, <b>${n(t => t.vote === 'down')}</b> down</span></div>`
+    : `<p class="sec-note">Nothing asked yet in this session, so three examples are shown. Ask something in Chat and its trace replaces them.</p>`;
+
+  const cs = runCheckSuite(), rs = runRouteSuite();
+  const missed = cs.filter(c => c.want !== 'pass' && c.got === 'pass'), wrong = cs.filter(c => c.want === 'pass' && c.got !== 'pass');
+  const rPass = rs.filter(c => c.ok).length, rRate = rPass / rs.length;
+  const nm = x => x === 'none' ? 'no genie' : x === 'pass' ? 'answer' : GENIES[x] ? GENIES[x].name : x === 'financial' ? 'decline (money decision)' : 'decline (pay question)';
+  const failItem = c => `<li>&ldquo;${esc(c.q)}&rdquo;<small>Expected: ${nm(c.want)}. Got: ${nm(c.got)}.</small></li>`;
+  const suites = [
+    { name: 'Check step', live: true, pass: cs.filter(c => c.ok).length, total: cs.length,
+      what: 'Labeled questions that should be answered or left to a person, including rephrasings of the two rules.',
+      gate: 'No missed declines, and no more than 1 wrong decline.',
+      status: missed.length ? stat('bad', 'x', `Blocked: ${missed.length} missed decline${missed.length > 1 ? 's' : ''}`) : wrong.length > 1 ? stat('look', 'flag', 'Below gate') : stat('ok', 'check', 'Passing'),
+      items: cs.filter(c => !c.ok).map(failItem), itemsLabel: `${cs.filter(c => !c.ok).length} failing cases`, open: true },
+    { name: 'Routing', live: true, pass: rPass, total: rs.length,
+      what: 'Questions mapped to the genie that should answer, plus questions no genie covers.',
+      gate: 'At least 90% routed as expected.',
+      status: rRate >= 0.9 ? stat('ok', 'check', `Passing at ${(100 * rRate).toFixed(0)}%`) : stat('bad', 'x', `Blocked at ${(100 * rRate).toFixed(0)}%`),
+      items: rs.filter(c => !c.ok).map(failItem), itemsLabel: `${rs.length - rPass} failing cases` },
+    { name: 'Answer grounding', live: false, pass: 48, total: 50,
+      what: 'Golden questions per genie. A grader model checks that every claim is supported by the cited passage and that the right document was retrieved.',
+      gate: 'At least 95% fully supported.', status: stat('ok', 'check', 'Passing at 96%'),
+      items: ['<li>&ldquo;How does parental leave work?&rdquo;<small>Answer said 18 weeks. The cited guide says 16.</small></li>', '<li>&ldquo;What are our standard payment terms?&rdquo;<small>Right answer, but it cited the approval matrix for a claim found in the payment terms PDF.</small></li>'], itemsLabel: '2 failing cases' },
+    { name: 'Onboarding workflow', live: false, pass: 6, total: 6,
+      what: 'Scripted runs of the access flow against mocked Jira and identity servers, checking the order of tool calls.',
+      gate: 'All pass. A seat must never be provisioned before every required approval.', status: stat('ok', 'check', 'Passing'),
+      items: ['Claude: no group add before both approvals', 'Tableau: no group add before both approvals', 'Snowflake: one approval is enough', 'Manager denial closes the ticket with the reason', 'License owner denial closes the ticket with the reason', '"Still blocked" reopens the ticket and assigns IT'].map(x => `<li>${x}</li>`), itemsLabel: '6 tests' }
+  ];
+
+  $('#admin-inner').innerHTML = `
+    <div class="approval-band admin-band"><span class="approval-label">${ico('swap')}Admin view (demo)</span><span class="approval-acting">What the Sparky team sees. Employees like ${USER.first} don't have this tab.</span></div>
+    <div><h1>Observability and evals</h1><p class="admin-lead">How Sparky is doing in use, what happened on each message, and whether a change is safe to release.</p></div>
+
+    <section>
+      <div class="sec-head"><div class="sec-title"><h2>Last 7 days</h2><span class="tag">Mocked sample</span></div></div>
+      <div class="kpis">
+        ${kpi('Messages', fmt(total), 'across all employees')}
+        ${kpi('Routed to a genie', pct(routed, total), `${fmt(routed)} messages`)}
+        ${kpi('Left to a person', pct(WEEK_OTHER.declined, total), `${WEEK_OTHER.declined} declined by the two rules`)}
+        ${kpi('Not sure', pct(WEEK_OTHER.unsure, total), 'no match or "Did you mean"')}
+        ${kpi('Rated helpful', pct(T[2], rated), `of ${fmt(rated)} rated answers`)}
+        ${kpi('Median response', WEEK_OTHER.median.toFixed(1) + ' s', `95th percentile ${WEEK_OTHER.p95.toFixed(1)} s`)}
+      </div>
+      <div class="tbl-wrap"><table class="data">
+        <thead><tr><th>Genie</th><th>Questions</th><th>Rated helpful</th><th>Rerouted away</th><th>No sourced answer</th><th>Asked a person</th><th class="st-cell">Status</th></tr></thead>
+        <tbody>${rows}</tbody>
+        <tfoot><tr><td>All genies</td><td>${fmt(routed)}</td><td>${pct(T[2], rated)}</td><td>${pct(T[4], routed, 1)}</td><td>${pct(T[5], routed, 1)}</td><td>${pct(T[6], routed, 1)}</td><td></td></tr></tfoot>
+      </table></div>
+    </section>
+
+    <section>
+      <div class="sec-head"><div class="sec-title"><h2>This session, message by message</h2><span class="tag live">Live</span></div></div>
+      ${session}
+      <div class="traces">${shown.map(traceRow).join('')}</div>
+      <p class="sec-note">Select a row to see its steps. Step timings are simulated in this prototype.</p>
+    </section>
+
+    <section>
+      <div class="sec-head"><div class="sec-title"><h2>Evals</h2></div>
+        <div class="req-actions"><span class="kpi-sub">Last run today at ${state.evalAt.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</span><button type="button" class="btn small secondary" data-act="run-evals">Run evals again</button></div></div>
+      <div class="suites">${suites.map(suiteCard).join('')}</div>
+    </section>`;
+}
+
 /* ----- demo script (for the presenter) ----- */
 function openDemo(opener) {
   const item = (prompt, tip) => `<div class="demo-item">${chip(prompt)}<small>${tip}</small></div>`;
@@ -1688,12 +2077,14 @@ function openDemo(opener) {
       ${item('Am I paid fairly for my level?', 'No answer on individual pay. Sparky explains how pay is set and offers a private follow-up from HR.')}</div>
     <div class="demo-group"><h3>When Sparky isn't sure</h3>
       ${item('How do I reset my pasword?', 'A typo. Sparky asks "Did you mean" instead of guessing.')}
-      ${item('Who approves my expense report?', 'No clear genie, so Sparky offers the closest ones.')}
+      ${item('Who approves my expense report?', 'No clear genie, so Sparky offers the closest ones. Pick one: it takes your question and either answers or asks you to rephrase. New question, by the message box, starts over.')}
       <p class="demo-tip">On any answer, select <strong>Not the right genie?</strong> to reroute it or ask a person.</p></div>
     <div class="demo-group"><h3>Tool onboarding</h3>
-      ${item('I need access to Claude', 'Two approvals. Give a reason, try Send a reminder, then approve as the manager and as the license owner.')}
+      ${item('I need access to Claude', 'Two approvals. Type a reason in the field, try Send a reminder, then approve as the manager and as the license owner.')}
       ${item('I need access to Datadog', 'One approval. Select Deny on the manager card to show the denial path.')}
-      <p class="demo-tip">At the end, answer <strong>No, still blocked</strong> to show the ticket reopening, then open <strong>My requests</strong>.</p></div>`, opener);
+      <p class="demo-tip">At the end, answer <strong>No, still blocked</strong> to show the ticket reopening, then open <strong>My requests</strong>.</p></div>
+    <div class="demo-group"><h3>Behind the scenes</h3>
+      <p class="demo-tip">Open the <strong>Observability</strong> tab after asking a few things. Each message has a trace, and two eval suites run for real against this prototype.</p></div>`, opener);
 }
 
 /* ----- guide ----- */
@@ -1759,8 +2150,10 @@ function renderGuide() {
 }
 
 /* ----- shell wiring ----- */
+const TABS = ['chat', 'requests', 'guide', 'admin'];
 function showTab(name) {
-  for (const t of ['chat', 'requests', 'guide']) {
+  if (name === 'admin') renderAdmin();
+  for (const t of TABS) {
     $('#view-' + t).hidden = t !== name;
     $('#tab-' + t).setAttribute('aria-selected', String(t === name));
   }
@@ -1772,9 +2165,9 @@ function renderRoster() {
 }
 function reset() {
   state.gen++; logInner.innerHTML = ''; state.flow = null; state.busy = false; sendBtn.disabled = false;
-  state.requests = seedRequests(); CTX = []; SRC = [];
+  state.requests = seedRequests(); CTX = []; SRC = []; state.turns = []; state.fresh = false; state.sticky = null;
   input.value = ''; input.placeholder = 'Ask Sparky a work question…';
-  closeDrawer(); renderTracker(); updateReqs(); setActiveGenie(null); showTab('chat'); welcome(); log.scrollTop = 0;
+  closeDrawer(); renderTracker(); updateReqs(); setActiveGenie(null); showTab('chat'); welcome(); renderAsk(); log.scrollTop = 0;
 }
 
 document.addEventListener('click', e => {
@@ -1784,8 +2177,9 @@ document.addEventListener('click', e => {
     if (tr) { const open = tr.classList.toggle('collapsed') === false; wb.setAttribute('aria-expanded', String(open)); }
     return;
   }
-  const t = e.target.closest('[data-prompt],[data-genie],[data-act],[data-mock-link],[data-mock-open],[data-src]');
+  const t = e.target.closest('[data-prompt],[data-pick],[data-genie],[data-act],[data-mock-link],[data-mock-open],[data-src]');
   if (!t) return;
+  if (t.dataset.pick) return void pickRoute(CTX[+t.dataset.ctx], t.dataset.pick);
   if (t.dataset.prompt) return void handle(t.dataset.prompt);
   if (t.dataset.src) return void openSource(+t.dataset.src, t);
   if (t.dataset.genie) { if (state.busy) return; showTab('chat'); return void genieMenu(t.dataset.genie); }
@@ -1795,31 +2189,42 @@ document.addEventListener('click', e => {
   if (act === 'verify-yes') onVerify(true, t);
   else if (act === 'verify-no') onVerify(false, t);
   else if (act === 'cancel-flow') { if (!state.busy) cancelFlow(); }
+  else if (act === 'submit-reason') submitReasonBox(t.closest('.reason-box'));
   else if (act === 'dismiss-tracker') { state.flow = null; renderTracker(); }
   else if (act === 'remind') remind();
   else if (act === 'reset') reset();
   else if (act === 'go-requests') showTab('requests');
-  else if (act === 'handoff-hrbp') { const c = CTX[+t.dataset.ctx]; if (c && !state.busy) { t.disabled = true; t.textContent = 'Sent to your HR business partner'; handoff(c); } }
+  else if (act === 'new-question') newQuestion();
+  else if (act === 'run-evals') { state.evalAt = new Date(); renderAdmin(); toast('Evals re-run against the current logic'); }
+  else if (act === 'handoff-hrbp') { const c = CTX[+t.dataset.ctx]; if (c && !state.busy) { t.disabled = true; t.textContent = 'Sent to your HR business partner'; if (c.turn) c.turn.handoff = true; handoff(c); } }
   else if (act === 'req-view') {
     const r = state.requests[+t.dataset.req];
     if (r && r.kind === 'tool' && !activeFlow()) { state.flow = r.flow; renderTracker(); }
     showTab('chat');
   }
-  else if (act === 'none-of-these') { if (!state.busy) pickGenie(newBot(), (CTX[+t.dataset.ctx] || {}).closest, 'No problem.'); }
-  else if (act === 'all-genies') say({ who: SPARKY_BADGE, html: `<p>Here are all nine. Pick one to see what it covers:</p><div class="chips">${GENIE_ORDER.map(genieChip).join('')}</div>` });
+  else if (act === 'none-of-these') { const c = CTX[+t.dataset.ctx] || {}; if (!state.busy) pickGenie(newBot(), c.closest, 'No problem.', null, c.q); }
+  else if (act === 'handoff') { const c = CTX[+t.dataset.ctx]; if (c && !state.busy) { t.disabled = true; if (c.turn) c.turn.handoff = true; handoff(c); } }
+  else if (act === 'all-genies') say({ who: SPARKY_BADGE, html: `<p>Here are all nine. Pick one and I'll hand it your question:</p><div class="chips">${GENIE_ORDER.map(g => pickChip(g, t.dataset.ctx)).join('')}</div>` });
 });
 document.addEventListener('change', e => {
   if (e.target.id === 'keep-trace') { state.keepTrace = e.target.checked; logInner.classList.toggle('keep-trace', state.keepTrace); }
 });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeDrawer();
+  if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && e.target.matches && e.target.matches('.reason-box textarea')) { e.preventDefault(); submitReasonBox(e.target.closest('.reason-box')); }
+});
 $('#scrim').addEventListener('click', closeDrawer);
 $('#drawer-x').addEventListener('click', closeDrawer);
-$('#composer-form').addEventListener('submit', e => { e.preventDefault(); const v = input.value; if (state.busy || !v.trim()) return; input.value = ''; handle(v); });
-for (const t of ['chat', 'requests', 'guide']) $('#tab-' + t).addEventListener('click', () => showTab(t));
+/* Sandboxed viewers block form submission before the submit event fires, so nothing here depends on it. */
+function sendFromComposer() { const v = input.value; if (state.busy || !v.trim()) return; input.value = ''; handle(v); }
+$('#composer-form').addEventListener('submit', e => e.preventDefault());
+sendBtn.addEventListener('click', sendFromComposer);
+input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); sendFromComposer(); } });
+for (const t of TABS) $('#tab-' + t).addEventListener('click', () => showTab(t));
 $('#demo-btn').addEventListener('click', e => openDemo(e.currentTarget));
 $('#suggest-btn').addEventListener('click', () => { if (!state.busy) welcome(); });
 
-renderRoster(); renderGuide(); updateReqs(); welcome(); log.scrollTop = 0;
+renderRoster(); renderGuide(); updateReqs(); welcome(); renderAsk(); log.scrollTop = 0;
 </script>
 </body>
 </html>
