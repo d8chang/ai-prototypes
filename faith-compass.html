@@ -1,0 +1,639 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="A 24-statement quiz that shows where you stand between Reformed and Arminian on salvation, and between cessationist and continuationist on spiritual gifts.">
+<style>html{-webkit-text-size-adjust:100%}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Faith Compass</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@400;500;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+/* Layout: one reading column. A single statement is set like an article of a confession and answered
+   on a five-step scale; the result plots the reader on two axes, one hue per axis. */
+:root{
+  --paper:#EDF0EB; --surface:#F7F9F5; --ink:#17211C; --muted:#56655D; --rule:#C9D1C9;
+  --grace:#1E5E48; --grace-soft:#D7E5DD; --gifts:#85570A; --gifts-soft:#EDE1C8; --on-fill:#FFFFFF;
+  --display:"EB Garamond", Garamond, "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --body:"Alegreya Sans", "Gill Sans", "Trebuchet MS", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#101612; --surface:#171F1A; --ink:#E6EBE5; --muted:#9BAAA1; --rule:#2D3A33;
+    --grace:#78C9A8; --grace-soft:#1D2F27; --gifts:#E0B25C; --gifts-soft:#33290F; --on-fill:#0D1410;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#101612; --surface:#171F1A; --ink:#E6EBE5; --muted:#9BAAA1; --rule:#2D3A33;
+  --grace:#78C9A8; --grace-soft:#1D2F27; --gifts:#E0B25C; --gifts-soft:#33290F; --on-fill:#0D1410;
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:1.0625rem;line-height:1.5}
+.wrap{max-width:44rem;margin-inline:auto;padding-inline:1.25rem;padding-block:2.5rem 4rem;display:flex;flex-direction:column;gap:2.5rem}
+p,h1,h2,h3,dl,dd,ol,figure{margin:0}
+h1,h2,h3{font-family:var(--display);font-weight:500;text-wrap:balance;line-height:1.1}
+
+.label{font-size:.8125rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+
+/* Masthead */
+.mast{display:flex;flex-direction:column;gap:.6rem}
+.mast h1{font-size:clamp(2.6rem,1.8rem + 4vw,4rem);letter-spacing:-.01em}
+.mast h1 em{font-style:italic;font-weight:400}
+.lede{max-width:36rem;font-size:1.2rem;line-height:1.45}
+
+/* Intro */
+#intro{display:flex;flex-direction:column;gap:1.75rem}
+.two-q{display:grid;grid-template-columns:repeat(auto-fit,minmax(16rem,1fr));gap:1.75rem}
+.two-q > div{display:flex;flex-direction:column;gap:.6rem;min-width:0;border-top:3px solid var(--axis);padding-top:.9rem}
+.two-q h3{font-size:1.7rem}
+.two-q .label{color:var(--axis)}
+.sides{display:flex;flex-direction:column;gap:.7rem}
+.sides div{display:flex;flex-direction:column;gap:.1rem}
+.sides dt{font-weight:700}
+.sides dd{color:var(--muted)}
+.expect{display:flex;flex-direction:column;gap:1.1rem;align-items:flex-start;background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:1.25rem}
+#intro h2{font-size:1.6rem}
+.steps{margin:0;padding:0;list-style:none;counter-reset:step;display:flex;flex-direction:column;gap:.8rem;max-width:38rem}
+.steps li{counter-increment:step;display:grid;grid-template-columns:2rem minmax(0,1fr);gap:.75rem;align-items:start}
+.steps li::before{content:counter(step);display:grid;place-items:center;width:2rem;height:2rem;border-radius:50%;border:1.5px solid var(--grace);color:var(--grace);font-family:var(--display);font-size:1.25rem;line-height:1}
+.steps b{font-weight:700}
+.btn.big{font-size:1.1rem;padding:.85rem 1.6rem}
+
+/* Quiz */
+#quiz,#results{--axis:var(--grace);--axis-soft:var(--grace-soft)}
+#quiz[data-part="1"]{--axis:var(--gifts);--axis-soft:var(--gifts-soft)}
+#quiz{display:flex;flex-direction:column;gap:1.25rem}
+.parts{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.part{display:flex;flex-direction:column;gap:.4rem;min-width:0}
+.part .label{transition:color .2s}
+.part.is-on .label{color:var(--ink)}
+.bar{display:block;height:4px;background:var(--rule);border-radius:2px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;transition:width .25s ease}
+.part[data-p="0"] .bar i{background:var(--grace)}
+.part[data-p="1"] .bar i{background:var(--gifts)}
+
+.article{display:flex;flex-direction:column;gap:.75rem;padding-block:.75rem .25rem}
+.count{font-variant-numeric:tabular-nums}
+.count b{color:var(--axis);font-weight:700}
+.statement{font-family:var(--display);font-size:clamp(1.6rem,1.2rem + 2vw,2.2rem);line-height:1.22;min-height:4.9em;text-wrap:pretty}
+.plain{max-width:38rem;font-size:1.08rem}
+.plain b{font-weight:700;color:var(--axis)}
+.tip{color:var(--muted);font-size:.95rem}
+.cited{color:var(--muted);font-size:.95rem}
+.cited span{font-style:italic;font-family:var(--display);font-size:1.05rem}
+
+.scale{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.5rem}
+.scale button{font:inherit;font-weight:500;line-height:1.2;padding:.85rem .4rem;min-height:3.25rem;border:1px solid var(--rule);background:var(--surface);color:var(--ink);border-radius:4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.25rem;transition:background .15s,border-color .15s,color .15s}
+.scale button:hover{border-color:var(--axis)}
+.scale button[aria-checked="true"]{background:var(--axis);border-color:var(--axis);color:var(--on-fill)}
+.scale .key{font-size:.75rem;font-weight:700;opacity:.6;font-variant-numeric:tabular-nums}
+
+.nav{display:flex;justify-content:space-between;gap:.75rem;flex-wrap:wrap}
+.btn{font:inherit;font-weight:700;padding:.65rem 1.1rem;border-radius:4px;border:1px solid var(--rule);background:transparent;color:var(--ink);cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--ink)}
+.btn:disabled{opacity:.4;cursor:default}
+.btn.primary{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.hint{color:var(--muted);font-size:.9rem}
+:focus-visible{outline:2px solid var(--axis,var(--grace));outline-offset:2px}
+
+/* Results */
+#results{display:flex;flex-direction:column;gap:2.25rem}
+#results > h2{font-size:clamp(2rem,1.5rem + 2.5vw,2.75rem)}
+#results > h2:focus{outline:none}
+#results h3{font-size:1.6rem}
+.gifts{--axis:var(--gifts);--axis-soft:var(--gifts-soft)}
+.grace{--axis:var(--grace);--axis-soft:var(--grace-soft)}
+.hero{display:grid;grid-template-columns:minmax(0,1fr);gap:1.75rem;background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:1.25rem}
+@media (min-width:720px){.hero{grid-template-columns:minmax(0,1fr) minmax(0,19rem);align-items:center;gap:2rem;padding:1.5rem}}
+.meters{display:flex;flex-direction:column;gap:1.75rem;min-width:0}
+.meter{display:flex;flex-direction:column;gap:.3rem;min-width:0}
+.meter .v-name{font-family:var(--display);font-size:clamp(1.8rem,1.4rem + 1.6vw,2.2rem);line-height:1.1;color:var(--axis)}
+.meter .v-pct{font-size:.95rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.gauge{position:relative;display:flex;height:.9rem;margin-top:.75rem}
+.gauge .seg{background:var(--axis-soft);border-right:2px solid var(--surface)}
+.gauge .seg:first-child{border-radius:999px 0 0 999px}
+.gauge .seg:last-of-type{border-right:0;border-radius:0 999px 999px 0}
+.gauge .seg.is-on{background:var(--axis)}
+.gauge .pin{position:absolute;top:50%;width:1.25rem;height:1.25rem;border-radius:50%;background:var(--ink);border:3px solid var(--surface);box-shadow:0 0 0 1.5px var(--ink);transform:translate(-50%,-50%)}
+.ends{display:flex;justify-content:space-between;gap:1rem;margin-top:.4rem}
+.ends .label{color:var(--axis)}
+.ends > span{display:flex;flex-direction:column;gap:.1rem;min-width:0}
+.ends > .r{text-align:right;align-items:flex-end}
+.ends small{font-size:.85rem;line-height:1.2;color:var(--muted)}
+.inshort{font-family:var(--display);font-size:clamp(1.35rem,1.1rem + 1.1vw,1.65rem);line-height:1.3;max-width:38rem;margin-top:-1.25rem}
+.howto{color:var(--muted);font-size:.95rem;border-top:1px solid var(--rule);padding-top:.9rem}
+@media (min-width:720px){.howto{grid-column:1 / -1}}
+.meaning{display:flex;flex-direction:column;gap:1rem}
+.meaning-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(16rem,1fr));gap:1.25rem 1.75rem}
+.meaning-cols > div{display:flex;flex-direction:column;gap:.35rem;min-width:0;border-top:3px solid var(--axis);padding-top:.8rem}
+.meaning-cols .label{color:var(--axis)}
+.combo{max-width:38rem}
+
+.plane-fig{display:flex;flex-direction:column;gap:.7rem;align-items:flex-start;min-width:0}
+.plane{position:relative;width:100%;max-width:26rem;aspect-ratio:1;background:var(--paper);border:1px solid var(--rule);border-radius:4px}
+.plane::before,.plane::after{content:"";position:absolute;background:var(--rule)}
+.plane::before{left:50%;top:0;bottom:0;width:1px}
+.plane::after{top:50%;left:0;right:0;height:1px}
+.plane .end{position:absolute;font-size:.72rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;line-height:1.1}
+.plane .e-l{left:.5rem;top:50%;transform:translateY(-140%);color:var(--grace)}
+.plane .e-r{right:.5rem;top:50%;transform:translateY(-140%);color:var(--grace)}
+.plane .e-t{top:.45rem;left:50%;transform:translateX(-50%);background:var(--paper);padding:.1rem .35rem;color:var(--gifts);z-index:1}
+.plane .e-b{bottom:.45rem;left:50%;transform:translateX(-50%);background:var(--paper);padding:.1rem .35rem;color:var(--gifts);z-index:1}
+.plane .quad{position:absolute;max-width:30%;padding:.45rem .55rem;font-family:var(--display);font-style:italic;font-size:.95rem;line-height:1.15;color:var(--muted)}
+.plane .q-tl{left:0;top:0}.plane .q-tr{right:0;top:0;text-align:right}.plane .q-bl{left:0;bottom:0}.plane .q-br{right:0;bottom:0;text-align:right}
+.plane .dot{position:absolute;width:1.1rem;height:1.1rem;border-radius:50%;background:var(--ink);border:3px solid var(--paper);box-shadow:0 0 0 1.5px var(--ink);transform:translate(-50%,-50%);z-index:2}
+.plane-fig figcaption{color:var(--muted);font-size:.9rem;max-width:26rem}
+
+.points,.voices{display:flex;flex-direction:column;gap:1rem}
+.point-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(16rem,1fr));gap:2rem 1.75rem}
+.point-cols > div{display:flex;flex-direction:column;gap:.9rem;min-width:0}
+.point-cols .ends{margin-top:0}
+.point-cols ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1.15rem}
+.point-cols li{display:flex;flex-direction:column;gap:.4rem}
+.pt-head{display:flex;justify-content:space-between;align-items:baseline;gap:.75rem}
+.pt-head b{font-weight:700}
+.pt-head .lean{color:var(--axis);font-size:.9rem;font-weight:700;white-space:nowrap}
+.point-cols li.is-mixed .lean,.point-cols li.is-mixed p{color:var(--muted)}
+.div{display:block;position:relative;height:.6rem;background:var(--axis-soft);border-radius:2px}
+.div::before{content:"";position:absolute;left:50%;top:-4px;bottom:-4px;width:1px;background:var(--muted)}
+.div i{position:absolute;top:0;bottom:0;background:var(--axis);border-radius:2px}
+.voice-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(16rem,1fr));gap:1.25rem 1.75rem}
+.voice-list li{display:flex;flex-direction:column;gap:.25rem;min-width:0;border-top:1px solid var(--rule);padding-top:.8rem}
+.voice-list .who{font-family:var(--display);font-size:1.5rem;line-height:1.15}
+.voice-list .what{color:var(--muted)}
+
+.actions{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center}
+#copy-fallback{width:100%;min-height:5.5rem;font:inherit;font-size:.95rem;padding:.6rem;background:var(--surface);color:var(--ink);border:1px solid var(--rule);border-radius:4px}
+.note{color:var(--muted);max-width:38rem}
+
+details{border-top:1px solid var(--rule);padding-top:.9rem}
+details + details{margin-top:-1.25rem}
+summary{cursor:pointer;font-family:var(--display);font-size:1.4rem;line-height:1.2}
+details > *:not(summary){margin-top:1rem}
+.answers{list-style:none;padding:0;display:flex;flex-direction:column;gap:1rem}
+.answers li{display:flex;flex-direction:column;gap:.2rem;padding-left:.9rem;border-left:3px solid var(--axis)}
+.answers .meta{color:var(--muted);font-size:.95rem}
+.answers .meta b{color:var(--ink)}
+.terms{display:grid;grid-template-columns:repeat(auto-fit,minmax(17rem,1fr));gap:1.5rem 2rem}
+.terms div{display:flex;flex-direction:column;gap:.3rem;min-width:0}
+.terms dt{font-family:var(--display);font-size:1.35rem;line-height:1.15}
+.terms dt.grace,.terms dt.gifts{color:var(--axis)}
+.terms dd{color:var(--muted)}
+
+@media (max-width:560px){
+  .scale{grid-template-columns:1fr}
+  .scale button{flex-direction:row;justify-content:flex-start;padding-inline:1rem;gap:.75rem}
+  .statement{min-height:0}
+}
+@media (hover:none){.hint,.scale .key{display:none}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+</head>
+<body>
+<main class="wrap">
+  <header class="mast">
+    <p class="label">A theology quiz · 24 statements · about 6 minutes · no sign-up</p>
+    <h1>Faith <em>Compass</em></h1>
+  </header>
+
+  <section id="intro" aria-label="About this quiz">
+    <p class="lede">Explore what you believe about two questions Christians have discussed for centuries: how God saves people, and whether miraculous gifts still happen today. You do not need to know any of the terms beforehand.</p>
+    <div class="expect">
+      <h2>What to expect</h2>
+      <ol class="steps">
+        <li><span><b>Read a statement.</b> There are 24. Each comes with a plain-words version and the Bible passages most often cited for it.</span></li>
+        <li><span><b>Say how much you agree.</b> You get five choices, from strongly disagree to strongly agree. There are no wrong answers, and you can choose Not sure.</span></li>
+        <li><span><b>See your result.</b> You get a one-sentence summary, a scale for each question, a chart, the teachers you sound most like, and a point-by-point breakdown.</span></li>
+      </ol>
+      <p class="tip">It takes about 6 minutes. Your answers stay on this device, and you can go back and change any of them.</p>
+      <button class="btn primary big begin" type="button">Start the quiz</button>
+    </div>
+    <h2>The two questions</h2>
+    <div class="two-q">
+      <div class="grace">
+        <p class="label">Part 1 · 12 statements</p>
+        <h3>How does God save people?</h3>
+        <dl class="sides">
+          <div><dt>Reformed</dt><dd>God chooses who will be saved, and his grace makes sure they believe and stay saved.</dd></div>
+          <div><dt>Arminian</dt><dd>God offers salvation to everyone, and each person is free to accept or refuse it.</dd></div>
+        </dl>
+      </div>
+      <div class="gifts">
+        <p class="label">Part 2 · 12 statements</p>
+        <h3>Do miraculous gifts still happen?</h3>
+        <dl class="sides">
+          <div><dt>Cessationist</dt><dd>Gifts like tongues, prophecy and healing ended with the apostles.</dd></div>
+          <div><dt>Continuationist</dt><dd>The Holy Spirit still gives those gifts today.</dd></div>
+        </dl>
+      </div>
+    </div>
+    <div><button class="btn primary big begin" type="button">Start the quiz</button></div>
+  </section>
+
+  <section id="quiz" data-part="0" aria-label="Quiz" hidden>
+    <div class="parts">
+      <div class="part" data-p="0"><span class="label">Part 1 · How God saves</span><span class="bar"><i id="bar0"></i></span></div>
+      <div class="part" data-p="1"><span class="label">Part 2 · Spiritual gifts</span><span class="bar"><i id="bar1"></i></span></div>
+    </div>
+    <p class="tip">Pick the answer closest to what you believe. There are no wrong answers, and you can go back and change any of them.</p>
+    <div class="article">
+      <p class="label count" id="count"></p>
+      <p class="statement" id="statement" aria-live="polite"></p>
+      <p class="plain"><b>In plain words:</b> <span id="plain"></span></p>
+      <p class="cited">Often cited: <span id="cited"></span></p>
+    </div>
+    <div class="scale" id="scale" role="radiogroup" aria-labelledby="statement"></div>
+    <div class="nav">
+      <button class="btn" id="back" type="button">Back</button>
+      <button class="btn primary" id="next" type="button">Next</button>
+    </div>
+    <p class="hint">Press 1 to 5 to answer. The arrow keys move between statements.</p>
+  </section>
+
+  <section id="results" aria-label="Your result" hidden></section>
+
+  <details id="terms">
+    <summary>What the four terms mean</summary>
+    <dl class="terms">
+      <div><dt class="grace">Reformed</dt><dd>Salvation is God's work from first to last. He chose his people before creation without regard to anything in them, Christ died to secure their salvation, the Spirit gives them new birth and faith, and God keeps them to the end. Stated at the Synod of Dort (1618–19) and in the Westminster Confession (1646). Also called Calvinist.</dd></div>
+      <div><dt class="grace">Arminian</dt><dd>God's grace goes before every person and makes a free response possible. Christ died for all, God elects those he foreknows will believe, and grace can be resisted. Set out in the Five Articles of the Remonstrance (1610) after Jacobus Arminius and developed by John Wesley. The Remonstrants left open whether a believer can fall away. Wesley taught that one can.</dd></div>
+      <div><dt class="gifts">Cessationist</dt><dd>The miraculous sign gifts (tongues, prophecy, healing) confirmed the apostles' message and ended with the apostolic age. God still answers prayer and may heal. Argued at length by B. B. Warfield in <i>Counterfeit Miracles</i> (1918).</dd></div>
+      <div><dt class="gifts">Continuationist</dt><dd>All the gifts of the Spirit continue until Christ returns and should be sought and tested by Scripture. Held by Pentecostal churches since the Azusa Street revival (1906), by the charismatic renewal, and by Reformed continuationists such as Wayne Grudem.</dd></div>
+    </dl>
+  </details>
+</main>
+
+<script>
+(function(){
+"use strict";
+var SCALE=["Strongly disagree","Disagree","Not sure","Agree","Strongly agree"];
+
+var AX=[
+ {cls:"grace",title:"How God saves",neg:"Reformed",pos:"Arminian",mid:"Between Reformed and Arminian",lower:false,
+  gloss:["God chooses who is saved","People freely respond"],
+  short:{neg:"you believe God chooses who is saved and keeps them to the end",pos:"you believe God offers salvation to everyone and each person freely accepts or refuses it",mid:"you hold a mix of Reformed and Arminian views on how God saves"},
+  topics:[["election","God's choice (election)"],["ability","Ability to believe"],["atonement","Who Christ died for"],["calling","Resisting God's call"],["perseverance","Staying saved"],["providence","God's control and free will"]],
+  desc:{
+   neg:"Your answers side with the Canons of Dort (1619). God chose his people unconditionally, Christ's death secures their salvation, the Spirit gives new birth that leads to faith, and God keeps believers to the end. The five points are often remembered as TULIP.",
+   pos:"Your answers side with the Remonstrants (1610) and John Wesley. God's grace reaches every person and makes a free response possible, Christ died for all, election follows God's foreknowledge of faith, and grace can be resisted.",
+   mid:"Your answers fall between the two systems, as many Christians' do. Lutherans, Molinists and four-point (Amyraldian) Calvinists each accept some points from one side and some from the other."}},
+ {cls:"gifts",title:"Spiritual gifts",neg:"Cessationist",pos:"Continuationist",mid:"Open but cautious",lower:true,
+  gloss:["Gifts ended with the apostles","Gifts continue today"],
+  short:{neg:"you also believe miraculous gifts like tongues and prophecy ended with the apostles",pos:"you also believe miraculous gifts like tongues and prophecy continue today",mid:"you are open to miraculous gifts today but cautious about them"},
+  topics:[["tongues","Tongues"],["prophecy","Prophecy"],["healing","Healing and miracles"],["duration","How long the gifts last"],["purpose","Purpose of the gifts"],["practice","Guidance and practice"]],
+  desc:{
+   neg:"Your answers say that tongues, prophecy and gifts of healing belonged to the apostolic age and ended once the church's foundation was laid and the New Testament was complete. God still works miracles and answers prayer, though he no longer gives these as gifts to individuals.",
+   pos:"Your answers say that all the gifts in 1 Corinthians 12–14 remain available until Christ returns, including tongues, prophecy and healing, with Scripture as the final test of every claimed gift.",
+   mid:"Your answers sit between the two, a position often called open but cautious. You see no clear biblical teaching that the gifts have ceased, and you are careful about how they are claimed and practiced today."}}
+];
+
+/* [part, topic, lean, statement, passages]  lean: -1 = Reformed / cessationist, +1 = Arminian / continuationist */
+var Q=[
+ [0,"election",-1,"Before the world began, God chose particular people to save, and his choice did not rest on anything he foresaw in them.","Ephesians 1:4–5; Romans 9:11–16"],
+ [0,"ability",1,"God gives every person enough grace to respond to the gospel, so each person is truly able to accept or refuse it.","John 12:32; Titus 2:11"],
+ [0,"atonement",1,"Christ died for every person without exception, with the same saving purpose for all.","1 John 2:2; 1 Timothy 2:4–6"],
+ [0,"perseverance",-1,"Everyone who is truly saved will be kept in faith by God to the end and cannot finally be lost.","John 10:28–29; Philippians 1:6"],
+ [0,"calling",1,"The Holy Spirit's call to salvation can be finally resisted, even by someone he is genuinely drawing.","Acts 7:51; Matthew 23:37"],
+ [0,"providence",-1,"God has ordained everything that comes to pass, human choices included, yet he is not the author of sin.","Ephesians 1:11; Genesis 50:20"],
+ [0,"ability",-1,"A sinner cannot believe until the Spirit gives new birth. Regeneration comes before faith.","John 6:44; Ephesians 2:1–5"],
+ [0,"election",1,"God chose those he foreknew would freely put their faith in Christ.","Romans 8:29; 1 Peter 1:1–2"],
+ [0,"perseverance",1,"A genuine believer can turn away from Christ and lose salvation.","Hebrews 6:4–6; Hebrews 10:26–29"],
+ [0,"atonement",-1,"Christ's death was designed to secure the salvation of the elect in particular, and it does so without fail.","John 10:11, 15; Ephesians 5:25"],
+ [0,"providence",1,"God gives people real freedom to choose otherwise, and he does not determine their choices.","Deuteronomy 30:19; Joshua 24:15"],
+ [0,"calling",-1,"When God sets out to save a person, his grace always brings that person to faith.","John 6:37; Romans 8:30"],
+
+ [1,"tongues",1,"Speaking in tongues is a gift the Spirit still gives to believers today.","1 Corinthians 14:5, 39"],
+ [1,"purpose",-1,"Miraculous sign gifts were given mainly to confirm the apostles and their message while the New Testament was being written.","Hebrews 2:3–4; Acts 14:3"],
+ [1,"prophecy",1,"God still gives prophetic words to believers today, and they should be weighed against Scripture.","1 Thessalonians 5:19–21; 1 Corinthians 14:29"],
+ [1,"healing",-1,"God still heals in answer to prayer, but he no longer gives individuals a gift of healing as he gave the apostles.","2 Corinthians 12:12; James 5:14–15"],
+ [1,"duration",1,"Nothing in the New Testament teaches that any spiritual gift would end before Christ returns.","1 Corinthians 13:8–12; 1 Corinthians 1:7"],
+ [1,"practice",-1,"God guides believers today through Scripture, wisdom and providence, and no longer through direct words, impressions or prophecies.","2 Timothy 3:16–17; Psalm 119:105"],
+ [1,"tongues",-1,"Tongues in the New Testament were real human languages given as a sign for the apostolic age, and that gift has ceased.","Acts 2:4–11; 1 Corinthians 14:21–22"],
+ [1,"healing",1,"Churches should expect gifts of healing and miracles to work through believers today.","1 Corinthians 12:9–10; John 14:12"],
+ [1,"prophecy",-1,"Because Scripture is complete, God no longer gives new revelation through prophecy.","Hebrews 1:1–2; Jude 3"],
+ [1,"purpose",1,"The miraculous gifts were given to build up the church in every age, and their purpose did not end with the apostles.","1 Corinthians 12:7; 1 Corinthians 14:12"],
+ [1,"duration",-1,"Apostles and prophets were the church's foundation. Once that foundation was laid, their gifts were no longer needed.","Ephesians 2:20; Ephesians 3:5"],
+ [1,"practice",1,"Christians should eagerly desire the miraculous gifts, and churches should make room for them in an orderly way.","1 Corinthians 12:31; 14:1, 40"]
+];
+var N=Q.length, KEY="grace-and-gifts-v1";
+
+/* A plain-words version of each statement, in the same order as Q */
+var PLAIN=[
+ "God decided whom to save. His decision was not based on anything they would do or believe.",
+ "Everyone gets a real chance to say yes or no to God.",
+ "Jesus died for all people equally, including those who never believe.",
+ "Once truly saved, always saved.",
+ "A person can say no to God for good, even while God is drawing them.",
+ "Everything that happens, including what people choose, is part of God's plan.",
+ "God must change a person's heart first. Only then can they believe.",
+ "God knew ahead of time who would believe, and chose them on that basis.",
+ "A real Christian can walk away from the faith and no longer be saved.",
+ "Jesus died specifically for those God chose, and his death guarantees they will be saved.",
+ "People make truly free choices that God does not decide for them.",
+ "If God decides to save someone, that person will come to believe.",
+ "The Holy Spirit still gives people the ability to speak in tongues.",
+ "Miracles like tongues and healing were mainly proof that the apostles spoke for God.",
+ "God still gives specific messages through people today, and the Bible is the test of them.",
+ "God can still heal when we pray, but no one today has a special power to heal as the apostles did.",
+ "The Bible never says the miraculous gifts would stop before Jesus comes back.",
+ "God leads us through the Bible and wise decisions, and not through inner voices or special messages.",
+ "Tongues were real foreign languages given to the early church only. That gift has stopped.",
+ "Churches today should expect healings and miracles to happen through believers.",
+ "The Bible is finished, so God is not giving new messages through prophets.",
+ "Miraculous gifts are meant to help the church in every generation, and not only the first one.",
+ "The apostles and prophets laid the groundwork for the church. Their special gifts ended when that work was done.",
+ "Christians should want gifts like prophecy and tongues, and churches should give them a place in their services."
+];
+
+var COMBO={
+ "-1,-1":"Reformed and cessationist together is the historic position of most confessional Presbyterian and Reformed Baptist churches.",
+ "-1,1":"Reformed and continuationist together is sometimes called Reformed charismatic. Sovereign Grace Churches are one example.",
+ "1,1":"Arminian and continuationist together is the classic Pentecostal position, held by the Assemblies of God among others.",
+ "1,-1":"Arminian and cessationist together is common in Free Will Baptist churches and Churches of Christ, and in many Baptist and Bible churches that would not call themselves Calvinist."
+};
+
+/* One sentence per topic: [if the answers lean to the first side, if they lean to the second, what is undecided] */
+var BELIEF={
+ election:["God chose who would be saved before creation, and nothing he foresaw in them was the reason.","God chose those he foreknew would freely trust Christ.","whether election rests on God's choice alone or on foreseen faith"],
+ ability:["No one can believe until the Spirit first gives new birth.","God gives everyone enough grace to believe, and each person can accept or refuse.","whether new birth comes before faith or follows it"],
+ atonement:["Christ died to secure the salvation of the elect in particular.","Christ died for every person with the same saving purpose.","whether Christ died for all alike or for the elect in particular"],
+ calling:["When God calls someone to salvation, his grace always brings them to faith.","The Spirit's call to salvation can be resisted to the end.","whether God's saving call can be finally resisted"],
+ perseverance:["A true believer is kept by God and cannot finally be lost.","A true believer can turn away and lose salvation.","whether a true believer can fall away"],
+ providence:["God ordains all that happens, human choices included, without being the author of sin.","God gives people real freedom and does not determine their choices.","how God's rule and human freedom fit together"],
+ tongues:["Tongues were a sign for the apostolic age and have ceased.","The Spirit still gives the gift of tongues.","whether the gift of tongues continues"],
+ prophecy:["With Scripture complete, God no longer gives prophecy.","God still gives prophetic words, which must be weighed against Scripture.","whether prophecy continues"],
+ healing:["God heals in answer to prayer but no longer gives a gift of healing to individuals.","Churches should expect gifts of healing and miracles today.","whether gifts of healing are still given"],
+ duration:["The foundational gifts ended once the apostles had laid the church's foundation.","No spiritual gift is set to end before Christ returns.","whether any gifts were meant to end with the apostles"],
+ purpose:["Sign gifts existed mainly to confirm the apostles and their message.","The miraculous gifts build up the church in every age.","what the miraculous gifts were for"],
+ practice:["God guides through Scripture, wisdom and providence, and no longer through direct words or impressions.","Believers should eagerly desire the miraculous gifts, and churches should make orderly room for them.","whether to seek the miraculous gifts and direct words from God"]
+};
+
+/* [name, x, y, note]  x: -1 Reformed to +1 Arminian.  y: -1 cessationist to +1 continuationist.
+   Approximate placements from each person's published teaching. */
+var VOICES=[
+ ["John Piper",-0.9,0.5,"Pastor and author, founder of Desiring God. Teaches all five points of Calvinism and urges believers to seek the gifts, prophecy especially."],
+ ["John MacArthur",-0.85,-0.95,"Pastor of Grace Community Church for over fifty years (1939–2025). Calvinist on salvation and a leading critic of the charismatic movement in <i>Strange Fire</i>."],
+ ["Matt Chandler",-0.8,0.7,"Pastor of The Village Church in Texas and a long-time leader in the Acts 29 network. Reformed on salvation and openly continuationist."],
+ ["Charles Spurgeon",-0.85,-0.4,"Baptist preacher in London (1834–1892). A committed Calvinist. He held that the apostolic sign gifts had ceased, though he told of moments of unexplained insight while preaching."],
+ ["R. C. Sproul",-0.95,-0.8,"Founder of Ligonier Ministries (1939–2017). Taught the doctrines of grace to a wide audience and held that the sign gifts ended with the apostles."],
+ ["John Calvin",-0.9,-0.7,"Reformer in Geneva (1509–1564). The Reformed tradition takes its shape from his <i>Institutes</i>. He held that miraculous gifts were given for the church's beginning."],
+ ["Jonathan Edwards",-0.9,-0.7,"New England pastor and theologian (1703–1758). Defended Calvinism in <i>Freedom of the Will</i> and held that the extraordinary gifts had ceased."],
+ ["B. B. Warfield",-0.9,-1,"Princeton theologian (1851–1921). Wrote the classic cessationist case, <i>Counterfeit Miracles</i>."],
+ ["Thomas Schreiner",-0.85,-0.55,"New Testament scholar at Southern Seminary. A Reformed Baptist who argues for a careful, nuanced cessationism."],
+ ["Wayne Grudem",-0.85,0.75,"Author of <i>Systematic Theology</i>. Reformed on salvation and the best-known scholarly defender of prophecy continuing today."],
+ ["Sam Storms",-0.85,0.95,"Pastor and author in Oklahoma City. Describes himself as a charismatic Calvinist and wrote <i>Practicing the Power</i>."],
+ ["Martyn Lloyd-Jones",-0.8,0.5,"Minister of Westminster Chapel, London (1899–1981). A Calvinist preacher who rejected cessationism and urged believers to seek the Spirit's power."],
+ ["D. A. Carson",-0.8,0.3,"New Testament scholar and co-founder of The Gospel Coalition. Reformed, and argues in <i>Showing the Spirit</i> that the gifts have not ceased, with cautions."],
+ ["J. I. Packer",-0.85,0.05,"Author of <i>Knowing God</i> (1926–2020). Thoroughly Reformed. He welcomed much in charismatic renewal while doubting that today's tongues and prophecy match the New Testament gifts."],
+ ["Norman Geisler",0.05,-0.75,"Apologist and theologian (1932–2019). Called himself a moderate Calvinist in <i>Chosen But Free</i> and argued that the sign gifts have ceased."],
+ ["John Wesley",0.85,0.3,"Founder of Methodism (1703–1791) and the best-known Arminian preacher. He denied that the gifts had to cease and blamed their decline on a church grown cold."],
+ ["A. W. Tozer",0.5,0.2,"Christian and Missionary Alliance pastor (1897–1963). Stressed a free response to God. His denomination's long-held stance on tongues was “seek not, forbid not”."],
+ ["Billy Graham",0.4,0.15,"Evangelist (1918–2018). Called every hearer to a free decision for Christ, and wrote in <i>The Holy Spirit</i> that the gifts may still be given, with caution about tongues."],
+ ["Jack Hayford",0.7,0.9,"Foursquare pastor of The Church on the Way (1934–2023). A leading Pentecostal voice on Spirit-filled worship and the gifts."],
+ ["Michael Brown",0.8,0.95,"Author and radio host. Has publicly debated against Calvinism and defended the charismatic movement in <i>Authentic Fire</i>."],
+ ["Gordon Fee",0.6,0.8,"Assemblies of God New Testament scholar (1934–2022). Wrote <i>God's Empowering Presence</i> on the Spirit in Paul's letters."],
+ ["David Wilkerson",0.7,0.85,"Assemblies of God minister (1931–2011). Founder of Teen Challenge and Times Square Church, and author of <i>The Cross and the Switchblade</i>."],
+ ["Alexander Campbell",0.7,-0.9,"Leader of the Restoration Movement (1788–1866). Rejected Calvinist election and taught that miraculous gifts ended with the apostles."],
+ ["F. Leroy Forlines",0.9,-0.7,"Free Will Baptist theologian and author of <i>Classical Arminianism</i>. His denomination holds that tongues have ceased."]
+];
+
+var st={a:[],i:0,view:"intro"};
+for(var z=0;z<N;z++) st.a.push(null);
+
+function valid(s){
+  return s && Array.isArray(s.a) && s.a.length===N &&
+    s.a.every(function(v){return v===null||(Number.isInteger(v)&&v>=0&&v<=4);});
+}
+function adopt(s){
+  if(!valid(s)) return;
+  st.a=s.a.slice();
+  st.i=Math.min(Math.max(parseInt(s.i,10)||0,0),N-1);
+  st.view=(s.view==="results"&&done())?"results":(s.view==="quiz"?"quiz":"intro");
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(st));}catch(e){}}
+function done(){return st.a.every(function(v){return v!==null;});}
+
+var $=function(id){return document.getElementById(id);};
+var intro=$("intro"),quiz=$("quiz"),results=$("results"),scale=$("scale"),back=$("back"),next=$("next");
+var timer=null;
+
+SCALE.forEach(function(name,v){
+  var b=document.createElement("button");
+  b.type="button"; b.id="opt"+v; b.setAttribute("role","radio"); b.setAttribute("aria-checked","false");
+  b.innerHTML='<span class="key" aria-hidden="true">'+(v+1)+'</span><span>'+name+'</span>';
+  b.addEventListener("click",function(){answer(v);});
+  scale.appendChild(b);
+});
+
+function score(){
+  return AX.map(function(ax,p){
+    var sum=0,n=0,t={};
+    ax.topics.forEach(function(tp){t[tp[0]]=0;});
+    Q.forEach(function(q,idx){
+      if(q[0]!==p) return; n++;
+      var v=st.a[idx]; if(v===null) return;
+      var d=q[2]*(v-2); sum+=d; t[q[1]]+=d;
+    });
+    Object.keys(t).forEach(function(k){t[k]=t[k]/4;});
+    return {x:sum/(2*n),t:t};
+  });
+}
+function side(x){return Math.abs(x)<0.15?0:(x<0?-1:1);}
+function label(ax,x){
+  var a=Math.abs(x); if(a<0.15) return ax.mid;
+  var s=x<0?ax.neg:ax.pos, low=ax.lower?s.toLowerCase():s;
+  if(a<0.4) return "Leaning "+low;
+  if(a<0.75) return s;
+  return "Strongly "+low;
+}
+function pct(ax,x){
+  if(Math.abs(x)<0.15) return "Near the middle of the scale";
+  var s=x<0?ax.neg:ax.pos;
+  return Math.round(Math.abs(x)*100)+"% toward "+(ax.lower?s.toLowerCase():s);
+}
+
+function renderQuiz(){
+  var q=Q[st.i], p=q[0];
+  quiz.setAttribute("data-part",p);
+  $("count").innerHTML="Statement <b>"+(st.i+1)+"</b> of "+N;
+  $("statement").textContent=q[3];
+  $("plain").textContent=PLAIN[st.i];
+  $("cited").textContent=q[4];
+  for(var v=0;v<5;v++) $("opt"+v).setAttribute("aria-checked",st.a[st.i]===v?"true":"false");
+  [0,1].forEach(function(pp){
+    var tot=0,ans=0;
+    Q.forEach(function(qq,idx){if(qq[0]===pp){tot++; if(st.a[idx]!==null) ans++;}});
+    $("bar"+pp).style.width=(100*ans/tot)+"%";
+    quiz.querySelector('.part[data-p="'+pp+'"]').classList.toggle("is-on",pp===p);
+  });
+  back.disabled=st.i===0;
+  var last=st.i===N-1;
+  next.textContent=last?"See your result":"Next";
+  next.disabled=last?!done():st.a[st.i]===null;
+}
+
+function answer(v){
+  st.a[st.i]=v; save(); renderQuiz();
+  clearTimeout(timer);
+  if(st.i<N-1){var at=st.i; timer=setTimeout(function(){if(st.i===at&&st.view==="quiz") go(1);},260);}
+}
+function go(d){
+  clearTimeout(timer);
+  if(d>0&&st.i===N-1){ if(done()) show("results"); return; }
+  if(d>0&&st.a[st.i]===null) return;
+  st.i=Math.min(Math.max(st.i+d,0),N-1); save(); renderQuiz();
+}
+Array.prototype.forEach.call(document.querySelectorAll(".begin"),function(b){b.addEventListener("click",function(){show("quiz");});});
+back.addEventListener("click",function(){go(-1);});
+next.addEventListener("click",function(){go(1);});
+
+document.addEventListener("keydown",function(e){
+  if(st.view!=="quiz"||e.metaKey||e.ctrlKey||e.altKey) return;
+  var tag=(e.target&&e.target.tagName)||"";
+  if(tag==="TEXTAREA"||tag==="INPUT"||tag==="SUMMARY") return;
+  if(e.key>="1"&&e.key<="5"){answer(parseInt(e.key,10)-1); e.preventDefault();}
+  else if(e.key==="ArrowLeft"){go(-1);}
+  else if(e.key==="ArrowRight"){go(1);}
+});
+
+function meter(ax,x){
+  var a=Math.abs(x), lvl=a<0.15?0:(a<0.4?1:(a<0.75?2:3)), on=3+(x<0?-lvl:lvl);
+  var W=[12.5,17.5,12.5,15,12.5,17.5,12.5], segs="";
+  W.forEach(function(w,i){segs+='<span class="seg'+(i===on?' is-on':'')+'" style="width:'+w+'%"></span>';});
+  var pos=Math.min(Math.max((x+1)*50,2),98);
+  return '<div class="meter '+ax.cls+'"><p class="label">'+ax.title+'</p><p class="v-name">'+label(ax,x)+'</p><p class="v-pct">'+pct(ax,x)+'</p>'+
+    '<div class="gauge" role="img" aria-label="Scale from '+ax.neg+' to '+ax.pos+'. Your result: '+label(ax,x)+'">'+segs+'<span class="pin" style="left:'+pos+'%"></span></div>'+
+    '<div class="ends"><span><span class="label">'+ax.neg+'</span><small>'+ax.gloss[0]+'</small></span><span class="r"><span class="label">'+ax.pos+'</span><small>'+ax.gloss[1]+'</small></span></div></div>';
+}
+
+function points(sc){
+  var h='<section class="points"><h3>What you believe, point by point</h3>'+
+    '<p class="note">Each bar shows which way your answers on that point leaned, and how strongly. A bar that stays at the centre line means your answers were mixed.</p><div class="point-cols">';
+  AX.forEach(function(ax,p){
+    h+='<div class="'+ax.cls+'"><div class="ends"><span class="label">'+ax.neg+'</span><span class="label">'+ax.pos+'</span></div><ul>';
+    ax.topics.forEach(function(tp){
+      var v=sc[p].t[tp[0]], b=BELIEF[tp[0]], mixed=Math.abs(v)<0.13, w=Math.abs(v)*50, left=v<0?50-w:50;
+      h+='<li'+(mixed?' class="is-mixed"':'')+'><div class="pt-head"><b>'+tp[1]+'</b><span class="lean">'+(mixed?'Mixed':(v<0?ax.neg:ax.pos))+'</span></div>'+
+         '<span class="div" aria-hidden="true">'+(w>0?'<i style="left:'+left+'%;width:'+w+'%"></i>':'')+'</span>'+
+         '<p>'+(mixed?'Your answers were mixed on '+b[2]+'.':(v<0?b[0]:b[1]))+'</p></li>';
+    });
+    h+='</ul></div>';
+  });
+  return h+'</div></section>';
+}
+
+function nearest(sc){
+  var x=sc[0].x, y=sc[1].x;
+  return VOICES.map(function(v){return {v:v,d:Math.sqrt((v[1]-x)*(v[1]-x)+(v[2]-y)*(v[2]-y))};})
+    .sort(function(a,b){return a.d-b.d;}).slice(0,4);
+}
+function stance(v){
+  var sx=side(v[1]), sy=side(v[2]);
+  return (sx===0?"Between Reformed and Arminian":(sx<0?"Reformed":"Arminian"))+", "+
+         (sy===0?"open but cautious":(sy<0?"cessationist":"continuationist"));
+}
+function voices(sc){
+  var h='<section class="voices"><h3>Who you sound most like</h3>'+
+    '<p class="note">These four teachers sit nearest to you on both questions together. Placements are approximate and drawn from each person\'s published teaching.</p><ol class="voice-list">';
+  nearest(sc).forEach(function(m){
+    var near=m.d<0.35?"Very close":(m.d<0.7?"Close":"Nearest");
+    h+='<li><p class="who">'+m.v[0]+'</p><p class="label">'+near+' · '+stance(m.v)+'</p><p class="what">'+m.v[3]+'</p></li>';
+  });
+  return h+'</ol></section>';
+}
+
+function summaryText(sc){
+  return "Faith Compass quiz result\n"+AX.map(function(ax,p){
+    return ax.title+": "+label(ax,sc[p].x)+" ("+pct(ax,sc[p].x).toLowerCase()+")";
+  }).join("\n")+"\nClosest to: "+nearest(sc).map(function(m){return m.v[0];}).join(", ");
+}
+
+function renderResults(){
+  var sc=score(), s0=side(sc[0].x), s1=side(sc[1].x);
+  var cx=Math.min(Math.max((sc[0].x+1)*50,4),96), cy=Math.min(Math.max((1-sc[1].x)*50,4),96);
+  var h='<h2 id="res-h" tabindex="-1">Your result</h2>';
+  function key(p){var s=side(sc[p].x); return s===0?"mid":(s<0?"neg":"pos");}
+  h+='<p class="inshort">In short, '+AX[0].short[key(0)]+', and '+AX[1].short[key(1)]+'.</p>';
+
+  h+='<div class="hero"><div class="meters">'+meter(AX[0],sc[0].x)+meter(AX[1],sc[1].x)+'</div>'+
+     '<figure class="plane-fig"><div class="plane" role="img" aria-label="Chart placing your result: '+label(AX[0],sc[0].x)+' and '+label(AX[1],sc[1].x)+'">'+
+     '<span class="quad q-tl">Reformed charismatic</span><span class="quad q-tr">Pentecostal</span>'+
+     '<span class="quad q-bl">Confessional Reformed</span><span class="quad q-br">Free Will Baptist</span>'+
+     '<span class="end e-l">Reformed</span><span class="end e-r">Arminian</span>'+
+     '<span class="end e-t">Continuationist</span><span class="end e-b">Cessationist</span>'+
+     '<span class="dot" style="left:'+cx+'%;top:'+cy+'%"></span></div>'+
+     '<figcaption>The dot is you on both questions at once. The corner names are traditions often found there.</figcaption></figure>'+
+     '<p class="howto"><b>How to read this.</b> The dark band and the dot show where you landed. 0% is the exact middle, and 100% is the strongest possible agreement with one side.</p></div>';
+
+  h+='<section class="meaning"><h3>What this means</h3><div class="meaning-cols">';
+  AX.forEach(function(ax,p){
+    var s=side(sc[p].x), key=s===0?"mid":(s<0?"neg":"pos");
+    h+='<div class="'+ax.cls+'"><p class="label">'+ax.title+'</p><p>'+ax.desc[key]+'</p></div>';
+  });
+  h+='</div><p class="combo">'+(s0&&s1?COMBO[s0+","+s1]:"At least one of your results sits near the middle, so no single tradition's label fits neatly.")+'</p></section>';
+
+  h+=voices(sc)+points(sc);
+
+  h+='<div class="actions"><button class="btn primary" id="copy" type="button">Copy result</button>'+
+     '<button class="btn" id="edit" type="button">Change an answer</button>'+
+     '<button class="btn" id="reset" type="button">Start over</button></div>'+
+     '<textarea id="copy-fallback" readonly hidden aria-label="Your result as text"></textarea>';
+
+  h+='<p class="note">A quiz can sort your answers. It cannot weigh the arguments for you. These labels are shorthand for centuries of careful debate, and faithful Christians are found at every point on this chart.</p>';
+
+  h+='<details id="answers"><summary>Your 24 answers</summary><ol class="answers">';
+  Q.forEach(function(q,idx){
+    var ax=AX[q[0]], s=q[2]<0?ax.neg:ax.pos;
+    h+='<li class="'+ax.cls+'"><span>'+q[3]+'</span><span class="meta">You answered <b>'+SCALE[st.a[idx]].toLowerCase()+
+       '</b>. Agreeing leans '+(ax.lower?s.toLowerCase():s)+'.</span></li>';
+  });
+  h+='</ol></details>';
+  results.innerHTML=h;
+
+  $("copy").addEventListener("click",function(){
+    var btn=this, text=summaryText(sc), fb=$("copy-fallback");
+    function fallback(){fb.value=text; fb.hidden=false; fb.focus(); fb.select(); btn.textContent="Select and copy below";}
+    try{
+      navigator.clipboard.writeText(text).then(function(){btn.textContent="Copied";setTimeout(function(){btn.textContent="Copy result";},1800);},fallback);
+    }catch(e){fallback();}
+  });
+  $("edit").addEventListener("click",function(){st.i=0; show("quiz");});
+  var armed=false, rt=null;
+  $("reset").addEventListener("click",function(){
+    var btn=this;
+    if(!armed){armed=true; btn.textContent="Click again to clear all answers";
+      rt=setTimeout(function(){armed=false; btn.textContent="Start over";},4000); return;}
+    clearTimeout(rt);
+    st.a=st.a.map(function(){return null;}); st.i=0; show("quiz");
+  });
+}
+
+function show(view,quiet){
+  st.view=view; save();
+  intro.hidden=view!=="intro"; quiz.hidden=view!=="quiz"; results.hidden=view!=="results";
+  if(view==="results"){
+    renderResults();
+    if(!quiet){var hd=$("res-h"); hd.focus({preventScroll:true}); hd.scrollIntoView({block:"start"});}
+  }else{
+    results.innerHTML="";
+    if(view==="quiz"){renderQuiz(); if(!quiet) quiz.scrollIntoView({block:"nearest"});}
+    else{var t=st.a.some(function(v){return v!==null;})?"Continue the quiz":"Start the quiz"; Array.prototype.forEach.call(document.querySelectorAll(".begin"),function(b){b.textContent=t;});}
+  }
+}
+
+function start(data){
+  if(data&&valid(data)) adopt(data);
+  else{try{adopt(JSON.parse(localStorage.getItem(KEY)));}catch(e){}}
+  show(st.view,true);
+}
+var hot=window.claude&&window.claude.hot;
+if(hot&&hot.snapshot) hot.snapshot(function(){return st;});
+if(hot&&hot.ready) hot.ready(start); else start((hot&&hot.data)||null);
+})();
+</script>
+</body>
+</html>
