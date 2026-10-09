@@ -1,0 +1,2058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ARR Attribution – prototype</title>
+<style>
+  /* Theme tokens. The dashboard styles below read these names. */
+  :root { color-scheme: light; --color-fg:#0b0b0b;--color-fg-muted:#6f6d68;--color-bg:#f6f6f3;--color-panel:#fcfcfb;--color-border-line:#e1e0d9;--cds-text-secondary:#52514e;--cds-border:#c9c8c0;--cds-surface-popover:#ffffff;--cds-chart-muted:#cfcec7;--cds-chart-grid:#e9e8e2;--cds-chart-axis:#c3c2b7;--cds-chart-reference:#898781;--c1:#2a78d6;--c2:#eb6834;--c3:#1baf7a;--c4:#eda100;--c5:#e87ba4;--c6:#008300;--c7:#6250d6;--c8:#e34948;
+    --color-bad:#d03b3b; --color-ok:#006300; --cds-font-size-title:22px;
+    --font-anthropic-sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-anthropic-serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    --cds-radius:8px; --cds-pad-xs:4px; --cds-pad-sm:8px; --cds-pad-md:12px; --cds-pad-lg:16px;
+    --cds-gap-xs:4px; --cds-gap-sm:8px; --cds-gap-md:12px; --cds-gap-lg:20px;
+    --cds-font-size-caption:12px; --cds-font-size-body:14px; --cds-font-size-heading:15px; --cds-font-weight-medium:500;
+    --cds-shadow-popover:0 4px 16px rgba(0,0,0,.16); --cds-dur-slow:.3s; --cds-dur-fast:.1s; }
+  @media (prefers-color-scheme: dark) { :root { color-scheme: dark; --color-fg:#f0efec;--color-fg-muted:#9a9892;--color-bg:#0d0d0d;--color-panel:#1a1a19;--color-border-line:#2c2c2a;--cds-text-secondary:#c3c2b7;--cds-border:#44443f;--cds-surface-popover:#242422;--cds-chart-muted:#4a4a46;--cds-chart-grid:#2c2c2a;--cds-chart-axis:#383835;--cds-chart-reference:#898781;--c1:#3987e5;--c2:#d95926;--c3:#199e70;--c4:#c98500;--c5:#d55181;--c6:#008300;--c7:#9085e9;--c8:#e66767; --color-ok:#0ca30c; --color-bad:#ec7e7e; } }
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; background: var(--color-bg); color: var(--color-fg); -webkit-font-smoothing: antialiased; }
+  [hidden] { display: none !important; }
+  .ar-shell { max-width: 1280px; margin: 0 auto; padding: 28px 20px 56px; }
+  @media (max-width: 480px) { .ar-shell { padding-inline: 16px; } }
+</style>
+<style>
+.arr { font-family: var(--font-anthropic-sans); color: var(--color-fg); display: grid; gap: var(--cds-gap-lg); font-variant-numeric: tabular-nums; min-width: 0; }
+.arr > * { min-width: 0; }
+.arr-head { display: flex; flex-wrap: wrap; gap: var(--cds-gap-md); align-items: flex-end; justify-content: space-between; }
+.arr-head-text { flex: 1 1 22rem; min-width: 0; }
+.arr-title { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); margin: 0 0 var(--cds-gap-xs); }
+.arr-takeaway { margin: 0; font-size: var(--cds-font-size-body); color: var(--color-fg); max-width: 60rem; }
+.arr-proto { margin: var(--cds-gap-xs) 0 0; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.arr-field { display: inline-flex; align-items: center; gap: var(--cds-gap-xs); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.arr-select { font: inherit; font-size: var(--cds-font-size-body); color: var(--color-fg); background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-xs) var(--cds-pad-sm); }
+
+.arr-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12.5rem), 1fr)); gap: var(--cds-gap-md); }
+.arr-tile { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); display: flex; flex-direction: column; gap: var(--cds-gap-xs); min-width: 0; }
+.arr-tile-label { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.arr-tile-value { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: 2.1rem; line-height: 1.15; min-height: 2.4rem; }
+.arr-tile-delta { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); min-height: 1.2em; }
+.arr-tile-sub { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin-top: auto; padding-top: var(--cds-pad-xs); }
+.arr .arr-good { color: var(--color-ok); }
+.arr .arr-bad { color: var(--color-bad); }
+
+.arr-card { position: relative; background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); display: flex; flex-direction: column; gap: var(--cds-gap-sm); min-width: 0; }
+.arr-card-title { font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); margin: 0; }
+.arr-card-note { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin: 0; max-width: 58rem; }
+.arr-section-title { font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); margin: var(--cds-gap-sm) 0 0; }
+.arr-section-note { font-size: var(--cds-font-size-body); margin: 0; max-width: 60rem; }
+.arr-intro { display: grid; gap: var(--cds-gap-sm); }
+.arr-two { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr)); gap: var(--cds-gap-md); }
+
+.arr-controls { display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm) var(--cds-gap-md); align-items: center; }
+.arr-control { display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--cds-gap-xs); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.arr-seg { display: inline-flex; border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); overflow: hidden; }
+.arr-seg button { font: inherit; font-size: var(--cds-font-size-caption); padding: var(--cds-pad-xs) var(--cds-pad-sm); background: transparent; color: var(--color-fg-muted); border: 0; border-left: 1px solid var(--color-border-line); cursor: pointer; }
+.arr-seg button:first-child { border-left: 0; }
+.arr-seg button[aria-pressed="true"] { background: var(--color-fg); color: var(--color-bg); }
+.arr-chips { display: inline-flex; flex-wrap: wrap; gap: var(--cds-gap-xs); }
+.arr-chip { font: inherit; font-size: var(--cds-font-size-caption); display: inline-flex; align-items: center; gap: 0.4rem; padding: var(--cds-pad-xs) var(--cds-pad-sm); border: 1px solid var(--color-border-line); border-radius: 999px; background: transparent; color: var(--color-fg-muted); cursor: pointer; }
+.arr-chip i { width: 0.6rem; height: 0.6rem; border-radius: 50%; border: 2px solid currentColor; box-sizing: border-box; }
+.arr-chip[aria-pressed="true"] { color: var(--color-fg); border-color: var(--color-fg-muted); }
+.arr-chip[aria-pressed="true"] i { border: 0; }
+.arr-check { display: inline-flex; align-items: center; gap: 0.35rem; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); cursor: pointer; }
+
+.arr-legend { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs) var(--cds-gap-md); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); align-items: center; }
+.arr-legend span { display: inline-flex; align-items: center; gap: 0.4rem; }
+.arr-legend i.arr-dot { width: 0.6rem; height: 0.6rem; border-radius: 2px; }
+.arr-legend i.arr-line { width: 1.4rem; border-top: 2px solid var(--color-fg); }
+.arr-legend i.arr-line-dash { border-top-style: dashed; opacity: 0.6; }
+.arr-legend i.arr-line-thin { border-top-width: 1px; opacity: 0.45; }
+
+.arr-panels { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); gap: var(--cds-gap-md); min-height: 12rem; }
+.arr-panel { min-width: 0; }
+.arr-panel-title { font-size: var(--cds-font-size-caption); font-weight: var(--cds-font-weight-medium); margin: 0 0 var(--cds-gap-xs); }
+.arr-chart { min-height: 17.5rem; min-width: 0; }
+.arr-flow { min-height: 20rem; min-width: 0; }
+.arr-svg { display: block; height: auto; overflow: visible; }
+.arr-svg text { font-family: var(--font-anthropic-sans); }
+.arr-tick { font-size: var(--cds-font-size-caption); fill: var(--color-fg-muted); }
+.arr-lab { font-size: var(--cds-font-size-caption); fill: var(--color-fg); }
+.arr-ribbon { transition: opacity var(--cds-dur-slow); }
+
+.arr-tip { position: absolute; z-index: 5; pointer-events: none; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius); box-shadow: var(--cds-shadow-popover); padding: var(--cds-pad-xs) var(--cds-pad-sm); font-size: var(--cds-font-size-caption); min-width: 9rem; max-width: 18rem; }
+.arr-tip[hidden] { display: none; }
+.arr-tip-title { color: var(--cds-text-secondary); margin-bottom: 0.2rem; }
+.arr-tip-row { display: flex; align-items: center; gap: 0.4rem; white-space: nowrap; }
+.arr-tip-row i { width: 0.55rem; height: 0.55rem; border-radius: 2px; flex: none; }
+.arr-tip-row span { flex: 1; }
+.arr-tip-row em { font-style: normal; font-weight: var(--cds-font-weight-medium); margin-left: 0.6rem; }
+
+.arr-table-wrap { overflow-x: auto; min-width: 0; }
+.arr-table { width: 100%; border-collapse: collapse; font-size: var(--cds-font-size-caption); }
+.arr-table th { text-align: left; font-weight: var(--cds-font-weight-medium); color: var(--color-fg-muted); padding: var(--cds-pad-xs) var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); vertical-align: bottom; }
+.arr-table td { padding: var(--cds-pad-xs) var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); vertical-align: top; }
+.arr-table tr:last-child td { border-bottom: 0; }
+.arr-table .arr-num { text-align: right; }
+.arr-table td.arr-num, .arr-table td:first-child { white-space: nowrap; }
+.arr-table tr.arr-total td { font-weight: var(--cds-font-weight-medium); border-top: 1px solid var(--color-fg-muted); }
+.arr-table th:first-child, .arr-table td:first-child { padding-left: 0; }
+.arr-table th:last-child, .arr-table td:last-child { padding-right: 0; }
+.arr-split { display: flex; height: 0.5rem; border-radius: 999px; overflow: hidden; min-width: 9rem; margin: 0.25rem 0 0.3rem; gap: 2px; }
+.arr-split i { display: block; height: 100%; }
+.arr-owners { min-width: 12rem; color: var(--color-fg-muted); }
+
+.arr-card[hidden], .arr-link[hidden] { display: none; }
+.arr-card-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--cds-gap-md); }
+.arr-link { font: inherit; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); background: none; border: 0; padding: 0; text-decoration: underline; cursor: pointer; white-space: nowrap; }
+.arr-tile[role=button] { cursor: pointer; }
+.arr-tile[role=button]:hover, .arr-tile[role=button]:focus-visible { border-color: var(--color-fg-muted); }
+.arr-clicky tbody tr { cursor: pointer; }
+.arr-clicky tbody tr:hover td { background: color-mix(in srgb, var(--color-fg) 5%, transparent); }
+.arr-clicky tbody tr.arr-picked td { background: color-mix(in srgb, var(--color-fg) 9%, transparent); }
+.arr-scroll { max-height: 26rem; overflow: auto; }
+.arr-scroll th { position: sticky; top: 0; background: var(--color-panel); z-index: 1; }
+.arr-sort { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: inherit; }
+.arr-table th[aria-sort=ascending] .arr-sort::after { content: ' \2191'; }
+.arr-table th[aria-sort=descending] .arr-sort::after { content: ' \2193'; }
+.arr-filter { font: inherit; font-size: var(--cds-font-size-caption); display: inline-flex; align-items: center; gap: 0.4rem; padding: var(--cds-pad-xs) var(--cds-pad-sm); border: 1px solid var(--color-border-line); border-radius: 999px; background: transparent; color: var(--color-fg); }
+button.arr-filter { cursor: pointer; }
+button.arr-filter::after { content: '\00d7'; color: var(--color-fg-muted); }
+.arr-search { font: inherit; font-size: var(--cds-font-size-caption); color: var(--color-fg); background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-xs) var(--cds-pad-sm); min-width: min(100%, 13rem); }
+.arr-table td:has(> .arr-tdot) { white-space: nowrap; }
+.arr-tdot { display: inline-block; width: 0.5rem; height: 0.5rem; border-radius: 50%; margin-right: 0.35rem; }
+.arr-table td.arr-repeat { color: var(--color-fg-muted); opacity: 0.45; }
+.arr-split-lg { height: 0.75rem; }
+.arr-sub-title { font-size: var(--cds-font-size-caption); font-weight: var(--cds-font-weight-medium); margin: var(--cds-gap-sm) 0 0; }
+.arr-tip-hint { color: var(--cds-text-secondary); margin-top: 0.25rem; }
+.arr-ribbon, .arr-node { cursor: pointer; }
+.arr-fail { display: flex; align-items: center; justify-content: center; gap: 0.4rem; min-height: inherit; height: 100%; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+.arr-fail i { width: 0.375rem; height: 0.375rem; border-radius: 50%; background: var(--color-bad); }
+.arr [data-dash-source-state=refreshing] { opacity: 0.5; transition: opacity var(--cds-dur-slow); }
+</style>
+</head>
+<body>
+<main class="ar-shell">
+<div class="arr">
+  <div class="arr-head">
+    <div class="arr-head-text">
+      <h1 class="arr-title">ARR attribution</h1>
+      <p class="arr-takeaway" id="takeaway" data-source="arr_kpis">—</p>
+      <p class="arr-proto">Prototype on synthetic data. Figures are illustrative, not real bookings. Click a tile, a point on a chart, a flow band or a table row to filter the detail at the bottom.</p>
+    </div>
+    <label class="arr-field">Quarter
+      <select class="arr-select" id="quarter" aria-label="Quarter" data-source="arr_kpis"></select>
+    </label>
+  </div>
+
+  <section class="arr-tiles" id="kpis">
+    <div class="arr-tile" role="button" tabindex="0" id="tile-net" data-metric="Net new" data-good="up" data-label="Net new ARR">
+      <div class="arr-tile-label">Net new ARR</div>
+      <div class="arr-tile-value dash-skeleton" data-source="arr_kpis" data-field="arr">—</div>
+      <div class="arr-tile-delta">—</div>
+      <div class="arr-tile-sub">New + expansion, less churn and downgrade</div>
+    </div>
+    <div class="arr-tile" role="button" tabindex="0" id="tile-gain" data-metric="New + Expansion" data-good="up" data-label="New + expansion ARR">
+      <div class="arr-tile-label">New + expansion ARR</div>
+      <div class="arr-tile-value dash-skeleton" data-source="arr_kpis" data-field="arr">—</div>
+      <div class="arr-tile-delta">—</div>
+      <div class="arr-tile-sub" id="tile-gain-split">New logos plus growth on existing accounts</div>
+    </div>
+    <div class="arr-tile" role="button" tabindex="0" id="tile-churn" data-metric="Churn" data-good="down" data-label="ARR churn">
+      <div class="arr-tile-label">ARR churn</div>
+      <div class="arr-tile-value dash-skeleton" data-source="arr_kpis" data-field="arr">—</div>
+      <div class="arr-tile-delta">—</div>
+      <div class="arr-tile-sub">ARR lost to full cancellations</div>
+    </div>
+    <div class="arr-tile" role="button" tabindex="0" id="tile-downgrade" data-metric="Downgrade" data-good="down" data-label="ARR downgrade">
+      <div class="arr-tile-label">ARR downgrade</div>
+      <div class="arr-tile-value dash-skeleton" data-source="arr_kpis" data-field="arr">—</div>
+      <div class="arr-tile-delta">—</div>
+      <div class="arr-tile-sub">ARR lost to contractions on retained accounts</div>
+    </div>
+  </section>
+
+  <section class="arr-card" id="breakdown">
+    <h2 class="arr-card-title" id="breakdown-title">Breakdown: this quarter vs last quarter</h2>
+    <p class="arr-card-note">Each component by week of quarter, with last quarter dashed behind it. Churn and downgrade are shown as positive amounts of ARR lost.</p>
+    <div class="arr-controls">
+      <div class="arr-control">Metrics <span class="arr-chips" id="metric-chips"></span></div>
+      <div class="arr-control">Split by
+        <span class="arr-seg" id="dimension-seg">
+          <button type="button" data-value="All">Total</button><button type="button" data-value="Theater">Theater</button><button type="button" data-value="Segment">Segment</button><button type="button" data-value="Product">Product</button>
+        </span>
+      </div>
+      <div class="arr-control">View
+        <span class="arr-seg" id="view-seg">
+          <button type="button" data-value="cumulative">Cumulative</button><button type="button" data-value="weekly">Weekly</button>
+        </span>
+      </div>
+    </div>
+    <div class="arr-legend" id="breakdown-legend"></div>
+    <div class="arr-panels dash-skeleton" id="breakdown-panels" data-source="arr_breakdown"></div>
+  </section>
+
+  <section class="arr-card" id="smoothed">
+    <h2 class="arr-card-title">Smoothed view: gains vs losses</h2>
+    <p class="arr-card-note">Trailing average of weekly ARR movement across last quarter and this quarter. Smoothed series are reported only as new + expansion and churn + downgrade: inside a smoothing window, a new deal followed by an expansion, or a downgrade followed by a churn, on the same account reads as one movement, so the component split is not shown here.</p>
+    <div class="arr-controls">
+      <div class="arr-control">Smoothing window
+        <span class="arr-seg" id="window-seg">
+          <button type="button" data-value="4">4 weeks</button><button type="button" data-value="8">8 weeks</button><button type="button" data-value="13">13 weeks</button>
+        </span>
+      </div>
+      <label class="arr-check"><input type="checkbox" id="raw-toggle"> Show unsmoothed weekly</label>
+    </div>
+    <div class="arr-legend" id="smoothed-legend"></div>
+    <div class="arr-chart dash-skeleton" id="smoothed-chart" data-source="arr_smoothed"></div>
+  </section>
+
+  <div class="arr-intro" id="attribution">
+  <h2 class="arr-section-title">Multi-rep ownership and cross-theater credit</h2>
+  <p class="arr-section-note" id="attribution-note">—</p>
+  <div class="arr-controls">
+    <div class="arr-control">Movement
+      <span class="arr-seg" id="credit-seg">
+        <button type="button" data-value="New + Expansion">New + expansion</button><button type="button" data-value="Churn + Downgrade">Churn + downgrade</button>
+      </span>
+    </div>
+  </div>
+  </div>
+
+  <div class="arr-two">
+    <section class="arr-card" id="flow">
+      <h3 class="arr-card-title">Where ARR is booked vs who gets credit</h3>
+      <p class="arr-card-note">Left: the account's home theater. Right: the theater of the reps credited, by ownership split. Bands that change theater are drawn stronger.</p>
+      <div class="arr-flow dash-skeleton" id="flow-chart" data-source="arr_credit"></div>
+    </section>
+    <section class="arr-card" id="recon">
+      <h3 class="arr-card-title">Theater totals, three ways</h3>
+      <p class="arr-card-note" id="recon-note">—</p>
+      <div class="arr-table-wrap">
+        <table class="arr-table arr-clicky" id="recon-table" data-source="theater_recon" data-row-key="quarter,movement,theater">
+          <thead><tr>
+            <th data-field="theater">Theater</th>
+            <th data-field="hq_arr" class="arr-num">Booked, by account home</th>
+            <th data-field="credited_arr" class="arr-num">Credited, by rep split</th>
+            <th data-field="shift" class="arr-num">Shift</th>
+            <th data-field="full_credit_arr" class="arr-num">Full credit to every owner</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <section class="arr-card" id="accounts">
+    <h3 class="arr-card-title">Largest split-owned accounts</h3>
+    <p class="arr-card-note">Accounts with more than one owner, ranked by ARR moved in the selected quarter. Each bar is the ownership split, colored by the rep's theater. Click an account to open its detail.</p>
+    <div class="arr-legend" id="theater-legend"></div>
+    <div class="arr-table-wrap">
+      <table class="arr-table arr-clicky" id="accounts-table" data-source="split_accounts" data-row-key="quarter,movement,account">
+        <thead><tr>
+          <th data-field="account">Account</th>
+          <th data-field="hq_theater">Home theater</th>
+          <th data-field="segment">Segment</th>
+          <th data-field="arr" class="arr-num">ARR moved</th>
+          <th data-field="owners">Owners and split</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="arr-card" id="detail">
+    <div class="arr-card-head">
+      <h2 class="arr-card-title">Detail: movements and who gets credit</h2>
+      <button type="button" class="arr-link" id="detail-clear" hidden>Clear filters</button>
+    </div>
+    <p class="arr-card-note">One row per ARR movement and owner, so a movement on a split-owned account appears once per owner with that owner's share. Filtered by what you click above. Click a row to open the account.</p>
+    <div class="arr-controls">
+      <div class="arr-control">Showing <span class="arr-chips" id="detail-chips"></span></div>
+    </div>
+    <div class="arr-controls">
+      <div class="arr-control">Ownership
+        <span class="arr-seg" id="ownership-seg">
+          <button type="button" data-value="all">All</button><button type="button" data-value="split">Split-owned</button><button type="button" data-value="cross">Credited outside home theater</button>
+        </span>
+      </div>
+      <input class="arr-search" id="ledger-search" type="search" placeholder="Search account or owner" aria-label="Search account or owner">
+    </div>
+    <p class="arr-card-note" id="ledger-summary">—</p>
+    <div class="arr-table-wrap arr-scroll">
+      <table class="arr-table arr-clicky" id="ledger-table" data-source="credit_ledger" data-row-key="credit_id">
+        <thead><tr>
+          <th data-field="date"><button type="button" class="arr-sort">Date</button></th>
+          <th data-field="account"><button type="button" class="arr-sort">Account</button></th>
+          <th data-field="hq_theater"><button type="button" class="arr-sort">Home theater</button></th>
+          <th data-field="movement_type"><button type="button" class="arr-sort">Movement</button></th>
+          <th data-field="arr" class="arr-num"><button type="button" class="arr-sort">ARR moved</button></th>
+          <th data-field="rep"><button type="button" class="arr-sort">Owner</button></th>
+          <th data-field="rep_theater"><button type="button" class="arr-sort">Owner theater</button></th>
+          <th data-field="split_pct" class="arr-num"><button type="button" class="arr-sort">Split</button></th>
+          <th data-field="credited_arr" class="arr-num"><button type="button" class="arr-sort">Credited ARR</button></th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="arr-card" id="account" hidden>
+    <div class="arr-card-head">
+      <h2 class="arr-card-title" id="account-title">—</h2>
+      <button type="button" class="arr-link" id="account-close">Close account</button>
+    </div>
+    <p class="arr-card-note" id="account-facts">—</p>
+    <div class="arr-split arr-split-lg" id="account-split"></div>
+    <div class="arr-table-wrap">
+      <table class="arr-table" id="owner-table" data-source="account_owner_credit" data-row-key="account,rep">
+        <thead><tr>
+          <th data-field="rep">Owner</th>
+          <th data-field="rep_theater">Owner theater</th>
+          <th data-field="split_pct" class="arr-num">Split</th>
+          <th data-field="gains_credited" class="arr-num">New + expansion credited</th>
+          <th data-field="losses_credited" class="arr-num">Churn + downgrade credited</th>
+          <th data-field="net_credited" class="arr-num">Net credited</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <h3 class="arr-sub-title">Every movement on this account, all quarters, and who was credited</h3>
+    <div class="arr-table-wrap">
+      <table class="arr-table" id="account-ledger" data-source="credit_ledger" data-row-key="credit_id">
+        <thead><tr>
+          <th data-field="date">Date</th>
+          <th data-field="quarter">Quarter</th>
+          <th data-field="movement_type">Movement</th>
+          <th data-field="arr" class="arr-num">ARR moved</th>
+          <th data-field="rep">Owner</th>
+          <th data-field="rep_theater">Owner theater</th>
+          <th data-field="split_pct" class="arr-num">Split</th>
+          <th data-field="credited_arr" class="arr-num">Credited ARR</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+</main>
+<script type="text/plain" id="ar-data-arr_movements">
+event_id,date,quarter,week_of_quarter,account_id,account,hq_theater,segment,product,movement_type,arr_delta
+E00137,2026-01-01,Q1 2026,1,A0107,Peakstone Telecom,EMEA,SMB,Security,Downgrade,-4800
+E00142,2026-01-01,Q1 2026,1,A0120,Brightlabs Insurance,AMER,SMB,Analytics,Downgrade,-8500
+E00145,2026-01-01,Q1 2026,1,A0163,Granitewind Financial,AMER,SMB,Analytics,Downgrade,-1900
+E00172,2026-01-01,Q1 2026,1,A0045,Harborcore Pharma,APAC,SMB,Security,Churn,-6600
+E00194,2026-01-01,Q1 2026,1,A0167,Summitgate Foods,AMER,Mid-Market,Platform,Churn,-29400
+E00140,2026-01-02,Q1 2026,1,A0003,Emberstone Insurance,AMER,Mid-Market,Analytics,Downgrade,-11500
+E00154,2026-01-02,Q1 2026,1,A0079,Blueshift Financial,APAC,Mid-Market,Analytics,Downgrade,-23600
+E00192,2026-01-02,Q1 2026,1,A0068,Onyxshift Health,APAC,Enterprise,Platform,Churn,-85100
+E00199,2026-01-02,Q1 2026,1,A0042,Granitegate Foods,APAC,Mid-Market,Analytics,Churn,-19600
+E00069,2026-01-03,Q1 2026,1,A0056,Granitestone Logistics,EMEA,Enterprise,Platform,Expansion,37900
+E00188,2026-01-03,Q1 2026,1,A0095,Aspenworks Systems,AMER,Mid-Market,Platform,Churn,-18600
+E00196,2026-01-03,Q1 2026,1,A0036,Silvershift Media,AMER,Mid-Market,Platform,Churn,-8500
+E00197,2026-01-03,Q1 2026,1,A0161,Harborwind Insurance,EMEA,SMB,Security,Churn,-9400
+E00185,2026-01-04,Q1 2026,1,A0019,Granitegrid Foods,AMER,SMB,Platform,Churn,-1900
+E00187,2026-01-04,Q1 2026,1,A0027,Kestrelline Logistics,EMEA,Mid-Market,Analytics,Churn,-23000
+E00018,2026-01-06,Q1 2026,1,A0164,Atlaspath Foods,APAC,Mid-Market,Platform,New,27600
+E00160,2026-01-06,Q1 2026,1,A0027,Kestrelline Logistics,EMEA,Mid-Market,Analytics,Downgrade,-6900
+E00189,2026-01-06,Q1 2026,1,A0041,Atlaswave Pharma,AMER,Mid-Market,Analytics,Churn,-17000
+E00191,2026-01-06,Q1 2026,1,A0009,Kestrelworks Systems,APAC,Enterprise,Security,Churn,-124400
+E00151,2026-01-07,Q1 2026,1,A0047,Northcore Systems,LATAM,Enterprise,Platform,Downgrade,-39600
+E00182,2026-01-07,Q1 2026,1,A0151,Aspenforge Mobility,AMER,SMB,Platform,Churn,-7900
+E00043,2026-01-08,Q1 2026,2,A0009,Kestrelworks Systems,APAC,Enterprise,Security,New,206600
+E00163,2026-01-08,Q1 2026,2,A0042,Granitegate Foods,APAC,Mid-Market,Analytics,Churn,-35800
+E00177,2026-01-08,Q1 2026,2,A0157,Quantumpath Systems,AMER,SMB,Security,Churn,-6700
+E00167,2026-01-09,Q1 2026,2,A0090,Granitewave Financial,AMER,SMB,Analytics,Churn,-5800
+E00175,2026-01-09,Q1 2026,2,A0173,Onyxwind Logistics,LATAM,Mid-Market,Analytics,Churn,-12700
+E00198,2026-01-09,Q1 2026,2,A0141,Blueforge Financial,EMEA,Mid-Market,Platform,Churn,-13500
+E00144,2026-01-11,Q1 2026,2,A0158,Harborshift Systems,EMEA,Enterprise,Platform,Downgrade,-57100
+E00001,2026-01-12,Q1 2026,2,A0164,Atlaspath Foods,APAC,Mid-Market,Platform,New,43200
+E00130,2026-01-12,Q1 2026,2,A0139,Kestrelshift Mobility,AMER,Enterprise,Analytics,Expansion,64200
+E00086,2026-01-13,Q1 2026,2,A0177,Brightpoint Insurance,AMER,Mid-Market,Platform,Expansion,19200
+E00190,2026-01-13,Q1 2026,2,A0111,Orbitstone Energy,EMEA,Mid-Market,Analytics,Churn,-26800
+E00009,2026-01-14,Q1 2026,2,A0153,Emberbridge Pharma,LATAM,Mid-Market,Analytics,New,65600
+E00085,2026-01-15,Q1 2026,3,A0035,Lumenlabs Financial,EMEA,SMB,Analytics,Expansion,5400
+E00030,2026-01-16,Q1 2026,3,A0120,Brightlabs Insurance,AMER,SMB,Analytics,New,13900
+E00164,2026-01-16,Q1 2026,3,A0137,Lumenforge Retail,AMER,Mid-Market,Analytics,Churn,-16300
+E00056,2026-01-17,Q1 2026,3,A0134,Summitgrid Media,AMER,Mid-Market,Security,New,73100
+E00193,2026-01-18,Q1 2026,3,A0044,Peakleaf Mobility,APAC,SMB,Analytics,Churn,-12000
+E00027,2026-01-21,Q1 2026,3,A0154,Atlasshift Energy,AMER,Enterprise,Analytics,New,147100
+E00117,2026-01-21,Q1 2026,3,A0157,Quantumpath Systems,AMER,SMB,Security,Expansion,7400
+E00186,2026-01-21,Q1 2026,3,A0166,Lumenline Financial,APAC,SMB,Analytics,Churn,-11800
+E00061,2026-01-22,Q1 2026,4,A0122,Aspengrid Health,APAC,SMB,Platform,New,10300
+E00039,2026-01-23,Q1 2026,4,A0058,Aspenforge Systems,AMER,Mid-Market,Analytics,New,28100
+E00057,2026-01-23,Q1 2026,4,A0016,Granitefield Foods,AMER,Enterprise,Platform,New,168100
+E00114,2026-01-23,Q1 2026,4,A0139,Kestrelshift Mobility,AMER,Enterprise,Analytics,Expansion,16100
+E00111,2026-01-24,Q1 2026,4,A0008,Quantumpath Pharma,AMER,Enterprise,Analytics,Expansion,56900
+E00121,2026-01-24,Q1 2026,4,A0014,Quantumwave Energy,AMER,SMB,Platform,Expansion,2400
+E00122,2026-01-25,Q1 2026,4,A0168,Northpoint Insurance,EMEA,SMB,Platform,Expansion,5800
+E00037,2026-01-26,Q1 2026,4,A0137,Lumenforge Retail,AMER,Mid-Market,Analytics,New,32900
+E00062,2026-01-26,Q1 2026,4,A0149,Kestrelpoint Financial,EMEA,SMB,Platform,New,4400
+E00077,2026-01-26,Q1 2026,4,A0013,Blueshift Foods,EMEA,SMB,Security,Expansion,3700
+E00115,2026-01-26,Q1 2026,4,A0119,Orbitleaf Energy,EMEA,Mid-Market,Platform,Expansion,15500
+E00124,2026-01-26,Q1 2026,4,A0099,Kestrelpoint Mobility,EMEA,Mid-Market,Security,Expansion,3200
+E00102,2026-01-27,Q1 2026,4,A0109,Deltabridge Software,AMER,Enterprise,Platform,Expansion,35200
+E00081,2026-01-28,Q1 2026,4,A0171,Quantumlabs Energy,AMER,Mid-Market,Analytics,Expansion,19300
+E00132,2026-01-31,Q1 2026,5,A0143,Orbitshift Robotics,APAC,SMB,Analytics,Expansion,1300
+E00178,2026-01-31,Q1 2026,5,A0155,Peakgate Software,EMEA,Enterprise,Platform,Churn,-1900
+E00159,2026-02-01,Q1 2026,5,A0014,Quantumwave Energy,AMER,SMB,Platform,Downgrade,-3100
+E00162,2026-02-01,Q1 2026,5,A0075,Peakleaf Systems,APAC,Mid-Market,Platform,Downgrade,-900
+E00174,2026-02-01,Q1 2026,5,A0124,Atlasworks Foods,LATAM,Enterprise,Platform,Churn,-62400
+E00078,2026-02-02,Q1 2026,5,A0026,Bluewind Logistics,AMER,SMB,Platform,Expansion,6200
+E00080,2026-02-02,Q1 2026,5,A0023,Juniperfield Mobility,AMER,Enterprise,Analytics,Expansion,103900
+E00147,2026-02-02,Q1 2026,5,A0027,Kestrelline Logistics,EMEA,Mid-Market,Analytics,Downgrade,-22500
+E00150,2026-02-02,Q1 2026,5,A0010,Kestrelforge Mobility,AMER,SMB,Security,Downgrade,-3900
+E00165,2026-02-02,Q1 2026,5,A0159,Embershift Software,EMEA,Mid-Market,Platform,Churn,-30900
+E00136,2026-02-03,Q1 2026,5,A0001,Tidalstone Insurance,AMER,Mid-Market,Platform,Downgrade,-11900
+E00123,2026-02-04,Q1 2026,5,A0093,Vertexworks Software,LATAM,SMB,Analytics,Expansion,2500
+E00173,2026-02-04,Q1 2026,5,A0147,Kestrelcore Logistics,APAC,Mid-Market,Platform,Churn,-20600
+E00087,2026-02-05,Q1 2026,6,A0061,Onyxpath Media,EMEA,Mid-Market,Platform,Expansion,18100
+E00184,2026-02-05,Q1 2026,6,A0173,Onyxwind Logistics,LATAM,Mid-Market,Analytics,Churn,-17400
+E00011,2026-02-06,Q1 2026,6,A0178,Nimbusshift Software,AMER,SMB,Security,New,23200
+E00048,2026-02-06,Q1 2026,6,A0135,Emberleaf Logistics,EMEA,SMB,Platform,New,9900
+E00055,2026-02-06,Q1 2026,6,A0071,Vertexpoint Pharma,APAC,SMB,Platform,New,9800
+E00093,2026-02-06,Q1 2026,6,A0102,Vertexleaf Energy,AMER,Enterprise,Security,Expansion,48000
+E00135,2026-02-06,Q1 2026,6,A0010,Kestrelforge Mobility,AMER,SMB,Security,Downgrade,-7200
+E00181,2026-02-06,Q1 2026,6,A0003,Emberstone Insurance,AMER,Mid-Market,Analytics,Churn,-15300
+E00138,2026-02-07,Q1 2026,6,A0090,Granitewave Financial,AMER,SMB,Analytics,Downgrade,-2600
+E00179,2026-02-07,Q1 2026,6,A0021,Quantumworks Telecom,APAC,Enterprise,Security,Churn,-38000
+E00006,2026-02-08,Q1 2026,6,A0029,Quantumline Software,AMER,SMB,Analytics,New,15800
+E00076,2026-02-08,Q1 2026,6,A0035,Lumenlabs Financial,EMEA,SMB,Analytics,Expansion,3300
+E00148,2026-02-08,Q1 2026,6,A0085,Granitepoint Insurance,LATAM,Mid-Market,Analytics,Downgrade,-15200
+E00003,2026-02-09,Q1 2026,6,A0044,Peakleaf Mobility,APAC,SMB,Analytics,New,10100
+E00075,2026-02-09,Q1 2026,6,A0127,Ironforge Systems,AMER,Mid-Market,Platform,Expansion,28300
+E00109,2026-02-10,Q1 2026,6,A0061,Onyxpath Media,EMEA,Mid-Market,Platform,Expansion,16400
+E00131,2026-02-10,Q1 2026,6,A0034,Silvergrid Pharma,EMEA,Enterprise,Analytics,Expansion,40800
+E00139,2026-02-10,Q1 2026,6,A0173,Onyxwind Logistics,LATAM,Mid-Market,Analytics,Downgrade,-8200
+E00052,2026-02-11,Q1 2026,6,A0104,Kestrellabs Robotics,EMEA,SMB,Analytics,New,8300
+E00141,2026-02-11,Q1 2026,6,A0050,Brightline Health,EMEA,Enterprise,Security,Downgrade,-14000
+E00004,2026-02-13,Q1 2026,7,A0024,Emberwind Financial,AMER,SMB,Platform,New,15200
+E00034,2026-02-13,Q1 2026,7,A0006,Deltaleaf Health,APAC,Enterprise,Platform,New,231200
+E00158,2026-02-13,Q1 2026,7,A0168,Northpoint Insurance,EMEA,SMB,Platform,Downgrade,-3100
+E00200,2026-02-13,Q1 2026,7,A0166,Lumenline Financial,APAC,SMB,Analytics,Churn,-5500
+E00100,2026-02-15,Q1 2026,7,A0149,Kestrelpoint Financial,EMEA,SMB,Platform,Expansion,5900
+E00066,2026-02-16,Q1 2026,7,A0090,Granitewave Financial,AMER,SMB,Analytics,Expansion,2900
+E00042,2026-02-17,Q1 2026,7,A0008,Quantumpath Pharma,AMER,Enterprise,Analytics,New,171000
+E00044,2026-02-17,Q1 2026,7,A0090,Granitewave Financial,AMER,SMB,Analytics,New,16600
+E00053,2026-02-17,Q1 2026,7,A0095,Aspenworks Systems,AMER,Mid-Market,Platform,New,38700
+E00096,2026-02-17,Q1 2026,7,A0045,Harborcore Pharma,APAC,SMB,Security,Expansion,5900
+E00101,2026-02-17,Q1 2026,7,A0105,Nimbusgate Logistics,EMEA,SMB,Platform,Expansion,2000
+E00026,2026-02-19,Q1 2026,8,A0058,Aspenforge Systems,AMER,Mid-Market,Analytics,New,32900
+E00010,2026-02-20,Q1 2026,8,A0091,Atlasbridge Financial,AMER,Mid-Market,Analytics,New,53200
+E00012,2026-02-20,Q1 2026,8,A0144,Cedarwind Software,AMER,Mid-Market,Security,New,16600
+E00033,2026-02-20,Q1 2026,8,A0077,Silvergrid Health,EMEA,Mid-Market,Security,New,47800
+E00005,2026-02-21,Q1 2026,8,A0030,Lumenleaf Mobility,AMER,SMB,Analytics,New,15000
+E00090,2026-02-22,Q1 2026,8,A0112,Silverbridge Foods,LATAM,SMB,Platform,Expansion,3300
+E00094,2026-02-22,Q1 2026,8,A0060,Bluefield Logistics,AMER,Mid-Market,Analytics,Expansion,16800
+E00104,2026-02-22,Q1 2026,8,A0104,Kestrellabs Robotics,EMEA,SMB,Analytics,Expansion,1300
+E00013,2026-02-23,Q1 2026,8,A0095,Aspenworks Systems,AMER,Mid-Market,Platform,New,55600
+E00020,2026-02-24,Q1 2026,8,A0117,Coralcore Retail,EMEA,SMB,Security,New,3000
+E00089,2026-02-24,Q1 2026,8,A0147,Kestrelcore Logistics,APAC,Mid-Market,Platform,Expansion,15000
+E00108,2026-02-24,Q1 2026,8,A0119,Orbitleaf Energy,EMEA,Mid-Market,Platform,Expansion,7500
+E00002,2026-02-25,Q1 2026,8,A0081,Vertexlabs Financial,APAC,Enterprise,Platform,New,6700
+E00129,2026-02-27,Q1 2026,9,A0100,Emberwind Energy,APAC,Mid-Market,Platform,Expansion,23600
+E00060,2026-03-01,Q1 2026,9,A0074,Kestrelbridge Media,EMEA,Enterprise,Platform,New,183000
+E00071,2026-03-01,Q1 2026,9,A0051,Silverbridge Pharma,EMEA,SMB,Platform,Expansion,3500
+E00074,2026-03-01,Q1 2026,9,A0002,Coralpath Logistics,APAC,Mid-Market,Platform,Expansion,3300
+E00038,2026-03-02,Q1 2026,9,A0015,Juniperforge Media,EMEA,Mid-Market,Security,New,29400
+E00153,2026-03-02,Q1 2026,9,A0007,Peakbridge Mobility,AMER,SMB,Analytics,Downgrade,-3900
+E00176,2026-03-02,Q1 2026,9,A0062,Tidalline Systems,AMER,SMB,Analytics,Churn,-1900
+E00183,2026-03-02,Q1 2026,9,A0165,Coralpath Retail,AMER,SMB,Security,Churn,-7000
+E00119,2026-03-03,Q1 2026,9,A0063,Graniteline Foods,APAC,Enterprise,Platform,Expansion,72100
+E00120,2026-03-03,Q1 2026,9,A0078,Vertexworks Systems,AMER,SMB,Security,Expansion,8000
+E00168,2026-03-03,Q1 2026,9,A0059,Vertexcore Energy,AMER,SMB,Security,Churn,-9500
+E00169,2026-03-03,Q1 2026,9,A0156,Blueforge Health,AMER,SMB,Security,Churn,-7000
+E00170,2026-03-03,Q1 2026,9,A0044,Peakleaf Mobility,APAC,SMB,Analytics,Churn,-15100
+E00045,2026-03-04,Q1 2026,9,A0001,Tidalstone Insurance,AMER,Mid-Market,Platform,New,36200
+E00134,2026-03-04,Q1 2026,9,A0127,Ironforge Systems,AMER,Mid-Market,Platform,Downgrade,-16600
+E00201,2026-03-04,Q1 2026,9,A0172,Quantumworks Insurance,APAC,Enterprise,Analytics,Churn,-164300
+E00023,2026-03-05,Q1 2026,10,A0172,Quantumworks Insurance,APAC,Enterprise,Analytics,New,62800
+E00156,2026-03-05,Q1 2026,10,A0154,Atlasshift Energy,AMER,Enterprise,Analytics,Downgrade,-12000
+E00166,2026-03-05,Q1 2026,10,A0141,Blueforge Financial,EMEA,Mid-Market,Platform,Churn,-26300
+E00015,2026-03-06,Q1 2026,10,A0145,Tidalwave Logistics,AMER,SMB,Platform,New,5700
+E00041,2026-03-06,Q1 2026,10,A0109,Deltabridge Software,AMER,Enterprise,Platform,New,69700
+E00152,2026-03-06,Q1 2026,10,A0128,Silverleaf Foods,EMEA,Enterprise,Security,Downgrade,-40200
+E00098,2026-03-07,Q1 2026,10,A0113,Kestrelpath Robotics,APAC,SMB,Analytics,Expansion,7100
+E00180,2026-03-07,Q1 2026,10,A0141,Blueforge Financial,EMEA,Mid-Market,Platform,Churn,-34300
+E00040,2026-03-08,Q1 2026,10,A0084,Kestrelcore Telecom,AMER,SMB,Platform,New,15700
+E00105,2026-03-08,Q1 2026,10,A0093,Vertexworks Software,LATAM,SMB,Analytics,Expansion,4300
+E00112,2026-03-08,Q1 2026,10,A0162,Ironstone Media,APAC,Mid-Market,Platform,Expansion,30000
+E00133,2026-03-08,Q1 2026,10,A0044,Peakleaf Mobility,APAC,SMB,Analytics,Downgrade,-2200
+E00143,2026-03-08,Q1 2026,10,A0140,Vertexgate Foods,EMEA,Enterprise,Analytics,Downgrade,-40200
+E00195,2026-03-08,Q1 2026,10,A0093,Vertexworks Software,LATAM,SMB,Analytics,Churn,-5100
+E00058,2026-03-09,Q1 2026,10,A0132,Onyxline Media,AMER,Enterprise,Security,New,3000
+E00064,2026-03-09,Q1 2026,10,A0139,Kestrelshift Mobility,AMER,Enterprise,Analytics,Expansion,98900
+E00128,2026-03-09,Q1 2026,10,A0052,Silverpath Pharma,AMER,Mid-Market,Analytics,Expansion,28500
+E00146,2026-03-09,Q1 2026,10,A0019,Granitegrid Foods,AMER,SMB,Platform,Downgrade,-3100
+E00157,2026-03-09,Q1 2026,10,A0073,Harborcore Robotics,EMEA,Mid-Market,Analytics,Downgrade,-11900
+E00072,2026-03-11,Q1 2026,10,A0150,Kestrelworks Energy,EMEA,Enterprise,Security,Expansion,69300
+E00029,2026-03-12,Q1 2026,11,A0041,Atlaswave Pharma,AMER,Mid-Market,Analytics,New,45700
+E00054,2026-03-12,Q1 2026,11,A0021,Quantumworks Telecom,APAC,Enterprise,Security,New,90600
+E00092,2026-03-12,Q1 2026,11,A0086,Nimbusline Robotics,AMER,SMB,Analytics,Expansion,1800
+E00149,2026-03-12,Q1 2026,11,A0153,Emberbridge Pharma,LATAM,Mid-Market,Analytics,Downgrade,-18000
+E00155,2026-03-12,Q1 2026,11,A0090,Granitewave Financial,AMER,SMB,Analytics,Downgrade,-3600
+E00021,2026-03-13,Q1 2026,11,A0131,Peakbridge Telecom,LATAM,Enterprise,Platform,New,160500
+E00022,2026-03-13,Q1 2026,11,A0171,Quantumlabs Energy,AMER,Mid-Market,Analytics,New,7400
+E00084,2026-03-13,Q1 2026,11,A0166,Lumenline Financial,APAC,SMB,Analytics,Expansion,5900
+E00161,2026-03-14,Q1 2026,11,A0132,Onyxline Media,AMER,Enterprise,Security,Downgrade,-24400
+E00171,2026-03-14,Q1 2026,11,A0074,Kestrelbridge Media,EMEA,Enterprise,Platform,Churn,-31300
+E00025,2026-03-15,Q1 2026,11,A0149,Kestrelpoint Financial,EMEA,SMB,Platform,New,13500
+E00046,2026-03-15,Q1 2026,11,A0110,Northshift Insurance,AMER,Mid-Market,Analytics,New,50400
+E00049,2026-03-15,Q1 2026,11,A0003,Emberstone Insurance,AMER,Mid-Market,Analytics,New,52600
+E00088,2026-03-15,Q1 2026,11,A0006,Deltaleaf Health,APAC,Enterprise,Platform,Expansion,48400
+E00095,2026-03-15,Q1 2026,11,A0173,Onyxwind Logistics,LATAM,Mid-Market,Analytics,Expansion,18900
+E00106,2026-03-15,Q1 2026,11,A0087,Cedarline Telecom,APAC,SMB,Platform,Expansion,6000
+E00202,2026-03-15,Q1 2026,11,A0064,Orbitwave Mobility,APAC,Mid-Market,Analytics,Churn,-18000
+E00024,2026-03-16,Q1 2026,11,A0122,Aspengrid Health,APAC,SMB,Platform,New,20300
+E00032,2026-03-16,Q1 2026,11,A0074,Kestrelbridge Media,EMEA,Enterprise,Platform,New,156700
+E00036,2026-03-16,Q1 2026,11,A0048,Nimbusshift Pharma,LATAM,Mid-Market,Platform,New,36700
+E00017,2026-03-17,Q1 2026,11,A0024,Emberwind Financial,AMER,SMB,Platform,New,13900
+E00016,2026-03-18,Q1 2026,11,A0036,Silvershift Media,AMER,Mid-Market,Platform,New,25900
+E00091,2026-03-18,Q1 2026,11,A0047,Northcore Systems,LATAM,Enterprise,Platform,Expansion,26700
+E00110,2026-03-18,Q1 2026,11,A0135,Emberleaf Logistics,EMEA,SMB,Platform,Expansion,3500
+E00067,2026-03-19,Q1 2026,12,A0024,Emberwind Financial,AMER,SMB,Platform,Expansion,3200
+E00127,2026-03-20,Q1 2026,12,A0165,Coralpath Retail,AMER,SMB,Security,Expansion,8700
+E00051,2026-03-21,Q1 2026,12,A0149,Kestrelpoint Financial,EMEA,SMB,Platform,New,18000
+E00063,2026-03-21,Q1 2026,12,A0011,Summitline Foods,AMER,Mid-Market,Analytics,Expansion,15500
+E00065,2026-03-21,Q1 2026,12,A0139,Kestrelshift Mobility,AMER,Enterprise,Analytics,Expansion,67700
+E00028,2026-03-22,Q1 2026,12,A0094,Onyxstone Financial,AMER,Mid-Market,Platform,New,54700
+E00079,2026-03-22,Q1 2026,12,A0067,Kestrelline Software,LATAM,SMB,Analytics,Expansion,5000
+E00014,2026-03-23,Q1 2026,12,A0080,Orbitforge Media,AMER,SMB,Platform,New,20200
+E00031,2026-03-23,Q1 2026,12,A0149,Kestrelpoint Financial,EMEA,SMB,Platform,New,3000
+E00082,2026-03-23,Q1 2026,12,A0107,Peakstone Telecom,EMEA,SMB,Security,Expansion,4500
+E00116,2026-03-23,Q1 2026,12,A0128,Silverleaf Foods,EMEA,Enterprise,Security,Expansion,19400
+E00035,2026-03-24,Q1 2026,12,A0074,Kestrelbridge Media,EMEA,Enterprise,Platform,New,77900
+E00099,2026-03-24,Q1 2026,12,A0014,Quantumwave Energy,AMER,SMB,Platform,Expansion,1300
+E00113,2026-03-24,Q1 2026,12,A0046,Summitworks Systems,EMEA,Mid-Market,Platform,Expansion,9900
+E00083,2026-03-25,Q1 2026,12,A0041,Atlaswave Pharma,AMER,Mid-Market,Analytics,Expansion,16100
+E00097,2026-03-27,Q1 2026,13,A0135,Emberleaf Logistics,EMEA,SMB,Platform,Expansion,7300
+E00059,2026-03-28,Q1 2026,13,A0026,Bluewind Logistics,AMER,SMB,Platform,New,6500
+E00103,2026-03-28,Q1 2026,13,A0116,Atlascore Telecom,APAC,Mid-Market,Platform,Expansion,11600
+E00007,2026-03-29,Q1 2026,13,A0102,Vertexleaf Energy,AMER,Enterprise,Security,New,88400
+E00047,2026-03-29,Q1 2026,13,A0107,Peakstone Telecom,EMEA,SMB,Security,New,11900
+E00068,2026-03-29,Q1 2026,13,A0172,Quantumworks Insurance,APAC,Enterprise,Analytics,Expansion,44900
+E00073,2026-03-29,Q1 2026,13,A0009,Kestrelworks Systems,APAC,Enterprise,Security,Expansion,32800
+E00126,2026-03-29,Q1 2026,13,A0130,Summitcore Pharma,AMER,Enterprise,Security,Expansion,71300
+E00050,2026-03-30,Q1 2026,13,A0121,Northshift Retail,EMEA,SMB,Platform,New,11600
+E00070,2026-03-30,Q1 2026,13,A0167,Summitgate Foods,AMER,Mid-Market,Platform,Expansion,6700
+E00118,2026-03-30,Q1 2026,13,A0032,Northleaf Retail,AMER,SMB,Security,Expansion,4100
+E00125,2026-03-30,Q1 2026,13,A0033,Juniperfield Energy,AMER,SMB,Security,Expansion,6800
+E00008,2026-03-31,Q1 2026,13,A0177,Brightpoint Insurance,AMER,Mid-Market,Platform,New,77600
+E00019,2026-03-31,Q1 2026,13,A0107,Peakstone Telecom,EMEA,SMB,Security,New,6300
+E00107,2026-03-31,Q1 2026,13,A0172,Quantumworks Insurance,APAC,Enterprise,Analytics,Expansion,35000
+E00371,2026-04-01,Q2 2026,1,A0092,Silverforge Pharma,APAC,Mid-Market,Security,Downgrade,-8400
+E00384,2026-04-01,Q2 2026,1,A0170,Atlasforge Energy,EMEA,SMB,Analytics,Churn,-5800
+E00419,2026-04-01,Q2 2026,1,A0051,Silverbridge Pharma,EMEA,SMB,Platform,Churn,-1900
+E00360,2026-04-02,Q2 2026,1,A0049,Quantumforge Systems,AMER,Mid-Market,Platform,Downgrade,-17300
+E00396,2026-04-02,Q2 2026,1,A0050,Brightline Health,EMEA,Enterprise,Security,Churn,-27800
+E00403,2026-04-03,Q2 2026,1,A0011,Summitline Foods,AMER,Mid-Market,Analytics,Churn,-42700
+E00415,2026-04-03,Q2 2026,1,A0176,Cedarshift Media,APAC,SMB,Analytics,Churn,-4700
+E00254,2026-04-04,Q2 2026,1,A0061,Onyxpath Media,EMEA,Mid-Market,Platform,New,42800
+E00346,2026-04-04,Q2 2026,1,A0107,Peakstone Telecom,EMEA,SMB,Security,Downgrade,-1300
+E00365,2026-04-04,Q2 2026,1,A0010,Kestrelforge Mobility,AMER,SMB,Security,Downgrade,-4200
+E00381,2026-04-04,Q2 2026,1,A0002,Coralpath Logistics,APAC,Mid-Market,Platform,Churn,-1900
+E00414,2026-04-04,Q2 2026,1,A0116,Atlascore Telecom,APAC,Mid-Market,Platform,Churn,-32300
+E00422,2026-04-04,Q2 2026,1,A0122,Aspengrid Health,APAC,SMB,Platform,Churn,-5400
+E00427,2026-04-04,Q2 2026,1,A0148,Vertexgate Software,AMER,SMB,Analytics,Churn,-3100
+E00343,2026-04-05,Q2 2026,1,A0172,Quantumworks Insurance,APAC,Enterprise,Analytics,Downgrade,-49300
+E00363,2026-04-05,Q2 2026,1,A0063,Graniteline Foods,APAC,Enterprise,Platform,Downgrade,-50500
+E00369,2026-04-05,Q2 2026,1,A0052,Silverpath Pharma,AMER,Mid-Market,Analytics,Downgrade,-10000
+E00423,2026-04-05,Q2 2026,1,A0006,Deltaleaf Health,APAC,Enterprise,Platform,Churn,-68000
+E00347,2026-04-06,Q2 2026,1,A0128,Silverleaf Foods,EMEA,Enterprise,Security,Downgrade,-44700
+E00380,2026-04-06,Q2 2026,1,A0005,Coralforge Telecom,AMER,SMB,Platform,Churn,-5500
+E00385,2026-04-06,Q2 2026,1,A0048,Nimbusshift Pharma,LATAM,Mid-Market,Platform,Churn,-8300
+E00390,2026-04-06,Q2 2026,1,A0128,Silverleaf Foods,EMEA,Enterprise,Security,Churn,-69000
+E00395,2026-04-06,Q2 2026,1,A0106,Vertexpath Health,EMEA,SMB,Platform,Churn,-2800
+E00272,2026-04-07,Q2 2026,1,A0159,Embershift Software,EMEA,Mid-Market,Platform,Expansion,6700
+E00354,2026-04-08,Q2 2026,2,A0155,Peakgate Software,EMEA,Enterprise,Platform,Downgrade,-48100
+E00409,2026-04-09,Q2 2026,2,A0156,Blueforge Health,AMER,SMB,Security,Churn,-7600
+E00355,2026-04-10,Q2 2026,2,A0048,Nimbusshift Pharma,LATAM,Mid-Market,Platform,Downgrade,-9500
+E00305,2026-04-11,Q2 2026,2,A0067,Kestrelline Software,LATAM,SMB,Analytics,Expansion,7500
+E00388,2026-04-11,Q2 2026,2,A0161,Harborwind Insurance,EMEA,SMB,Security,Churn,-6400
+E00212,2026-04-14,Q2 2026,2,A0117,Coralcore Retail,EMEA,SMB,Security,New,5800
+E00362,2026-04-14,Q2 2026,2,A0079,Blueshift Financial,APAC,Mid-Market,Analytics,Downgrade,-21900
+E00215,2026-04-15,Q2 2026,3,A0147,Kestrelcore Logistics,APAC,Mid-Market,Platform,New,3700
+E00297,2026-04-17,Q2 2026,3,A0151,Aspenforge Mobility,AMER,SMB,Platform,Expansion,2400
+E00319,2026-04-17,Q2 2026,3,A0174,Quantumstone Media,EMEA,Mid-Market,Analytics,Expansion,17800
+E00382,2026-04-17,Q2 2026,3,A0064,Orbitwave Mobility,APAC,Mid-Market,Analytics,Churn,-39100
+E00262,2026-04-18,Q2 2026,3,A0135,Emberleaf Logistics,EMEA,SMB,Platform,New,18800
+E00218,2026-04-21,Q2 2026,3,A0131,Peakbridge Telecom,LATAM,Enterprise,Platform,New,16800
+E00315,2026-04-21,Q2 2026,3,A0139,Kestrelshift Mobility,AMER,Enterprise,Analytics,Expansion,36900
+E00203,2026-04-22,Q2 2026,4,A0036,Silvershift Media,AMER,Mid-Market,Platform,New,57300
+E00224,2026-04-22,Q2 2026,4,A0003,Emberstone Insurance,AMER,Mid-Market,Analytics,New,48300
+E00258,2026-04-22,Q2 2026,4,A0109,Deltabridge Software,AMER,Enterprise,Platform,New,232200
+E00325,2026-04-24,Q2 2026,4,A0083,Peaklabs Telecom,EMEA,Mid-Market,Platform,Expansion,15500
+E00250,2026-04-30,Q2 2026,5,A0064,Orbitwave Mobility,APAC,Mid-Market,Analytics,New,37300
+E00298,2026-04-30,Q2 2026,5,A0099,Kestrelpoint Mobility,EMEA,Mid-Market,Security,Expansion,27500
+E00225,2026-05-01,Q2 2026,5,A0032,Northleaf Retail,AMER,SMB,Security,New,10900
+E00405,2026-05-01,Q2 2026,5,A0083,Peaklabs Telecom,EMEA,Mid-Market,Platform,Churn,-27300
+E00251,2026-05-02,Q2 2026,5,A0034,Silvergrid Pharma,EMEA,Enterprise,Analytics,New,77000
+E00259,2026-05-02,Q2 2026,5,A0126,Atlasshift Pharma,APAC,Mid-Market,Security,New,53200
+E00314,2026-05-02,Q2 2026,5,A0102,Vertexleaf Energy,AMER,Enterprise,Security,Expansion,63500
+E00391,2026-05-02,Q2 2026,5,A0102,Vertexleaf Energy,AMER,Enterprise,Security,Churn,-44100
+E00421,2026-05-02,Q2 2026,5,A0091,Atlasbridge Financial,AMER,Mid-Market,Analytics,Churn,-32000
+E00243,2026-05-03,Q2 2026,5,A0010,Kestrelforge Mobility,AMER,SMB,Security,New,10000
+E00303,2026-05-03,Q2 2026,5,A0172,Quantumworks Insurance,APAC,Enterprise,Analytics,Expansion,40700
+E00342,2026-05-03,Q2 2026,5,A0124,Atlasworks Foods,LATAM,Enterprise,Platform,Expansion,10200
+E00356,2026-05-03,Q2 2026,5,A0156,Blueforge Health,AMER,SMB,Security,Downgrade,-2800
+E00418,2026-05-03,Q2 2026,5,A0138,Vertexlabs Robotics,EMEA,SMB,Platform,Churn,-9000
+E00256,2026-05-04,Q2 2026,5,A0097,Orbitfield Foods,APAC,Enterprise,Security,New,160900
+E00286,2026-05-04,Q2 2026,5,A0084,Kestrelcore Telecom,AMER,SMB,Platform,Expansion,5500
+E00351,2026-05-04,Q2 2026,5,A0091,Atlasbridge Financial,AMER,Mid-Market,Analytics,Downgrade,-10900
+E00367,2026-05-04,Q2 2026,5,A0180,Emberworks Insurance,AMER,SMB,Platform,Downgrade,-1900
+E00373,2026-05-04,Q2 2026,5,A0004,Peakpoint Pharma,APAC,SMB,Platform,Downgrade,-4200
+E00398,2026-05-04,Q2 2026,5,A0155,Peakgate Software,EMEA,Enterprise,Platform,Churn,-64400
+E00424,2026-05-04,Q2 2026,5,A0169,Aspenwave Software,EMEA,Mid-Market,Platform,Churn,-13900
+E00253,2026-05-05,Q2 2026,5,A0046,Summitworks Systems,EMEA,Mid-Market,Platform,New,17000
+E00271,2026-05-06,Q2 2026,6,A0079,Blueshift Financial,APAC,Mid-Market,Analytics,Expansion,2300
+E00408,2026-05-06,Q2 2026,6,A0024,Emberwind Financial,AMER,SMB,Platform,Churn,-14300
+E00205,2026-05-07,Q2 2026,6,A0177,Brightpoint Insurance,AMER,Mid-Market,Platform,New,7000
+E00397,2026-05-07,Q2 2026,6,A0175,Nimbuslabs Mobility,AMER,SMB,Platform,Churn,-8400
+E00410,2026-05-07,Q2 2026,6,A0118,Deltashift Financial,EMEA,Mid-Market,Analytics,Churn,-28900
+E00283,2026-05-08,Q2 2026,6,A0141,Blueforge Financial,EMEA,Mid-Market,Platform,Expansion,3100
+E00375,2026-05-08,Q2 2026,6,A0072,Lumenleaf Insurance,AMER,SMB,Security,Downgrade,-3100
+E00402,2026-05-08,Q2 2026,6,A0013,Blueshift Foods,EMEA,SMB,Security,Churn,-6100
+E00235,2026-05-09,Q2 2026,6,A0034,Silvergrid Pharma,EMEA,Enterprise,Analytics,New,52800
+E00379,2026-05-09,Q2 2026,6,A0147,Kestrelcore Logistics,APAC,Mid-Market,Platform,Churn,-2500
+E00387,2026-05-09,Q2 2026,6,A0065,Deltagate Pharma,AMER,Mid-Market,Security,Churn,-41100
+E00370,2026-05-10,Q2 2026,6,A0154,Atlasshift Energy,AMER,Enterprise,Analytics,Downgrade,-28300
+E00411,2026-05-10,Q2 2026,6,A0135,Emberleaf Logistics,EMEA,SMB,Platform,Churn,-3900
+E00358,2026-05-11,Q2 2026,6,A0098,Coralbridge Foods,AMER,Mid-Market,Security,Downgrade,-9700
+E00328,2026-05-12,Q2 2026,6,A0089,Peakline Media,APAC,Enterprise,Platform,Expansion,88600
+E00392,2026-05-12,Q2 2026,6,A0083,Peaklabs Telecom,EMEA,Mid-Market,Platform,Churn,-23700
+E00209,2026-05-13,Q2 2026,7,A0167,Summitgate Foods,AMER,Mid-Market,Platform,New,58900
+E00216,2026-05-13,Q2 2026,7,A0130,Summitcore Pharma,AMER,Enterprise,Security,New,102100
+E00282,2026-05-13,Q2 2026,7,A0065,Deltagate Pharma,AMER,Mid-Market,Security,Expansion,27800
+E00309,2026-05-13,Q2 2026,7,A0175,Nimbuslabs Mobility,AMER,SMB,Platform,Expansion,1300
+E00364,2026-05-13,Q2 2026,7,A0006,Deltaleaf Health,APAC,Enterprise,Platform,Downgrade,-33400
+E00257,2026-05-14,Q2 2026,7,A0117,Coralcore Retail,EMEA,SMB,Security,New,4300
+E00307,2026-05-14,Q2 2026,7,A0159,Embershift Software,EMEA,Mid-Market,Platform,Expansion,13100
+E00284,2026-05-15,Q2 2026,7,A0095,Aspenworks Systems,AMER,Mid-Market,Platform,Expansion,11300
+E00208,2026-05-16,Q2 2026,7,A0174,Quantumstone Media,EMEA,Mid-Market,Analytics,New,65400
+E00220,2026-05-17,Q2 2026,7,A0093,Vertexworks Software,LATAM,SMB,Analytics,New,18200
+E00219,2026-05-18,Q2 2026,7,A0073,Harborcore Robotics,EMEA,Mid-Market,Analytics,New,48600
+E00310,2026-05-18,Q2 2026,7,A0010,Kestrelforge Mobility,AMER,SMB,Security,Expansion,6500
+E00290,2026-05-19,Q2 2026,7,A0095,Aspenworks Systems,AMER,Mid-Market,Platform,Expansion,25100
+E00340,2026-05-19,Q2 2026,7,A0045,Harborcore Pharma,APAC,SMB,Security,Expansion,8900
+E00320,2026-05-20,Q2 2026,8,A0006,Deltaleaf Health,APAC,Enterprise,Platform,Expansion,51100
+E00210,2026-05-21,Q2 2026,8,A0100,Emberwind Energy,APAC,Mid-Market,Platform,New,22400
+E00270,2026-05-21,Q2 2026,8,A0117,Coralcore Retail,EMEA,SMB,Security,Expansion,5600
+E00291,2026-05-21,Q2 2026,8,A0166,Lumenline Financial,APAC,SMB,Analytics,Expansion,3400
+E00339,2026-05-21,Q2 2026,8,A0158,Harborshift Systems,EMEA,Enterprise,Platform,Expansion,40600
+E00294,2026-05-23,Q2 2026,8,A0083,Peaklabs Telecom,EMEA,Mid-Market,Platform,Expansion,18500
+E00327,2026-05-23,Q2 2026,8,A0084,Kestrelcore Telecom,AMER,SMB,Platform,Expansion,3200
+E00292,2026-05-24,Q2 2026,8,A0095,Aspenworks Systems,AMER,Mid-Market,Platform,Expansion,25200
+E00233,2026-05-25,Q2 2026,8,A0054,Coralleaf Energy,AMER,Enterprise,Platform,New,163800
+E00281,2026-05-25,Q2 2026,8,A0143,Orbitshift Robotics,APAC,SMB,Analytics,Expansion,7500
+E00288,2026-05-25,Q2 2026,8,A0170,Atlasforge Energy,EMEA,SMB,Analytics,Expansion,4000
+E00312,2026-05-25,Q2 2026,8,A0120,Brightlabs Insurance,AMER,SMB,Analytics,Expansion,2400
+E00337,2026-05-25,Q2 2026,8,A0037,Coralshift Financial,EMEA,Enterprise,Platform,Expansion,75400
+E00204,2026-05-26,Q2 2026,8,A0080,Orbitforge Media,AMER,SMB,Platform,New,16400
+E00229,2026-05-27,Q2 2026,9,A0037,Coralshift Financial,EMEA,Enterprise,Platform,New,169700
+E00207,2026-05-28,Q2 2026,9,A0083,Peaklabs Telecom,EMEA,Mid-Market,Platform,New,10700
+E00226,2026-05-28,Q2 2026,9,A0155,Peakgate Software,EMEA,Enterprise,Platform,New,73300
+E00266,2026-05-28,Q2 2026,9,A0096,Vertexbridge Systems,EMEA,SMB,Platform,New,16500
+E00302,2026-05-28,Q2 2026,9,A0107,Peakstone Telecom,EMEA,SMB,Security,Expansion,6600
+E00264,2026-05-29,Q2 2026,9,A0068,Onyxshift Health,APAC,Enterprise,Platform,New,183800
+E00295,2026-05-29,Q2 2026,9,A0091,Atlasbridge Financial,AMER,Mid-Market,Analytics,Expansion,14200
+E00244,2026-05-31,Q2 2026,9,A0152,Deltaworks Pharma,APAC,Enterprise,Analytics,New,100600
+E00300,2026-05-31,Q2 2026,9,A0085,Granitepoint Insurance,LATAM,Mid-Market,Analytics,Expansion,9500
+E00336,2026-05-31,Q2 2026,9,A0047,Northcore Systems,LATAM,Enterprise,Platform,Expansion,47700
+E00349,2026-05-31,Q2 2026,9,A0026,Bluewind Logistics,AMER,SMB,Platform,Downgrade,-2700
+E00361,2026-05-31,Q2 2026,9,A0095,Aspenworks Systems,AMER,Mid-Market,Platform,Downgrade,-18800
+E00383,2026-05-31,Q2 2026,9,A0026,Bluewind Logistics,AMER,SMB,Platform,Churn,-9300
+E00393,2026-05-31,Q2 2026,9,A0096,Vertexbridge Systems,EMEA,SMB,Platform,Churn,-9000
+E00222,2026-06-01,Q2 2026,9,A0106,Vertexpath Health,EMEA,SMB,Platform,New,14000
+E00227,2026-06-01,Q2 2026,9,A0052,Silverpath Pharma,AMER,Mid-Market,Analytics,New,17400
+E00268,2026-06-01,Q2 2026,9,A0057,Northline Systems,EMEA,SMB,Platform,New,6600
+E00406,2026-06-01,Q2 2026,9,A0071,Vertexpoint Pharma,APAC,SMB,Platform,Churn,-4700
+E00417,2026-06-01,Q2 2026,9,A0050,Brightline Health,EMEA,Enterprise,Security,Churn,-77100
+E00221,2026-06-02,Q2 2026,9,A0167,Summitgate Foods,AMER,Mid-Market,Platform,New,67200
+E00366,2026-06-02,Q2 2026,9,A0019,Granitegrid Foods,AMER,SMB,Platform,Downgrade,-3700
+E00368,2026-06-02,Q2 2026,9,A0149,Kestrelpoint Financial,EMEA,SMB,Platform,Downgrade,-2900
+E00374,2026-06-02,Q2 2026,9,A0168,Northpoint Insurance,EMEA,SMB,Platform,Downgrade,-3100
+E00394,2026-06-02,Q2 2026,9,A0117,Coralcore Retail,EMEA,SMB,Security,Churn,-10600
+E00412,2026-06-02,Q2 2026,9,A0168,Northpoint Insurance,EMEA,SMB,Platform,Churn,-6800
+E00241,2026-06-03,Q2 2026,10,A0071,Vertexpoint Pharma,APAC,SMB,Platform,New,13300
+E00345,2026-06-03,Q2 2026,10,A0150,Kestrelworks Energy,EMEA,Enterprise,Security,Downgrade,-13800
+E00353,2026-06-03,Q2 2026,10,A0156,Blueforge Health,AMER,SMB,Security,Downgrade,-3900
+E00372,2026-06-03,Q2 2026,10,A0012,Orbitlabs Logistics,AMER,Mid-Market,Security,Downgrade,-17300
+E00260,2026-06-04,Q2 2026,10,A0054,Coralleaf Energy,AMER,Enterprise,Platform,New,80800
+E00277,2026-06-04,Q2 2026,10,A0094,Onyxstone Financial,AMER,Mid-Market,Platform,Expansion,15900
+E00285,2026-06-04,Q2 2026,10,A0108,Atlasgate Logistics,APAC,Mid-Market,Platform,Expansion,21400
+E00323,2026-06-04,Q2 2026,10,A0080,Orbitforge Media,AMER,SMB,Platform,Expansion,2200
+E00335,2026-06-04,Q2 2026,10,A0133,Granitepath Systems,AMER,Mid-Market,Analytics,Expansion,19100
+E00404,2026-06-04,Q2 2026,10,A0011,Summitline Foods,AMER,Mid-Market,Analytics,Churn,-44800
+E00425,2026-06-04,Q2 2026,10,A0032,Northleaf Retail,AMER,SMB,Security,Churn,-8600
+E00318,2026-06-05,Q2 2026,10,A0082,Summitleaf Health,AMER,Mid-Market,Platform,Expansion,19200
+E00357,2026-06-05,Q2 2026,10,A0163,Granitewind Financial,AMER,SMB,Analytics,Downgrade,-5400
+E00399,2026-06-05,Q2 2026,10,A0161,Harborwind Insurance,EMEA,SMB,Security,Churn,-9000
+E00400,2026-06-05,Q2 2026,10,A0056,Granitestone Logistics,EMEA,Enterprise,Platform,Churn,-43500
+E00401,2026-06-05,Q2 2026,10,A0080,Orbitforge Media,AMER,SMB,Platform,Churn,-8700
+E00420,2026-06-05,Q2 2026,10,A0095,Aspenworks Systems,AMER,Mid-Market,Platform,Churn,-40600
+E00378,2026-06-06,Q2 2026,10,A0092,Silverforge Pharma,APAC,Mid-Market,Security,Downgrade,-7000
+E00249,2026-06-07,Q2 2026,10,A0024,Emberwind Financial,AMER,SMB,Platform,New,10600
+E00350,2026-06-07,Q2 2026,10,A0121,Northshift Retail,EMEA,SMB,Platform,Downgrade,-6000
+E00217,2026-06-08,Q2 2026,10,A0155,Peakgate Software,EMEA,Enterprise,Platform,New,54700
+E00238,2026-06-08,Q2 2026,10,A0156,Blueforge Health,AMER,SMB,Security,New,8400
+E00296,2026-06-08,Q2 2026,10,A0164,Atlaspath Foods,APAC,Mid-Market,Platform,Expansion,7400
+E00359,2026-06-08,Q2 2026,10,A0123,Nimbuscore Pharma,AMER,SMB,Platform,Downgrade,-1900
+E00377,2026-06-08,Q2 2026,10,A0006,Deltaleaf Health,APAC,Enterprise,Platform,Downgrade,-63700
+E00389,2026-06-08,Q2 2026,10,A0028,Vertexpath Retail,EMEA,Mid-Market,Platform,Churn,-21000
+E00426,2026-06-08,Q2 2026,10,A0008,Quantumpath Pharma,AMER,Enterprise,Analytics,Churn,-101700
+E00237,2026-06-09,Q2 2026,10,A0143,Orbitshift Robotics,APAC,SMB,Analytics,New,6600
+E00242,2026-06-09,Q2 2026,10,A0096,Vertexbridge Systems,EMEA,SMB,Platform,New,12000
+E00252,2026-06-09,Q2 2026,10,A0103,Orbitstone Pharma,AMER,Mid-Market,Platform,New,56300
+E00280,2026-06-09,Q2 2026,10,A0140,Vertexgate Foods,EMEA,Enterprise,Analytics,Expansion,39600
+E00306,2026-06-09,Q2 2026,10,A0027,Kestrelline Logistics,EMEA,Mid-Market,Analytics,Expansion,17900
+E00352,2026-06-09,Q2 2026,10,A0136,Northwind Financial,EMEA,SMB,Analytics,Downgrade,-2700
+E00376,2026-06-09,Q2 2026,10,A0016,Granitefield Foods,AMER,Enterprise,Platform,Downgrade,-51700
+E00407,2026-06-09,Q2 2026,10,A0059,Vertexcore Energy,AMER,SMB,Security,Churn,-3700
+E00416,2026-06-09,Q2 2026,10,A0142,Bluebridge Mobility,AMER,Enterprise,Platform,Churn,-81100
+E00344,2026-06-10,Q2 2026,11,A0163,Granitewind Financial,AMER,SMB,Analytics,Downgrade,-2500
+E00348,2026-06-10,Q2 2026,11,A0040,Bluegate Energy,APAC,Mid-Market,Platform,Downgrade,-16300
+E00276,2026-06-11,Q2 2026,11,A0165,Coralpath Retail,AMER,SMB,Security,Expansion,5200
+E00329,2026-06-11,Q2 2026,11,A0103,Orbitstone Pharma,AMER,Mid-Market,Platform,Expansion,5900
+E00333,2026-06-11,Q2 2026,11,A0004,Peakpoint Pharma,APAC,SMB,Platform,Expansion,3700
+E00386,2026-06-12,Q2 2026,11,A0158,Harborshift Systems,EMEA,Enterprise,Platform,Churn,-46000
+E00247,2026-06-14,Q2 2026,11,A0069,Cedarleaf Health,AMER,Enterprise,Analytics,New,44200
+E00213,2026-06-15,Q2 2026,11,A0073,Harborcore Robotics,EMEA,Mid-Market,Analytics,New,23300
+E00299,2026-06-15,Q2 2026,11,A0028,Vertexpath Retail,EMEA,Mid-Market,Platform,Expansion,14900
+E00313,2026-06-16,Q2 2026,11,A0110,Northshift Insurance,AMER,Mid-Market,Analytics,Expansion,14400
+E00206,2026-06-17,Q2 2026,12,A0064,Orbitwave Mobility,APAC,Mid-Market,Analytics,New,18000
+E00267,2026-06-17,Q2 2026,12,A0025,Junipercore Robotics,AMER,SMB,Security,New,7400
+E00240,2026-06-18,Q2 2026,12,A0008,Quantumpath Pharma,AMER,Enterprise,Analytics,New,139100
+E00246,2026-06-18,Q2 2026,12,A0028,Vertexpath Retail,EMEA,Mid-Market,Platform,New,54900
+E00304,2026-06-19,Q2 2026,12,A0011,Summitline Foods,AMER,Mid-Market,Analytics,Expansion,35800
+E00413,2026-06-19,Q2 2026,12,A0163,Granitewind Financial,AMER,SMB,Analytics,Churn,-1900
+E00214,2026-06-20,Q2 2026,12,A0151,Aspenforge Mobility,AMER,SMB,Platform,New,12100
+E00263,2026-06-20,Q2 2026,12,A0012,Orbitlabs Logistics,AMER,Mid-Market,Security,New,20600
+E00211,2026-06-21,Q2 2026,12,A0004,Peakpoint Pharma,APAC,SMB,Platform,New,12300
+E00274,2026-06-21,Q2 2026,12,A0121,Northshift Retail,EMEA,SMB,Platform,Expansion,1300
+E00278,2026-06-21,Q2 2026,12,A0110,Northshift Insurance,AMER,Mid-Market,Analytics,Expansion,1300
+E00311,2026-06-21,Q2 2026,12,A0006,Deltaleaf Health,APAC,Enterprise,Platform,Expansion,42300
+E00322,2026-06-21,Q2 2026,12,A0019,Granitegrid Foods,AMER,SMB,Platform,Expansion,1300
+E00324,2026-06-21,Q2 2026,12,A0012,Orbitlabs Logistics,AMER,Mid-Market,Security,Expansion,6300
+E00239,2026-06-22,Q2 2026,12,A0157,Quantumpath Systems,AMER,SMB,Security,New,15900
+E00245,2026-06-22,Q2 2026,12,A0052,Silverpath Pharma,AMER,Mid-Market,Analytics,New,26200
+E00265,2026-06-22,Q2 2026,12,A0153,Emberbridge Pharma,LATAM,Mid-Market,Analytics,New,67200
+E00293,2026-06-22,Q2 2026,12,A0106,Vertexpath Health,EMEA,SMB,Platform,Expansion,4400
+E00269,2026-06-23,Q2 2026,12,A0169,Aspenwave Software,EMEA,Mid-Market,Platform,Expansion,21200
+E00316,2026-06-23,Q2 2026,12,A0080,Orbitforge Media,AMER,SMB,Platform,Expansion,7200
+E00321,2026-06-23,Q2 2026,12,A0026,Bluewind Logistics,AMER,SMB,Platform,Expansion,5900
+E00232,2026-06-24,Q2 2026,13,A0053,Brightforge Energy,APAC,SMB,Analytics,New,10600
+E00287,2026-06-24,Q2 2026,13,A0056,Granitestone Logistics,EMEA,Enterprise,Platform,Expansion,1300
+E00234,2026-06-25,Q2 2026,13,A0114,Brightwave Insurance,AMER,Enterprise,Analytics,New,158800
+E00248,2026-06-25,Q2 2026,13,A0126,Atlasshift Pharma,APAC,Mid-Market,Security,New,20900
+E00308,2026-06-25,Q2 2026,13,A0149,Kestrelpoint Financial,EMEA,SMB,Platform,Expansion,9400
+E00317,2026-06-25,Q2 2026,13,A0088,Vertexstone Robotics,APAC,Enterprise,Platform,Expansion,48900
+E00330,2026-06-25,Q2 2026,13,A0134,Summitgrid Media,AMER,Mid-Market,Security,Expansion,8400
+E00332,2026-06-26,Q2 2026,13,A0179,Quantumleaf Insurance,AMER,Mid-Market,Platform,Expansion,22800
+E00223,2026-06-27,Q2 2026,13,A0011,Summitline Foods,AMER,Mid-Market,Analytics,New,17300
+E00231,2026-06-27,Q2 2026,13,A0107,Peakstone Telecom,EMEA,SMB,Security,New,14200
+E00289,2026-06-27,Q2 2026,13,A0109,Deltabridge Software,AMER,Enterprise,Platform,Expansion,70500
+E00334,2026-06-27,Q2 2026,13,A0004,Peakpoint Pharma,APAC,SMB,Platform,Expansion,5300
+E00341,2026-06-27,Q2 2026,13,A0129,Cedarfield Financial,APAC,SMB,Platform,Expansion,7100
+E00236,2026-06-28,Q2 2026,13,A0086,Nimbusline Robotics,AMER,SMB,Analytics,New,18600
+E00301,2026-06-28,Q2 2026,13,A0042,Granitegate Foods,APAC,Mid-Market,Analytics,Expansion,13000
+E00331,2026-06-28,Q2 2026,13,A0071,Vertexpoint Pharma,APAC,SMB,Platform,Expansion,3600
+E00228,2026-06-29,Q2 2026,13,A0160,Orbitgate Logistics,APAC,SMB,Analytics,New,11700
+E00255,2026-06-29,Q2 2026,13,A0096,Vertexbridge Systems,EMEA,SMB,Platform,New,8500
+E00338,2026-06-29,Q2 2026,13,A0159,Embershift Software,EMEA,Mid-Market,Platform,Expansion,12800
+E00230,2026-06-30,Q2 2026,13,A0113,Kestrelpath Robotics,APAC,SMB,Analytics,New,22300
+E00261,2026-06-30,Q2 2026,13,A0180,Emberworks Insurance,AMER,SMB,Platform,New,12200
+E00273,2026-06-30,Q2 2026,13,A0162,Ironstone Media,APAC,Mid-Market,Platform,Expansion,7600
+E00275,2026-06-30,Q2 2026,13,A0105,Nimbusgate Logistics,EMEA,SMB,Platform,Expansion,2900
+E00279,2026-06-30,Q2 2026,13,A0080,Orbitforge Media,AMER,SMB,Platform,Expansion,6000
+E00326,2026-06-30,Q2 2026,13,A0114,Brightwave Insurance,AMER,Enterprise,Analytics,Expansion,45000
+E00603,2026-07-01,Q3 2026,1,A0046,Summitworks Systems,EMEA,Mid-Market,Platform,Downgrade,-15100
+E00618,2026-07-01,Q3 2026,1,A0091,Atlasbridge Financial,AMER,Mid-Market,Analytics,Downgrade,-4200
+E00639,2026-07-01,Q3 2026,1,A0081,Vertexlabs Financial,APAC,Enterprise,Platform,Churn,-54300
+E00602,2026-07-02,Q3 2026,1,A0088,Vertexstone Robotics,APAC,Enterprise,Platform,Downgrade,-31900
+E00605,2026-07-03,Q3 2026,1,A0156,Blueforge Health,AMER,SMB,Security,Downgrade,-3200
+E00608,2026-07-03,Q3 2026,1,A0179,Quantumleaf Insurance,AMER,Mid-Market,Platform,Downgrade,-8400
+E00624,2026-07-03,Q3 2026,1,A0178,Nimbusshift Software,AMER,SMB,Security,Downgrade,-3200
+E00632,2026-07-03,Q3 2026,1,A0133,Granitepath Systems,AMER,Mid-Market,Analytics,Churn,-13000
+E00638,2026-07-03,Q3 2026,1,A0117,Coralcore Retail,EMEA,SMB,Security,Churn,-5000
+E00647,2026-07-03,Q3 2026,1,A0005,Coralforge Telecom,AMER,SMB,Platform,Churn,-5400
+E00659,2026-07-03,Q3 2026,1,A0067,Kestrelline Software,LATAM,SMB,Analytics,Churn,-1900
+E00594,2026-07-04,Q3 2026,1,A0070,Cedarforge Insurance,AMER,SMB,Analytics,Downgrade,-900
+E00600,2026-07-04,Q3 2026,1,A0008,Quantumpath Pharma,AMER,Enterprise,Analytics,Downgrade,-57100
+E00621,2026-07-05,Q3 2026,1,A0132,Onyxline Media,AMER,Enterprise,Security,Downgrade,-53100
+E00649,2026-07-05,Q3 2026,1,A0166,Lumenline Financial,APAC,SMB,Analytics,Churn,-4900
+E00661,2026-07-05,Q3 2026,1,A0088,Vertexstone Robotics,APAC,Enterprise,Platform,Churn,-95500
+E00625,2026-07-09,Q3 2026,2,A0011,Summitline Foods,AMER,Mid-Market,Analytics,Churn,-32900
+E00663,2026-07-09,Q3 2026,2,A0011,Summitline Foods,AMER,Mid-Market,Analytics,Churn,-7000
+E00523,2026-07-10,Q3 2026,2,A0105,Nimbusgate Logistics,EMEA,SMB,Platform,Expansion,2800
+E00546,2026-07-10,Q3 2026,2,A0177,Brightpoint Insurance,AMER,Mid-Market,Platform,Expansion,12900
+E00628,2026-07-10,Q3 2026,2,A0038,Irongrid Pharma,EMEA,Enterprise,Analytics,Churn,-87500
+E00447,2026-07-11,Q3 2026,2,A0116,Atlascore Telecom,APAC,Mid-Market,Platform,New,57100
+E00630,2026-07-11,Q3 2026,2,A0134,Summitgrid Media,AMER,Mid-Market,Security,Churn,-20900
+E00650,2026-07-13,Q3 2026,2,A0093,Vertexworks Software,LATAM,SMB,Analytics,Churn,-8900
+E00612,2026-07-14,Q3 2026,2,A0051,Silverbridge Pharma,EMEA,SMB,Platform,Downgrade,-4200
+E00514,2026-07-17,Q3 2026,3,A0069,Cedarleaf Health,AMER,Enterprise,Analytics,Expansion,33500
+E00636,2026-07-17,Q3 2026,3,A0077,Silvergrid Health,EMEA,Mid-Market,Security,Churn,-30900
+E00478,2026-07-18,Q3 2026,3,A0128,Silverleaf Foods,EMEA,Enterprise,Security,New,89100
+E00489,2026-07-18,Q3 2026,3,A0178,Nimbusshift Software,AMER,SMB,Security,New,7300
+E00655,2026-07-18,Q3 2026,3,A0103,Orbitstone Pharma,AMER,Mid-Market,Platform,Churn,-26200
+E00438,2026-07-21,Q3 2026,3,A0130,Summitcore Pharma,AMER,Enterprise,Security,New,118200
+E00442,2026-07-21,Q3 2026,3,A0101,Ironpoint Insurance,APAC,Mid-Market,Platform,New,41000
+E00539,2026-07-21,Q3 2026,3,A0100,Emberwind Energy,APAC,Mid-Market,Platform,Expansion,18500
+E00536,2026-07-23,Q3 2026,4,A0061,Onyxpath Media,EMEA,Mid-Market,Platform,Expansion,18400
+E00548,2026-07-25,Q3 2026,4,A0004,Peakpoint Pharma,APAC,SMB,Platform,Expansion,6000
+E00455,2026-07-26,Q3 2026,4,A0139,Kestrelshift Mobility,AMER,Enterprise,Analytics,New,174300
+E00560,2026-07-26,Q3 2026,4,A0129,Cedarfield Financial,APAC,SMB,Platform,Expansion,2600
+E00467,2026-07-28,Q3 2026,4,A0151,Aspenforge Mobility,AMER,SMB,Platform,New,10100
+E00465,2026-07-29,Q3 2026,5,A0115,Graniteworks Telecom,AMER,Enterprise,Security,New,196400
+E00491,2026-07-29,Q3 2026,5,A0123,Nimbuscore Pharma,AMER,SMB,Platform,New,14500
+E00487,2026-07-30,Q3 2026,5,A0122,Aspengrid Health,APAC,SMB,Platform,New,6700
+E00498,2026-07-31,Q3 2026,5,A0060,Bluefield Logistics,AMER,Mid-Market,Analytics,New,3000
+E00520,2026-07-31,Q3 2026,5,A0050,Brightline Health,EMEA,Enterprise,Security,Expansion,57500
+E00570,2026-07-31,Q3 2026,5,A0122,Aspengrid Health,APAC,SMB,Platform,Expansion,4600
+E00615,2026-07-31,Q3 2026,5,A0156,Blueforge Health,AMER,SMB,Security,Downgrade,-4200
+E00623,2026-07-31,Q3 2026,5,A0123,Nimbuscore Pharma,AMER,SMB,Platform,Downgrade,-2500
+E00646,2026-07-31,Q3 2026,5,A0014,Quantumwave Energy,AMER,SMB,Platform,Churn,-4900
+E00656,2026-07-31,Q3 2026,5,A0044,Peakleaf Mobility,APAC,SMB,Analytics,Churn,-7200
+E00527,2026-08-01,Q3 2026,5,A0159,Embershift Software,EMEA,Mid-Market,Platform,Expansion,1300
+E00574,2026-08-01,Q3 2026,5,A0090,Granitewave Financial,AMER,SMB,Analytics,Expansion,5500
+E00641,2026-08-01,Q3 2026,5,A0039,Orbitgrid Health,EMEA,Enterprise,Platform,Churn,-65100
+E00654,2026-08-01,Q3 2026,5,A0175,Nimbuslabs Mobility,AMER,SMB,Platform,Churn,-12900
+E00431,2026-08-02,Q3 2026,5,A0167,Summitgate Foods,AMER,Mid-Market,Platform,New,45900
+E00475,2026-08-02,Q3 2026,5,A0162,Ironstone Media,APAC,Mid-Market,Platform,New,10900
+E00616,2026-08-02,Q3 2026,5,A0153,Emberbridge Pharma,LATAM,Mid-Market,Analytics,Downgrade,-15100
+E00627,2026-08-02,Q3 2026,5,A0128,Silverleaf Foods,EMEA,Enterprise,Security,Churn,-1900
+E00470,2026-08-03,Q3 2026,5,A0169,Aspenwave Software,EMEA,Mid-Market,Platform,New,69500
+E00571,2026-08-03,Q3 2026,5,A0106,Vertexpath Health,EMEA,SMB,Platform,Expansion,3900
+E00585,2026-08-03,Q3 2026,5,A0117,Coralcore Retail,EMEA,SMB,Security,Expansion,5200
+E00588,2026-08-03,Q3 2026,5,A0125,Northlabs Health,AMER,Mid-Market,Platform,Expansion,11300
+E00613,2026-08-03,Q3 2026,5,A0039,Orbitgrid Health,EMEA,Enterprise,Platform,Downgrade,-36100
+E00620,2026-08-03,Q3 2026,5,A0138,Vertexlabs Robotics,EMEA,SMB,Platform,Downgrade,-9900
+E00634,2026-08-03,Q3 2026,5,A0167,Summitgate Foods,AMER,Mid-Market,Platform,Churn,-45100
+E00645,2026-08-03,Q3 2026,5,A0150,Kestrelworks Energy,EMEA,Enterprise,Security,Churn,-40700
+E00446,2026-08-04,Q3 2026,5,A0064,Orbitwave Mobility,APAC,Mid-Market,Analytics,New,40000
+E00596,2026-08-04,Q3 2026,5,A0172,Quantumworks Insurance,APAC,Enterprise,Analytics,Downgrade,-23100
+E00665,2026-08-04,Q3 2026,5,A0139,Kestrelshift Mobility,AMER,Enterprise,Analytics,Churn,-129400
+E00450,2026-08-05,Q3 2026,6,A0139,Kestrelshift Mobility,AMER,Enterprise,Analytics,New,125400
+E00495,2026-08-05,Q3 2026,6,A0067,Kestrelline Software,LATAM,SMB,Analytics,New,9000
+E00464,2026-08-06,Q3 2026,6,A0149,Kestrelpoint Financial,EMEA,SMB,Platform,New,10800
+E00472,2026-08-06,Q3 2026,6,A0057,Northline Systems,EMEA,SMB,Platform,New,10600
+E00510,2026-08-06,Q3 2026,6,A0089,Peakline Media,APAC,Enterprise,Platform,Expansion,7600
+E00555,2026-08-06,Q3 2026,6,A0116,Atlascore Telecom,APAC,Mid-Market,Platform,Expansion,16600
+E00635,2026-08-06,Q3 2026,6,A0067,Kestrelline Software,LATAM,SMB,Analytics,Churn,-12800
+E00653,2026-08-07,Q3 2026,6,A0031,Ironworks Retail,EMEA,SMB,Platform,Churn,-7800
+E00537,2026-08-08,Q3 2026,6,A0035,Lumenlabs Financial,EMEA,SMB,Analytics,Expansion,5600
+E00601,2026-08-08,Q3 2026,6,A0113,Kestrelpath Robotics,APAC,SMB,Analytics,Downgrade,-5500
+E00609,2026-08-08,Q3 2026,6,A0036,Silvershift Media,AMER,Mid-Market,Platform,Downgrade,-23300
+E00508,2026-08-09,Q3 2026,6,A0174,Quantumstone Media,EMEA,Mid-Market,Analytics,Expansion,20000
+E00652,2026-08-09,Q3 2026,6,A0021,Quantumworks Telecom,APAC,Enterprise,Security,Churn,-66700
+E00432,2026-08-10,Q3 2026,6,A0023,Juniperfield Mobility,AMER,Enterprise,Analytics,New,63300
+E00433,2026-08-10,Q3 2026,6,A0102,Vertexleaf Energy,AMER,Enterprise,Security,New,136400
+E00434,2026-08-10,Q3 2026,6,A0096,Vertexbridge Systems,EMEA,SMB,Platform,New,14000
+E00436,2026-08-10,Q3 2026,6,A0059,Vertexcore Energy,AMER,SMB,Security,New,17400
+E00492,2026-08-10,Q3 2026,6,A0176,Cedarshift Media,APAC,SMB,Analytics,New,12800
+E00565,2026-08-10,Q3 2026,6,A0123,Nimbuscore Pharma,AMER,SMB,Platform,Expansion,4500
+E00572,2026-08-10,Q3 2026,6,A0172,Quantumworks Insurance,APAC,Enterprise,Analytics,Expansion,22700
+E00617,2026-08-10,Q3 2026,6,A0111,Orbitstone Energy,EMEA,Mid-Market,Analytics,Downgrade,-4900
+E00469,2026-08-11,Q3 2026,6,A0102,Vertexleaf Energy,AMER,Enterprise,Security,New,189100
+E00558,2026-08-11,Q3 2026,6,A0102,Vertexleaf Energy,AMER,Enterprise,Security,Expansion,55100
+E00589,2026-08-11,Q3 2026,6,A0048,Nimbusshift Pharma,LATAM,Mid-Market,Platform,Expansion,28800
+E00532,2026-08-12,Q3 2026,7,A0152,Deltaworks Pharma,APAC,Enterprise,Analytics,Expansion,86300
+E00598,2026-08-12,Q3 2026,7,A0021,Quantumworks Telecom,APAC,Enterprise,Security,Downgrade,-38800
+E00643,2026-08-12,Q3 2026,7,A0013,Blueshift Foods,EMEA,SMB,Security,Churn,-3500
+E00651,2026-08-12,Q3 2026,7,A0147,Kestrelcore Logistics,APAC,Mid-Market,Platform,Churn,-15300
+E00462,2026-08-13,Q3 2026,7,A0001,Tidalstone Insurance,AMER,Mid-Market,Platform,New,69000
+E00473,2026-08-13,Q3 2026,7,A0031,Ironworks Retail,EMEA,SMB,Platform,New,22400
+E00501,2026-08-14,Q3 2026,7,A0079,Blueshift Financial,APAC,Mid-Market,Analytics,New,75600
+E00551,2026-08-14,Q3 2026,7,A0063,Graniteline Foods,APAC,Enterprise,Platform,Expansion,68000
+E00504,2026-08-16,Q3 2026,7,A0173,Onyxwind Logistics,LATAM,Mid-Market,Analytics,New,43400
+E00564,2026-08-16,Q3 2026,7,A0116,Atlascore Telecom,APAC,Mid-Market,Platform,Expansion,10900
+E00566,2026-08-16,Q3 2026,7,A0117,Coralcore Retail,EMEA,SMB,Security,Expansion,2700
+E00545,2026-08-17,Q3 2026,7,A0117,Coralcore Retail,EMEA,SMB,Security,Expansion,10600
+E00581,2026-08-17,Q3 2026,7,A0034,Silvergrid Pharma,EMEA,Enterprise,Analytics,Expansion,74800
+E00479,2026-08-18,Q3 2026,7,A0173,Onyxwind Logistics,LATAM,Mid-Market,Analytics,New,58500
+E00554,2026-08-20,Q3 2026,8,A0067,Kestrelline Software,LATAM,SMB,Analytics,Expansion,1300
+E00456,2026-08-21,Q3 2026,8,A0046,Summitworks Systems,EMEA,Mid-Market,Platform,New,39300
+E00476,2026-08-21,Q3 2026,8,A0132,Onyxline Media,AMER,Enterprise,Security,New,140100
+E00562,2026-08-21,Q3 2026,8,A0098,Coralbridge Foods,AMER,Mid-Market,Security,Expansion,22500
+E00443,2026-08-22,Q3 2026,8,A0082,Summitleaf Health,AMER,Mid-Market,Platform,New,37000
+E00471,2026-08-22,Q3 2026,8,A0015,Juniperforge Media,EMEA,Mid-Market,Security,New,26900
+E00488,2026-08-22,Q3 2026,8,A0075,Peakleaf Systems,APAC,Mid-Market,Platform,New,54900
+E00509,2026-08-22,Q3 2026,8,A0154,Atlasshift Energy,AMER,Enterprise,Analytics,Expansion,70300
+E00529,2026-08-22,Q3 2026,8,A0079,Blueshift Financial,APAC,Mid-Market,Analytics,Expansion,24600
+E00481,2026-08-23,Q3 2026,8,A0026,Bluewind Logistics,AMER,SMB,Platform,New,3600
+E00534,2026-08-23,Q3 2026,8,A0126,Atlasshift Pharma,APAC,Mid-Market,Security,Expansion,16000
+E00561,2026-08-23,Q3 2026,8,A0029,Quantumline Software,AMER,SMB,Analytics,Expansion,5500
+E00568,2026-08-23,Q3 2026,8,A0107,Peakstone Telecom,EMEA,SMB,Security,Expansion,6100
+E00428,2026-08-26,Q3 2026,9,A0012,Orbitlabs Logistics,AMER,Mid-Market,Security,New,76800
+E00591,2026-08-26,Q3 2026,9,A0179,Quantumleaf Insurance,AMER,Mid-Market,Platform,Expansion,15700
+E00575,2026-08-27,Q3 2026,9,A0177,Brightpoint Insurance,AMER,Mid-Market,Platform,Expansion,24100
+E00580,2026-08-27,Q3 2026,9,A0072,Lumenleaf Insurance,AMER,SMB,Security,Expansion,8700
+E00444,2026-08-28,Q3 2026,9,A0020,Brightpoint Telecom,AMER,SMB,Security,New,15900
+E00459,2026-08-29,Q3 2026,9,A0036,Silvershift Media,AMER,Mid-Market,Platform,New,21800
+E00468,2026-08-29,Q3 2026,9,A0142,Bluebridge Mobility,AMER,Enterprise,Platform,New,266400
+E00448,2026-08-30,Q3 2026,9,A0123,Nimbuscore Pharma,AMER,SMB,Platform,New,3000
+E00500,2026-08-30,Q3 2026,9,A0098,Coralbridge Foods,AMER,Mid-Market,Security,New,47400
+E00599,2026-08-30,Q3 2026,9,A0120,Brightlabs Insurance,AMER,SMB,Analytics,Downgrade,-2800
+E00607,2026-08-30,Q3 2026,9,A0154,Atlasshift Energy,AMER,Enterprise,Analytics,Downgrade,-35200
+E00626,2026-08-30,Q3 2026,9,A0148,Vertexgate Software,AMER,SMB,Analytics,Churn,-11600
+E00648,2026-08-30,Q3 2026,9,A0033,Juniperfield Energy,AMER,SMB,Security,Churn,-9000
+E00658,2026-08-30,Q3 2026,9,A0100,Emberwind Energy,APAC,Mid-Market,Platform,Churn,-21700
+E00430,2026-08-31,Q3 2026,9,A0038,Irongrid Pharma,EMEA,Enterprise,Analytics,New,136100
+E00533,2026-08-31,Q3 2026,9,A0072,Lumenleaf Insurance,AMER,SMB,Security,Expansion,9600
+E00535,2026-08-31,Q3 2026,9,A0028,Vertexpath Retail,EMEA,Mid-Market,Platform,Expansion,11000
+E00541,2026-08-31,Q3 2026,9,A0076,Atlaspath Health,APAC,SMB,Security,Expansion,5600
+E00619,2026-08-31,Q3 2026,9,A0147,Kestrelcore Logistics,APAC,Mid-Market,Platform,Downgrade,-12600
+E00622,2026-08-31,Q3 2026,9,A0005,Coralforge Telecom,AMER,SMB,Platform,Downgrade,-3200
+E00644,2026-08-31,Q3 2026,9,A0033,Juniperfield Energy,AMER,SMB,Security,Churn,-11200
+E00553,2026-09-01,Q3 2026,9,A0133,Granitepath Systems,AMER,Mid-Market,Analytics,Expansion,6400
+E00597,2026-09-01,Q3 2026,9,A0151,Aspenforge Mobility,AMER,SMB,Platform,Downgrade,-1600
+E00611,2026-09-01,Q3 2026,9,A0067,Kestrelline Software,LATAM,SMB,Analytics,Downgrade,-1800
+E00452,2026-09-02,Q3 2026,10,A0100,Emberwind Energy,APAC,Mid-Market,Platform,New,9800
+E00526,2026-09-02,Q3 2026,10,A0147,Kestrelcore Logistics,APAC,Mid-Market,Platform,Expansion,15700
+E00557,2026-09-02,Q3 2026,10,A0040,Bluegate Energy,APAC,Mid-Market,Platform,Expansion,14900
+E00578,2026-09-02,Q3 2026,10,A0109,Deltabridge Software,AMER,Enterprise,Platform,Expansion,52400
+E00595,2026-09-02,Q3 2026,10,A0068,Onyxshift Health,APAC,Enterprise,Platform,Downgrade,-26400
+E00604,2026-09-02,Q3 2026,10,A0129,Cedarfield Financial,APAC,SMB,Platform,Downgrade,-2800
+E00606,2026-09-02,Q3 2026,10,A0125,Northlabs Health,AMER,Mid-Market,Platform,Downgrade,-900
+E00664,2026-09-02,Q3 2026,10,A0164,Atlaspath Foods,APAC,Mid-Market,Platform,Churn,-4100
+E00454,2026-09-03,Q3 2026,10,A0094,Onyxstone Financial,AMER,Mid-Market,Platform,New,30500
+E00637,2026-09-03,Q3 2026,10,A0133,Granitepath Systems,AMER,Mid-Market,Analytics,Churn,-12100
+E00660,2026-09-03,Q3 2026,10,A0178,Nimbusshift Software,AMER,SMB,Security,Churn,-1900
+E00662,2026-09-03,Q3 2026,10,A0030,Lumenleaf Mobility,AMER,SMB,Analytics,Churn,-8000
+E00453,2026-09-04,Q3 2026,10,A0078,Vertexworks Systems,AMER,SMB,Security,New,12800
+E00516,2026-09-04,Q3 2026,10,A0146,Nimbuspath Robotics,AMER,Mid-Market,Analytics,Expansion,22400
+E00559,2026-09-04,Q3 2026,10,A0053,Brightforge Energy,APAC,SMB,Analytics,Expansion,5800
+E00610,2026-09-04,Q3 2026,10,A0014,Quantumwave Energy,AMER,SMB,Platform,Downgrade,-1800
+E00629,2026-09-04,Q3 2026,10,A0059,Vertexcore Energy,AMER,SMB,Security,Churn,-11300
+E00642,2026-09-04,Q3 2026,10,A0135,Emberleaf Logistics,EMEA,SMB,Platform,Churn,-9700
+E00461,2026-09-05,Q3 2026,10,A0062,Tidalline Systems,AMER,SMB,Analytics,New,8300
+E00517,2026-09-05,Q3 2026,10,A0072,Lumenleaf Insurance,AMER,SMB,Security,Expansion,3100
+E00583,2026-09-05,Q3 2026,10,A0097,Orbitfield Foods,APAC,Enterprise,Security,Expansion,86400
+E00445,2026-09-06,Q3 2026,10,A0068,Onyxshift Health,APAC,Enterprise,Platform,New,53100
+E00640,2026-09-06,Q3 2026,10,A0050,Brightline Health,EMEA,Enterprise,Security,Churn,-59200
+E00657,2026-09-06,Q3 2026,10,A0036,Silvershift Media,AMER,Mid-Market,Platform,Churn,-18300
+E00441,2026-09-07,Q3 2026,10,A0112,Silverbridge Foods,LATAM,SMB,Platform,New,14800
+E00457,2026-09-07,Q3 2026,10,A0051,Silverbridge Pharma,EMEA,SMB,Platform,New,11800
+E00507,2026-09-07,Q3 2026,10,A0019,Granitegrid Foods,AMER,SMB,Platform,Expansion,6100
+E00524,2026-09-07,Q3 2026,10,A0112,Silverbridge Foods,LATAM,SMB,Platform,Expansion,10800
+E00614,2026-09-07,Q3 2026,10,A0133,Granitepath Systems,AMER,Mid-Market,Analytics,Downgrade,-16100
+E00460,2026-09-09,Q3 2026,11,A0149,Kestrelpoint Financial,EMEA,SMB,Platform,New,24600
+E00482,2026-09-09,Q3 2026,11,A0001,Tidalstone Insurance,AMER,Mid-Market,Platform,New,29000
+E00502,2026-09-09,Q3 2026,11,A0056,Granitestone Logistics,EMEA,Enterprise,Platform,New,100600
+E00519,2026-09-09,Q3 2026,11,A0143,Orbitshift Robotics,APAC,SMB,Analytics,Expansion,5700
+E00540,2026-09-09,Q3 2026,11,A0084,Kestrelcore Telecom,AMER,SMB,Platform,Expansion,2200
+E00633,2026-09-09,Q3 2026,11,A0178,Nimbusshift Software,AMER,SMB,Security,Churn,-4400
+E00577,2026-09-10,Q3 2026,11,A0023,Juniperfield Mobility,AMER,Enterprise,Analytics,Expansion,25600
+E00463,2026-09-11,Q3 2026,11,A0082,Summitleaf Health,AMER,Mid-Market,Platform,New,27200
+E00483,2026-09-11,Q3 2026,11,A0110,Northshift Insurance,AMER,Mid-Market,Analytics,New,29000
+E00579,2026-09-11,Q3 2026,11,A0180,Emberworks Insurance,AMER,SMB,Platform,Expansion,5800
+E00631,2026-09-11,Q3 2026,11,A0068,Onyxshift Health,APAC,Enterprise,Platform,Churn,-114100
+E00506,2026-09-13,Q3 2026,11,A0066,Aspenfield Energy,AMER,Mid-Market,Analytics,Expansion,18100
+E00521,2026-09-13,Q3 2026,11,A0164,Atlaspath Foods,APAC,Mid-Market,Platform,Expansion,1300
+E00569,2026-09-13,Q3 2026,11,A0096,Vertexbridge Systems,EMEA,SMB,Platform,Expansion,7200
+E00493,2026-09-14,Q3 2026,11,A0017,Silvershift Pharma,AMER,Enterprise,Platform,New,127800
+E00518,2026-09-15,Q3 2026,11,A0029,Quantumline Software,AMER,SMB,Analytics,Expansion,1500
+E00556,2026-09-15,Q3 2026,11,A0071,Vertexpoint Pharma,APAC,SMB,Platform,Expansion,5500
+E00576,2026-09-15,Q3 2026,11,A0152,Deltaworks Pharma,APAC,Enterprise,Analytics,Expansion,64400
+E00590,2026-09-15,Q3 2026,11,A0074,Kestrelbridge Media,EMEA,Enterprise,Platform,Expansion,98700
+E00592,2026-09-15,Q3 2026,11,A0079,Blueshift Financial,APAC,Mid-Market,Analytics,Expansion,12900
+E00439,2026-09-16,Q3 2026,12,A0075,Peakleaf Systems,APAC,Mid-Market,Platform,New,34500
+E00530,2026-09-16,Q3 2026,12,A0169,Aspenwave Software,EMEA,Mid-Market,Platform,Expansion,19100
+E00547,2026-09-16,Q3 2026,12,A0091,Atlasbridge Financial,AMER,Mid-Market,Analytics,Expansion,18300
+E00494,2026-09-17,Q3 2026,12,A0139,Kestrelshift Mobility,AMER,Enterprise,Analytics,New,3000
+E00549,2026-09-17,Q3 2026,12,A0010,Kestrelforge Mobility,AMER,SMB,Security,Expansion,10100
+E00486,2026-09-19,Q3 2026,12,A0036,Silvershift Media,AMER,Mid-Market,Platform,New,27100
+E00429,2026-09-20,Q3 2026,12,A0114,Brightwave Insurance,AMER,Enterprise,Analytics,New,93700
+E00449,2026-09-20,Q3 2026,12,A0132,Onyxline Media,AMER,Enterprise,Security,New,55300
+E00437,2026-09-21,Q3 2026,12,A0037,Coralshift Financial,EMEA,Enterprise,Platform,New,206700
+E00451,2026-09-21,Q3 2026,12,A0035,Lumenlabs Financial,EMEA,SMB,Analytics,New,4100
+E00542,2026-09-21,Q3 2026,12,A0071,Vertexpoint Pharma,APAC,SMB,Platform,Expansion,4200
+E00550,2026-09-21,Q3 2026,12,A0062,Tidalline Systems,AMER,SMB,Analytics,Expansion,7500
+E00584,2026-09-21,Q3 2026,12,A0162,Ironstone Media,APAC,Mid-Market,Platform,Expansion,18200
+E00586,2026-09-21,Q3 2026,12,A0026,Bluewind Logistics,AMER,SMB,Platform,Expansion,7700
+E00528,2026-09-22,Q3 2026,12,A0121,Northshift Retail,EMEA,SMB,Platform,Expansion,2600
+E00552,2026-09-22,Q3 2026,12,A0040,Bluegate Energy,APAC,Mid-Market,Platform,Expansion,16900
+E00515,2026-09-23,Q3 2026,13,A0014,Quantumwave Energy,AMER,SMB,Platform,Expansion,5400
+E00544,2026-09-23,Q3 2026,13,A0037,Coralshift Financial,EMEA,Enterprise,Platform,Expansion,23500
+E00582,2026-09-23,Q3 2026,13,A0101,Ironpoint Insurance,APAC,Mid-Market,Platform,Expansion,19400
+E00593,2026-09-23,Q3 2026,13,A0110,Northshift Insurance,AMER,Mid-Market,Analytics,Expansion,25400
+E00480,2026-09-24,Q3 2026,13,A0090,Granitewave Financial,AMER,SMB,Analytics,New,22800
+E00522,2026-09-24,Q3 2026,13,A0085,Granitepoint Insurance,LATAM,Mid-Market,Analytics,Expansion,1300
+E00525,2026-09-24,Q3 2026,13,A0082,Summitleaf Health,AMER,Mid-Market,Platform,Expansion,19700
+E00563,2026-09-24,Q3 2026,13,A0058,Aspenforge Systems,AMER,Mid-Market,Analytics,Expansion,12200
+E00587,2026-09-24,Q3 2026,13,A0112,Silverbridge Foods,LATAM,SMB,Platform,Expansion,5300
+E00435,2026-09-25,Q3 2026,13,A0039,Orbitgrid Health,EMEA,Enterprise,Platform,New,86200
+E00458,2026-09-25,Q3 2026,13,A0109,Deltabridge Software,AMER,Enterprise,Platform,New,98800
+E00485,2026-09-25,Q3 2026,13,A0024,Emberwind Financial,AMER,SMB,Platform,New,3000
+E00497,2026-09-26,Q3 2026,13,A0075,Peakleaf Systems,APAC,Mid-Market,Platform,New,61700
+E00511,2026-09-26,Q3 2026,13,A0153,Emberbridge Pharma,LATAM,Mid-Market,Analytics,Expansion,16300
+E00513,2026-09-26,Q3 2026,13,A0075,Peakleaf Systems,APAC,Mid-Market,Platform,Expansion,19600
+E00531,2026-09-26,Q3 2026,13,A0143,Orbitshift Robotics,APAC,SMB,Analytics,Expansion,3500
+E00496,2026-09-27,Q3 2026,13,A0068,Onyxshift Health,APAC,Enterprise,Platform,New,164400
+E00499,2026-09-27,Q3 2026,13,A0126,Atlasshift Pharma,APAC,Mid-Market,Security,New,3400
+E00505,2026-09-27,Q3 2026,13,A0061,Onyxpath Media,EMEA,Mid-Market,Platform,New,21600
+E00567,2026-09-27,Q3 2026,13,A0027,Kestrelline Logistics,EMEA,Mid-Market,Analytics,Expansion,12900
+E00573,2026-09-27,Q3 2026,13,A0134,Summitgrid Media,AMER,Mid-Market,Security,Expansion,9900
+E00474,2026-09-28,Q3 2026,13,A0104,Kestrellabs Robotics,EMEA,SMB,Analytics,New,19100
+E00490,2026-09-28,Q3 2026,13,A0087,Cedarline Telecom,APAC,SMB,Platform,New,13700
+E00512,2026-09-28,Q3 2026,13,A0005,Coralforge Telecom,AMER,SMB,Platform,Expansion,2500
+E00538,2026-09-28,Q3 2026,13,A0007,Peakbridge Mobility,AMER,SMB,Analytics,Expansion,8200
+E00466,2026-09-29,Q3 2026,13,A0009,Kestrelworks Systems,APAC,Enterprise,Security,New,53500
+E00484,2026-09-29,Q3 2026,13,A0068,Onyxshift Health,APAC,Enterprise,Platform,New,111300
+E00503,2026-09-29,Q3 2026,13,A0031,Ironworks Retail,EMEA,SMB,Platform,New,10300
+E00440,2026-09-30,Q3 2026,13,A0154,Atlasshift Energy,AMER,Enterprise,Analytics,New,3000
+E00477,2026-09-30,Q3 2026,13,A0051,Silverbridge Pharma,EMEA,SMB,Platform,New,14100
+E00543,2026-09-30,Q3 2026,13,A0134,Summitgrid Media,AMER,Mid-Market,Security,Expansion,7200
+</script>
+<script type="text/plain" id="ar-data-account_ownership">
+account_id,account,hq_theater,segment,product,rep_id,rep,rep_theater,split_pct
+A0001,Tidalstone Insurance,AMER,Mid-Market,Platform,R008,Ravi Silva,AMER,100
+A0002,Coralpath Logistics,APAC,Mid-Market,Platform,R022,Liam Kim,APAC,100
+A0003,Emberstone Insurance,AMER,Mid-Market,Analytics,R002,Bruno Tanaka,AMER,100
+A0004,Peakpoint Pharma,APAC,SMB,Platform,R021,Tomas Rossi,APAC,100
+A0005,Coralforge Telecom,AMER,SMB,Platform,R005,Bruno Brandt,AMER,100
+A0006,Deltaleaf Health,APAC,Enterprise,Platform,R022,Liam Kim,APAC,50
+A0006,Deltaleaf Health,APAC,Enterprise,Platform,R019,Jonas Rossi,APAC,50
+A0007,Peakbridge Mobility,AMER,SMB,Analytics,R010,Elif Reyes,AMER,100
+A0008,Quantumpath Pharma,AMER,Enterprise,Analytics,R001,Lena Castillo,AMER,50
+A0008,Quantumpath Pharma,AMER,Enterprise,Analytics,R002,Bruno Tanaka,AMER,25
+A0008,Quantumpath Pharma,AMER,Enterprise,Analytics,R005,Bruno Brandt,AMER,25
+A0009,Kestrelworks Systems,APAC,Enterprise,Security,R018,Zoe Kim,APAC,100
+A0010,Kestrelforge Mobility,AMER,SMB,Security,R004,Ravi Novak,AMER,100
+A0011,Summitline Foods,AMER,Mid-Market,Analytics,R010,Elif Reyes,AMER,100
+A0012,Orbitlabs Logistics,AMER,Mid-Market,Security,R004,Ravi Novak,AMER,100
+A0013,Blueshift Foods,EMEA,SMB,Security,R014,Dara Okafor,EMEA,100
+A0014,Quantumwave Energy,AMER,SMB,Platform,R004,Ravi Novak,AMER,70
+A0014,Quantumwave Energy,AMER,SMB,Platform,R024,Elif Rossi,LATAM,30
+A0015,Juniperforge Media,EMEA,Mid-Market,Security,R014,Dara Okafor,EMEA,100
+A0016,Granitefield Foods,AMER,Enterprise,Platform,R004,Ravi Novak,AMER,100
+A0017,Silvershift Pharma,AMER,Enterprise,Platform,R004,Ravi Novak,AMER,80
+A0017,Silvershift Pharma,AMER,Enterprise,Platform,R005,Bruno Brandt,AMER,20
+A0018,Coralpath Mobility,LATAM,Mid-Market,Analytics,R023,Felix Tanaka,LATAM,100
+A0019,Granitegrid Foods,AMER,SMB,Platform,R010,Elif Reyes,AMER,100
+A0020,Brightpoint Telecom,AMER,SMB,Security,R008,Ravi Silva,AMER,100
+A0021,Quantumworks Telecom,APAC,Enterprise,Security,R022,Liam Kim,APAC,70
+A0021,Quantumworks Telecom,APAC,Enterprise,Security,R015,Sara Okafor,EMEA,30
+A0022,Atlasgate Software,APAC,SMB,Platform,R019,Jonas Rossi,APAC,100
+A0023,Juniperfield Mobility,AMER,Enterprise,Analytics,R002,Bruno Tanaka,AMER,80
+A0023,Juniperfield Mobility,AMER,Enterprise,Analytics,R010,Elif Reyes,AMER,20
+A0024,Emberwind Financial,AMER,SMB,Platform,R001,Lena Castillo,AMER,100
+A0025,Junipercore Robotics,AMER,SMB,Security,R008,Ravi Silva,AMER,100
+A0026,Bluewind Logistics,AMER,SMB,Platform,R009,Nia Lindqvist,AMER,100
+A0027,Kestrelline Logistics,EMEA,Mid-Market,Analytics,R011,Priya Okafor,EMEA,100
+A0028,Vertexpath Retail,EMEA,Mid-Market,Platform,R011,Priya Okafor,EMEA,100
+A0029,Quantumline Software,AMER,SMB,Analytics,R006,Priya Ito,AMER,100
+A0030,Lumenleaf Mobility,AMER,SMB,Analytics,R002,Bruno Tanaka,AMER,100
+A0031,Ironworks Retail,EMEA,SMB,Platform,R015,Sara Okafor,EMEA,100
+A0032,Northleaf Retail,AMER,SMB,Security,R009,Nia Lindqvist,AMER,100
+A0033,Juniperfield Energy,AMER,SMB,Security,R003,Ravi Mbeki,AMER,100
+A0034,Silvergrid Pharma,EMEA,Enterprise,Analytics,R013,Mateo Moreau,EMEA,100
+A0035,Lumenlabs Financial,EMEA,SMB,Analytics,R014,Dara Okafor,EMEA,100
+A0036,Silvershift Media,AMER,Mid-Market,Platform,R002,Bruno Tanaka,AMER,50
+A0036,Silvershift Media,AMER,Mid-Market,Platform,R022,Liam Kim,APAC,25
+A0036,Silvershift Media,AMER,Mid-Market,Platform,R006,Priya Ito,AMER,25
+A0037,Coralshift Financial,EMEA,Enterprise,Platform,R017,Elif Dunne,EMEA,60
+A0037,Coralshift Financial,EMEA,Enterprise,Platform,R022,Liam Kim,APAC,40
+A0038,Irongrid Pharma,EMEA,Enterprise,Analytics,R012,Liam Silva,EMEA,70
+A0038,Irongrid Pharma,EMEA,Enterprise,Analytics,R011,Priya Okafor,EMEA,30
+A0039,Orbitgrid Health,EMEA,Enterprise,Platform,R011,Priya Okafor,EMEA,100
+A0040,Bluegate Energy,APAC,Mid-Market,Platform,R019,Jonas Rossi,APAC,100
+A0041,Atlaswave Pharma,AMER,Mid-Market,Analytics,R004,Ravi Novak,AMER,100
+A0042,Granitegate Foods,APAC,Mid-Market,Analytics,R018,Zoe Kim,APAC,100
+A0043,Bluegate Retail,AMER,Mid-Market,Platform,R008,Ravi Silva,AMER,100
+A0044,Peakleaf Mobility,APAC,SMB,Analytics,R020,Kai Novak,APAC,100
+A0045,Harborcore Pharma,APAC,SMB,Security,R020,Kai Novak,APAC,100
+A0046,Summitworks Systems,EMEA,Mid-Market,Platform,R017,Elif Dunne,EMEA,100
+A0047,Northcore Systems,LATAM,Enterprise,Platform,R025,Yuki Mbeki,LATAM,50
+A0047,Northcore Systems,LATAM,Enterprise,Platform,R024,Elif Rossi,LATAM,50
+A0048,Nimbusshift Pharma,LATAM,Mid-Market,Platform,R024,Elif Rossi,LATAM,100
+A0049,Quantumforge Systems,AMER,Mid-Market,Platform,R004,Ravi Novak,AMER,100
+A0050,Brightline Health,EMEA,Enterprise,Security,R014,Dara Okafor,EMEA,70
+A0050,Brightline Health,EMEA,Enterprise,Security,R015,Sara Okafor,EMEA,30
+A0051,Silverbridge Pharma,EMEA,SMB,Platform,R015,Sara Okafor,EMEA,100
+A0052,Silverpath Pharma,AMER,Mid-Market,Analytics,R010,Elif Reyes,AMER,100
+A0053,Brightforge Energy,APAC,SMB,Analytics,R021,Tomas Rossi,APAC,100
+A0054,Coralleaf Energy,AMER,Enterprise,Platform,R001,Lena Castillo,AMER,100
+A0055,Northstone Software,AMER,Mid-Market,Platform,R010,Elif Reyes,AMER,100
+A0056,Granitestone Logistics,EMEA,Enterprise,Platform,R012,Liam Silva,EMEA,80
+A0056,Granitestone Logistics,EMEA,Enterprise,Platform,R009,Nia Lindqvist,AMER,20
+A0057,Northline Systems,EMEA,SMB,Platform,R014,Dara Okafor,EMEA,100
+A0058,Aspenforge Systems,AMER,Mid-Market,Analytics,R003,Ravi Mbeki,AMER,40
+A0058,Aspenforge Systems,AMER,Mid-Market,Analytics,R004,Ravi Novak,AMER,30
+A0058,Aspenforge Systems,AMER,Mid-Market,Analytics,R009,Nia Lindqvist,AMER,30
+A0059,Vertexcore Energy,AMER,SMB,Security,R001,Lena Castillo,AMER,50
+A0059,Vertexcore Energy,AMER,SMB,Security,R004,Ravi Novak,AMER,25
+A0059,Vertexcore Energy,AMER,SMB,Security,R005,Bruno Brandt,AMER,25
+A0060,Bluefield Logistics,AMER,Mid-Market,Analytics,R002,Bruno Tanaka,AMER,100
+A0061,Onyxpath Media,EMEA,Mid-Market,Platform,R013,Mateo Moreau,EMEA,100
+A0062,Tidalline Systems,AMER,SMB,Analytics,R005,Bruno Brandt,AMER,100
+A0063,Graniteline Foods,APAC,Enterprise,Platform,R020,Kai Novak,APAC,50
+A0063,Graniteline Foods,APAC,Enterprise,Platform,R012,Liam Silva,EMEA,30
+A0063,Graniteline Foods,APAC,Enterprise,Platform,R019,Jonas Rossi,APAC,20
+A0064,Orbitwave Mobility,APAC,Mid-Market,Analytics,R018,Zoe Kim,APAC,100
+A0065,Deltagate Pharma,AMER,Mid-Market,Security,R006,Priya Ito,AMER,100
+A0066,Aspenfield Energy,AMER,Mid-Market,Analytics,R005,Bruno Brandt,AMER,100
+A0067,Kestrelline Software,LATAM,SMB,Analytics,R025,Yuki Mbeki,LATAM,100
+A0068,Onyxshift Health,APAC,Enterprise,Platform,R021,Tomas Rossi,APAC,70
+A0068,Onyxshift Health,APAC,Enterprise,Platform,R001,Lena Castillo,AMER,30
+A0069,Cedarleaf Health,AMER,Enterprise,Analytics,R006,Priya Ito,AMER,100
+A0070,Cedarforge Insurance,AMER,SMB,Analytics,R009,Nia Lindqvist,AMER,40
+A0070,Cedarforge Insurance,AMER,SMB,Analytics,R025,Yuki Mbeki,LATAM,30
+A0070,Cedarforge Insurance,AMER,SMB,Analytics,R018,Zoe Kim,APAC,30
+A0071,Vertexpoint Pharma,APAC,SMB,Platform,R022,Liam Kim,APAC,100
+A0072,Lumenleaf Insurance,AMER,SMB,Security,R005,Bruno Brandt,AMER,100
+A0073,Harborcore Robotics,EMEA,Mid-Market,Analytics,R015,Sara Okafor,EMEA,100
+A0074,Kestrelbridge Media,EMEA,Enterprise,Platform,R014,Dara Okafor,EMEA,50
+A0074,Kestrelbridge Media,EMEA,Enterprise,Platform,R003,Ravi Mbeki,AMER,30
+A0074,Kestrelbridge Media,EMEA,Enterprise,Platform,R001,Lena Castillo,AMER,20
+A0075,Peakleaf Systems,APAC,Mid-Market,Platform,R021,Tomas Rossi,APAC,100
+A0076,Atlaspath Health,APAC,SMB,Security,R020,Kai Novak,APAC,100
+A0077,Silvergrid Health,EMEA,Mid-Market,Security,R012,Liam Silva,EMEA,100
+A0078,Vertexworks Systems,AMER,SMB,Security,R002,Bruno Tanaka,AMER,100
+A0079,Blueshift Financial,APAC,Mid-Market,Analytics,R020,Kai Novak,APAC,100
+A0080,Orbitforge Media,AMER,SMB,Platform,R009,Nia Lindqvist,AMER,100
+A0081,Vertexlabs Financial,APAC,Enterprise,Platform,R021,Tomas Rossi,APAC,60
+A0081,Vertexlabs Financial,APAC,Enterprise,Platform,R018,Zoe Kim,APAC,40
+A0082,Summitleaf Health,AMER,Mid-Market,Platform,R001,Lena Castillo,AMER,60
+A0082,Summitleaf Health,AMER,Mid-Market,Platform,R005,Bruno Brandt,AMER,25
+A0082,Summitleaf Health,AMER,Mid-Market,Platform,R008,Ravi Silva,AMER,15
+A0083,Peaklabs Telecom,EMEA,Mid-Market,Platform,R013,Mateo Moreau,EMEA,100
+A0084,Kestrelcore Telecom,AMER,SMB,Platform,R010,Elif Reyes,AMER,100
+A0085,Granitepoint Insurance,LATAM,Mid-Market,Analytics,R023,Felix Tanaka,LATAM,100
+A0086,Nimbusline Robotics,AMER,SMB,Analytics,R004,Ravi Novak,AMER,100
+A0087,Cedarline Telecom,APAC,SMB,Platform,R020,Kai Novak,APAC,100
+A0088,Vertexstone Robotics,APAC,Enterprise,Platform,R020,Kai Novak,APAC,80
+A0088,Vertexstone Robotics,APAC,Enterprise,Platform,R006,Priya Ito,AMER,20
+A0089,Peakline Media,APAC,Enterprise,Platform,R021,Tomas Rossi,APAC,100
+A0090,Granitewave Financial,AMER,SMB,Analytics,R004,Ravi Novak,AMER,100
+A0091,Atlasbridge Financial,AMER,Mid-Market,Analytics,R002,Bruno Tanaka,AMER,100
+A0092,Silverforge Pharma,APAC,Mid-Market,Security,R019,Jonas Rossi,APAC,50
+A0092,Silverforge Pharma,APAC,Mid-Market,Security,R024,Elif Rossi,LATAM,25
+A0092,Silverforge Pharma,APAC,Mid-Market,Security,R021,Tomas Rossi,APAC,25
+A0093,Vertexworks Software,LATAM,SMB,Analytics,R024,Elif Rossi,LATAM,40
+A0093,Vertexworks Software,LATAM,SMB,Analytics,R016,Kai Rossi,EMEA,30
+A0093,Vertexworks Software,LATAM,SMB,Analytics,R021,Tomas Rossi,APAC,30
+A0094,Onyxstone Financial,AMER,Mid-Market,Platform,R008,Ravi Silva,AMER,100
+A0095,Aspenworks Systems,AMER,Mid-Market,Platform,R008,Ravi Silva,AMER,100
+A0096,Vertexbridge Systems,EMEA,SMB,Platform,R014,Dara Okafor,EMEA,100
+A0097,Orbitfield Foods,APAC,Enterprise,Security,R021,Tomas Rossi,APAC,50
+A0097,Orbitfield Foods,APAC,Enterprise,Security,R020,Kai Novak,APAC,50
+A0098,Coralbridge Foods,AMER,Mid-Market,Security,R005,Bruno Brandt,AMER,100
+A0099,Kestrelpoint Mobility,EMEA,Mid-Market,Security,R013,Mateo Moreau,EMEA,100
+A0100,Emberwind Energy,APAC,Mid-Market,Platform,R022,Liam Kim,APAC,100
+A0101,Ironpoint Insurance,APAC,Mid-Market,Platform,R018,Zoe Kim,APAC,100
+A0102,Vertexleaf Energy,AMER,Enterprise,Security,R005,Bruno Brandt,AMER,60
+A0102,Vertexleaf Energy,AMER,Enterprise,Security,R007,Mia Mbeki,AMER,40
+A0103,Orbitstone Pharma,AMER,Mid-Market,Platform,R008,Ravi Silva,AMER,50
+A0103,Orbitstone Pharma,AMER,Mid-Market,Platform,R025,Yuki Mbeki,LATAM,50
+A0104,Kestrellabs Robotics,EMEA,SMB,Analytics,R012,Liam Silva,EMEA,100
+A0105,Nimbusgate Logistics,EMEA,SMB,Platform,R016,Kai Rossi,EMEA,100
+A0106,Vertexpath Health,EMEA,SMB,Platform,R011,Priya Okafor,EMEA,100
+A0107,Peakstone Telecom,EMEA,SMB,Security,R016,Kai Rossi,EMEA,100
+A0108,Atlasgate Logistics,APAC,Mid-Market,Platform,R020,Kai Novak,APAC,100
+A0109,Deltabridge Software,AMER,Enterprise,Platform,R006,Priya Ito,AMER,50
+A0109,Deltabridge Software,AMER,Enterprise,Platform,R008,Ravi Silva,AMER,25
+A0109,Deltabridge Software,AMER,Enterprise,Platform,R004,Ravi Novak,AMER,25
+A0110,Northshift Insurance,AMER,Mid-Market,Analytics,R001,Lena Castillo,AMER,60
+A0110,Northshift Insurance,AMER,Mid-Market,Analytics,R003,Ravi Mbeki,AMER,40
+A0111,Orbitstone Energy,EMEA,Mid-Market,Analytics,R017,Elif Dunne,EMEA,100
+A0112,Silverbridge Foods,LATAM,SMB,Platform,R024,Elif Rossi,LATAM,100
+A0113,Kestrelpath Robotics,APAC,SMB,Analytics,R019,Jonas Rossi,APAC,100
+A0114,Brightwave Insurance,AMER,Enterprise,Analytics,R002,Bruno Tanaka,AMER,60
+A0114,Brightwave Insurance,AMER,Enterprise,Analytics,R011,Priya Okafor,EMEA,40
+A0115,Graniteworks Telecom,AMER,Enterprise,Security,R001,Lena Castillo,AMER,50
+A0115,Graniteworks Telecom,AMER,Enterprise,Security,R018,Zoe Kim,APAC,30
+A0115,Graniteworks Telecom,AMER,Enterprise,Security,R023,Felix Tanaka,LATAM,20
+A0116,Atlascore Telecom,APAC,Mid-Market,Platform,R020,Kai Novak,APAC,100
+A0117,Coralcore Retail,EMEA,SMB,Security,R016,Kai Rossi,EMEA,100
+A0118,Deltashift Financial,EMEA,Mid-Market,Analytics,R012,Liam Silva,EMEA,100
+A0119,Orbitleaf Energy,EMEA,Mid-Market,Platform,R012,Liam Silva,EMEA,60
+A0119,Orbitleaf Energy,EMEA,Mid-Market,Platform,R017,Elif Dunne,EMEA,40
+A0120,Brightlabs Insurance,AMER,SMB,Analytics,R009,Nia Lindqvist,AMER,100
+A0121,Northshift Retail,EMEA,SMB,Platform,R015,Sara Okafor,EMEA,100
+A0122,Aspengrid Health,APAC,SMB,Platform,R020,Kai Novak,APAC,100
+A0123,Nimbuscore Pharma,AMER,SMB,Platform,R007,Mia Mbeki,AMER,100
+A0124,Atlasworks Foods,LATAM,Enterprise,Platform,R024,Elif Rossi,LATAM,100
+A0125,Northlabs Health,AMER,Mid-Market,Platform,R002,Bruno Tanaka,AMER,100
+A0126,Atlasshift Pharma,APAC,Mid-Market,Security,R019,Jonas Rossi,APAC,60
+A0126,Atlasshift Pharma,APAC,Mid-Market,Security,R018,Zoe Kim,APAC,40
+A0127,Ironforge Systems,AMER,Mid-Market,Platform,R009,Nia Lindqvist,AMER,100
+A0128,Silverleaf Foods,EMEA,Enterprise,Security,R017,Elif Dunne,EMEA,50
+A0128,Silverleaf Foods,EMEA,Enterprise,Security,R009,Nia Lindqvist,AMER,30
+A0128,Silverleaf Foods,EMEA,Enterprise,Security,R006,Priya Ito,AMER,20
+A0129,Cedarfield Financial,APAC,SMB,Platform,R020,Kai Novak,APAC,100
+A0130,Summitcore Pharma,AMER,Enterprise,Security,R006,Priya Ito,AMER,100
+A0131,Peakbridge Telecom,LATAM,Enterprise,Platform,R025,Yuki Mbeki,LATAM,70
+A0131,Peakbridge Telecom,LATAM,Enterprise,Platform,R012,Liam Silva,EMEA,30
+A0132,Onyxline Media,AMER,Enterprise,Security,R005,Bruno Brandt,AMER,40
+A0132,Onyxline Media,AMER,Enterprise,Security,R025,Yuki Mbeki,LATAM,30
+A0132,Onyxline Media,AMER,Enterprise,Security,R018,Zoe Kim,APAC,30
+A0133,Granitepath Systems,AMER,Mid-Market,Analytics,R006,Priya Ito,AMER,80
+A0133,Granitepath Systems,AMER,Mid-Market,Analytics,R008,Ravi Silva,AMER,20
+A0134,Summitgrid Media,AMER,Mid-Market,Security,R006,Priya Ito,AMER,100
+A0135,Emberleaf Logistics,EMEA,SMB,Platform,R012,Liam Silva,EMEA,100
+A0136,Northwind Financial,EMEA,SMB,Analytics,R015,Sara Okafor,EMEA,100
+A0137,Lumenforge Retail,AMER,Mid-Market,Analytics,R003,Ravi Mbeki,AMER,100
+A0138,Vertexlabs Robotics,EMEA,SMB,Platform,R016,Kai Rossi,EMEA,100
+A0139,Kestrelshift Mobility,AMER,Enterprise,Analytics,R005,Bruno Brandt,AMER,40
+A0139,Kestrelshift Mobility,AMER,Enterprise,Analytics,R024,Elif Rossi,LATAM,30
+A0139,Kestrelshift Mobility,AMER,Enterprise,Analytics,R002,Bruno Tanaka,AMER,30
+A0140,Vertexgate Foods,EMEA,Enterprise,Analytics,R015,Sara Okafor,EMEA,60
+A0140,Vertexgate Foods,EMEA,Enterprise,Analytics,R004,Ravi Novak,AMER,40
+A0141,Blueforge Financial,EMEA,Mid-Market,Platform,R015,Sara Okafor,EMEA,100
+A0142,Bluebridge Mobility,AMER,Enterprise,Platform,R007,Mia Mbeki,AMER,60
+A0142,Bluebridge Mobility,AMER,Enterprise,Platform,R024,Elif Rossi,LATAM,25
+A0142,Bluebridge Mobility,AMER,Enterprise,Platform,R004,Ravi Novak,AMER,15
+A0143,Orbitshift Robotics,APAC,SMB,Analytics,R019,Jonas Rossi,APAC,100
+A0144,Cedarwind Software,AMER,Mid-Market,Security,R007,Mia Mbeki,AMER,100
+A0145,Tidalwave Logistics,AMER,SMB,Platform,R006,Priya Ito,AMER,100
+A0146,Nimbuspath Robotics,AMER,Mid-Market,Analytics,R007,Mia Mbeki,AMER,50
+A0146,Nimbuspath Robotics,AMER,Mid-Market,Analytics,R001,Lena Castillo,AMER,25
+A0146,Nimbuspath Robotics,AMER,Mid-Market,Analytics,R010,Elif Reyes,AMER,25
+A0147,Kestrelcore Logistics,APAC,Mid-Market,Platform,R020,Kai Novak,APAC,100
+A0148,Vertexgate Software,AMER,SMB,Analytics,R002,Bruno Tanaka,AMER,100
+A0149,Kestrelpoint Financial,EMEA,SMB,Platform,R011,Priya Okafor,EMEA,100
+A0150,Kestrelworks Energy,EMEA,Enterprise,Security,R011,Priya Okafor,EMEA,100
+A0151,Aspenforge Mobility,AMER,SMB,Platform,R001,Lena Castillo,AMER,100
+A0152,Deltaworks Pharma,APAC,Enterprise,Analytics,R019,Jonas Rossi,APAC,50
+A0152,Deltaworks Pharma,APAC,Enterprise,Analytics,R024,Elif Rossi,LATAM,50
+A0153,Emberbridge Pharma,LATAM,Mid-Market,Analytics,R023,Felix Tanaka,LATAM,100
+A0154,Atlasshift Energy,AMER,Enterprise,Analytics,R007,Mia Mbeki,AMER,100
+A0155,Peakgate Software,EMEA,Enterprise,Platform,R015,Sara Okafor,EMEA,100
+A0156,Blueforge Health,AMER,SMB,Security,R001,Lena Castillo,AMER,100
+A0157,Quantumpath Systems,AMER,SMB,Security,R002,Bruno Tanaka,AMER,100
+A0158,Harborshift Systems,EMEA,Enterprise,Platform,R011,Priya Okafor,EMEA,50
+A0158,Harborshift Systems,EMEA,Enterprise,Platform,R015,Sara Okafor,EMEA,50
+A0159,Embershift Software,EMEA,Mid-Market,Platform,R013,Mateo Moreau,EMEA,80
+A0159,Embershift Software,EMEA,Mid-Market,Platform,R008,Ravi Silva,AMER,20
+A0160,Orbitgate Logistics,APAC,SMB,Analytics,R021,Tomas Rossi,APAC,100
+A0161,Harborwind Insurance,EMEA,SMB,Security,R012,Liam Silva,EMEA,100
+A0162,Ironstone Media,APAC,Mid-Market,Platform,R018,Zoe Kim,APAC,100
+A0163,Granitewind Financial,AMER,SMB,Analytics,R003,Ravi Mbeki,AMER,100
+A0164,Atlaspath Foods,APAC,Mid-Market,Platform,R022,Liam Kim,APAC,100
+A0165,Coralpath Retail,AMER,SMB,Security,R007,Mia Mbeki,AMER,100
+A0166,Lumenline Financial,APAC,SMB,Analytics,R020,Kai Novak,APAC,60
+A0166,Lumenline Financial,APAC,SMB,Analytics,R021,Tomas Rossi,APAC,40
+A0167,Summitgate Foods,AMER,Mid-Market,Platform,R001,Lena Castillo,AMER,100
+A0168,Northpoint Insurance,EMEA,SMB,Platform,R014,Dara Okafor,EMEA,100
+A0169,Aspenwave Software,EMEA,Mid-Market,Platform,R011,Priya Okafor,EMEA,80
+A0169,Aspenwave Software,EMEA,Mid-Market,Platform,R017,Elif Dunne,EMEA,20
+A0170,Atlasforge Energy,EMEA,SMB,Analytics,R011,Priya Okafor,EMEA,100
+A0171,Quantumlabs Energy,AMER,Mid-Market,Analytics,R001,Lena Castillo,AMER,100
+A0172,Quantumworks Insurance,APAC,Enterprise,Analytics,R018,Zoe Kim,APAC,80
+A0172,Quantumworks Insurance,APAC,Enterprise,Analytics,R023,Felix Tanaka,LATAM,20
+A0173,Onyxwind Logistics,LATAM,Mid-Market,Analytics,R025,Yuki Mbeki,LATAM,100
+A0174,Quantumstone Media,EMEA,Mid-Market,Analytics,R015,Sara Okafor,EMEA,60
+A0174,Quantumstone Media,EMEA,Mid-Market,Analytics,R014,Dara Okafor,EMEA,25
+A0174,Quantumstone Media,EMEA,Mid-Market,Analytics,R013,Mateo Moreau,EMEA,15
+A0175,Nimbuslabs Mobility,AMER,SMB,Platform,R001,Lena Castillo,AMER,100
+A0176,Cedarshift Media,APAC,SMB,Analytics,R022,Liam Kim,APAC,100
+A0177,Brightpoint Insurance,AMER,Mid-Market,Platform,R001,Lena Castillo,AMER,70
+A0177,Brightpoint Insurance,AMER,Mid-Market,Platform,R003,Ravi Mbeki,AMER,30
+A0178,Nimbusshift Software,AMER,SMB,Security,R002,Bruno Tanaka,AMER,100
+A0179,Quantumleaf Insurance,AMER,Mid-Market,Platform,R002,Bruno Tanaka,AMER,100
+A0180,Emberworks Insurance,AMER,SMB,Platform,R002,Bruno Tanaka,AMER,100
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+  // Stand-in for the dashboard runtime this page was built on: loads the rows, runs the calculations, holds the filter state, redraws on change.
+  (() => {
+    const load = (id) => d3.csvParse(document.getElementById('ar-data-' + id).textContent.trim());
+    const tables = { arr_movements: load('arr_movements'), account_ownership: load('account_ownership') };
+    const calcs = {}, cache = {};
+    const START = { quarter: 'Q3 2026', metrics: ['New', 'Expansion'], dimension: 'Theater', view: 'cumulative', window: 4, raw: true, credit: 'New + Expansion', detail_ownership: 'all' };
+    let params = JSON.parse(JSON.stringify(START));
+    const fns = [];
+    const fire = () => fns.forEach((f) => f());
+    const data = (id) => {
+      if (tables[id]) return { status: 'ok', data: tables[id], columns: tables[id].columns };
+      if (!calcs[id]) return { status: 'missing', data: [] };
+      if (!(id in cache)) cache[id] = calcs[id].fn(...calcs[id].inputs.map((i) => data(i).data));
+      return { status: 'ok', data: cache[id] };
+    };
+    window.dash = {
+      colors: [1, 2, 3, 4, 5, 6, 7, 8].map((i) => `var(--c${i})`),
+      data,
+      calc: (id, def) => { calcs[id] = def; },
+      onData: (f) => { fns.push(f); f(); },
+      params: () => JSON.parse(JSON.stringify(params)),
+      setParams: (o) => { Object.assign(params, o); fire(); },
+      resetParams: () => { params = JSON.parse(JSON.stringify(START)); fire(); },
+    };
+    let t; window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(fire, 120); });
+  })();
+</script>
+<script>
+// ---------- Calculations (readers see these in Sources) ----------
+dash.calc('arr_kpis', {
+  title: 'ARR headline metrics',
+  description: 'ARR per quarter for each headline metric, with the quarter before and the change. Churn and downgrade are positive amounts lost; net new is signed.',
+  inputs: ['arr_movements'],
+  fn: (arr_movements) => {
+    const quarters = [...new Set(arr_movements.map((e) => e.quarter))]; // file is in date order
+    const metrics = {
+      'Net new': ['New', 'Expansion', 'Churn', 'Downgrade'],
+      'New + Expansion': ['New', 'Expansion'],
+      'Churn + Downgrade': ['Churn', 'Downgrade'],
+      New: ['New'], Expansion: ['Expansion'], Churn: ['Churn'], Downgrade: ['Downgrade'],
+    };
+    const total = (quarter, metric) => arr_movements
+      .filter((e) => e.quarter === quarter && metrics[metric].includes(e.movement_type))
+      .reduce((sum, e) => sum + (metric === 'Net new' ? Number(e.arr_delta) : Math.abs(Number(e.arr_delta))), 0);
+    return quarters.flatMap((quarter, i) => Object.keys(metrics).map((metric) => {
+      const arr = total(quarter, metric);
+      const prior_quarter = i ? quarters[i - 1] : null;
+      const prior_arr = i ? total(prior_quarter, metric) : null;
+      return {quarter, metric, arr, prior_quarter, prior_arr, change: prior_arr ? arr / prior_arr - 1 : null};
+    }));
+  },
+});
+
+dash.calc('arr_breakdown', {
+  title: 'ARR by week of quarter',
+  description: 'Weekly and running ARR per movement type for each quarter, in total and by theater, segment and product. Churn and downgrade are positive amounts lost.',
+  inputs: ['arr_movements'],
+  fn: (arr_movements) => {
+    const dims = {All: () => 'All', Theater: (e) => e.hq_theater, Segment: (e) => e.segment, Product: (e) => e.product};
+    const series = new Map();
+    for (const e of arr_movements) for (const dimension in dims) {
+      const value = dims[dimension](e);
+      const key = [e.quarter, dimension, value, e.movement_type].join('|');
+      if (!series.has(key)) series.set(key, {quarter: e.quarter, dimension, value, movement_type: e.movement_type, weeks: Array(13).fill(0)});
+      series.get(key).weeks[Number(e.week_of_quarter) - 1] += Math.abs(Number(e.arr_delta));
+    }
+    return [...series.values()].flatMap(({weeks, ...s}) => {
+      let cumulative_arr = 0;
+      return weeks.map((arr, i) => ({...s, week: i + 1, arr, cumulative_arr: (cumulative_arr += arr)}));
+    });
+  },
+});
+
+dash.calc('arr_smoothed', {
+  title: 'Smoothed gains and losses',
+  description: 'Weekly new + expansion and churn + downgrade ARR, with trailing 4-, 8- and 13-week averages. An average is empty until a full window of weeks exists.',
+  inputs: ['arr_movements'],
+  fn: (arr_movements) => {
+    const quarters = [...new Set(arr_movements.map((e) => e.quarter))]; // file is in date order
+    const groups = {'New + Expansion': ['New', 'Expansion'], 'Churn + Downgrade': ['Churn', 'Downgrade']};
+    return Object.keys(groups).flatMap((series) => {
+      const weekly = Array(quarters.length * 13).fill(0);
+      for (const e of arr_movements) if (groups[series].includes(e.movement_type)) {
+        weekly[quarters.indexOf(e.quarter) * 13 + Number(e.week_of_quarter) - 1] += Math.abs(Number(e.arr_delta));
+      }
+      const trailing = (i, n) => (i + 1 < n ? null : Math.round(weekly.slice(i + 1 - n, i + 1).reduce((a, b) => a + b, 0) / n));
+      return weekly.map((arr, i) => {
+        const quarter = quarters[Math.floor(i / 13)], week = (i % 13) + 1;
+        const [q, year] = quarter.slice(1).split(' ').map(Number);
+        const week_start = new Date(Date.UTC(year, (q - 1) * 3, 1 + 7 * (week - 1))).toISOString().slice(0, 10);
+        return {series, quarter, week, week_index: i + 1, week_start, arr, avg_4wk: trailing(i, 4), avg_8wk: trailing(i, 8), avg_13wk: trailing(i, 13)};
+      });
+    });
+  },
+});
+
+dash.calc('arr_credit', {
+  title: 'ARR credit by theater pair',
+  description: 'Each ARR movement shared across the account owners by split percent, summed by the account home theater and the credited rep theater.',
+  inputs: ['arr_movements', 'account_ownership'],
+  fn: (arr_movements, account_ownership) => {
+    const owners = new Map();
+    for (const o of account_ownership) owners.set(o.account_id, [...(owners.get(o.account_id) || []), o]);
+    const group = {New: 'New + Expansion', Expansion: 'New + Expansion', Churn: 'Churn + Downgrade', Downgrade: 'Churn + Downgrade'};
+    const pairs = new Map();
+    for (const e of arr_movements) for (const o of owners.get(e.account_id) || []) {
+      const movement = group[e.movement_type];
+      const key = [e.quarter, movement, e.hq_theater, o.rep_theater].join('|');
+      if (!pairs.has(key)) pairs.set(key, {quarter: e.quarter, movement, hq_theater: e.hq_theater, rep_theater: o.rep_theater, credited_arr: 0});
+      pairs.get(key).credited_arr += Math.round(Math.abs(Number(e.arr_delta)) * Number(o.split_pct) / 100);
+    }
+    return [...pairs.values()];
+  },
+});
+
+dash.calc('cross_theater_summary', {
+  title: 'Cross-theater credit share',
+  description: 'ARR credited to reps outside the account home theater, and its share of all credited ARR, per quarter and movement.',
+  inputs: ['arr_credit'],
+  fn: (arr_credit) => {
+    const rows = new Map();
+    for (const p of arr_credit) {
+      const key = p.quarter + '|' + p.movement;
+      if (!rows.has(key)) rows.set(key, {quarter: p.quarter, movement: p.movement, credited_arr: 0, cross_theater_arr: 0});
+      rows.get(key).credited_arr += p.credited_arr;
+      if (p.hq_theater !== p.rep_theater) rows.get(key).cross_theater_arr += p.credited_arr;
+    }
+    return [...rows.values()].map((r) => ({...r, cross_share: r.cross_theater_arr / r.credited_arr}));
+  },
+});
+
+dash.calc('theater_recon', {
+  title: 'Theater totals, three ways',
+  description: 'ARR per theater by account home, by rep split credit, and with every owner given full credit. Shift is split credit less account home; overcount is full credit over account home, less one.',
+  inputs: ['arr_movements', 'account_ownership'],
+  fn: (arr_movements, account_ownership) => {
+    const owners = new Map();
+    for (const o of account_ownership) owners.set(o.account_id, [...(owners.get(o.account_id) || []), o]);
+    const group = {New: 'New + Expansion', Expansion: 'New + Expansion', Churn: 'Churn + Downgrade', Downgrade: 'Churn + Downgrade'};
+    const rows = new Map();
+    const add = (quarter, movement, where, field, arr) => {
+      for (const theater of [where, 'All theaters']) {
+        const key = [quarter, movement, theater].join('|');
+        if (!rows.has(key)) rows.set(key, {quarter, movement, theater, hq_arr: 0, credited_arr: 0, full_credit_arr: 0});
+        rows.get(key)[field] += arr;
+      }
+    };
+    for (const e of arr_movements) {
+      const arr = Math.abs(Number(e.arr_delta)), movement = group[e.movement_type];
+      add(e.quarter, movement, e.hq_theater, 'hq_arr', arr);
+      for (const o of owners.get(e.account_id) || []) {
+        add(e.quarter, movement, o.rep_theater, 'credited_arr', Math.round(arr * Number(o.split_pct) / 100));
+        add(e.quarter, movement, o.rep_theater, 'full_credit_arr', arr);
+      }
+    }
+    return [...rows.values()].map((r) => ({...r, shift: r.credited_arr - r.hq_arr, overcount: r.hq_arr ? r.full_credit_arr / r.hq_arr - 1 : null}));
+  },
+});
+
+dash.calc('split_accounts', {
+  title: 'Split-owned account movements',
+  description: 'ARR moved per quarter and movement for accounts with more than one owner, with each owner, their theater and split percent.',
+  inputs: ['arr_movements', 'account_ownership'],
+  fn: (arr_movements, account_ownership) => {
+    const owners = new Map();
+    for (const o of account_ownership) owners.set(o.account_id, [...(owners.get(o.account_id) || []), o]);
+    const group = {New: 'New + Expansion', Expansion: 'New + Expansion', Churn: 'Churn + Downgrade', Downgrade: 'Churn + Downgrade'};
+    const rows = new Map();
+    for (const e of arr_movements) {
+      const team = owners.get(e.account_id) || [];
+      if (team.length < 2) continue;
+      const movement = group[e.movement_type], key = [e.quarter, movement, e.account].join('|');
+      if (!rows.has(key)) rows.set(key, {quarter: e.quarter, movement, account: e.account, hq_theater: e.hq_theater, segment: e.segment, arr: 0,
+        owners: team.map((o) => `${o.rep} (${o.rep_theater}) ${o.split_pct}%`).join(' · ')});
+      rows.get(key).arr += Math.abs(Number(e.arr_delta));
+    }
+    return [...rows.values()];
+  },
+});
+
+dash.calc('ownership_mix', {
+  title: 'Account ownership mix',
+  description: 'How many accounts have one owner, several owners, and owners in more than one theater.',
+  inputs: ['account_ownership'],
+  fn: (account_ownership) => {
+    const accounts = new Map();
+    for (const o of account_ownership) accounts.set(o.account_id, [...(accounts.get(o.account_id) || []), o]);
+    const teams = [...accounts.values()];
+    return [{
+      accounts: teams.length,
+      multi_rep_accounts: teams.filter((t) => t.length > 1).length,
+      cross_theater_accounts: teams.filter((t) => t.some((o) => o.rep_theater !== o.hq_theater)).length,
+    }];
+  },
+});
+
+dash.calc('credit_ledger', {
+  title: 'Credit ledger',
+  description: 'One row per ARR movement and owner: the movement, the owner, their split percent and the ARR credited to them. Churn and downgrade are positive amounts lost.',
+  inputs: ['arr_movements', 'account_ownership'],
+  fn: (arr_movements, account_ownership) => {
+    const owners = new Map();
+    for (const o of account_ownership) owners.set(o.account_id, [...(owners.get(o.account_id) || []), o]);
+    const quarters = [...new Set(arr_movements.map((e) => e.quarter))]; // file is in date order
+    return arr_movements.flatMap((e) => (owners.get(e.account_id) || []).map((o) => {
+      const arr = Math.abs(Number(e.arr_delta)), week = Number(e.week_of_quarter);
+      return {credit_id: e.event_id + '-' + o.rep_id, date: e.date, quarter: e.quarter, week, week_index: quarters.indexOf(e.quarter) * 13 + week,
+        account: e.account, hq_theater: e.hq_theater, segment: e.segment, product: e.product, movement_type: e.movement_type, arr,
+        owners: owners.get(e.account_id).length, rep: o.rep, rep_theater: o.rep_theater, split_pct: Number(o.split_pct),
+        credited_arr: Math.round(arr * Number(o.split_pct) / 100)};
+    }));
+  },
+});
+
+dash.calc('account_owner_credit', {
+  title: 'Account credit by owner',
+  description: 'For each account and owner: their split percent and the ARR credited to them across all quarters, as new + expansion, churn + downgrade and net.',
+  inputs: ['credit_ledger'],
+  fn: (credit_ledger) => {
+    const rows = new Map();
+    for (const c of credit_ledger) {
+      const key = c.account + '|' + c.rep;
+      if (!rows.has(key)) rows.set(key, {account: c.account, hq_theater: c.hq_theater, segment: c.segment, product: c.product,
+        rep: c.rep, rep_theater: c.rep_theater, split_pct: c.split_pct, gains_credited: 0, losses_credited: 0});
+      rows.get(key)[['New', 'Expansion'].includes(c.movement_type) ? 'gains_credited' : 'losses_credited'] += c.credited_arr;
+    }
+    return [...rows.values()].map((r) => ({...r, net_credited: r.gains_credited - r.losses_credited}));
+  },
+});
+
+// ---------- Page ----------
+const root = document.querySelector('.arr');
+const $ = (selector, el = root) => el.querySelector(selector);
+const C = dash.colors;
+const METRICS = ['New', 'Expansion', 'Downgrade', 'Churn'];
+const METRIC_LABEL = {New: 'New ARR', Expansion: 'Expansion ARR', Downgrade: 'ARR downgrade', Churn: 'ARR churn'};
+const METRIC_COLOR = {New: C[0], Expansion: C[1], Downgrade: C[2], Churn: C[3]};
+const GROUPS = ['New + Expansion', 'Churn + Downgrade'];
+const GROUP_LABEL = {'New + Expansion': 'New + expansion', 'Churn + Downgrade': 'Churn + downgrade'};
+const GROUP_COLOR = {'New + Expansion': C[0], 'Churn + Downgrade': C[3]};
+const GROUP_TYPES = {'New + Expansion': ['New', 'Expansion'], 'Churn + Downgrade': ['Churn', 'Downgrade']};
+const DETAIL_KEYS = ['detail_types', 'detail_dimension', 'detail_value', 'detail_weeks', 'detail_span', 'detail_home', 'detail_credit_theater'];
+const NO_DETAIL = Object.fromEntries(DETAIL_KEYS.map((k) => [k, null]));
+const DEFAULTS = {quarter: null, metrics: ['New', 'Expansion'], dimension: 'Theater', view: 'cumulative', window: 4, raw: true, credit: 'New + Expansion'};
+
+const params = () => {
+  const set = dash.params() || {}, p = {...DEFAULTS};
+  for (const k in DEFAULTS) if (set[k] !== undefined && set[k] !== null) p[k] = set[k];
+  p.metrics = [].concat(p.metrics).filter((m) => METRICS.includes(m));
+  if (!p.metrics.length) p.metrics = DEFAULTS.metrics;
+  if (!['All', 'Theater', 'Segment', 'Product'].includes(p.dimension)) p.dimension = DEFAULTS.dimension;
+  if (!['cumulative', 'weekly'].includes(p.view)) p.view = DEFAULTS.view;
+  p.window = [4, 8, 13].includes(Number(p.window)) ? Number(p.window) : DEFAULTS.window;
+  p.raw = p.raw !== false && p.raw !== 'false';
+  if (!GROUPS.includes(p.credit)) p.credit = DEFAULTS.credit;
+  // Drilldown filters, set by clicks.
+  const range = (v) => (Array.isArray(v) && v.length === 2 && v.every((n) => Number.isFinite(Number(n))) ? v.map(Number) : null);
+  const types = [].concat(set.detail_types ?? []).filter((m) => METRICS.includes(m));
+  p.detail_types = types.length ? types : null;
+  p.detail_weeks = range(set.detail_weeks);
+  p.detail_span = range(set.detail_span);
+  for (const k of ['detail_dimension', 'detail_value', 'detail_home', 'detail_credit_theater', 'account']) p[k] = set[k] ?? null;
+  p.detail_ownership = ['split', 'cross'].includes(set.detail_ownership) ? set.detail_ownership : 'all';
+  return p;
+};
+
+const money = (v) => {
+  if (v == null || Number.isNaN(v)) return '—';
+  const a = Math.abs(v), sign = v < 0 ? '−' : '';
+  return sign + '$' + (a >= 1e6 ? (a / 1e6).toFixed(2) + 'M' : a >= 1e3 ? Math.round(a / 1e3) + 'K' : Math.round(a));
+};
+const axisMoney = (v) => (v >= 1e6 ? '$' + +(v / 1e6).toFixed(1) + 'M' : v >= 1e3 ? '$' + Math.round(v / 1e3) + 'K' : '$' + v);
+const signedPct = d3.format('+.1%');
+const pct = d3.format('.1%');
+const shortDate = d3.utcFormat('%b %-d');
+
+const statusOf = (...ids) => {
+  const all = ids.map((id) => dash.data(id).status);
+  return all.every((s) => s === 'ok') ? 'ok' : all.some((s) => s === 'error' || s === 'missing') ? 'error' : 'loading';
+};
+const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+const enc = (v) => String(v).replace(/%/g, '%25').replace(/&/g, '%26').replace(/=/g, '%3D');
+const cite = (node, source, field, where) => {
+  node.setAttribute('data-source', source);
+  if (field) node.setAttribute('data-field', field);
+  if (where) node.setAttribute('data-where', Object.entries(where).map(([k, v]) => k + '=' + enc(v)).join('&'));
+  else node.removeAttribute('data-where');
+  return node;
+};
+const cited = (text, source, field, where, cls) => cite(el('span', cls, text), source, field, where);
+// A chart box: empty while loading, one line when its source failed.
+const boxReady = (box, state) => {
+  box.classList.toggle('dash-skeleton', state === 'loading');
+  if (state === 'ok') return true;
+  box.replaceChildren();
+  if (state === 'error') { const f = el('div', 'arr-fail'); f.append(el('i'), 'Failed to load'); box.append(f); }
+  return false;
+};
+const pressed = (seg, value) => { for (const b of seg.querySelectorAll('button')) b.setAttribute('aria-pressed', String(b.dataset.value === String(value))); };
+const textWidth = (svg, strings, cls) => {
+  const t = svg.append('text').attr('class', cls).style('visibility', 'hidden');
+  let w = 0;
+  for (const s of strings) { t.text(s); w = Math.max(w, t.node().getComputedTextLength()); }
+  t.remove();
+  return Math.ceil(w);
+};
+
+// Tooltips: one per card, kept inside it.
+const tipOf = (card) => { let t = card.querySelector(':scope > .arr-tip'); if (!t) { t = el('div', 'arr-tip'); t.hidden = true; card.append(t); } return t; };
+const showTip = (card, event, title, items, hint) => {
+  const tip = tipOf(card);
+  tip.replaceChildren(el('div', 'arr-tip-title', title));
+  for (const it of items) {
+    const row = el('div', 'arr-tip-row'), sw = el('i');
+    sw.style.background = it.color || 'transparent';
+    if (it.faint) sw.style.opacity = 0.45;
+    row.append(sw, el('span', '', it.name), el('em', '', it.value));
+    tip.append(row);
+  }
+  if (hint) tip.append(el('div', 'arr-tip-hint', hint));
+  tip.hidden = false;
+  const r = card.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+  let x = event.clientX - r.left + 14, y = event.clientY - r.top + 14;
+  if (x + w > r.width - 4) x = event.clientX - r.left - w - 14;
+  if (y + h > r.height - 4) y = event.clientY - r.top - h - 14;
+  tip.style.left = Math.max(4, x) + 'px';
+  tip.style.top = Math.max(4, y) + 'px';
+};
+const hideTip = (card) => { tipOf(card).hidden = true; };
+
+// ---------- Controls ----------
+const chips = $('#metric-chips');
+for (const m of METRICS) {
+  const b = el('button', 'arr-chip'); b.type = 'button'; b.dataset.value = m;
+  const dot = el('i'); dot.dataset.color = m;
+  b.append(dot, METRIC_LABEL[m]);
+  chips.append(b);
+}
+chips.addEventListener('click', (event) => {
+  const b = event.target.closest('button'); if (!b) return;
+  const now = params().metrics, m = b.dataset.value;
+  const next = now.includes(m) ? now.filter((x) => x !== m) : METRICS.filter((x) => x === m || now.includes(x));
+  if (next.length) dash.setParams({metrics: next});
+});
+const segment = (id, name, cast = String) => $(id).addEventListener('click', (event) => {
+  const b = event.target.closest('button'); if (b) dash.setParams({[name]: cast(b.dataset.value)});
+});
+segment('#dimension-seg', 'dimension');
+segment('#view-seg', 'view');
+segment('#window-seg', 'window', Number);
+segment('#credit-seg', 'credit');
+$('#raw-toggle').addEventListener('change', (event) => dash.setParams({raw: event.target.checked}));
+$('#quarter').addEventListener('change', (event) => dash.setParams({quarter: event.target.value}));
+
+// ---------- Drilldown ----------
+const goTo = (id) => requestAnimationFrame(() => {
+  const calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  $(id).scrollIntoView({behavior: calm ? 'auto' : 'smooth', block: 'start'});
+});
+// A click on a tile, chart or band replaces the detail filters with what was clicked.
+const drill = (filters) => { dash.setParams({...NO_DETAIL, detail_ownership: 'all', ...filters}); goTo('#detail'); };
+const openAccount = (account) => { dash.setParams({account}); goTo('#account'); };
+const TILE_TYPES = {'Net new': null, 'New + Expansion': ['New', 'Expansion'], Churn: ['Churn'], Downgrade: ['Downgrade']};
+for (const tile of root.querySelectorAll('.arr-tile')) {
+  const go = () => drill({detail_types: TILE_TYPES[tile.dataset.metric]});
+  tile.addEventListener('click', go);
+  tile.addEventListener('keydown', (event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); go(); } });
+}
+$('#recon-table').addEventListener('click', (event) => {
+  const tr = event.target.closest('tr[data-theater]'); if (!tr) return;
+  drill({detail_types: GROUP_TYPES[params().credit], detail_credit_theater: tr.dataset.theater === 'All theaters' ? null : tr.dataset.theater});
+});
+for (const id of ['#accounts-table', '#ledger-table']) $(id).addEventListener('click', (event) => {
+  const tr = event.target.closest('tr[data-account]'); if (tr) openAccount(tr.dataset.account);
+});
+segment('#ownership-seg', 'detail_ownership');
+const ledgerView = {sort: 'arr', dir: -1, search: ''};
+let ledgerArgs = null;
+$('#ledger-table thead').addEventListener('click', (event) => {
+  const b = event.target.closest('.arr-sort'); if (!b) return;
+  const field = b.closest('th').dataset.field;
+  if (ledgerView.sort === field) ledgerView.dir *= -1;
+  else { ledgerView.sort = field; ledgerView.dir = ['date', 'arr', 'split_pct', 'credited_arr'].includes(field) ? -1 : 1; }
+  drawLedger();
+});
+$('#ledger-search').addEventListener('input', (event) => { ledgerView.search = event.target.value; drawLedger(); });
+$('#detail-clear').addEventListener('click', () => { ledgerView.search = ''; $('#ledger-search').value = ''; dash.setParams({...NO_DETAIL, detail_ownership: 'all'}); });
+$('#account-close').addEventListener('click', () => dash.setParams({account: null}));
+
+// ---------- Drawing ----------
+function drawHeader(p, state, kpis, quarter, prior) {
+  const row = (metric) => kpis.find((r) => r.quarter === quarter && r.metric === metric);
+  const take = $('#takeaway');
+  if (state !== 'ok' || !quarter) take.textContent = '—';
+  else {
+    const net = row('Net new'), gain = row('New + Expansion'), loss = row('Churn + Downgrade');
+    take.replaceChildren(
+      `${quarter} net new ARR was `, cited(money(net.arr), 'arr_kpis', 'arr', {quarter, metric: 'Net new'}),
+      ', ', cited(signedPct(net.change), 'arr_kpis', 'change', {quarter, metric: 'Net new'}), ` against ${prior}. New + expansion moved `,
+      cited(signedPct(gain.change), 'arr_kpis', 'change', {quarter, metric: 'New + Expansion'}), ' and churn + downgrade moved ',
+      cited(signedPct(loss.change), 'arr_kpis', 'change', {quarter, metric: 'Churn + Downgrade'}), '.');
+  }
+  for (const tile of root.querySelectorAll('.arr-tile')) {
+    const metric = tile.dataset.metric, value = $('.arr-tile-value', tile), delta = $('.arr-tile-delta', tile);
+    const r = state === 'ok' && quarter ? row(metric) : null;
+    $('.arr-tile-label', tile).textContent = tile.dataset.label + (quarter ? ` · ${quarter}` : '');
+    value.classList.toggle('dash-skeleton', state === 'loading');
+    value.textContent = r ? money(r.arr) : '—';
+    cite(value, 'arr_kpis', 'arr', r && {quarter, metric});
+    if (!r) { delta.textContent = '—'; continue; }
+    const good = (r.change >= 0) === (tile.dataset.good === 'up');
+    delta.replaceChildren(cited(signedPct(r.change), 'arr_kpis', 'change', {quarter, metric}, good ? 'arr-good' : 'arr-bad'), ` vs ${prior}`);
+  }
+  const split = $('#tile-gain-split');
+  if (state === 'ok' && quarter) split.replaceChildren('New ', cited(money(row('New').arr), 'arr_kpis', 'arr', {quarter, metric: 'New'}),
+    ' · Expansion ', cited(money(row('Expansion').arr), 'arr_kpis', 'arr', {quarter, metric: 'Expansion'}));
+}
+
+function drawBreakdown(p, quarter, prior) {
+  pressed($('#dimension-seg'), p.dimension);
+  pressed($('#view-seg'), p.view);
+  for (const b of chips.querySelectorAll('button')) {
+    const on = p.metrics.includes(b.dataset.value);
+    b.setAttribute('aria-pressed', String(on));
+    b.querySelector('i').style.background = on ? METRIC_COLOR[b.dataset.value] : 'transparent';
+  }
+  const card = $('#breakdown'), box = $('#breakdown-panels'), legend = $('#breakdown-legend');
+  hideTip(card);
+  $('#breakdown-title').textContent = quarter ? `Breakdown: ${quarter} vs ${prior}` : 'Breakdown: this quarter vs last quarter';
+  legend.replaceChildren();
+  if (!boxReady(box, quarter ? statusOf('arr_breakdown') : statusOf('arr_kpis', 'arr_breakdown'))) return;
+
+  const all = dash.data('arr_breakdown').data.filter((r) => r.dimension === p.dimension);
+  const field = p.view === 'weekly' ? 'arr' : 'cumulative_arr';
+  const lines = new Map(); // value|quarter|type -> 13 weekly points
+  for (const r of all) {
+    const key = [r.value, r.quarter, r.movement_type].join('|');
+    if (!lines.has(key)) lines.set(key, Array(13).fill(0));
+    lines.get(key)[r.week - 1] = r[field];
+  }
+  const get = (value, q, type) => lines.get([value, q, type].join('|')) || Array(13).fill(0);
+  const size = d3.rollup(all, (v) => d3.sum(v, (r) => r.arr), (r) => r.value);
+  const values = [...size.keys()].sort((a, b) => size.get(b) - size.get(a));
+  const top = d3.max(values, (v) => d3.max(p.metrics, (m) => Math.max(d3.max(get(v, quarter, m)), d3.max(get(v, prior, m))))) || 1;
+  const domain = d3.scaleLinear([0, top], [0, 1]).nice(4).domain();
+
+  for (const m of p.metrics) { const s = el('span'), dot = el('i', 'arr-dot'); dot.style.background = METRIC_COLOR[m]; s.append(dot, METRIC_LABEL[m]); legend.append(s); }
+  const now = el('span'); now.append(el('i', 'arr-line'), quarter);
+  const then = el('span'); then.append(el('i', 'arr-line arr-line-dash'), prior);
+  legend.append(now, then);
+
+  box.replaceChildren();
+  const one = values.length === 1;
+  box.style.gridTemplateColumns = one ? '1fr' : '';
+  const holders = values.map((value) => {
+    const panel = el('div', 'arr-panel'), holder = el('div');
+    if (!one) panel.append(el('div', 'arr-panel-title', value));
+    panel.append(holder); box.append(panel);
+    return [value, holder];
+  });
+  for (const [value, holder] of holders) {
+    const W = Math.max(holder.clientWidth, 220), H = one ? 300 : 190, mt = 10, mb = 24, mr = 12;
+    const svg = d3.select(holder).append('svg').attr('class', 'arr-svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`)
+      .attr('role', 'img').attr('aria-label', `${one ? 'Total' : value}: ${p.metrics.map((m) => METRIC_LABEL[m]).join(', ')} by week, ${quarter} vs ${prior}`);
+    const y = d3.scaleLinear(domain, [H - mb, mt]);
+    const ticks = y.ticks(4);
+    const ml = textWidth(svg, ticks.map(axisMoney), 'arr-tick') + 8;
+    const x = d3.scaleLinear([1, 13], [ml, W - mr]);
+    for (const t of ticks) {
+      svg.append('line').attr('x1', ml).attr('x2', W - mr).attr('y1', y(t)).attr('y2', y(t)).style('stroke', t ? 'var(--cds-chart-grid)' : 'var(--cds-chart-axis)');
+      svg.append('text').attr('class', 'arr-tick').attr('x', ml - 6).attr('y', y(t)).attr('dy', '0.32em').attr('text-anchor', 'end').text(axisMoney(t));
+    }
+    for (const w of [1, 4, 7, 10, 13]) svg.append('text').attr('class', 'arr-tick').attr('x', x(w)).attr('y', H - 6)
+      .attr('text-anchor', w === 13 ? 'end' : w === 1 ? 'start' : 'middle').text('W' + w);
+    const path = d3.line().x((d, i) => x(i + 1)).y((d) => y(d));
+    for (const m of p.metrics) svg.append('path').attr('d', path(get(value, prior, m))).style('fill', 'none').style('stroke', METRIC_COLOR[m])
+      .style('stroke-width', 1.5).style('stroke-dasharray', '4 4').style('opacity', 0.55).style('stroke-linejoin', 'round');
+    for (const m of p.metrics) svg.append('path').attr('d', path(get(value, quarter, m))).style('fill', 'none').style('stroke', METRIC_COLOR[m])
+      .style('stroke-width', 2).style('stroke-linecap', 'round').style('stroke-linejoin', 'round');
+    const rule = svg.append('line').attr('y1', mt).attr('y2', H - mb).style('stroke', 'var(--cds-chart-axis)').style('display', 'none');
+    const dots = svg.append('g');
+    svg.append('rect').attr('x', ml).attr('y', 0).attr('width', Math.max(0, W - mr - ml)).attr('height', H - mb).style('fill', 'transparent').style('pointer-events', 'all').style('cursor', 'pointer')
+      .on('pointermove', (event) => {
+        const w = Math.max(1, Math.min(13, Math.round(x.invert(d3.pointer(event, svg.node())[0]))));
+        rule.style('display', null).attr('x1', x(w)).attr('x2', x(w));
+        dots.selectAll('circle').data(p.metrics).join('circle').attr('r', 3.5).attr('cx', x(w)).attr('cy', (m) => y(get(value, quarter, m)[w - 1])).style('fill', (m) => METRIC_COLOR[m]);
+        showTip(card, event, `${one ? 'Total' : value} · week ${w}${p.view === 'weekly' ? '' : ', quarter to date'}`, p.metrics.flatMap((m) => [
+          {color: METRIC_COLOR[m], name: `${METRIC_LABEL[m]} · ${quarter}`, value: money(get(value, quarter, m)[w - 1])},
+          {color: METRIC_COLOR[m], faint: true, name: `${METRIC_LABEL[m]} · ${prior}`, value: money(get(value, prior, m)[w - 1])},
+        ]), 'Click to list these movements');
+      })
+      .on('click', (event) => {
+        const w = Math.max(1, Math.min(13, Math.round(x.invert(d3.pointer(event, svg.node())[0]))));
+        drill({detail_types: p.metrics, detail_dimension: one ? null : p.dimension, detail_value: one ? null : value, detail_weeks: p.view === 'weekly' ? [w, w] : [1, w]});
+      })
+      .on('pointerleave', () => { rule.style('display', 'none'); dots.selectAll('circle').remove(); hideTip(card); });
+  }
+}
+
+function drawSmoothed(p, quarter, prior) {
+  pressed($('#window-seg'), p.window);
+  $('#raw-toggle').checked = p.raw;
+  const card = $('#smoothed'), box = $('#smoothed-chart'), legend = $('#smoothed-legend');
+  hideTip(card);
+  legend.replaceChildren();
+  if (!boxReady(box, quarter ? statusOf('arr_smoothed') : statusOf('arr_kpis', 'arr_smoothed'))) return;
+  const field = `avg_${p.window}wk`;
+  const rows = dash.data('arr_smoothed').data.filter((r) => r.quarter === quarter || r.quarter === prior);
+  const by = d3.group(rows, (r) => r.series);
+  const weeks = (by.get(GROUPS[0]) || []).slice().sort((a, b) => a.week_index - b.week_index);
+  if (!weeks.length) { box.replaceChildren(); return; }
+  const at = (series, index) => by.get(series).find((r) => r.week_index === index);
+
+  for (const g of GROUPS) { const s = el('span'), dot = el('i', 'arr-dot'); dot.style.background = GROUP_COLOR[g]; s.append(dot, GROUP_LABEL[g]); legend.append(s); }
+  const smooth = el('span'); smooth.append(el('i', 'arr-line'), `Trailing ${p.window}-week average`); legend.append(smooth);
+  if (p.raw) { const raw = el('span'); raw.append(el('i', 'arr-line arr-line-thin'), 'Unsmoothed weekly'); legend.append(raw); }
+
+  box.replaceChildren();
+  const W = Math.max(box.clientWidth, 260), H = 280, mt = 26, mb = 26;
+  const svg = d3.select(box).append('svg').attr('class', 'arr-svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`)
+    .attr('role', 'img').attr('aria-label', `Trailing ${p.window}-week average of new + expansion and churn + downgrade ARR, ${prior} to ${quarter}`);
+  const top = d3.max(rows, (r) => Math.max(r[field] || 0, p.raw ? r.arr : 0)) || 1;
+  const y = d3.scaleLinear([0, top], [H - mb, mt]).nice(4);
+  const ticks = y.ticks(4);
+  const last = weeks[weeks.length - 1].week_index, first = weeks[0].week_index;
+  const ends = GROUPS.map((g) => ({g, v: at(g, last)[field]})).filter((d) => d.v != null);
+  const ml = textWidth(svg, ticks.map(axisMoney), 'arr-tick') + 8;
+  const mr = textWidth(svg, ends.map((d) => money(d.v)), 'arr-lab') + 12;
+  const x = d3.scaleLinear([first, last], [ml, W - mr]);
+  for (const t of ticks) {
+    svg.append('line').attr('x1', ml).attr('x2', W - mr).attr('y1', y(t)).attr('y2', y(t)).style('stroke', t ? 'var(--cds-chart-grid)' : 'var(--cds-chart-axis)');
+    svg.append('text').attr('class', 'arr-tick').attr('x', ml - 6).attr('y', y(t)).attr('dy', '0.32em').attr('text-anchor', 'end').text(axisMoney(t));
+  }
+  // Quarter boundary and names.
+  const cut = weeks.find((r) => r.quarter === quarter).week_index;
+  svg.append('line').attr('x1', x(cut - 0.5)).attr('x2', x(cut - 0.5)).attr('y1', mt - 6).attr('y2', H - mb).style('stroke', 'var(--cds-chart-reference)').style('stroke-dasharray', '3 3');
+  svg.append('text').attr('class', 'arr-tick').attr('x', (ml + x(cut - 0.5)) / 2).attr('y', 12).attr('text-anchor', 'middle').text(prior);
+  svg.append('text').attr('class', 'arr-tick').attr('x', (x(cut - 0.5) + W - mr) / 2).attr('y', 12).attr('text-anchor', 'middle').text(quarter);
+  const step = W < 460 ? [1, 7] : [1, 5, 9];
+  for (const r of weeks) if (step.includes(r.week)) svg.append('text').attr('class', 'arr-tick').attr('x', x(r.week_index)).attr('y', H - 7)
+    .attr('text-anchor', r.week_index === first ? 'start' : 'middle').text(shortDate(new Date(r.week_start)));
+
+  for (const g of GROUPS) {
+    const pts = by.get(g).slice().sort((a, b) => a.week_index - b.week_index);
+    if (p.raw) svg.append('path').attr('d', d3.line().x((d) => x(d.week_index)).y((d) => y(d.arr))(pts)).style('fill', 'none').style('stroke', GROUP_COLOR[g])
+      .style('stroke-width', 1).style('opacity', 0.4).style('stroke-linejoin', 'round');
+    svg.append('path').attr('d', d3.line().defined((d) => d[field] != null).x((d) => x(d.week_index)).y((d) => y(d[field]))(pts)).style('fill', 'none')
+      .style('stroke', GROUP_COLOR[g]).style('stroke-width', 2.5).style('stroke-linecap', 'round').style('stroke-linejoin', 'round');
+  }
+  // End labels, kept apart.
+  const labels = ends.map((d) => ({...d, y: y(d.v)})).sort((a, b) => a.y - b.y);
+  for (let i = 1; i < labels.length; i++) if (labels[i].y - labels[i - 1].y < 14) { const mid = (labels[i].y + labels[i - 1].y) / 2; labels[i - 1].y = mid - 7; labels[i].y = mid + 7; }
+  for (const d of labels) svg.append('text').attr('class', 'arr-lab').attr('x', W - mr + 6).attr('y', d.y).attr('dy', '0.32em').style('fill', GROUP_COLOR[d.g]).text(money(d.v));
+
+  const rule = svg.append('line').attr('y1', mt).attr('y2', H - mb).style('stroke', 'var(--cds-chart-axis)').style('display', 'none');
+  const dots = svg.append('g');
+  svg.append('rect').attr('x', ml).attr('y', 0).attr('width', Math.max(0, W - mr - ml)).attr('height', H - mb).style('fill', 'transparent').style('pointer-events', 'all').style('cursor', 'pointer')
+    .on('pointermove', (event) => {
+      const i = Math.max(first, Math.min(last, Math.round(x.invert(d3.pointer(event, svg.node())[0]))));
+      const week = at(GROUPS[0], i);
+      rule.style('display', null).attr('x1', x(i)).attr('x2', x(i));
+      dots.selectAll('circle').data(GROUPS.filter((g) => at(g, i)[field] != null)).join('circle').attr('r', 3.5).attr('cx', x(i)).attr('cy', (g) => y(at(g, i)[field])).style('fill', (g) => GROUP_COLOR[g]);
+      showTip(card, event, `Week of ${shortDate(new Date(week.week_start))} · ${week.quarter} W${week.week}`, GROUPS.flatMap((g) => [
+        {color: GROUP_COLOR[g], name: `${GROUP_LABEL[g]} · ${p.window}-wk avg`, value: at(g, i)[field] == null ? 'not enough history' : money(at(g, i)[field])},
+        {color: GROUP_COLOR[g], faint: true, name: `${GROUP_LABEL[g]} · that week`, value: money(at(g, i).arr)},
+      ]), `Click to list the ${p.window} weeks behind this point`);
+    })
+    .on('click', (event) => {
+      const i = Math.max(first, Math.min(last, Math.round(x.invert(d3.pointer(event, svg.node())[0]))));
+      drill({detail_span: [Math.max(1, i - p.window + 1), i]});
+    })
+    .on('pointerleave', () => { rule.style('display', 'none'); dots.selectAll('circle').remove(); hideTip(card); });
+}
+
+function theaterColors() {
+  const credit = dash.data('arr_credit');
+  if (credit.status !== 'ok') return {order: [], color: () => 'var(--cds-chart-muted)'};
+  const size = d3.rollup(credit.data, (v) => d3.sum(v, (r) => r.credited_arr), (r) => r.hq_theater);
+  for (const r of credit.data) if (!size.has(r.rep_theater)) size.set(r.rep_theater, 0);
+  const order = [...size.keys()].sort((a, b) => size.get(b) - size.get(a));
+  return {order, color: (t) => C[4 + (Math.max(0, order.indexOf(t)) % 4)]};
+}
+
+function drawFlow(p, quarter, theaters) {
+  pressed($('#credit-seg'), p.credit);
+  const card = $('#flow'), box = $('#flow-chart');
+  hideTip(card);
+  if (!boxReady(box, quarter ? statusOf('arr_credit') : statusOf('arr_kpis', 'arr_credit'))) return;
+  const rows = dash.data('arr_credit').data.filter((r) => r.quarter === quarter && r.movement === p.credit);
+  box.replaceChildren();
+  const total = d3.sum(rows, (r) => r.credited_arr);
+  if (!total) return;
+  const sumBy = (key) => d3.rollup(rows, (v) => d3.sum(v, (r) => r.credited_arr), (r) => r[key]);
+  const booked = sumBy('hq_theater'), credited = sumBy('rep_theater');
+  const left = theaters.order.filter((t) => booked.get(t)), right = theaters.order.filter((t) => credited.get(t));
+  const W = Math.max(box.clientWidth, 260), H = 320, mt = 26, pad = 12, node = 10;
+  const svg = d3.select(box).append('svg').attr('class', 'arr-svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`)
+    .attr('role', 'img').attr('aria-label', `${GROUP_LABEL[p.credit]} ARR in ${quarter}, from account home theater to credited rep theater`);
+  const label = (t, map) => `${t} ${money(map.get(t))}`;
+  const ml = textWidth(svg, left.map((t) => label(t, booked)), 'arr-lab') + 8;
+  const mr = textWidth(svg, right.map((t) => label(t, credited)), 'arr-lab') + 8;
+  const x0 = ml, x1 = W - mr - node, k = (H - mt - 4 - pad * (Math.max(left.length, right.length) - 1)) / total;
+  const stack = (names, map) => { let yy = mt; const pos = new Map(); for (const t of names) { pos.set(t, {y: yy, used: 0}); yy += map.get(t) * k + pad; } return pos; };
+  const L = stack(left, booked), R = stack(right, credited);
+  svg.append('text').attr('class', 'arr-tick').attr('x', 0).attr('y', 12).text('Account home theater');
+  svg.append('text').attr('class', 'arr-tick').attr('x', W).attr('y', 12).attr('text-anchor', 'end').text('Credited rep theater');
+  const bands = svg.append('g');
+  for (const a of left) for (const b of right) {
+    const r = rows.find((d) => d.hq_theater === a && d.rep_theater === b);
+    if (!r) continue;
+    const h = r.credited_arr * k, ya = L.get(a).y + L.get(a).used, yb = R.get(b).y + R.get(b).used, xa = x0 + node, xm = (xa + x1) / 2;
+    L.get(a).used += h; R.get(b).used += h;
+    const cross = a !== b, rest = cross ? 0.62 : 0.2;
+    bands.append('path').attr('class', 'arr-ribbon')
+      .attr('d', `M${xa},${ya}C${xm},${ya} ${xm},${yb} ${x1},${yb}L${x1},${yb + h}C${xm},${yb + h} ${xm},${ya + h} ${xa},${ya + h}Z`)
+      .style('fill', theaters.color(a)).style('opacity', rest)
+      .on('pointermove', function (event) {
+        bands.selectAll('path').style('opacity', 0.1); d3.select(this).style('opacity', 0.85);
+        showTip(card, event, `${a} account → ${b} reps`, [
+          {color: theaters.color(a), name: 'Credited ARR', value: money(r.credited_arr)},
+          {name: `Share of ${a}-booked ARR`, value: pct(r.credited_arr / booked.get(a))},
+        ], 'Click to list these movements');
+      })
+      .on('click', () => drill({detail_types: GROUP_TYPES[p.credit], detail_home: a, detail_credit_theater: b}))
+      .on('pointerleave', function () { bands.selectAll('path').style('opacity', (d, i, n) => n[i].dataset.rest); hideTip(card); })
+      .node().dataset.rest = rest;
+  }
+  for (const t of left) {
+    const pick = () => drill({detail_types: GROUP_TYPES[p.credit], detail_home: t});
+    svg.append('rect').attr('class', 'arr-node').attr('x', x0).attr('y', L.get(t).y).attr('width', node).attr('height', Math.max(1, booked.get(t) * k)).attr('rx', 2).style('fill', theaters.color(t)).on('click', pick);
+    svg.append('text').attr('class', 'arr-lab arr-node').on('click', pick).attr('x', x0 - 6).attr('y', L.get(t).y + booked.get(t) * k / 2).attr('dy', '0.32em').attr('text-anchor', 'end').text(label(t, booked));
+  }
+  for (const t of right) {
+    const pick = () => drill({detail_types: GROUP_TYPES[p.credit], detail_credit_theater: t});
+    svg.append('rect').attr('class', 'arr-node').attr('x', x1).attr('y', R.get(t).y).attr('width', node).attr('height', Math.max(1, credited.get(t) * k)).attr('rx', 2).style('fill', theaters.color(t)).on('click', pick);
+    svg.append('text').attr('class', 'arr-lab arr-node').on('click', pick).attr('x', x1 + node + 6).attr('y', R.get(t).y + credited.get(t) * k / 2).attr('dy', '0.32em').text(label(t, credited));
+  }
+}
+
+function drawAttributionText(p, quarter) {
+  const note = $('#attribution-note'), mix = dash.data('ownership_mix'), cross = dash.data('cross_theater_summary');
+  if (mix.status !== 'ok' || cross.status !== 'ok' || !quarter) { note.textContent = '—'; return; }
+  const m = mix.data[0], c = cross.data.find((r) => r.quarter === quarter && r.movement === p.credit);
+  const mixCell = (field) => { const s = cited(d3.format(',')(m[field]), 'ownership_mix', field); s.setAttribute('data-row', '0'); return s; };
+  note.replaceChildren(mixCell('multi_rep_accounts'), ' of ', mixCell('accounts'), ' accounts have more than one owner, and ', mixCell('cross_theater_accounts'),
+    ' have an owner outside the account’s home theater. Each movement is shared across owners by split percent, so every dollar is counted once.');
+  if (c) note.append(` In ${quarter}, `, cited(money(c.cross_theater_arr), 'cross_theater_summary', 'cross_theater_arr', {quarter, movement: p.credit}), ' (',
+    cited(pct(c.cross_share), 'cross_theater_summary', 'cross_share', {quarter, movement: p.credit}), `) of ${GROUP_LABEL[p.credit].toLowerCase()} ARR was credited to a different theater than the one that booked it.`);
+}
+
+const rowKey = (...parts) => parts.map(encodeURIComponent).join(',');
+
+function drawRecon(p, quarter, theaters) {
+  const body = $('#recon-table tbody'), note = $('#recon-note'), src = dash.data('theater_recon');
+  body.replaceChildren();
+  if (src.status !== 'ok' || !quarter) { note.textContent = src.status === 'error' ? 'Failed to load' : '—'; return; }
+  const rows = src.data.filter((r) => r.quarter === quarter && r.movement === p.credit);
+  const rank = (t) => (t === 'All theaters' ? 99 : theaters.order.indexOf(t));
+  rows.sort((a, b) => rank(a.theater) - rank(b.theater));
+  for (const r of rows) {
+    const tr = el('tr', r.theater === 'All theaters' ? 'arr-total' : '');
+    tr.dataset.key = rowKey(r.quarter, r.movement, r.theater); tr.dataset.theater = r.theater;
+    const shift = el('td', 'arr-num', r.shift === 0 ? '$0' : (r.shift > 0 ? '+' : '') + money(r.shift));
+    tr.append(el('td', '', r.theater), el('td', 'arr-num', money(r.hq_arr)), el('td', 'arr-num', money(r.credited_arr)), shift, el('td', 'arr-num', money(r.full_credit_arr)));
+    body.append(tr);
+  }
+  const all = rows.find((r) => r.theater === 'All theaters');
+  if (!all) { note.textContent = '—'; return; }
+  const where = {quarter, movement: p.credit, theater: 'All theaters'};
+  note.replaceChildren('Split credit moves ARR between theaters but still adds up to the booked total of ', cited(money(all.hq_arr), 'theater_recon', 'hq_arr', where),
+    '. Giving every owner full credit would overstate it by ', cited(pct(all.overcount), 'theater_recon', 'overcount', where), '.');
+}
+
+function drawAccounts(p, quarter, theaters) {
+  const body = $('#accounts-table tbody'), legend = $('#theater-legend'), src = dash.data('split_accounts');
+  body.replaceChildren(); legend.replaceChildren();
+  if (src.status !== 'ok' || !quarter) return;
+  for (const t of theaters.order) { const s = el('span'), dot = el('i', 'arr-dot'); dot.style.background = theaters.color(t); s.append(dot, t); legend.append(s); }
+  const rows = src.data.filter((r) => r.quarter === quarter && r.movement === p.credit).sort((a, b) => b.arr - a.arr).slice(0, 8);
+  for (const r of rows) {
+    const tr = el('tr', r.account === p.account ? 'arr-picked' : ''); tr.dataset.key = rowKey(r.quarter, r.movement, r.account); tr.dataset.account = r.account;
+    const owners = el('td', 'arr-owners'), bar = el('div', 'arr-split');
+    for (const [, theater, share] of r.owners.matchAll(/\((\w+)\) (\d+)%/g)) { const part = el('i'); part.style.flex = share + ' 0 0'; part.style.background = theaters.color(theater); bar.append(part); }
+    owners.append(bar, el('span', '', r.owners));
+    tr.append(el('td', '', r.account), el('td', '', r.hq_theater), el('td', '', r.segment), el('td', 'arr-num', money(r.arr)), owners);
+    body.append(tr);
+  }
+}
+
+const longDate = d3.utcFormat('%b %-d, %Y');
+const count = d3.format(',');
+const dotCell = (text, color) => { const td = el('td'), dot = el('i', 'arr-tdot'); dot.style.background = color; td.append(dot, text); return td; };
+
+function detailFilters(p, quarter, quarters) {
+  const weekName = (i) => `${quarters[Math.floor((i - 1) / 13)]} W${((i - 1) % 13) + 1}`;
+  const out = [];
+  if (p.detail_span) out.push({label: `${weekName(p.detail_span[0])} to ${weekName(p.detail_span[1])}`, clear: {detail_span: null},
+    test: (r) => r.week_index >= p.detail_span[0] && r.week_index <= p.detail_span[1]});
+  else out.push({label: quarter, test: (r) => r.quarter === quarter});
+  if (p.detail_weeks) out.push({label: p.detail_weeks[0] === p.detail_weeks[1] ? `Week ${p.detail_weeks[0]}` : `Weeks ${p.detail_weeks[0]} to ${p.detail_weeks[1]}`,
+    clear: {detail_weeks: null}, test: (r) => r.week >= p.detail_weeks[0] && r.week <= p.detail_weeks[1]});
+  if (p.detail_types) out.push({label: p.detail_types.join(' + '), clear: {detail_types: null}, test: (r) => p.detail_types.includes(r.movement_type)});
+  const column = {Theater: 'hq_theater', Segment: 'segment', Product: 'product'}[p.detail_dimension];
+  if (column && p.detail_value) out.push({label: `${column === 'hq_theater' ? 'Home theater' : p.detail_dimension}: ${p.detail_value}`,
+    clear: {detail_dimension: null, detail_value: null}, test: (r) => r[column] === p.detail_value});
+  if (p.detail_home) out.push({label: `Home theater: ${p.detail_home}`, clear: {detail_home: null}, test: (r) => r.hq_theater === p.detail_home});
+  if (p.detail_credit_theater) out.push({label: `Owner theater: ${p.detail_credit_theater}`, clear: {detail_credit_theater: null}, test: (r) => r.rep_theater === p.detail_credit_theater});
+  return out;
+}
+
+function drawLedger() {
+  if (!ledgerArgs) return;
+  const {p, quarter, quarters, theaters} = ledgerArgs;
+  const chipBox = $('#detail-chips'), body = $('#ledger-table tbody'), summary = $('#ledger-summary'), clear = $('#detail-clear'), src = dash.data('credit_ledger');
+  pressed($('#ownership-seg'), p.detail_ownership);
+  chipBox.replaceChildren(); body.replaceChildren();
+  for (const th of root.querySelectorAll('#ledger-table th')) th.setAttribute('aria-sort', th.dataset.field !== ledgerView.sort ? 'none' : ledgerView.dir > 0 ? 'ascending' : 'descending');
+  if (src.status !== 'ok' || !quarter) { summary.textContent = src.status === 'error' ? 'Failed to load' : '—'; clear.hidden = true; return; }
+  const filters = detailFilters(p, quarter, quarters);
+  for (const f of filters) {
+    const chip = el(f.clear ? 'button' : 'span', 'arr-filter', f.label);
+    if (f.clear) { chip.type = 'button'; chip.setAttribute('aria-label', `Remove filter: ${f.label}`); chip.addEventListener('click', () => dash.setParams(f.clear)); }
+    chipBox.append(chip);
+  }
+  const needle = ledgerView.search.trim().toLowerCase();
+  clear.hidden = !filters.some((f) => f.clear) && p.detail_ownership === 'all' && !needle;
+  let rows = src.data.filter((r) => filters.every((f) => f.test(r)));
+  if (p.detail_ownership === 'split') rows = rows.filter((r) => r.owners > 1);
+  if (p.detail_ownership === 'cross') rows = rows.filter((r) => r.rep_theater !== r.hq_theater);
+  if (needle) rows = rows.filter((r) => (r.account + ' ' + r.rep).toLowerCase().includes(needle));
+  const by = ledgerView.sort, dir = ledgerView.dir;
+  rows.sort((a, b) => (typeof a[by] === 'number' ? a[by] - b[by] : String(a[by]).localeCompare(String(b[by]))) * dir || (a.credit_id < b.credit_id ? -1 : 1));
+  const moved = new Map(rows.map((r) => [r.credit_id.split('-')[0], r.arr]));
+  summary.textContent = rows.length
+    ? `${count(rows.length)} credit lines from ${count(moved.size)} movements on ${count(new Set(rows.map((r) => r.account)).size)} accounts. ` +
+      `${money(d3.sum(moved.values()))} ARR moved, ${money(d3.sum(rows, (r) => r.credited_arr))} of it credited to the owners shown.`
+    : 'No movements match these filters.';
+  for (const r of rows) {
+    const tr = el('tr', r.account === p.account ? 'arr-picked' : '');
+    tr.dataset.key = encodeURIComponent(r.credit_id); tr.dataset.account = r.account;
+    tr.append(el('td', '', longDate(new Date(r.date))), el('td', '', r.account), dotCell(r.hq_theater, theaters.color(r.hq_theater)), dotCell(r.movement_type, METRIC_COLOR[r.movement_type]),
+      el('td', 'arr-num', money(r.arr)), el('td', '', r.rep), dotCell(r.rep_theater, theaters.color(r.rep_theater)), el('td', 'arr-num', r.split_pct + '%'), el('td', 'arr-num', money(r.credited_arr)));
+    body.append(tr);
+  }
+}
+
+function drawAccount(p, theaters) {
+  const card = $('#account'), src = dash.data('account_owner_credit'), ledger = dash.data('credit_ledger');
+  const ownerBody = $('#owner-table tbody'), moveBody = $('#account-ledger tbody'), bar = $('#account-split');
+  const owners = p.account && src.status === 'ok' && ledger.status === 'ok' ? src.data.filter((r) => r.account === p.account).sort((a, b) => b.split_pct - a.split_pct) : [];
+  ownerBody.replaceChildren(); moveBody.replaceChildren(); bar.replaceChildren();
+  card.hidden = !owners.length;
+  if (card.hidden) return;
+  const a = owners[0], away = [...new Set(owners.map((o) => o.rep_theater).filter((t) => t !== a.hq_theater))];
+  $('#account-title').textContent = a.account;
+  $('#account-facts').textContent = `${a.segment} · ${a.product} · home theater ${a.hq_theater}. ` + (owners.length === 1 ? 'One owner takes all the credit.'
+    : away.length ? `Credit is split across theaters: ${[a.hq_theater, ...away].join(', ')}.` : 'Credit is split between owners in the home theater.');
+  for (const o of owners) {
+    const part = el('i'); part.style.flex = o.split_pct + ' 0 0'; part.style.background = theaters.color(o.rep_theater); bar.append(part);
+    const tr = el('tr'); tr.dataset.key = rowKey(o.account, o.rep);
+    tr.append(el('td', '', o.rep), dotCell(o.rep_theater, theaters.color(o.rep_theater)), el('td', 'arr-num', o.split_pct + '%'), el('td', 'arr-num', money(o.gains_credited)),
+      el('td', 'arr-num', money(o.losses_credited)), el('td', 'arr-num ' + (o.net_credited < 0 ? 'arr-bad' : ''), money(o.net_credited)));
+    ownerBody.append(tr);
+  }
+  const lines = ledger.data.filter((r) => r.account === p.account).sort((x, y) => (x.date < y.date ? -1 : x.date > y.date ? 1 : x.credit_id < y.credit_id ? -1 : 1));
+  let before = null;
+  for (const r of lines) {
+    const move = r.credit_id.split('-')[0], again = move === before ? ' arr-repeat' : '';
+    before = move;
+    const tr = el('tr'); tr.dataset.key = encodeURIComponent(r.credit_id);
+    const kind = dotCell(r.movement_type, METRIC_COLOR[r.movement_type]); kind.className = again.trim();
+    tr.append(el('td', again.trim(), longDate(new Date(r.date))), el('td', again.trim(), r.quarter), kind, el('td', 'arr-num' + again, money(r.arr)),
+      el('td', '', r.rep), dotCell(r.rep_theater, theaters.color(r.rep_theater)), el('td', 'arr-num', r.split_pct + '%'), el('td', 'arr-num', money(r.credited_arr)));
+    moveBody.append(tr);
+  }
+}
+
+dash.onData(() => {
+  const p = params(), kp = dash.data('arr_kpis'), state = statusOf('arr_kpis');
+  const kpis = state === 'ok' ? kp.data : [];
+  const quarters = [...new Set(kpis.filter((r) => r.prior_quarter).map((r) => r.quarter))];
+  const quarter = quarters.includes(p.quarter) ? p.quarter : quarters[quarters.length - 1];
+  const prior = quarter ? kpis.find((r) => r.quarter === quarter).prior_quarter : null;
+  const select = $('#quarter');
+  select.replaceChildren(...quarters.slice().reverse().map((q) => new Option(q, q)));
+  if (quarter) select.value = quarter;
+  const theaters = theaterColors();
+  drawHeader(p, state, kpis, quarter, prior);
+  drawBreakdown(p, quarter, prior);
+  drawSmoothed(p, quarter, prior);
+  drawAttributionText(p, quarter);
+  drawFlow(p, quarter, theaters);
+  drawRecon(p, quarter, theaters);
+  drawAccounts(p, quarter, theaters);
+  ledgerArgs = {p, quarter, quarters: [...new Set(kpis.map((r) => r.quarter))], theaters};
+  drawLedger();
+  drawAccount(p, theaters);
+});
+</script>
+</body>
+</html>
