@@ -89,10 +89,20 @@ section.block{padding-block:48px}
 
 /* footer */
 footer{border-top:1px solid var(--line);background:radial-gradient(40% 90% at 6% 0%,#D3E6FB 0%,rgba(211,230,251,0) 62%),radial-gradient(40% 90% at 96% 100%,#FFF1BA 0%,rgba(255,241,186,0) 62%),radial-gradient(30% 80% at 60% 110%,#FBD8D0 0%,rgba(251,216,208,0) 62%),var(--hero)}
-footer .wrap{display:grid;grid-template-columns:minmax(0,1fr);gap:36px;align-items:start;padding-block:44px 52px}
+footer .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:36px;align-items:center;padding-block:44px 52px}
 .bye{display:flex;flex-direction:column;gap:14px;min-width:0}
 footer h2{font-size:28px;font-weight:800}
 footer p{color:var(--ink-2);max-width:46ch}
+.seek{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:22px 24px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.seek h3{margin:0;font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.seek dl{margin:0;display:flex;flex-direction:column;gap:12px}
+.seek div{display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;align-items:start}
+.seek .dot{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--p1)}
+.seek div:nth-child(2) .dot{background:var(--p5)}
+.seek div:nth-child(3) .dot{background:var(--p3)}
+.seek .dot svg{width:17px;height:17px;fill:none;stroke:var(--ink);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.seek dt{font-weight:800;color:var(--ink);font-size:15px}
+.seek dd{margin:2px 0 0;color:var(--ink-2);font-size:15px;line-height:1.5}
 
 @media (max-width:900px){
   .mast .wrap{padding-block:32px 0}
@@ -237,6 +247,14 @@ footer p{color:var(--ink-2);max-width:46ch}
       <p>If one of these prototypes is relevant to your team, I would be glad to walk through it live. LinkedIn is the quickest way to reach me.</p>
       <div class="links"><a class="btn primary" href="https://www.linkedin.com/in/deborah-chang-pm/" target="_blank" rel="noopener">Connect on LinkedIn ↗</a></div>
     </div>
+    <aside class="seek" aria-label="What I'm looking for">
+      <h3>What I'm looking for</h3>
+      <dl>
+        <div><span class="dot"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></span><span><dt>Role</dt><dd>Senior Product Manager</dd></span></div>
+        <div><span class="dot"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19c0-8 5-13 14-14 0 9-5 14-13 14"/><path d="M5 19l7-7"/></svg></span><span><dt>Focus</dt><dd>Health and wellness, consumer health, and AI and data products</dd></span></div>
+        <div><span class="dot"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></span><span><dt>What I bring</dt><dd>Customer insight, zero-to-one launches, self-serve experiences, and hands-on analytics</dd></span></div>
+      </dl>
+    </aside>
   </div>
 </footer>
 
