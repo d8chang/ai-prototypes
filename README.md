@@ -1,5 +1,7 @@
 # AI Prototypes
 
+**Portfolio with demo videos:** https://d8chang.github.io/ai-prototypes/
+
 Click around these prototypes!
 
 - [Sparky](https://d8chang.github.io/ai-prototypes/sparky-prototype.html)
