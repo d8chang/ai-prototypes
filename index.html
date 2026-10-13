@@ -3,27 +3,262 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AI Prototypes</title>
+<title>Deborah Chang | Product Portfolio</title>
+<meta name="description" content="Deborah Chang, Senior Product Manager. Prototypes of AI and data products she designed and built, with short demo videos.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap">
 <style>
-  :root { --bg:#fafaf9; --fg:#1c1917; --muted:#57534e; --card:#fff; --line:#e7e5e4; --accent:#2563eb; }
-  @media (prefers-color-scheme: dark) { :root { --bg:#0c0a09; --fg:#f5f5f4; --muted:#a8a29e; --card:#1c1917; --line:#292524; --accent:#60a5fa; } }
-  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.5 system-ui,-apple-system,sans-serif; }
-  main { max-width:640px; margin:0 auto; padding:48px 16px; }
-  h1 { font-size:28px; margin:0 0 24px; }
-  a.card { display:block; padding:16px 20px; margin-bottom:12px; background:var(--card); border:1px solid var(--line); border-radius:10px; color:inherit; text-decoration:none; }
-  a.card:hover { border-color:var(--accent); }
-  a.card strong { display:block; color:var(--accent); }
-  a.card span { color:var(--muted); font-size:14px; }
+html,body{margin:0;padding:0}
+/* Layout: a soft mint page that stays light for every viewer. The top holds the introduction;
+   below it, one grid of equal prototype tiles; then a closing call to action. Rounded type throughout. */
+:root{
+  color-scheme:light;
+  --bg:#EFF8EC; --hero:#E0F1DB; --surface:#FCFEFA; --tint:#E6F3E2;
+  --ink:#24332A; --ink-2:#4A5C50; --ink-3:#5C6E61; --line:#CBE2C5;
+  --accent:#1F7A4D; --hl:#FFF0B3; --btn-bg:#2E7D57; --btn-fg:#FFFFFF;
+  --p1:#FFEFB0; --p2:#D3E6FB; --p3:#FBDAD3; --p4:#E5DCF8; --p5:#CDEBD3;
+  --display:"Nunito","Avenir Next Rounded","Segoe UI",system-ui,sans-serif;
+  --body:"Nunito","Avenir Next Rounded","Segoe UI",system-ui,-apple-system,sans-serif;
+  --r:16px; --wrap:1120px;
+}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16.5px;line-height:1.6;font-weight:500;-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-underline-offset:3px}
+a:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.18;letter-spacing:-.005em}
+p{margin:0}
+.wrap{max-width:var(--wrap);margin-inline:auto;padding-inline:20px}
+.eyebrow{font-family:var(--body);font-weight:800;font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+
+/* introduction */
+.mast{background:radial-gradient(46% 78% at 94% 6%,rgba(255,241,186,.6) 0%,rgba(255,241,186,0) 62%),radial-gradient(38% 70% at 76% 104%,rgba(251,216,208,.45) 0%,rgba(251,216,208,0) 62%),radial-gradient(34% 62% at 52% -14%,rgba(211,230,251,.55) 0%,rgba(211,230,251,0) 64%),radial-gradient(30% 60% at 4% 108%,rgba(229,220,248,.5) 0%,rgba(229,220,248,0) 62%),var(--hero);border-bottom:1px solid var(--line)}
+.mast .wrap{position:relative;padding-block:48px 52px}
+.who{position:relative}
+.emblem{position:absolute;right:0;bottom:18px;width:128px;height:auto}
+.mast-col{position:relative;z-index:1}
+.mast-col{display:flex;flex-direction:column;gap:14px;min-width:0}
+.who{display:flex;flex-direction:column;gap:6px;padding-bottom:20px;margin-bottom:12px;border-bottom:1px solid rgba(36,51,42,.16)}
+.who strong{font-family:var(--display);font-size:clamp(30px,4vw,46px);font-weight:800;line-height:1.08;letter-spacing:-.015em;color:var(--ink)}
+.who span{color:var(--ink-2);font-size:17px;font-weight:600}
+.kind{font-style:normal;font-weight:800;font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);display:flex;align-items:center;gap:12px;margin-bottom:4px}
+.kind::before{content:"";width:30px;height:2px;border-radius:2px;background:var(--accent)}
+.mast h1{font-size:clamp(23px,2.9vw,34px);font-weight:800;text-wrap:pretty}
+.mast h1 em{font-style:normal;background:linear-gradient(transparent 60%,#FFE58A 60%)}
+.pitch{color:var(--ink-2);font-size:17.5px}
+.proof{font-size:15.5px;color:var(--ink-2);max-width:66ch}
+.chips{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:4px 0 0;padding:0}
+.chips li{background:var(--p5);border-radius:999px;padding:6px 14px;font-size:14px;font-weight:800;color:var(--ink)}
+.chips li:nth-child(5n+1){background:var(--p1)}
+.chips li:nth-child(5n+2){background:var(--p2)}
+.chips li:nth-child(5n+3){background:var(--p3)}
+.chips li:nth-child(5n+4){background:var(--p4)}
+.links{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.btn{display:inline-flex;align-items:center;gap:8px;font:800 15px var(--body);text-decoration:none;border-radius:999px;padding:10px 20px;border:1px solid transparent}
+.btn.primary{background:var(--btn-bg);color:var(--btn-fg)}
+
+/* prototype tiles */
+section.block{padding-block:48px}
+.sec-head{display:flex;flex-direction:column;gap:6px;margin-bottom:24px}
+.sec-head .eyebrow{color:var(--accent)}
+.sec-head h2{font-size:clamp(24px,3vw,34px);font-weight:800}
+.sec-head p{color:var(--ink-2)}
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.tile{position:relative;display:flex;flex-direction:column;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.shot{display:block;aspect-ratio:16/9;background:var(--tint);border-bottom:1px solid var(--line);overflow:hidden}
+.shot img{display:block;width:100%;height:100%;object-fit:cover;object-position:top left}
+.shot.art{display:grid;place-items:center;background:linear-gradient(135deg,var(--p1),var(--p3))}
+.shot.art svg{width:60px;height:60px;fill:none;stroke:var(--ink);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;opacity:.75}
+.tile .body{display:flex;flex-direction:column;gap:8px;flex:1;padding:16px 18px 18px;min-width:0}
+.tile .eyebrow{align-self:flex-start;background:var(--p5);color:var(--ink);border-radius:999px;padding:4px 11px;font-size:11.5px}
+.tile:nth-child(6n+1) .eyebrow{background:var(--p1)}
+.tile:nth-child(6n+2) .eyebrow{background:var(--p2)}
+.tile:nth-child(6n+3) .eyebrow{background:var(--p4)}
+.tile:nth-child(6n+4) .eyebrow{background:var(--p3)}
+.tile:nth-child(6n+5) .eyebrow{background:var(--p1)}
+.tile h3{font-size:21px;font-weight:800}
+.tile .what{color:var(--ink-2);font-size:15.5px;line-height:1.5}
+.tile .win{font-size:14.5px;font-weight:700;color:var(--accent)}
+.tile .foot{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;margin-top:auto;padding-top:8px;font-size:14.5px}
+.tile .open{font-weight:800;text-decoration:none}
+.tile .open:hover{text-decoration:underline}
+.tile .soon{font-weight:700;color:var(--ink-3)}
+.playpill{position:absolute;left:12px;top:12px;display:inline-flex;align-items:center;gap:8px;background:var(--btn-bg);color:var(--btn-fg);font-weight:800;font-size:14px;line-height:1;border-radius:999px;padding:10px 16px 10px 13px;text-decoration:none;box-shadow:0 4px 14px rgba(36,51,42,.28)}
+.playpill svg{width:12px;height:12px;fill:currentColor}
+.playpill:hover{filter:brightness(1.08)}
+.fine{font-size:13px;color:var(--ink-3);margin-top:16px}
+
+/* footer */
+footer{border-top:1px solid var(--line);background:radial-gradient(40% 90% at 6% 0%,#D3E6FB 0%,rgba(211,230,251,0) 62%),radial-gradient(40% 90% at 96% 100%,#FFF1BA 0%,rgba(255,241,186,0) 62%),radial-gradient(30% 80% at 60% 110%,#FBD8D0 0%,rgba(251,216,208,0) 62%),var(--hero)}
+footer .wrap{display:grid;grid-template-columns:minmax(0,1fr);gap:36px;align-items:start;padding-block:44px 52px}
+.bye{display:flex;flex-direction:column;gap:14px;min-width:0}
+footer h2{font-size:28px;font-weight:800}
+footer p{color:var(--ink-2);max-width:46ch}
+
+@media (max-width:900px){
+  .mast .wrap{padding-block:32px 0}
+  .emblem{bottom:auto;top:0;width:62px}
+  .who{padding-right:74px}
+  .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+  footer .wrap{grid-template-columns:minmax(0,1fr)}
+  section.block{padding-block:36px}
+}
+@media (max-width:580px){ .tiles{grid-template-columns:minmax(0,1fr)} }
 </style>
 </head>
 <body>
+<header class="mast">
+  <div class="wrap">
+    <div class="mast-col">
+      <div class="who"><em class="kind">Product Portfolio</em><strong>Deborah Chang</strong><span>Senior Product Manager · AI, Data, and Health &amp; Wellness Products</span><svg class="emblem" viewBox="0 0 160 160" role="img" aria-label="Emblem: a person at the center, with data, AI, health, and wellness symbols built around them">
+        <circle cx="80" cy="80" r="76" fill="#FCFEFA" stroke="#CBE2C5" stroke-width="2"/>
+        <circle cx="80" cy="80" r="63" fill="#E6F3E2"/>
+        <circle cx="80" cy="80" r="45" fill="none" stroke="#9DB8A3" stroke-width="2" stroke-dasharray="4 6" stroke-linecap="round"/>
+        <circle cx="80" cy="70" r="11" fill="#2E7D57"/>
+        <path d="M59 103 c2 -13 10.5 -19.5 21 -19.5 s19 6.5 21 19.5 z" fill="#2E7D57"/>
+        <g transform="translate(-6 -5)"><circle cx="112" cy="48" r="14" fill="#FFEFB0" stroke="#FCFEFA" stroke-width="2.5"/>
+        <rect x="105.4" y="48.5" width="3.6" height="6.5" rx="1.8" fill="#C29A3A"/>
+        <rect x="110.2" y="44.5" width="3.6" height="10.5" rx="1.8" fill="#C29A3A"/>
+        <rect x="115" y="41" width="3.6" height="14" rx="1.8" fill="#C29A3A"/></g>
+        <g transform="translate(7 -10)"><circle cx="112" cy="112" r="14" fill="#FBDAD3" stroke="#FCFEFA" stroke-width="2.5"/>
+        <path d="M112 118 c-4.6 -3.3 -7.4 -5.9 -7.4 -9 a3.8 3.8 0 0 1 7.4 -1.4 a3.8 3.8 0 0 1 7.4 1.4 c0 3.1 -2.8 5.7 -7.4 9 z" fill="#E07A6E"/></g>
+        <g transform="translate(-10 17)"><circle cx="48" cy="48" r="14" fill="#D3E6FB" stroke="#FCFEFA" stroke-width="2.5"/>
+        <path d="M48 39.5 c1 4.6 2.9 6.6 7.5 8.5 c-4.6 1.9 -6.5 3.9 -7.5 8.5 c-1 -4.6 -2.9 -6.6 -7.5 -8.5 c4.6 -1.9 6.5 -3.9 7.5 -8.5 z" fill="#5A88C4"/></g>
+        <g transform="translate(13 9)"><circle cx="48" cy="112" r="14" fill="#D6EFD3" stroke="#FCFEFA" stroke-width="2.5"/>
+        <path d="M42 118 c-1 -8.5 4.5 -14 13 -13.5 c0.5 8.5 -5 14 -13 13.5 z" fill="#5FAE6E"/>
+        <path d="M42.5 117.5 l7 -7" stroke="#D6EFD3" stroke-width="1.5" stroke-linecap="round"/></g>
+      </svg></div>
+      <h1>I build <em>AI and data products</em> around the people who use them.</h1>
+      <p class="pitch">I am an analyst turned Senior Product Manager. I started my career in analytics and have spent the 5+ years since taking AI, data, and analytics products from concept to launch. I stay close to customers and the teams who serve them, learn what stands in their way, and deliver self-serve experiences that help them reach and exceed their goals.</p>
+      <p class="pitch">I lead through action. I clear roadblocks for my team and stakeholders, and I base product decisions on what I learn firsthand from customers through conversations, usage data, and feedback. I also stay close to the work, analyzing the data myself and building hands-on with analytics, dashboard, and modern AI tooling alongside the engineers I partner with.</p>
+      <p class="pitch">I am now looking to bring this customer-first approach to health and wellness products that help people build healthy habits and stay well, where clear, calm, and trustworthy experiences matter most.</p>
+      <ul class="chips" aria-label="Areas of focus">
+        <li>Customer empathy</li>
+        <li>Leading through action</li>
+        <li>Self-serve experiences</li>
+        <li>Zero-to-one launches</li>
+        <li>AI assistants and agents</li>
+      </ul>
+    </div>
+  </div>
+</header>
+
 <main>
-  <h1>AI Prototypes</h1>
-  <a class="card" href="sparky-prototype.html"><strong>Sparky Prototype</strong><span>sparky-prototype.html</span></a>
-  <a class="card" href="bvr-prototype.html"><strong>Business Value Realization</strong><span>bvr-prototype.html</span></a>
-  <a class="card" href="marketing-ai-hub.html"><strong>Marketing AI Hub</strong><span>marketing-ai-hub.html</span></a>
-  <a class="card" href="trial-funnel-prototype.html"><strong>14-Day Trial Funnel</strong><span>trial-funnel-prototype.html</span></a>
-  <a class="card" href="arr-attribution-prototype.html"><strong>ARR Attribution</strong><span>arr-attribution-prototype.html</span></a>
+<section class="block" id="prototypes">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Prototypes</span>
+      <h2>What I've built</h2>
+      <p>These are prototypes of products I designed and built. Each one runs in your browser on sample data, with no login required.</p>
+    </div>
+
+    <div class="tiles">
+      <article class="tile">
+        <a class="shot" href="https://d8chang.github.io/ai-prototypes/sparky-prototype.html" target="_blank" rel="noopener"><img src="img/sparky.jpg" alt="Sparky chat screen: the HR Genie answers a time-off question and lists its sources."></a>
+        <div class="body">
+          <span class="eyebrow">Employee assistant</span>
+          <h3>Sparky</h3>
+          <p class="what">One chat for every "who do I ask?" question. Sparky routes each question to the right team's assistant and always shows where the answer came from.</p>
+          <p class="win">The production version cut routine support requests by 70%.</p>
+          <div class="foot">
+            <a class="open" href="https://d8chang.github.io/ai-prototypes/sparky-prototype.html" target="_blank" rel="noopener">Open prototype ↗</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="tile">
+        <a class="shot" href="https://d8chang.github.io/ai-prototypes/bvr-prototype.html" target="_blank" rel="noopener"><img src="img/bvr.jpg" alt="Business Value Realization dashboard: a funnel, two charts, and six value tiles."></a>
+        <div class="body">
+          <span class="eyebrow">Customer value dashboard</span>
+          <h3>Business Value Realization</h3>
+          <p class="what">Answers the question every customer asks at renewal: what value did we get? Every number shows its calculation, so customers can verify it themselves.</p>
+          <p class="win">The production version contributed to $500K+ a quarter in upsell and expansion revenue.</p>
+          <div class="foot">
+            <a class="open" href="https://d8chang.github.io/ai-prototypes/bvr-prototype.html" target="_blank" rel="noopener">Open prototype ↗</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="tile">
+        <a class="shot" href="https://d8chang.github.io/ai-prototypes/marketing-ai-hub.html" target="_blank" rel="noopener"><img src="img/hub.jpg" alt="Marketing AI Hub: connected systems, three pipeline metrics, and a grid of skills with Run buttons."></a>
+        <div class="body">
+          <span class="eyebrow">Internal AI platform</span>
+          <h3>Marketing AI Hub</h3>
+          <p class="what">One front door where marketers run AI skills on their own data. A person approves anything before it is sent, so teams can adopt it with confidence.</p>
+          <p class="win">The production version drove 75% adoption of AI tools across marketing.</p>
+          <div class="foot">
+            <a class="open" href="https://d8chang.github.io/ai-prototypes/marketing-ai-hub.html" target="_blank" rel="noopener">Open prototype ↗</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="tile">
+        <a class="shot" href="https://d8chang.github.io/ai-prototypes/trial-funnel-prototype.html" target="_blank" rel="noopener"><img src="img/trial.jpg" alt="14-day trial funnel dashboard: five headline metrics and a stacked bar chart of trials by path for each month."></a>
+        <div class="body">
+          <span class="eyebrow">Trial reporting</span>
+          <h3>14-Day Trial Funnel</h3>
+          <p class="what">Where do free trials go? This follows each trial to paid, freemium, or churn, and shows which paths bring in the most revenue.</p>
+          <div class="foot">
+            <a class="open" href="https://d8chang.github.io/ai-prototypes/trial-funnel-prototype.html" target="_blank" rel="noopener">Open prototype ↗</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="tile">
+        <div class="shot art" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-9.6A3.9 3.9 0 0 1 12 8a3.9 3.9 0 0 1 7 2.4C19 15.6 12 20 12 20z"/></svg></div>
+        <div class="body">
+          <span class="eyebrow">Consumer wellness</span>
+          <h3>Wellness app</h3>
+          <p class="what">A consumer wellness experience designed to feel calm and simple from the first tap.</p>
+          <div class="foot"><span class="soon">Demo coming soon</span></div>
+        </div>
+      </article>
+
+      <article class="tile">
+        <a class="shot" href="https://d8chang.github.io/ai-prototypes/arr-attribution-prototype.html" target="_blank" rel="noopener"><img src="img/arr.jpg" alt="ARR attribution dashboard: four headline ARR metrics and line charts of new and expansion ARR by theater."></a>
+        <div class="body">
+          <span class="eyebrow">ARR attribution</span>
+          <h3>Revenue Radar</h3>
+          <p class="what">Shows where new revenue comes from each quarter, and who gets credit when reps in different regions share an account. A complex part of ARR, made easy to read.</p>
+          <div class="foot">
+            <a class="open" href="https://d8chang.github.io/ai-prototypes/arr-attribution-prototype.html" target="_blank" rel="noopener">Open prototype ↗</a>
+          </div>
+        </div>
+      </article>
+    </div>
+    <p class="fine">All company names, people, and numbers inside the prototypes are sample data.</p>
+  </div>
+</section>
 </main>
+
+<footer>
+  <div class="wrap">
+    <div class="bye">
+      <h2>Let's connect</h2>
+      <p>If one of these prototypes is relevant to your team, I would be glad to walk through it live. LinkedIn is the quickest way to reach me.</p>
+      <div class="links"><a class="btn primary" href="https://www.linkedin.com/in/deborah-chang-pm/" target="_blank" rel="noopener">Connect on LinkedIn ↗</a></div>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* Demo videos by tile, in the order the tiles appear. A tile with a video gets a play button on its screenshot. */
+const VIDEOS = [
+  'https://www.loom.com/share/a184f56c423346d5ae307319eb8bf207', // Sparky
+  'https://www.loom.com/share/84194f60ca86443188a7de2231af79b0', // Business Value Realization
+  'https://www.loom.com/share/31294f0042614e13a1f24f524af1ced9', // Marketing AI Hub
+  'https://www.loom.com/share/fe3b69bb011641f9a4e50b1be8994900', // 14-Day Trial Funnel
+  '',                                                             // Wellness app
+  'https://www.loom.com/share/01f2b546844649f293ede120e415b97e'  // Revenue Radar
+];
+document.querySelectorAll('.tile').forEach((tile, i) => {
+  if (!VIDEOS[i]) return;
+  const a = document.createElement('a');
+  a.href = VIDEOS[i]; a.target = '_blank'; a.rel = 'noopener';
+  a.className = 'playpill';
+  a.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l16 9-16 9z"/></svg>Watch the demo';
+  tile.appendChild(a);
+});
+</script>
+
 </body>
 </html>
