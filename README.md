@@ -1,4 +1,4 @@
-# AI Prototypes
+# Portfolio
 
 **Portfolio with demo videos:** https://d8chang.github.io/ai-prototypes/
 
