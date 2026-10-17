@@ -82,6 +82,16 @@ tr.l-region td{font-weight:800}
 .agrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
 .inrow input{width:72px!important}
 tr.pstart td{border-top:2px solid var(--line-2)}
+#v-output table{font-size:13px}
+#v-output th,#v-output td{padding:7px 7px}
+#v-output td .dt{font-size:10.5px}
+#v-output th{font-size:10.5px;letter-spacing:.03em}
+#v-output .lv{font-size:10.5px;padding:2px 7px}
+#v-output .ind1{padding-left:14px} #v-output .ind2{padding-left:24px} #v-output .ind3{padding-left:34px}
+.app{max-width:1320px}
+tr.grp th{background:#F8FBF6;border-bottom:0;padding-bottom:0;text-align:center}
+th.gp{color:var(--warn)!important} th.gs{color:var(--lav-ink)!important}
+th.sep,td.sep{border-left:1px solid var(--line-2)}
 tr.gt td{background:var(--accent-2);color:#fff;font-weight:800;border-top:2px solid var(--accent);border-bottom:0;position:sticky;bottom:0}
 tr.gt td .dt{color:#D7EEDC}
 td .dt{display:block;font-size:11.5px;color:var(--ink-3);font-weight:600}
@@ -149,7 +159,6 @@ table.ph{font-size:13px;width:100%} table.ph th,table.ph td{padding:5px 6px} tab
         <select class="inline" id="fPeriod" aria-label="Period"></select>
         <select class="inline" id="fLevel" aria-label="Aggregation level"><option value="">All levels</option><option value="company">Company</option><option value="theater">Theater</option><option value="region">Region</option><option value="manager">Manager</option><option value="rep">Rep</option></select>
         <select class="inline" id="fTheater" aria-label="Theater"><option value="">All theaters</option><option>AMER</option><option>EMEA</option><option>APAC</option></select>
-        <select class="inline" id="fSplit" aria-label="Split pipe target by"><option value="product">Split by product</option><option value="source">Split by source</option></select>
         <input class="search" id="fSearch" type="search" placeholder="Search name" aria-label="Search name">
         <button class="btn primary" id="csv">Download CSV</button>
       </div>
@@ -280,8 +289,9 @@ function fillPeriods(){
 function renderOutput(){
   const g = $('#fGrain').value, pid = $('#fPeriod').value, lv = $('#fLevel').value, th = $('#fTheater').value, q = $('#fSearch').value.trim().toLowerCase();
   const all = buildRows(g);
-  const cols = SPLIT[$('#fSplit').value];
-  $('#outHead').innerHTML = `<tr><th>Period</th><th>Aggregation level</th><th>Name</th><th>Rolls up to</th><th class="num">Quota</th><th class="num">Coverage</th><th class="num">Pipe target</th>${cols.map(c=>`<th class="num">${c}</th>`).join('')}</tr>`;
+  const cols = SPLIT_KEYS;
+  $('#outHead').innerHTML = `<tr class="grp"><th colspan="7"></th><th colspan="3" class="gp">By product mix</th><th colspan="3" class="gs">By source mix</th></tr>
+    <tr><th>Period</th><th>Aggregation level</th><th>Name</th><th>Rolls up to</th><th class="num">Quota</th><th class="num">Coverage</th><th class="num">Pipe target</th>${PRODUCTS.map((c,i)=>`<th class="num${i===0?' sep':''}">${c}</th>`).join('')}${SOURCES.map((c,i)=>`<th class="num${i===0?' sep':''}">${c === 'Sales' ? 'Sales' : c}</th>`).join('')}</tr>`;
   const rows = all.filter(r => (!pid || r.pid===pid) && (!lv || r.level===lv) && (!th || r.theater===th) && (!q || r.name.toLowerCase().includes(q)));
   const flat = !!lv || !!q;
   let last = null;
@@ -293,15 +303,15 @@ function renderOutput(){
     <td class="${flat?'':IND[r.level]}">${esc(r.name)}</td>
     <td>${esc(r.parent)}</td>
     <td class="num">${money(r.quota)}</td><td class="num">${r.cov.toFixed(2)}x</td><td class="num tgt">${money(r.total)}</td>
-    ${cols.map(p=>`<td class="num">${money(r.by[p])}</td>`).join('')}</tr>`;
-  }).join('') || '<tr><td colspan="10" style="color:var(--ink-3)">No rows match these filters.</td></tr>';
+    ${cols.map((p,i)=>`<td class="num${i%3===0?' sep':''}">${money(r.by[p])}</td>`).join('')}</tr>`;
+  }).join('') || '<tr><td colspan="13" style="color:var(--ink-3)">No rows match these filters.</td></tr>';
   // grand total: rep-level rows for the selected periods and theater, so no level is counted twice
   const base = all.filter(r => r.level==='rep' && (g!=='all' || r.grain==='Annual') && (!pid || r.pid===pid) && (!th || r.theater===th));
   const gt = {quota:0, total:0, by:{}}; SPLIT_KEYS.forEach(p=>gt.by[p]=0);
   base.forEach(r => { gt.quota+=r.quota; gt.total+=r.total; SPLIT_KEYS.forEach(p=>gt.by[p]+=r.by[p]); });
   const scope = (pid ? periods(g).find(x=>x.id===pid).label : (g==='all' ? 'FY26' : 'All of FY26')) + ' · ' + (th || 'All theaters');
   $('#outFoot').innerHTML = `<tr class="gt"><td colspan="4"><b>Grand total</b><span class="dt">${scope}${g==='all'&&!pid?' · counted once at the annual grain':''}</span></td>
-    <td class="num">${money(gt.quota)}</td><td class="num">${gt.quota? (gt.total/gt.quota).toFixed(2):'0.00'}x</td><td class="num">${money(gt.total)}</td>${cols.map(p=>`<td class="num">${money(gt.by[p])}</td>`).join('')}</tr>`;
+    <td class="num">${money(gt.quota)}</td><td class="num">${gt.quota? (gt.total/gt.quota).toFixed(2):'0.00'}x</td><td class="num">${money(gt.total)}</td>${cols.map((p,i)=>`<td class="num${i%3===0?' sep':''}">${money(gt.by[p])}</td>`).join('')}</tr>`;
   const fy = buildRows('year')[0], np = periods(g).length;
   $('#outMeta').innerHTML = `<span>${g==='all'?'All grains (annual, quarterly, monthly)':GRAIN_LBL[g]+' grain'}: ${np} period${np>1?'s':''} × 34 rows = ${all.length} rows (showing ${rows.length})</span><span>FY26 company pipe target <b style="color:var(--ink)">${money(fy.total)}</b> on ${money(fy.quota)} quota</span><span>Coverage ${A.cov.Coverage.toFixed(1)}x at every level</span>`;
   window._rows = rows;
@@ -384,7 +394,7 @@ function show(v){
 document.querySelectorAll('.step').forEach(s => s.onclick = () => { if (s.dataset.v!=='none') show(s.dataset.v); });
 document.querySelectorAll('[data-go]').forEach(b => b.onclick = () => { show(b.dataset.go); window.scrollTo({top:0, behavior:'smooth'}); });
 $('#fGrain').onchange = () => { $('#fPeriod').value=''; fillPeriods(); renderOutput(); };
-['fPeriod','fLevel','fTheater','fSplit'].forEach(id => $('#'+id).onchange = renderOutput);
+['fPeriod','fLevel','fTheater'].forEach(id => $('#'+id).onchange = renderOutput);
 $('#fSearch').oninput = renderOutput;
 $('#reset').onclick = () => { A = JSON.parse(JSON.stringify(DEFAULTS)); renderAssume(); renderSql(); toast('Target rules reset'); };
 $('#csv').onclick = () => {
