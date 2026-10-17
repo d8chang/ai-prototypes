@@ -82,6 +82,11 @@ tr.l-region td{font-weight:800}
 .agrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
 .inrow input{width:72px!important}
 tr.pstart td{border-top:2px solid var(--line-2)}
+td .dt{display:block;font-size:11.5px;color:var(--ink-3);font-weight:600}
+.fy{background:var(--info-soft);color:var(--info);border-radius:12px;padding:9px 14px;font-size:13.5px;margin:0 0 14px}
+.fy b{font-weight:800}
+table.ph{font-size:13px;width:100%} table.ph th,table.ph td{padding:5px 6px} table.ph tr.qh td{background:#F5FAF2;font-weight:800;font-size:12px;color:var(--ink-2)}
+.box .tw,.box table.ph{border:0}
 .box{border:1px solid var(--line);border-radius:14px;padding:14px}
 .box h3{font-size:15px;font-weight:800;margin-bottom:2px}
 .box p{font-size:13px;color:var(--ink-3);margin-bottom:10px}
@@ -122,6 +127,7 @@ tr.pstart td{border-top:2px solid var(--line-2)}
     <button class="step on" data-v="output"><small>Output view</small><b>GTM.PIPE_TARGETS</b><span>By month and quarter</span></button>
   </nav>
 
+  <p class="fy"><b>FY26</b> runs <b>Feb 1, 2025 to Jan 31, 2026</b>. Q1 Feb to Apr · Q2 May to Jul · Q3 Aug to Oct · Q4 Nov to Jan.</p>
   <div class="formula" aria-label="Formula">
     <span class="lbl">Pipe target</span><span class="op">=</span>
     <span class="term t1">Quota</span><span class="op">×</span>
@@ -134,9 +140,9 @@ tr.pstart td{border-top:2px solid var(--line-2)}
   <!-- OUTPUT -->
   <section class="panel" id="v-output">
     <div class="ph">
-      <div><h2>GTM.PIPE_TARGETS</h2><p>One row per period and aggregation level for FY26 (Feb 2025 to Jan 2026). Pick a monthly, quarterly, or annual grain. Managers, regions, theaters, and the company roll up from rep-level targets.</p></div>
+      <div><h2>GTM.PIPE_TARGETS</h2><p>One row per time period and aggregation level for the full fiscal year. Pick a monthly, quarterly, or annual grain. Managers, regions, theaters, and the company roll up from rep-level targets.</p></div>
       <div class="controls">
-        <select class="inline" id="fGrain" aria-label="Time grain"><option value="quarter">Quarterly</option><option value="month">Monthly</option><option value="year">Annual</option></select>
+        <select class="inline" id="fGrain" aria-label="Time grain"><option value="quarter">Quarterly</option><option value="month">Monthly</option><option value="year">Annual</option><option value="all">All grains</option></select>
         <select class="inline" id="fPeriod" aria-label="Period"></select>
         <select class="inline" id="fLevel" aria-label="Aggregation level"><option value="">All levels</option><option value="company">Company</option><option value="theater">Theater</option><option value="region">Region</option><option value="manager">Manager</option><option value="rep">Rep</option></select>
         <select class="inline" id="fTheater" aria-label="Theater"><option value="">All theaters</option><option>AMER</option><option>EMEA</option><option>APAC</option></select>
@@ -162,7 +168,7 @@ tr.pstart td{border-top:2px solid var(--line-2)}
       <div class="box"><h3>Coverage by segment</h3><p>Pipeline needed per $1 of quota.</p><div id="covIn"></div></div>
       <div class="box"><h3>Product mix</h3><p>Share of pipeline by product. Must total 100%.</p><div id="mixIn"></div><div class="sum" id="mixSum"></div></div>
       <div class="box"><h3>Theater mix</h3><p>Adjusts for conversion differences by theater.</p><div id="thIn"></div></div>
-      <div class="box"><h3>Monthly phasing</h3><p>How each quarter's target splits across its three months. Must total 100%.</p><div id="phIn"></div><div class="sum" id="phSum"></div></div>
+      <div class="box"><h3>Monthly phasing</h3><p>Each month gets its share of the quarter by number of days.</p><div id="phIn"></div></div>
     </div>
   </section>
 
@@ -196,16 +202,23 @@ const REPS = ORG.flatMap(g => g.reps.map(r => {
   return {name:r[0], segment:r[1], q, fy:q.reduce((a,b)=>a+b,0), manager:g.manager, region:g.region, theater:g.theater};
 }));
 const PRODUCTS = ['Platform','Add-ons','Services'];
-const MONTHS = ['Feb 2025','Mar 2025','Apr 2025','May 2025','Jun 2025','Jul 2025','Aug 2025','Sep 2025','Oct 2025','Nov 2025','Dec 2025','Jan 2026'];
-const DEFAULTS = {cov:{Enterprise:3.5,'Mid-Market':3.0,SMB:2.5,Default:3.0}, mix:{Platform:60,'Add-ons':25,Services:15}, th:{AMER:1.00,EMEA:1.10,APAC:1.20}, ph:{'Month 1':30,'Month 2':33,'Month 3':37}};
+/* FY26 fiscal calendar: Feb 1, 2025 to Jan 31, 2026 */
+const MONTHS = [
+  ['Feb 2025','2025-02-01','2025-02-28',28],['Mar 2025','2025-03-01','2025-03-31',31],['Apr 2025','2025-04-01','2025-04-30',30],
+  ['May 2025','2025-05-01','2025-05-31',31],['Jun 2025','2025-06-01','2025-06-30',30],['Jul 2025','2025-07-01','2025-07-31',31],
+  ['Aug 2025','2025-08-01','2025-08-31',31],['Sep 2025','2025-09-01','2025-09-30',30],['Oct 2025','2025-10-01','2025-10-31',31],
+  ['Nov 2025','2025-11-01','2025-11-30',30],['Dec 2025','2025-12-01','2025-12-31',31],['Jan 2026','2026-01-01','2026-01-31',31]
+].map(m => ({label:m[0], start:m[1], end:m[2], days:m[3]}));
+const QDAYS = [0,1,2,3].map(q => MONTHS.slice(q*3, q*3+3).reduce((a,m)=>a+m.days,0));
+const DEFAULTS = {cov:{Enterprise:3.5,'Mid-Market':3.0,SMB:2.5,Default:3.0}, mix:{Platform:60,'Add-ons':25,Services:15}, th:{AMER:1.00,EMEA:1.10,APAC:1.20}};
 let A = JSON.parse(JSON.stringify(DEFAULTS));
 
 /* periods: each has a label and a function returning a rep's quota for it */
 function periods(grain){
-  if (grain==='year') return [{id:'FY26', label:'FY26', quota:r=>r.fy}];
-  if (grain==='quarter') return [0,1,2,3].map(i => ({id:'Q'+(i+1), label:'Q'+(i+1)+' FY26', quota:r=>r.q[i]}));
-  const ph = Object.values(A.ph);
-  return MONTHS.map((m,i) => ({id:'M'+(i+1), label:m, sub:'Q'+(Math.floor(i/3)+1), quota:r=>r.q[Math.floor(i/3)]*ph[i%3]/100}));
+  if (grain==='all') return [...periods('year'), ...periods('quarter'), ...periods('month')];
+  if (grain==='year') return [{id:'FY26', label:'FY26', start:'2025-02-01', end:'2026-01-31', quota:r=>r.fy}];
+  if (grain==='quarter') return [0,1,2,3].map(i => ({id:'Q'+(i+1), label:'Q'+(i+1)+' FY26', start:MONTHS[i*3].start, end:MONTHS[i*3+2].end, quota:r=>r.q[i]}));
+  return MONTHS.map((m,i) => { const q=Math.floor(i/3); return {id:'M'+(i+1), label:m.label, start:m.start, end:m.end, quota:r=>r.q[q]*m.days/QDAYS[q]}; });
 }
 
 /* ------------ helpers ------------ */
@@ -222,8 +235,9 @@ function repTargets(r, quota){
   PRODUCTS.forEach(p => { by[p] = quota * cov * (A.mix[p]/100) * th; total += by[p]; });
   return {by, total};
 }
-const GRAIN_LBL = {month:'Monthly', quarter:'Quarterly', year:'Annual'};
+const GRAIN_LBL = {month:'Monthly', quarter:'Quarterly', year:'Annual', all:'All'};
 function buildRows(grain){
+  if (grain==='all') return [...buildRows('year'), ...buildRows('quarter'), ...buildRows('month')];
   const rows = [];
   periods(grain).forEach(per => {
     const add = (level, name, parent, theater, reps, extra={}) => {
@@ -231,7 +245,7 @@ function buildRows(grain){
       const t = reps.map(r => repTargets(r, per.quota(r)));
       const by = {}; PRODUCTS.forEach(p => by[p] = t.reduce((s,x)=>s+x.by[p],0));
       const total = t.reduce((s,x)=>s+x.total,0);
-      rows.push(Object.assign({grain:GRAIN_LBL[grain], period:per.label, pid:per.id, level, name, parent, theater, quota, total, by, cov: quota? total/quota : 0}, extra));
+      rows.push(Object.assign({grain:GRAIN_LBL[grain], period:per.label, pid:per.id, start:per.start, end:per.end, level, name, parent, theater, quota, total, by, cov: quota? total/quota : 0}, extra));
     };
     add('company','All GTM','','Global', REPS);
     ['AMER','EMEA','APAC'].forEach(th => {
@@ -245,6 +259,7 @@ function buildRows(grain){
   });
   return rows;
 }
+const fmtDate = d => { const [y,m,dd]=d.split('-'); return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m-1]+' '+(+dd)+', '+y; };
 const IND = {company:'', theater:'', region:'ind1', manager:'ind2', rep:'ind3'};
 const LVL = {company:'Company', theater:'Theater', region:'Region', manager:'Manager', rep:'Rep'};
 
@@ -264,7 +279,7 @@ function renderOutput(){
   $('#outBody').innerHTML = rows.map(r => {
     const first = r.period !== last; last = r.period;
     return `<tr class="l-${r.level}${first?' pstart':''}">
-    <td>${esc(r.period)}</td>
+    <td><b>${esc(r.period)}</b><span class="dt">${fmtDate(r.start)} – ${fmtDate(r.end)}</span></td>
     <td><span class="lv lv-${r.level}">${LVL[r.level]}</span></td>
     <td class="${flat?'':IND[r.level]}">${esc(r.name)}${r.usedDefault?'<span class="flag" title="Segment missing in quota sheet">default coverage</span>':''}</td>
     <td>${esc(r.parent)}</td>
@@ -272,7 +287,7 @@ function renderOutput(){
     ${PRODUCTS.map(p=>`<td class="num">${money(r.by[p])}</td>`).join('')}</tr>`;
   }).join('') || '<tr><td colspan="10" style="color:var(--ink-3)">No rows match these filters.</td></tr>';
   const fy = buildRows('year')[0], np = periods(g).length;
-  $('#outMeta').innerHTML = `<span>${GRAIN_LBL[g]} grain: ${np} period${np>1?'s':''} × 34 rows = ${all.length} rows (showing ${rows.length})</span><span>FY26 company pipe target <b style="color:var(--ink)">${money(fy.total)}</b> on ${money(fy.quota)} quota</span><span>${REPS.filter(r=>!r.segment).length} reps used default coverage</span>`;
+  $('#outMeta').innerHTML = `<span>${g==='all'?'All grains (annual, quarterly, monthly)':GRAIN_LBL[g]+' grain'}: ${np} period${np>1?'s':''} × 34 rows = ${all.length} rows (showing ${rows.length})</span><span>FY26 company pipe target <b style="color:var(--ink)">${money(fy.total)}</b> on ${money(fy.quota)} quota</span><span>${REPS.filter(r=>!r.segment).length} reps used default coverage</span>`;
   window._rows = rows;
 }
 function renderInput(){
@@ -285,7 +300,8 @@ function renderAssume(){
   $('#covIn').innerHTML = Object.entries(A.cov).map(([k,v])=>inputRow('cov',k,v,0.1,'x')).join('');
   $('#mixIn').innerHTML = Object.entries(A.mix).map(([k,v])=>inputRow('mix',k,v,1,'%')).join('');
   $('#thIn').innerHTML = Object.entries(A.th).map(([k,v])=>inputRow('th',k,v.toFixed(2),0.05,'×')).join('');
-  $('#phIn').innerHTML = Object.entries(A.ph).map(([k,v])=>inputRow('ph',k,v,1,'%')).join('');
+  $('#phIn').innerHTML = '<table class="ph"><thead><tr><th>Month</th><th class="num">Days</th><th class="num">Share</th></tr></thead><tbody>' +
+    MONTHS.map((m,i)=>{ const q=Math.floor(i/3); return `${i%3===0?`<tr class="qh"><td colspan="3">Q${q+1} FY26 · ${QDAYS[q]} days</td></tr>`:''}<tr><td>${m.label}</td><td class="num">${m.days}</td><td class="num">${(m.days/QDAYS[q]*100).toFixed(1)}%</td></tr>`; }).join('') + '</tbody></table>';
   sumCheck();
   document.querySelectorAll('.box input').forEach(i => i.oninput = () => {
     const v = parseFloat(i.value); if (isNaN(v) || v<0) return;
@@ -293,26 +309,25 @@ function renderAssume(){
   });
 }
 function sumCheck(){
-  [['mix','#mixSum','targets add up to the full coverage amount'],['ph','#phSum','months add up to the quarter']].forEach(([g,id,why]) => {
-    const s = Object.values(A[g]).reduce((a,b)=>a+b,0);
-    $(id).innerHTML = s===100 ? '<span class="ok">Total 100% ✓</span>' : `<span class="bad">Total ${s}%. Adjust to 100% so ${why}.</span>`;
-  });
+  const t = Object.values(A.mix).reduce((a,b)=>a+b,0);
+  $('#mixSum').innerHTML = t===100 ? '<span class="ok">Total 100% ✓</span>' : `<span class="bad">Total ${t}%. Adjust to 100% so targets add up to the full coverage amount.</span>`;
 }
 function renderSql(){
-  const c=A.cov, m=A.mix, t=A.th, p=Object.values(A.ph);
-  $('#sqlPre').innerHTML = `<span class="cm">-- GTM.PIPE_TARGETS: pipeline targets by time grain, period, and aggregation level (FY26)</span>
+  const c=A.cov, m=A.mix, t=A.th;
+  $('#sqlPre').innerHTML = `<span class="cm">-- GTM.PIPE_TARGETS: pipeline targets by time grain, period, and aggregation level</span>
+<span class="cm">-- FY26 runs Feb 1, 2025 to Jan 31, 2026 (Q1 Feb-Apr, Q2 May-Jul, Q3 Aug-Oct, Q4 Nov-Jan)</span>
 <span class="kw">create or replace view</span> GTM.PIPE_TARGETS <span class="kw">as</span>
 <span class="kw">with</span> quarterly_quota <span class="kw">as</span> (           <span class="cm">-- Anaplan export via Google Sheets, one column per quarter</span>
   <span class="kw">select</span> rep_name, manager, region, theater, segment, fiscal_quarter, quota
   <span class="kw">from</span> RAW.QUOTA_SHEET
   <span class="kw">unpivot</span> (quota <span class="kw">for</span> fiscal_quarter <span class="kw">in</span> (q1_quota <span class="kw">as</span> <span class="st">'Q1'</span>, q2_quota <span class="kw">as</span> <span class="st">'Q2'</span>, q3_quota <span class="kw">as</span> <span class="st">'Q3'</span>, q4_quota <span class="kw">as</span> <span class="st">'Q4'</span>))
 ),
-monthly_quota <span class="kw">as</span> (             <span class="cm">-- month phasing within the quarter: ${p[0]}% / ${p[1]}% / ${p[2]}%</span>
+monthly_quota <span class="kw">as</span> (             <span class="cm">-- phase each quarter by days in month ÷ days in quarter</span>
   <span class="kw">select</span> q.rep_name, q.manager, q.region, q.theater, q.segment, q.fiscal_quarter,
-         c.fiscal_month, q.quota * ph.pct <span class="kw">as</span> quota
+         c.fiscal_month, c.month_start, c.month_end,
+         q.quota * c.days_in_month / c.days_in_quarter <span class="kw">as</span> quota
   <span class="kw">from</span> quarterly_quota q
-  <span class="kw">join</span> CONFIG.FISCAL_CALENDAR c <span class="kw">on</span> c.fiscal_year = <span class="st">'FY26'</span> <span class="kw">and</span> c.fiscal_quarter = q.fiscal_quarter
-  <span class="kw">join</span> CONFIG.MONTH_PHASING ph  <span class="kw">on</span> ph.month_of_quarter = c.month_of_quarter
+  <span class="kw">join</span> CONFIG.FISCAL_CALENDAR c <span class="kw">on</span> c.fiscal_year = <span class="st">'FY26'</span> <span class="kw">and</span> c.fiscal_quarter = q.fiscal_quarter  <span class="cm">-- FY26 = Feb 1, 2025 to Jan 31, 2026</span>
 ),
 rep_targets <span class="kw">as</span> (
   <span class="kw">select</span> mq.*, pm.product,
@@ -356,8 +371,8 @@ $('#fGrain').onchange = () => { $('#fPeriod').value=''; fillPeriods(); renderOut
 $('#fSearch').oninput = renderOutput;
 $('#reset').onclick = () => { A = JSON.parse(JSON.stringify(DEFAULTS)); renderAssume(); renderSql(); toast('Target rules reset'); };
 $('#csv').onclick = () => {
-  const head = ['time_grain','period','aggregation_level','name','parent','theater','quota','coverage','pipe_target',...PRODUCTS.map(p=>'pipe_'+p.toLowerCase().replace(/[^a-z]/g,''))];
-  const lines = [head.join(',')].concat(window._rows.map(r => [r.grain, r.period, LVL[r.level], r.name, r.parent, r.theater, Math.round(r.quota), r.cov.toFixed(2), Math.round(r.total), ...PRODUCTS.map(p=>Math.round(r.by[p]))].map(v => /[",]/.test(String(v)) ? '"'+String(v).replace(/"/g,'""')+'"' : v).join(',')));
+  const head = ['time_grain','period','period_start','period_end','aggregation_level','name','parent','theater','quota','coverage','pipe_target',...PRODUCTS.map(p=>'pipe_'+p.toLowerCase().replace(/[^a-z]/g,''))];
+  const lines = [head.join(',')].concat(window._rows.map(r => [r.grain, r.period, r.start, r.end, LVL[r.level], r.name, r.parent, r.theater, Math.round(r.quota), r.cov.toFixed(2), Math.round(r.total), ...PRODUCTS.map(p=>Math.round(r.by[p]))].map(v => /[",]/.test(String(v)) ? '"'+String(v).replace(/"/g,'""')+'"' : v).join(',')));
   const url = URL.createObjectURL(new Blob([lines.join('\n')], {type:'text/csv'}));
   const a = document.createElement('a'); a.href = url; a.download = 'pipe_targets_fy26_' + $('#fGrain').value + '.csv'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url), 1000);
   toast('Downloaded ' + a.download);
