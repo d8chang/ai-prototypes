@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>GTM Pipeline Targeting | Prototype</title>
-<meta name="description" content="Prototype: turn rep quotas into pipeline targets at rep, manager, region, and theater levels using coverage, product mix, and theater mix.">
+<meta name="description" content="Prototype: turn rep quotas into pipeline targets at rep, manager, region, and theater levels using 4x coverage, product mix, and source mix.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800&display=swap">
 <style>
 :root{
@@ -125,7 +125,7 @@ table.ph{font-size:13px;width:100%} table.ph th,table.ph td{padding:5px 6px} tab
     <button class="step" data-v="none"><small>Source</small><b>Anaplan quotas</b><span>FY26 quota plan by rep</span></button>
     <button class="step" data-v="input"><small>Shared sheet</small><b>Quota sheet</b><span>Exported to Google Sheets</span></button>
     <button class="step" data-v="input"><small>Snowflake</small><b>RAW.QUOTA_SHEET</b><span>Ingested daily</span></button>
-    <button class="step" data-v="assume"><small>Logic</small><b>Target rules</b><span>Coverage, product, theater mix</span></button>
+    <button class="step" data-v="assume"><small>Logic</small><b>Target rules</b><span>4x coverage and mixes</span></button>
     <button class="step on" data-v="output"><small>Output view</small><b>GTM.PIPE_TARGETS</b><span>By month and quarter</span></button>
   </nav>
 
@@ -133,10 +133,11 @@ table.ph{font-size:13px;width:100%} table.ph th,table.ph td{padding:5px 6px} tab
   <div class="formula" aria-label="Formula">
     <span class="lbl">Pipe target</span><span class="op">=</span>
     <span class="term t1">Quota</span><span class="op">×</span>
-    <span class="term t2">4x coverage</span><span class="op">×</span>
-    <span class="term t3">Product mix</span><span class="op">×</span>
-    <span class="term t4">Theater mix</span>
-    <span class="op" style="margin-left:6px;font-weight:700">· 4x pipeline for every $1 of quota, so there is enough pipe to cover quota</span>
+    <span class="term t2">4x coverage</span>
+    <span class="op" style="margin:0 4px">→ then split by</span>
+    <span class="term t3">Product mix</span><span class="op">and</span>
+    <span class="term t4">Source mix</span>
+    <span class="op" style="margin-left:6px;font-weight:700">· splits always add up to 100%, so coverage stays 4x</span>
   </div>
 
   <!-- OUTPUT -->
@@ -148,11 +149,12 @@ table.ph{font-size:13px;width:100%} table.ph th,table.ph td{padding:5px 6px} tab
         <select class="inline" id="fPeriod" aria-label="Period"></select>
         <select class="inline" id="fLevel" aria-label="Aggregation level"><option value="">All levels</option><option value="company">Company</option><option value="theater">Theater</option><option value="region">Region</option><option value="manager">Manager</option><option value="rep">Rep</option></select>
         <select class="inline" id="fTheater" aria-label="Theater"><option value="">All theaters</option><option>AMER</option><option>EMEA</option><option>APAC</option></select>
+        <select class="inline" id="fSplit" aria-label="Split pipe target by"><option value="product">Split by product</option><option value="source">Split by source</option></select>
         <input class="search" id="fSearch" type="search" placeholder="Search name" aria-label="Search name">
         <button class="btn primary" id="csv">Download CSV</button>
       </div>
     </div>
-    <div class="tw"><table><thead><tr><th>Period</th><th>Aggregation level</th><th>Name</th><th>Rolls up to</th><th class="num">Quota</th><th class="num">Coverage</th><th class="num">Pipe target</th><th class="num">Platform</th><th class="num">Add-ons</th><th class="num">Services</th></tr></thead><tbody id="outBody"></tbody><tfoot id="outFoot"></tfoot></table></div>
+    <div class="tw"><table><thead id="outHead"></thead><tbody id="outBody"></tbody><tfoot id="outFoot"></tfoot></table></div>
     <div class="meta" id="outMeta"></div>
   </section>
 
@@ -169,7 +171,7 @@ table.ph{font-size:13px;width:100%} table.ph th,table.ph td{padding:5px 6px} tab
     <div class="agrid">
       <div class="box"><h3>Coverage</h3><p>Pipeline needed per $1 of quota. Default is 4x, so there is enough pipeline to cover quota.</p><div id="covIn"></div></div>
       <div class="box"><h3>Product mix</h3><p>Share of pipeline by product. Must total 100%.</p><div id="mixIn"></div><div class="sum" id="mixSum"></div></div>
-      <div class="box"><h3>Theater mix</h3><p>Adjusts for conversion differences by theater.</p><div id="thIn"></div></div>
+      <div class="box"><h3>Source mix</h3><p>Where pipeline should come from. Must total 100%.</p><div id="srcIn"></div><div class="sum" id="srcSum"></div></div>
       <div class="box"><h3>Monthly phasing</h3><p>Each month gets its share of the quarter by number of days.</p><div id="phIn"></div></div>
     </div>
   </section>
@@ -204,6 +206,9 @@ const REPS = ORG.flatMap(g => g.reps.map(r => {
   return {name:r[0], segment:r[1], q, fy:q.reduce((a,b)=>a+b,0), manager:g.manager, region:g.region, theater:g.theater};
 }));
 const PRODUCTS = ['Platform','Add-ons','Services'];
+const SOURCES = ['Marketing','Sales','Partner'];
+const SPLIT = {product:PRODUCTS, source:SOURCES};
+const SPLIT_KEYS = [...PRODUCTS, ...SOURCES];
 /* FY26 fiscal calendar: Feb 1, 2025 to Jan 31, 2026 */
 const MONTHS = [
   ['Feb 2025','2025-02-01','2025-02-28',28],['Mar 2025','2025-03-01','2025-03-31',31],['Apr 2025','2025-04-01','2025-04-30',30],
@@ -212,7 +217,7 @@ const MONTHS = [
   ['Nov 2025','2025-11-01','2025-11-30',30],['Dec 2025','2025-12-01','2025-12-31',31],['Jan 2026','2026-01-01','2026-01-31',31]
 ].map(m => ({label:m[0], start:m[1], end:m[2], days:m[3]}));
 const QDAYS = [0,1,2,3].map(q => MONTHS.slice(q*3, q*3+3).reduce((a,m)=>a+m.days,0));
-const DEFAULTS = {cov:{Coverage:4.0}, mix:{Platform:60,'Add-ons':25,Services:15}, th:{AMER:1.00,EMEA:1.10,APAC:1.20}};
+const DEFAULTS = {cov:{Coverage:4.0}, mix:{Platform:60,'Add-ons':25,Services:15}, src:{Marketing:40,Sales:45,Partner:15}};
 let A = JSON.parse(JSON.stringify(DEFAULTS));
 
 /* periods: each has a label and a function returning a rep's quota for it */
@@ -232,9 +237,9 @@ let toastT; function toast(m){ const t=$('#toast'); t.textContent=m; t.classList
 /* ------------ target logic ------------ */
 function repTargets(r, quota){
   const cov = A.cov.Coverage;
-  const th = A.th[r.theater] != null ? A.th[r.theater] : 1;
-  const by = {}; let total = 0;
-  PRODUCTS.forEach(p => { by[p] = quota * cov * (A.mix[p]/100) * th; total += by[p]; });
+  const total = quota * cov, by = {};
+  PRODUCTS.forEach(p => by[p] = total * A.mix[p]/100);
+  SOURCES.forEach(x => by[x] = total * A.src[x]/100);
   return {by, total};
 }
 const GRAIN_LBL = {month:'Monthly', quarter:'Quarterly', year:'Annual', all:'All'};
@@ -245,7 +250,7 @@ function buildRows(grain){
     const add = (level, name, parent, theater, reps, extra={}) => {
       const quota = reps.reduce((s,r)=>s+per.quota(r),0);
       const t = reps.map(r => repTargets(r, per.quota(r)));
-      const by = {}; PRODUCTS.forEach(p => by[p] = t.reduce((s,x)=>s+x.by[p],0));
+      const by = {}; SPLIT_KEYS.forEach(p => by[p] = t.reduce((s,x)=>s+x.by[p],0));
       const total = t.reduce((s,x)=>s+x.total,0);
       rows.push(Object.assign({grain:GRAIN_LBL[grain], period:per.label, pid:per.id, start:per.start, end:per.end, level, name, parent, theater, quota, total, by, cov: quota? total/quota : 0}, extra));
     };
@@ -275,6 +280,8 @@ function fillPeriods(){
 function renderOutput(){
   const g = $('#fGrain').value, pid = $('#fPeriod').value, lv = $('#fLevel').value, th = $('#fTheater').value, q = $('#fSearch').value.trim().toLowerCase();
   const all = buildRows(g);
+  const cols = SPLIT[$('#fSplit').value];
+  $('#outHead').innerHTML = `<tr><th>Period</th><th>Aggregation level</th><th>Name</th><th>Rolls up to</th><th class="num">Quota</th><th class="num">Coverage</th><th class="num">Pipe target</th>${cols.map(c=>`<th class="num">${c}</th>`).join('')}</tr>`;
   const rows = all.filter(r => (!pid || r.pid===pid) && (!lv || r.level===lv) && (!th || r.theater===th) && (!q || r.name.toLowerCase().includes(q)));
   const flat = !!lv || !!q;
   let last = null;
@@ -286,17 +293,17 @@ function renderOutput(){
     <td class="${flat?'':IND[r.level]}">${esc(r.name)}</td>
     <td>${esc(r.parent)}</td>
     <td class="num">${money(r.quota)}</td><td class="num">${r.cov.toFixed(2)}x</td><td class="num tgt">${money(r.total)}</td>
-    ${PRODUCTS.map(p=>`<td class="num">${money(r.by[p])}</td>`).join('')}</tr>`;
+    ${cols.map(p=>`<td class="num">${money(r.by[p])}</td>`).join('')}</tr>`;
   }).join('') || '<tr><td colspan="10" style="color:var(--ink-3)">No rows match these filters.</td></tr>';
   // grand total: rep-level rows for the selected periods and theater, so no level is counted twice
   const base = all.filter(r => r.level==='rep' && (g!=='all' || r.grain==='Annual') && (!pid || r.pid===pid) && (!th || r.theater===th));
-  const gt = {quota:0, total:0, by:{}}; PRODUCTS.forEach(p=>gt.by[p]=0);
-  base.forEach(r => { gt.quota+=r.quota; gt.total+=r.total; PRODUCTS.forEach(p=>gt.by[p]+=r.by[p]); });
+  const gt = {quota:0, total:0, by:{}}; SPLIT_KEYS.forEach(p=>gt.by[p]=0);
+  base.forEach(r => { gt.quota+=r.quota; gt.total+=r.total; SPLIT_KEYS.forEach(p=>gt.by[p]+=r.by[p]); });
   const scope = (pid ? periods(g).find(x=>x.id===pid).label : (g==='all' ? 'FY26' : 'All of FY26')) + ' · ' + (th || 'All theaters');
   $('#outFoot').innerHTML = `<tr class="gt"><td colspan="4"><b>Grand total</b><span class="dt">${scope}${g==='all'&&!pid?' · counted once at the annual grain':''}</span></td>
-    <td class="num">${money(gt.quota)}</td><td class="num">${gt.quota? (gt.total/gt.quota).toFixed(2):'0.00'}x</td><td class="num">${money(gt.total)}</td>${PRODUCTS.map(p=>`<td class="num">${money(gt.by[p])}</td>`).join('')}</tr>`;
+    <td class="num">${money(gt.quota)}</td><td class="num">${gt.quota? (gt.total/gt.quota).toFixed(2):'0.00'}x</td><td class="num">${money(gt.total)}</td>${cols.map(p=>`<td class="num">${money(gt.by[p])}</td>`).join('')}</tr>`;
   const fy = buildRows('year')[0], np = periods(g).length;
-  $('#outMeta').innerHTML = `<span>${g==='all'?'All grains (annual, quarterly, monthly)':GRAIN_LBL[g]+' grain'}: ${np} period${np>1?'s':''} × 34 rows = ${all.length} rows (showing ${rows.length})</span><span>FY26 company pipe target <b style="color:var(--ink)">${money(fy.total)}</b> on ${money(fy.quota)} quota</span><span>Coverage ${A.cov.Coverage.toFixed(1)}x × theater mix</span>`;
+  $('#outMeta').innerHTML = `<span>${g==='all'?'All grains (annual, quarterly, monthly)':GRAIN_LBL[g]+' grain'}: ${np} period${np>1?'s':''} × 34 rows = ${all.length} rows (showing ${rows.length})</span><span>FY26 company pipe target <b style="color:var(--ink)">${money(fy.total)}</b> on ${money(fy.quota)} quota</span><span>Coverage ${A.cov.Coverage.toFixed(1)}x at every level</span>`;
   window._rows = rows;
 }
 function renderInput(){
@@ -308,7 +315,7 @@ function inputRow(group, key, val, step, suffix){
 function renderAssume(){
   $('#covIn').innerHTML = Object.entries(A.cov).map(([k,v])=>inputRow('cov',k,v,0.1,'x')).join('');
   $('#mixIn').innerHTML = Object.entries(A.mix).map(([k,v])=>inputRow('mix',k,v,1,'%')).join('');
-  $('#thIn').innerHTML = Object.entries(A.th).map(([k,v])=>inputRow('th',k,v.toFixed(2),0.05,'×')).join('');
+  $('#srcIn').innerHTML = Object.entries(A.src).map(([k,v])=>inputRow('src',k,v,1,'%')).join('');
   $('#phIn').innerHTML = '<table class="ph"><thead><tr><th>Month</th><th class="num">Days</th><th class="num">Share</th></tr></thead><tbody>' +
     MONTHS.map((m,i)=>{ const q=Math.floor(i/3); return `${i%3===0?`<tr class="qh"><td colspan="3">Q${q+1} FY26 · ${QDAYS[q]} days</td></tr>`:''}<tr><td>${m.label}</td><td class="num">${m.days}</td><td class="num">${(m.days/QDAYS[q]*100).toFixed(1)}%</td></tr>`; }).join('') + '</tbody></table>';
   sumCheck();
@@ -318,11 +325,13 @@ function renderAssume(){
   });
 }
 function sumCheck(){
-  const t = Object.values(A.mix).reduce((a,b)=>a+b,0);
-  $('#mixSum').innerHTML = t===100 ? '<span class="ok">Total 100% ✓</span>' : `<span class="bad">Total ${t}%. Adjust to 100% so targets add up to the full coverage amount.</span>`;
+  [['mix','#mixSum','product'],['src','#srcSum','source']].forEach(([g,id,w]) => {
+    const t = Object.values(A[g]).reduce((a,b)=>a+b,0);
+    $(id).innerHTML = t===100 ? '<span class="ok">Total 100% ✓</span>' : `<span class="bad">Total ${t}%. Adjust to 100% so the ${w} split adds up to the full target.</span>`;
+  });
 }
 function renderSql(){
-  const c=A.cov, m=A.mix, t=A.th;
+  const c=A.cov, m=A.mix, x=A.src;
   $('#sqlPre').innerHTML = `<span class="cm">-- GTM.PIPE_TARGETS: pipeline targets by time grain, period, and aggregation level</span>
 <span class="cm">-- FY26 runs Feb 1, 2025 to Jan 31, 2026 (Q1 Feb-Apr, Q2 May-Jul, Q3 Aug-Oct, Q4 Nov-Jan)</span>
 <span class="kw">create or replace view</span> GTM.PIPE_TARGETS <span class="kw">as</span>
@@ -339,31 +348,31 @@ monthly_quota <span class="kw">as</span> (             <span class="cm">-- phase
   <span class="kw">join</span> CONFIG.FISCAL_CALENDAR c <span class="kw">on</span> c.fiscal_year = <span class="st">'FY26'</span> <span class="kw">and</span> c.fiscal_quarter = q.fiscal_quarter  <span class="cm">-- FY26 = Feb 1, 2025 to Jan 31, 2026</span>
 ),
 rep_targets <span class="kw">as</span> (
-  <span class="kw">select</span> mq.*, pm.product,
+  <span class="kw">select</span> mq.*, pm.product, sm.source,
     mq.quota
     * ${c.Coverage.toFixed(1)}                            <span class="cm">-- coverage: 4x pipeline per $1 of quota by default</span>
     * pm.mix_pct                      <span class="cm">-- Platform ${m.Platform}%, Add-ons ${m['Add-ons']}%, Services ${m.Services}%</span>
-    * <span class="fn">coalesce</span>(th.factor, 1.00)      <span class="cm">-- AMER ${t.AMER.toFixed(2)}, EMEA ${t.EMEA.toFixed(2)}, APAC ${t.APAC.toFixed(2)}</span>
+    * sm.mix_pct                      <span class="cm">-- Marketing ${x.Marketing}%, Sales ${x.Sales}%, Partner ${x.Partner}%</span>
     <span class="kw">as</span> pipe_target
   <span class="kw">from</span> monthly_quota mq
-  <span class="kw">left join</span> CONFIG.THEATER_MIX th          <span class="kw">on</span> th.theater = mq.theater
   <span class="kw">cross join</span> CONFIG.PRODUCT_MIX pm
+  <span class="kw">cross join</span> CONFIG.SOURCE_MIX sm      <span class="cm">-- product and source are both shares, so coverage stays 4x</span>
 ),
 grains <span class="kw">as</span> (                     <span class="cm">-- the same monthly rows, labeled at each time grain</span>
   <span class="kw">select</span> <span class="st">'Monthly'</span>   <span class="kw">as</span> time_grain, fiscal_month          <span class="kw">as</span> period, * <span class="kw">from</span> rep_targets
   <span class="kw">union all select</span> <span class="st">'Quarterly'</span>, fiscal_quarter || <span class="st">' FY26'</span>, * <span class="kw">from</span> rep_targets
   <span class="kw">union all select</span> <span class="st">'Annual'</span>,    <span class="st">'FY26'</span>,                   * <span class="kw">from</span> rep_targets
 )
-<span class="kw">select</span> time_grain, period, <span class="st">'Rep'</span>     <span class="kw">as</span> aggregation_level, rep_name <span class="kw">as</span> name, manager <span class="kw">as</span> parent, theater, product, <span class="fn">sum</span>(quota) <span class="kw">as</span> quota, <span class="fn">sum</span>(pipe_target) <span class="kw">as</span> pipe_target <span class="kw">from</span> grains <span class="kw">group by</span> 1,2,3,4,5,6,7
+<span class="kw">select</span> time_grain, period, <span class="st">'Rep'</span>     <span class="kw">as</span> aggregation_level, rep_name <span class="kw">as</span> name, manager <span class="kw">as</span> parent, theater, product, source, <span class="fn">sum</span>(quota) <span class="kw">as</span> quota, <span class="fn">sum</span>(pipe_target) <span class="kw">as</span> pipe_target <span class="kw">from</span> grains <span class="kw">group by</span> 1,2,3,4,5,6,7,8
 <span class="kw">union all</span>
-<span class="kw">select</span> time_grain, period, <span class="st">'Manager'</span>, manager, theater || <span class="st">' '</span> || region, theater, product, <span class="fn">sum</span>(quota), <span class="fn">sum</span>(pipe_target) <span class="kw">from</span> grains <span class="kw">group by</span> 1,2,3,4,5,6,7
+<span class="kw">select</span> time_grain, period, <span class="st">'Manager'</span>, manager, theater || <span class="st">' '</span> || region, theater, product, source, <span class="fn">sum</span>(quota), <span class="fn">sum</span>(pipe_target) <span class="kw">from</span> grains <span class="kw">group by</span> 1,2,3,4,5,6,7,8
 <span class="kw">union all</span>
-<span class="kw">select</span> time_grain, period, <span class="st">'Region'</span>,  theater || <span class="st">' '</span> || region, theater, theater, product, <span class="fn">sum</span>(quota), <span class="fn">sum</span>(pipe_target) <span class="kw">from</span> grains <span class="kw">group by</span> 1,2,3,4,5,6,7
+<span class="kw">select</span> time_grain, period, <span class="st">'Region'</span>,  theater || <span class="st">' '</span> || region, theater, theater, product, source, <span class="fn">sum</span>(quota), <span class="fn">sum</span>(pipe_target) <span class="kw">from</span> grains <span class="kw">group by</span> 1,2,3,4,5,6,7,8
 <span class="kw">union all</span>
-<span class="kw">select</span> time_grain, period, <span class="st">'Theater'</span>, theater, <span class="st">'All GTM'</span>, theater, product, <span class="fn">sum</span>(quota), <span class="fn">sum</span>(pipe_target) <span class="kw">from</span> grains <span class="kw">group by</span> 1,2,3,4,5,6,7
+<span class="kw">select</span> time_grain, period, <span class="st">'Theater'</span>, theater, <span class="st">'All GTM'</span>, theater, product, source, <span class="fn">sum</span>(quota), <span class="fn">sum</span>(pipe_target) <span class="kw">from</span> grains <span class="kw">group by</span> 1,2,3,4,5,6,7,8
 <span class="kw">union all</span>
-<span class="kw">select</span> time_grain, period, <span class="st">'Company'</span>, <span class="st">'All GTM'</span>, <span class="kw">null</span>, <span class="st">'Global'</span>, product, <span class="fn">sum</span>(quota), <span class="fn">sum</span>(pipe_target) <span class="kw">from</span> grains <span class="kw">group by</span> 1,2,3,4,5,6,7;
-<span class="cm">-- note: quota repeats on each product row; sum it once per name and period when reporting</span>`;
+<span class="kw">select</span> time_grain, period, <span class="st">'Company'</span>, <span class="st">'All GTM'</span>, <span class="kw">null</span>, <span class="st">'Global'</span>, product, source, <span class="fn">sum</span>(quota), <span class="fn">sum</span>(pipe_target) <span class="kw">from</span> grains <span class="kw">group by</span> 1,2,3,4,5,6,7,8;
+<span class="cm">-- note: quota repeats on each product and source row; sum it once per name and period when reporting</span>`;
 }
 
 /* ------------ navigation ------------ */
@@ -375,12 +384,12 @@ function show(v){
 document.querySelectorAll('.step').forEach(s => s.onclick = () => { if (s.dataset.v!=='none') show(s.dataset.v); });
 document.querySelectorAll('[data-go]').forEach(b => b.onclick = () => { show(b.dataset.go); window.scrollTo({top:0, behavior:'smooth'}); });
 $('#fGrain').onchange = () => { $('#fPeriod').value=''; fillPeriods(); renderOutput(); };
-['fPeriod','fLevel','fTheater'].forEach(id => $('#'+id).onchange = renderOutput);
+['fPeriod','fLevel','fTheater','fSplit'].forEach(id => $('#'+id).onchange = renderOutput);
 $('#fSearch').oninput = renderOutput;
 $('#reset').onclick = () => { A = JSON.parse(JSON.stringify(DEFAULTS)); renderAssume(); renderSql(); toast('Target rules reset'); };
 $('#csv').onclick = () => {
-  const head = ['time_grain','period','period_start','period_end','aggregation_level','name','parent','theater','quota','coverage','pipe_target',...PRODUCTS.map(p=>'pipe_'+p.toLowerCase().replace(/[^a-z]/g,''))];
-  const lines = [head.join(',')].concat(window._rows.map(r => [r.grain, r.period, r.start, r.end, LVL[r.level], r.name, r.parent, r.theater, Math.round(r.quota), r.cov.toFixed(2), Math.round(r.total), ...PRODUCTS.map(p=>Math.round(r.by[p]))].map(v => /[",]/.test(String(v)) ? '"'+String(v).replace(/"/g,'""')+'"' : v).join(',')));
+  const head = ['time_grain','period','period_start','period_end','aggregation_level','name','parent','theater','quota','coverage','pipe_target',...SPLIT_KEYS.map(p=>'pipe_'+p.toLowerCase().replace(/[^a-z]/g,''))];
+  const lines = [head.join(',')].concat(window._rows.map(r => [r.grain, r.period, r.start, r.end, LVL[r.level], r.name, r.parent, r.theater, Math.round(r.quota), r.cov.toFixed(2), Math.round(r.total), ...SPLIT_KEYS.map(p=>Math.round(r.by[p]))].map(v => /[",]/.test(String(v)) ? '"'+String(v).replace(/"/g,'""')+'"' : v).join(',')));
   const url = URL.createObjectURL(new Blob([lines.join('\n')], {type:'text/csv'}));
   const a = document.createElement('a'); a.href = url; a.download = 'pipe_targets_fy26_' + $('#fGrain').value + '.csv'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url), 1000);
   toast('Downloaded ' + a.download);
