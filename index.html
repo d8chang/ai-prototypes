@@ -213,15 +213,6 @@ footer p{color:var(--ink-2);max-width:46ch}
         </div>
       </article>
 
-      <article class="tile">
-        <div class="shot art" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-9.6A3.9 3.9 0 0 1 12 8a3.9 3.9 0 0 1 7 2.4C19 15.6 12 20 12 20z"/></svg></div>
-        <div class="body">
-          <span class="eyebrow">Consumer wellness</span>
-          <h3>Wellness app</h3>
-          <p class="what">A consumer wellness experience designed to feel calm and simple from the first tap.</p>
-          <div class="foot"><span class="soon">Demo coming soon</span></div>
-        </div>
-      </article>
 
       <article class="tile">
         <a class="shot" href="https://d8chang.github.io/ai-prototypes/arr-attribution-prototype.html" target="_blank" rel="noopener"><img src="img/arr.jpg" alt="ARR attribution dashboard: four headline ARR metrics and line charts of new and expansion ARR by theater."></a>
@@ -232,6 +223,27 @@ footer p{color:var(--ink-2);max-width:46ch}
           <div class="foot">
             <a class="open" href="https://d8chang.github.io/ai-prototypes/arr-attribution-prototype.html" target="_blank" rel="noopener">Open prototype ↗</a>
           </div>
+        </div>
+      </article>
+      <article class="tile">
+        <a class="shot" href="https://d8chang.github.io/ai-prototypes/data-readiness-prototype.html" target="_blank" rel="noopener"><img src="img/data.jpg" alt="Groundwork prototype: an AI readiness score, progress for each step, and a preview of what the assistant can see for a Customer Success role."></a>
+        <div class="body">
+          <span class="eyebrow">AI data readiness</span>
+          <h3>Groundwork</h3>
+          <p class="what">Gets company data ready for an AI assistant: prioritize sources, describe columns and metrics, flag sensitive data, and set access by role. Then preview what the assistant can see and answer.</p>
+          <p class="win">Mirrors the data prep behind a company-wide Claude rollout.</p>
+          <div class="foot">
+            <a class="open" href="https://d8chang.github.io/ai-prototypes/data-readiness-prototype.html" target="_blank" rel="noopener">Open prototype ↗</a>
+          </div>
+        </div>
+      </article>
+      <article class="tile">
+        <div class="shot art" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-9.6A3.9 3.9 0 0 1 12 8a3.9 3.9 0 0 1 7 2.4C19 15.6 12 20 12 20z"/></svg></div>
+        <div class="body">
+          <span class="eyebrow">Consumer wellness</span>
+          <h3>Wellness app</h3>
+          <p class="what">A consumer wellness experience designed to feel calm and simple from the first tap.</p>
+          <div class="foot"><span class="soon">Demo coming soon</span></div>
         </div>
       </article>
     </div>
@@ -265,8 +277,9 @@ const VIDEOS = [
   'https://www.loom.com/share/84194f60ca86443188a7de2231af79b0', // Business Value Realization
   'https://www.loom.com/share/31294f0042614e13a1f24f524af1ced9', // Marketing AI Hub
   'https://www.loom.com/share/fe3b69bb011641f9a4e50b1be8994900', // 14-Day Trial Funnel
-  '',                                                             // Wellness app
-  'https://www.loom.com/share/01f2b546844649f293ede120e415b97e'  // Revenue Radar
+  'https://www.loom.com/share/01f2b546844649f293ede120e415b97e', // Revenue Radar
+  '',                                                             // Groundwork
+  ''                                                              // Wellness app
 ];
 document.querySelectorAll('.tile').forEach((tile, i) => {
   if (!VIDEOS[i]) return;

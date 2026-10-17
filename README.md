@@ -9,3 +9,4 @@ Click around these prototypes!
 - [Marketing AI Hub](https://d8chang.github.io/ai-prototypes/marketing-ai-hub.html)
 - [14-Day Trial Funnel](https://d8chang.github.io/ai-prototypes/trial-funnel-prototype.html)
 - [ARR Attribution](https://d8chang.github.io/ai-prototypes/arr-attribution-prototype.html)
+- [Groundwork: AI Data Readiness](https://d8chang.github.io/ai-prototypes/data-readiness-prototype.html)
