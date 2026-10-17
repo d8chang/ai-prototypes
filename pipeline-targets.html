@@ -131,10 +131,10 @@ table.ph{font-size:13px;width:100%} table.ph th,table.ph td{padding:5px 6px} tab
   <div class="formula" aria-label="Formula">
     <span class="lbl">Pipe target</span><span class="op">=</span>
     <span class="term t1">Quota</span><span class="op">×</span>
-    <span class="term t2">Coverage by segment</span><span class="op">×</span>
+    <span class="term t2">4x coverage</span><span class="op">×</span>
     <span class="term t3">Product mix</span><span class="op">×</span>
     <span class="term t4">Theater mix</span>
-    <span class="op" style="margin-left:6px;font-weight:700">· defaults fill any missing value</span>
+    <span class="op" style="margin-left:6px;font-weight:700">· 4x pipeline for every $1 of quota, so there is enough pipe to cover quota</span>
   </div>
 
   <!-- OUTPUT -->
@@ -156,8 +156,8 @@ table.ph{font-size:13px;width:100%} table.ph th,table.ph td{padding:5px 6px} tab
 
   <!-- INPUT -->
   <section class="panel" id="v-input" hidden>
-    <div class="ph"><div><h2>RAW.QUOTA_SHEET</h2><p>FY26 quarterly quotas exported from Anaplan to a shared Google Sheet and ingested into Snowflake. Rows missing a segment use the default coverage.</p></div></div>
-    <div class="tw"><table><thead><tr><th>rep_name</th><th>manager</th><th>region</th><th>theater</th><th>segment</th><th class="num">q1_quota</th><th class="num">q2_quota</th><th class="num">q3_quota</th><th class="num">q4_quota</th><th class="num">fy26_total</th></tr></thead><tbody id="inBody"></tbody></table></div>
+    <div class="ph"><div><h2>RAW.QUOTA_SHEET</h2><p>FY26 quarterly quotas exported from Anaplan to a shared Google Sheet and ingested into Snowflake.</p></div></div>
+    <div class="tw"><table><thead><tr><th>rep_name</th><th>manager</th><th>region</th><th>theater</th><th class="num">q1_quota</th><th class="num">q2_quota</th><th class="num">q3_quota</th><th class="num">q4_quota</th><th class="num">fy26_total</th></tr></thead><tbody id="inBody"></tbody></table></div>
     <div class="meta"><span>Source: <code>Anaplan › FY26 Quota Plan</code></span><span>Sheet: <code>FY26 Quotas (export)</code></span><span>Loaded: <code>RAW.QUOTA_SHEET</code>, 18 rows</span></div>
   </section>
 
@@ -165,7 +165,7 @@ table.ph{font-size:13px;width:100%} table.ph th,table.ph td{padding:5px 6px} tab
   <section class="panel" id="v-assume" hidden>
     <div class="ph"><div><h2>Target rules</h2><p>Change any input and the output view recalculates. In Snowflake these live in a small config table so RevOps can update them without editing SQL.</p></div><button class="btn" id="reset">Reset defaults</button></div>
     <div class="agrid">
-      <div class="box"><h3>Coverage by segment</h3><p>Pipeline needed per $1 of quota.</p><div id="covIn"></div></div>
+      <div class="box"><h3>Coverage</h3><p>Pipeline needed per $1 of quota. Default is 4x, so there is enough pipeline to cover quota.</p><div id="covIn"></div></div>
       <div class="box"><h3>Product mix</h3><p>Share of pipeline by product. Must total 100%.</p><div id="mixIn"></div><div class="sum" id="mixSum"></div></div>
       <div class="box"><h3>Theater mix</h3><p>Adjusts for conversion differences by theater.</p><div id="thIn"></div></div>
       <div class="box"><h3>Monthly phasing</h3><p>Each month gets its share of the quarter by number of days.</p><div id="phIn"></div></div>
@@ -210,7 +210,7 @@ const MONTHS = [
   ['Nov 2025','2025-11-01','2025-11-30',30],['Dec 2025','2025-12-01','2025-12-31',31],['Jan 2026','2026-01-01','2026-01-31',31]
 ].map(m => ({label:m[0], start:m[1], end:m[2], days:m[3]}));
 const QDAYS = [0,1,2,3].map(q => MONTHS.slice(q*3, q*3+3).reduce((a,m)=>a+m.days,0));
-const DEFAULTS = {cov:{Enterprise:3.5,'Mid-Market':3.0,SMB:2.5,Default:3.0}, mix:{Platform:60,'Add-ons':25,Services:15}, th:{AMER:1.00,EMEA:1.10,APAC:1.20}};
+const DEFAULTS = {cov:{Coverage:4.0}, mix:{Platform:60,'Add-ons':25,Services:15}, th:{AMER:1.00,EMEA:1.10,APAC:1.20}};
 let A = JSON.parse(JSON.stringify(DEFAULTS));
 
 /* periods: each has a label and a function returning a rep's quota for it */
@@ -229,7 +229,7 @@ let toastT; function toast(m){ const t=$('#toast'); t.textContent=m; t.classList
 
 /* ------------ target logic ------------ */
 function repTargets(r, quota){
-  const cov = r.segment && A.cov[r.segment] != null ? A.cov[r.segment] : A.cov.Default;
+  const cov = A.cov.Coverage;
   const th = A.th[r.theater] != null ? A.th[r.theater] : 1;
   const by = {}; let total = 0;
   PRODUCTS.forEach(p => { by[p] = quota * cov * (A.mix[p]/100) * th; total += by[p]; });
@@ -253,7 +253,7 @@ function buildRows(grain){
       ORG.filter(g=>g.theater===th).forEach(g => {
         add('region', th+' '+g.region, th, th, REPS.filter(r=>r.region===g.region));
         add('manager', g.manager, th+' '+g.region, th, REPS.filter(r=>r.manager===g.manager));
-        REPS.filter(r=>r.manager===g.manager).forEach(r => add('rep', r.name, g.manager, th, [r], {usedDefault: !r.segment}));
+        REPS.filter(r=>r.manager===g.manager).forEach(r => add('rep', r.name, g.manager, th, [r]));
       });
     });
   });
@@ -281,17 +281,17 @@ function renderOutput(){
     return `<tr class="l-${r.level}${first?' pstart':''}">
     <td><b>${esc(r.period)}</b><span class="dt">${fmtDate(r.start)} – ${fmtDate(r.end)}</span></td>
     <td><span class="lv lv-${r.level}">${LVL[r.level]}</span></td>
-    <td class="${flat?'':IND[r.level]}">${esc(r.name)}${r.usedDefault?'<span class="flag" title="Segment missing in quota sheet">default coverage</span>':''}</td>
+    <td class="${flat?'':IND[r.level]}">${esc(r.name)}</td>
     <td>${esc(r.parent)}</td>
     <td class="num">${money(r.quota)}</td><td class="num">${r.cov.toFixed(2)}x</td><td class="num tgt">${money(r.total)}</td>
     ${PRODUCTS.map(p=>`<td class="num">${money(r.by[p])}</td>`).join('')}</tr>`;
   }).join('') || '<tr><td colspan="10" style="color:var(--ink-3)">No rows match these filters.</td></tr>';
   const fy = buildRows('year')[0], np = periods(g).length;
-  $('#outMeta').innerHTML = `<span>${g==='all'?'All grains (annual, quarterly, monthly)':GRAIN_LBL[g]+' grain'}: ${np} period${np>1?'s':''} × 34 rows = ${all.length} rows (showing ${rows.length})</span><span>FY26 company pipe target <b style="color:var(--ink)">${money(fy.total)}</b> on ${money(fy.quota)} quota</span><span>${REPS.filter(r=>!r.segment).length} reps used default coverage</span>`;
+  $('#outMeta').innerHTML = `<span>${g==='all'?'All grains (annual, quarterly, monthly)':GRAIN_LBL[g]+' grain'}: ${np} period${np>1?'s':''} × 34 rows = ${all.length} rows (showing ${rows.length})</span><span>FY26 company pipe target <b style="color:var(--ink)">${money(fy.total)}</b> on ${money(fy.quota)} quota</span><span>Coverage ${A.cov.Coverage.toFixed(1)}x × theater mix</span>`;
   window._rows = rows;
 }
 function renderInput(){
-  $('#inBody').innerHTML = REPS.map(r => `<tr><td>${esc(r.name)}</td><td>${esc(r.manager)}</td><td>${esc(r.region)}</td><td>${r.theater}</td><td>${r.segment ? r.segment : '<span class="flag" style="margin:0">missing</span>'}</td>${r.q.map(v=>`<td class="num">${money(v)}</td>`).join('')}<td class="num" style="font-weight:800">${money(r.fy)}</td></tr>`).join('');
+  $('#inBody').innerHTML = REPS.map(r => `<tr><td>${esc(r.name)}</td><td>${esc(r.manager)}</td><td>${esc(r.region)}</td><td>${r.theater}</td>${r.q.map(v=>`<td class="num">${money(v)}</td>`).join('')}<td class="num" style="font-weight:800">${money(r.fy)}</td></tr>`).join('');
 }
 function inputRow(group, key, val, step, suffix){
   return `<div class="inrow"><label for="in-${group}-${key}">${key==='Default'?'Default':key}</label><span><input id="in-${group}-${key.replace(/\s/g,'')}" data-g="${group}" data-k="${key}" type="number" step="${step}" min="0" value="${val}"> <span style="color:var(--ink-3);font-weight:800">${suffix}</span></span></div>`;
@@ -318,12 +318,12 @@ function renderSql(){
 <span class="cm">-- FY26 runs Feb 1, 2025 to Jan 31, 2026 (Q1 Feb-Apr, Q2 May-Jul, Q3 Aug-Oct, Q4 Nov-Jan)</span>
 <span class="kw">create or replace view</span> GTM.PIPE_TARGETS <span class="kw">as</span>
 <span class="kw">with</span> quarterly_quota <span class="kw">as</span> (           <span class="cm">-- Anaplan export via Google Sheets, one column per quarter</span>
-  <span class="kw">select</span> rep_name, manager, region, theater, segment, fiscal_quarter, quota
+  <span class="kw">select</span> rep_name, manager, region, theater, fiscal_quarter, quota
   <span class="kw">from</span> RAW.QUOTA_SHEET
   <span class="kw">unpivot</span> (quota <span class="kw">for</span> fiscal_quarter <span class="kw">in</span> (q1_quota <span class="kw">as</span> <span class="st">'Q1'</span>, q2_quota <span class="kw">as</span> <span class="st">'Q2'</span>, q3_quota <span class="kw">as</span> <span class="st">'Q3'</span>, q4_quota <span class="kw">as</span> <span class="st">'Q4'</span>))
 ),
 monthly_quota <span class="kw">as</span> (             <span class="cm">-- phase each quarter by days in month ÷ days in quarter</span>
-  <span class="kw">select</span> q.rep_name, q.manager, q.region, q.theater, q.segment, q.fiscal_quarter,
+  <span class="kw">select</span> q.rep_name, q.manager, q.region, q.theater, q.fiscal_quarter,
          c.fiscal_month, c.month_start, c.month_end,
          q.quota * c.days_in_month / c.days_in_quarter <span class="kw">as</span> quota
   <span class="kw">from</span> quarterly_quota q
@@ -332,12 +332,11 @@ monthly_quota <span class="kw">as</span> (             <span class="cm">-- phase
 rep_targets <span class="kw">as</span> (
   <span class="kw">select</span> mq.*, pm.product,
     mq.quota
-    * <span class="fn">coalesce</span>(cov.multiple, ${c.Default.toFixed(1)})    <span class="cm">-- Ent ${c.Enterprise}x, MM ${c['Mid-Market']}x, SMB ${c.SMB}x; default when segment is missing</span>
+    * ${c.Coverage.toFixed(1)}                            <span class="cm">-- coverage: 4x pipeline per $1 of quota by default</span>
     * pm.mix_pct                      <span class="cm">-- Platform ${m.Platform}%, Add-ons ${m['Add-ons']}%, Services ${m.Services}%</span>
     * <span class="fn">coalesce</span>(th.factor, 1.00)      <span class="cm">-- AMER ${t.AMER.toFixed(2)}, EMEA ${t.EMEA.toFixed(2)}, APAC ${t.APAC.toFixed(2)}</span>
     <span class="kw">as</span> pipe_target
   <span class="kw">from</span> monthly_quota mq
-  <span class="kw">left join</span> CONFIG.COVERAGE_BY_SEGMENT cov <span class="kw">on</span> cov.segment = mq.segment
   <span class="kw">left join</span> CONFIG.THEATER_MIX th          <span class="kw">on</span> th.theater = mq.theater
   <span class="kw">cross join</span> CONFIG.PRODUCT_MIX pm
 ),
