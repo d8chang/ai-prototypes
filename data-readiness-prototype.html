@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Groundwork | AI Data Readiness Prototype</title>
+<meta name="description" content="Prototype: get company data ready for an AI assistant. Prioritize sources, build a semantic layer, flag sensitive data, and set role-based access.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800&display=swap">
+<style>
+:root{
+  --bg:#F3F8F1; --surface:#FFFFFF; --tint:#EAF4E6; --line:#D9E6D4; --line-2:#C6D9C0;
+  --ink:#1F2B24; --ink-2:#4A5A50; --ink-3:#77867C;
+  --accent:#1F7A4D; --accent-2:#2E7D57; --accent-soft:#D7EEDC;
+  --warn:#9A6A12; --warn-soft:#FFF1C9; --risk:#B4443A; --risk-soft:#FBE0DB; --info:#2F5E99; --info-soft:#DCE9FA;
+  --lav:#E9E1FA; --lav-ink:#5B4A99;
+  --font:'Nunito',ui-rounded,system-ui,-apple-system,'Segoe UI',sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.5;font-weight:600;-webkit-font-smoothing:antialiased}
+button,select,input,textarea{font:inherit;color:inherit}
+h1,h2,h3,p{margin:0}
+.app{max-width:1180px;margin:0 auto;padding:20px 16px 48px}
+
+/* top bar */
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.logo{width:40px;height:40px;border-radius:12px;background:var(--accent-2);display:grid;place-items:center;flex:none}
+.logo svg{width:22px;height:22px}
+.brand h1{font-size:21px;font-weight:800;line-height:1.2}
+.brand p{font-size:13.5px;color:var(--ink-3)}
+.sample{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px 12px}
+
+/* readiness summary */
+.summary{display:grid;grid-template-columns:200px minmax(0,1fr);gap:18px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px 20px;margin-bottom:16px}
+.score{display:flex;align-items:center;gap:14px}
+.ring{width:76px;height:76px;flex:none}
+.ring circle{fill:none;stroke-width:9}
+.score b{display:block;font-size:13px;color:var(--ink-3);font-weight:800;letter-spacing:.04em;text-transform:uppercase}
+.score span{font-size:14px;color:var(--ink-2)}
+.bars{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.bar{min-width:0}
+.bar .lbl{display:flex;justify-content:space-between;gap:6px;font-size:13px;color:var(--ink-2);margin-bottom:6px}
+.bar .lbl b{color:var(--ink)}
+.track{height:8px;border-radius:99px;background:var(--tint);overflow:hidden}
+.fill{height:100%;border-radius:99px;background:var(--accent-2);transition:width .35s ease}
+
+/* tabs */
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;margin-bottom:14px;scrollbar-width:thin}
+.tab{flex:none;display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 15px;cursor:pointer;font-weight:800;color:var(--ink-2)}
+.tab .n{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;background:var(--tint);color:var(--accent)}
+.tab[aria-selected="true"]{background:var(--accent-2);border-color:var(--accent-2);color:#fff}
+.tab[aria-selected="true"] .n{background:rgba(255,255,255,.22);color:#fff}
+.tab .ok{display:none;color:var(--accent);font-size:13px}
+.tab.done .ok{display:inline}
+.tab[aria-selected="true"] .ok{color:#fff}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px}
+.panel[hidden]{display:none}
+.ph{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:16px}
+.ph h2{font-size:20px;font-weight:800}
+.ph p{color:var(--ink-2);max-width:70ch;font-size:14.5px}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.btn{border:1px solid var(--line-2);background:var(--surface);border-radius:10px;padding:7px 13px;font-weight:800;cursor:pointer;font-size:14px}
+.btn:hover{background:var(--tint)}
+.btn.primary{background:var(--accent-2);border-color:var(--accent-2);color:#fff}
+.btn.primary:hover{background:var(--accent)}
+.btn.sm{padding:4px 10px;font-size:13px;border-radius:8px}
+.btn:disabled{opacity:.5;cursor:default}
+
+/* tables */
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);background:#F8FBF6;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.sub{display:block;font-size:12.5px;color:var(--ink-3);font-weight:600}
+.dots{display:inline-flex;gap:3px;vertical-align:middle}
+.dots i{width:8px;height:8px;border-radius:50%;background:var(--tint)}
+.dots i.on{background:var(--accent-2)}
+.pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 10px;font-size:12.5px;font-weight:800;white-space:nowrap}
+.p-green{background:var(--accent-soft);color:var(--accent)}
+.p-amber{background:var(--warn-soft);color:var(--warn)}
+.p-red{background:var(--risk-soft);color:var(--risk)}
+.p-blue{background:var(--info-soft);color:var(--info)}
+.p-lav{background:var(--lav);color:var(--lav-ink)}
+.p-gray{background:#EEF1EE;color:var(--ink-3)}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:9px;overflow:hidden}
+.seg button{border:0;background:var(--surface);padding:4px 10px;font-size:13px;font-weight:800;cursor:pointer;color:var(--ink-2)}
+.seg button+button{border-left:1px solid var(--line-2)}
+.seg button.on-in{background:var(--accent-2);color:#fff}
+.seg button.on-out{background:#EEF1EE;color:var(--ink)}
+.prio{display:flex;align-items:center;gap:8px;min-width:120px}
+.prio .track{flex:1;min-width:50px}
+
+/* semantic layer */
+.split{display:grid;grid-template-columns:230px minmax(0,1fr);gap:16px}
+.list{display:flex;flex-direction:column;gap:6px}
+.li{display:flex;justify-content:space-between;align-items:center;gap:8px;border:1px solid var(--line);border-radius:11px;padding:9px 12px;background:var(--surface);cursor:pointer;text-align:left;width:100%}
+.li:hover{background:#F8FBF6}
+.li.sel{border-color:var(--accent-2);box-shadow:0 0 0 2px var(--accent-soft)}
+.li b{font-weight:800;font-size:14px}
+.li small{display:block;color:var(--ink-3);font-size:12px;font-weight:600}
+.minor{font-size:12px;color:var(--ink-3);font-weight:800}
+.subhead{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin:6px 0 2px}
+textarea.desc{width:100%;min-height:40px;resize:vertical;border:1px solid var(--line-2);border-radius:9px;padding:7px 9px;font-size:13.5px;font-weight:600;background:#FCFEFB;line-height:1.4}
+textarea.desc:focus{outline:2px solid var(--accent-soft);border-color:var(--accent-2)}
+textarea.desc.empty{border-style:dashed;background:#FFFCF2}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;background:var(--tint);border-radius:6px;padding:1px 6px;color:var(--ink)}
+.metric{border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.metric .mh{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.metric h4{margin:0;font-size:15px;font-weight:800}
+.metric p{font-size:13.5px;color:var(--ink-2)}
+.mgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
+
+/* governance */
+.policy{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:16px}
+.pc{border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.pc h4{margin:0 0 4px;font-size:14.5px;font-weight:800;display:flex;align-items:center;gap:8px}
+.pc p{font-size:13px;color:var(--ink-2)}
+select.inline{border:1px solid var(--line-2);border-radius:8px;padding:4px 8px;background:var(--surface);font-size:13px;font-weight:800}
+
+/* access */
+.matrix td,.matrix th{text-align:center}
+.matrix td:first-child,.matrix th:first-child{text-align:left}
+.cell{border:0;border-radius:8px;padding:5px 9px;font-size:12.5px;font-weight:800;cursor:pointer;min-width:74px}
+.c-full{background:var(--accent-soft);color:var(--accent)}
+.c-masked{background:var(--warn-soft);color:var(--warn)}
+.c-none{background:#EEF1EE;color:var(--ink-3)}
+.users{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px}
+.user{border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:10px;min-width:0}
+.user.un{border-color:#EBCB86;background:#FFFCF2}
+.av{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:12.5px;font-weight:800;flex:none}
+.user .who{min-width:0;flex:1}
+.user .who b{display:block;font-size:14px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user .who small{display:block;font-size:12px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* preview */
+.pv{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:16px}
+.chat{border:1px solid var(--line);border-radius:14px;display:flex;flex-direction:column;overflow:hidden;min-height:340px}
+.chat .ch{padding:10px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px;background:#F8FBF6;font-weight:800;font-size:14px}
+.msgs{padding:14px;display:flex;flex-direction:column;gap:10px;flex:1}
+.msg{max-width:92%;border-radius:14px;padding:10px 13px;font-size:14px;line-height:1.5}
+.msg.u{align-self:flex-end;background:var(--accent-2);color:#fff;border-bottom-right-radius:4px}
+.msg.a{align-self:flex-start;background:var(--tint);border-bottom-left-radius:4px}
+.msg.a .note{display:block;margin-top:8px;font-size:12.5px;color:var(--ink-2);border-top:1px dashed var(--line-2);padding-top:6px}
+.qs{display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px;border-top:1px solid var(--line)}
+.q{border:1px solid var(--line-2);background:var(--surface);border-radius:999px;padding:5px 11px;font-size:13px;font-weight:700;cursor:pointer}
+.q:hover{background:var(--tint)}
+.see{border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.tbl{border-top:1px solid var(--line);padding:9px 0}
+.tbl:first-of-type{border-top:0}
+.tbl .th{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:800;font-size:14px;margin-bottom:6px}
+.cols{display:flex;flex-wrap:wrap;gap:5px}
+.col{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;border-radius:6px;padding:2px 7px;background:var(--tint)}
+.col.m{background:var(--warn-soft);color:var(--warn)}
+.col.h{background:#EEF1EE;color:#A3ADA6;text-decoration:line-through}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12.5px;color:var(--ink-3);margin-top:8px}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.sw{width:12px;height:12px;border-radius:4px;display:inline-block}
+
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%) translateY(20px);opacity:0;background:var(--ink);color:#fff;border-radius:999px;padding:9px 18px;font-size:14px;font-weight:700;transition:all .25s ease;pointer-events:none;z-index:9}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.foot{margin-top:18px;text-align:center;font-size:12.5px;color:var(--ink-3)}
+
+@media (max-width:900px){
+  .summary{grid-template-columns:minmax(0,1fr)}
+  .bars{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .split,.pv{grid-template-columns:minmax(0,1fr)}
+  .list{flex-direction:row;overflow-x:auto}
+  .li{min-width:180px}
+  .users,.policy{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .mgrid{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:560px){
+  .users,.policy{grid-template-columns:minmax(0,1fr)}
+  .panel{padding:14px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="7" ry="2.8"/><path d="M5 6v6c0 1.5 3.1 2.8 7 2.8s7-1.3 7-2.8V6"/><path d="M5 12v6c0 1.5 3.1 2.8 7 2.8"/><path d="M16.5 17.5l1.8 1.8 3.2-3.6"/></svg></div>
+      <div><h1>Groundwork</h1><p>Get company data ready for an AI assistant, step by step</p></div>
+    </div>
+    <span class="sample">Prototype · sample data</span>
+  </header>
+
+  <section class="summary" aria-label="AI readiness">
+    <div class="score">
+      <svg class="ring" viewBox="0 0 80 80" aria-hidden="true"><circle cx="40" cy="40" r="33" stroke="#EAF4E6"/><circle id="ringFill" cx="40" cy="40" r="33" stroke="#2E7D57" stroke-linecap="round" transform="rotate(-90 40 40)" stroke-dasharray="207.3" stroke-dashoffset="207.3" style="transition:stroke-dashoffset .4s ease"/><text id="ringText" x="40" y="46" text-anchor="middle" font-size="19" font-weight="800" fill="#1F2B24" font-family="Nunito,sans-serif">0%</text></svg>
+      <div><b>AI readiness</b><span id="readyMsg">Work through the steps</span></div>
+    </div>
+    <div class="bars" id="bars"></div>
+  </section>
+
+  <nav class="tabs" role="tablist" id="tabs"></nav>
+
+  <!-- 1. Sources -->
+  <section class="panel" id="p-sources" role="tabpanel">
+    <div class="ph">
+      <div><h2>1. Prioritize data sources</h2><p>Start with the sources teams ask about most. Priority weighs demand across teams, data quality, and freshness. Decide which ones go into the AI layer first.</p></div>
+      <div class="actions"><button class="btn" id="sortPrio">Sort by priority</button><button class="btn primary" id="acceptTop">Include top 5</button></div>
+    </div>
+    <div class="tw"><table><thead><tr><th>Source</th><th>Teams asking</th><th>Quality</th><th>Freshness</th><th>Priority</th><th>AI layer</th></tr></thead><tbody id="srcBody"></tbody></table></div>
+  </section>
+
+  <!-- 2. Semantic layer -->
+  <section class="panel" id="p-semantic" role="tabpanel" hidden>
+    <div class="ph">
+      <div><h2>2. Build the semantic layer</h2><p>Describe what each column means in plain language and define metrics once, so the assistant answers with the same numbers the business uses.</p></div>
+      <div class="actions"><button class="btn" id="draftAll">Draft missing with AI</button><button class="btn primary" id="approveAll">Approve all in table</button></div>
+    </div>
+    <div class="split">
+      <div><div class="subhead">Tables in the AI layer</div><div class="list" id="tblList"></div></div>
+      <div>
+        <div class="tw"><table><thead><tr><th style="width:24%">Column</th><th>Description</th><th style="width:120px">Status</th></tr></thead><tbody id="colBody"></tbody></table></div>
+        <div class="subhead" style="margin-top:16px">Metric definitions</div>
+        <div class="mgrid" id="metrics"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Governance -->
+  <section class="panel" id="p-gov" role="tabpanel" hidden>
+    <div class="ph">
+      <div><h2>3. Flag sensitive data</h2><p>A scan suggests columns that hold personal, financial, or HR data. Confirm each flag. Sensitive columns are masked or hidden by role in the next step.</p></div>
+      <div class="actions"><button class="btn primary" id="acceptFlags">Accept all suggestions</button></div>
+    </div>
+    <div class="policy">
+      <div class="pc"><h4><span class="pill p-red">PII</span>Personal data</h4><p>Names, emails, phone numbers. Masked for everyone outside the owning team.</p></div>
+      <div class="pc"><h4><span class="pill p-amber">Financial</span>Deal and billing data</h4><p>Contract values and payment details. Visible to Sales, Finance, and leadership.</p></div>
+      <div class="pc"><h4><span class="pill p-lav">Confidential</span>HR and internal</h4><p>Compensation and performance data. Hidden from the AI layer by default.</p></div>
+    </div>
+    <div class="tw"><table><thead><tr><th>Column</th><th>Table</th><th>Scan suggestion</th><th>Reason</th><th>Decision</th></tr></thead><tbody id="govBody"></tbody></table></div>
+  </section>
+
+  <!-- 4. Roles & access -->
+  <section class="panel" id="p-access" role="tabpanel" hidden>
+    <div class="ph">
+      <div><h2>4. Define roles and access</h2><p>Set what each department role can see, then group people into roles. Click a cell to cycle between full access, masked sensitive columns, and no access.</p></div>
+      <div class="actions"><button class="btn primary" id="autoGroup">Auto-group by department</button></div>
+    </div>
+    <div class="tw"><table class="matrix"><thead id="mxHead"></thead><tbody id="mxBody"></tbody></table></div>
+    <div class="subhead" style="margin-top:18px">People <span class="minor" id="userCount"></span></div>
+    <div class="users" id="users"></div>
+  </section>
+
+  <!-- 5. Preview -->
+  <section class="panel" id="p-preview" role="tabpanel" hidden>
+    <div class="ph">
+      <div><h2>5. Preview as a role</h2><p>See what the assistant can use for each role, and how the semantic layer and access rules change its answers.</p></div>
+      <div class="actions"><label class="minor" for="pvRole" style="align-self:center">Viewing as</label><select class="inline" id="pvRole"></select></div>
+    </div>
+    <div class="pv">
+      <div class="chat"><div class="ch"><span class="pill p-green">AI assistant</span><span id="chatRole"></span></div><div class="msgs" id="msgs"></div><div class="qs" id="qs"></div></div>
+      <div class="see"><div class="subhead" style="margin-top:0">What the assistant can see</div><div id="see"></div>
+        <div class="legend"><span><i class="sw" style="background:var(--tint)"></i>Visible</span><span><i class="sw" style="background:var(--warn-soft)"></i>Masked</span><span><i class="sw" style="background:#EEF1EE"></i>Hidden</span></div>
+      </div>
+    </div>
+  </section>
+
+  <p class="foot">Prototype built by Deborah Chang. All company names, people, and numbers are sample data.</p>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ---------------- sample data ---------------- */
+const SOURCES = [
+  {id:'crm',      name:'CRM',                 sys:'Accounts, contacts, opportunities', teams:5, quality:4, fresh:5, inc:null},
+  {id:'billing',  name:'Billing',             sys:'Subscriptions, invoices',           teams:4, quality:5, fresh:4, inc:null},
+  {id:'usage',    name:'Product usage',       sys:'Daily feature events',              teams:4, quality:4, fresh:5, inc:null},
+  {id:'support',  name:'Support desk',        sys:'Tickets, CSAT',                     teams:3, quality:4, fresh:5, inc:null},
+  {id:'marketing',name:'Marketing automation',sys:'Campaigns, leads',                  teams:3, quality:3, fresh:4, inc:null},
+  {id:'web',      name:'Web analytics',       sys:'Sessions, sign-ups',                teams:2, quality:3, fresh:5, inc:null},
+  {id:'finance',  name:'Finance ledger',      sys:'GL entries, cost centers',          teams:1, quality:5, fresh:2, inc:null},
+  {id:'hr',       name:'HR system',           sys:'Employees, compensation',           teams:1, quality:4, fresh:2, inc:null}
+];
+
+const TABLES = [
+  {id:'accounts', src:'crm', name:'accounts', cols:[
+    ['account_id','string','Unique ID for a customer account.',null],
+    ['account_name','string','Company name of the customer account.',null],
+    ['segment','string','Customer size tier: SMB, Mid-Market, or Enterprise.',null],
+    ['owner_email','string','Email of the account owner (sales rep).','pii'],
+    ['region','string','Sales region that owns the account: AMER, EMEA, or APAC.',null],
+    ['health_score','number','0-100 score combining usage, support, and billing signals.',null]
+  ], pre:[0,1,2]},
+  {id:'opportunities', src:'crm', name:'opportunities', cols:[
+    ['opp_id','string','Unique ID for a sales opportunity.',null],
+    ['account_id','string','Account the opportunity belongs to.',null],
+    ['stage','string','Current sales stage, from Discovery to Closed Won or Lost.',null],
+    ['amount','number','Expected annual contract value in USD.','fin'],
+    ['close_date','date','Expected or actual close date.',null]
+  ], pre:[0,1]},
+  {id:'subscriptions', src:'billing', name:'subscriptions', cols:[
+    ['sub_id','string','Unique ID for a subscription.',null],
+    ['account_id','string','Account that owns the subscription.',null],
+    ['plan','string','Plan tier: Starter, Team, or Business.',null],
+    ['arr','number','Annual recurring revenue for the subscription in USD.','fin'],
+    ['card_last4','string','Last four digits of the payment card on file.','fin'],
+    ['status','string','Trialing, active, past due, or canceled.',null]
+  ], pre:[0,1,2]},
+  {id:'usage_daily', src:'usage', name:'usage_daily', cols:[
+    ['account_id','string','Account the activity belongs to.',null],
+    ['event_date','date','Day the activity happened.',null],
+    ['active_users','number','Distinct users active that day.',null],
+    ['feature','string','Product feature used, such as Reports or Automations.',null]
+  ], pre:[0,1]},
+  {id:'tickets', src:'support', name:'tickets', cols:[
+    ['ticket_id','string','Unique ID for a support ticket.',null],
+    ['account_id','string','Account that opened the ticket.',null],
+    ['requester_email','string','Email of the person who opened the ticket.','pii'],
+    ['category','string','Issue type, such as Billing, Login, or Integrations.',null],
+    ['resolved_by_ai','boolean','True when the AI assistant resolved the ticket without an agent.',null],
+    ['csat','number','Customer satisfaction rating from 1 to 5.',null]
+  ], pre:[0,1]},
+  {id:'leads', src:'marketing', name:'leads', cols:[
+    ['lead_id','string','Unique ID for a marketing lead.',null],
+    ['email','string','Lead email address.','pii'],
+    ['campaign','string','Campaign that sourced the lead.',null],
+    ['mql_date','date','Date the lead became marketing qualified.',null]
+  ], pre:[0]},
+  {id:'sessions', src:'web', name:'sessions', cols:[
+    ['session_id','string','Unique ID for a website visit.',null],
+    ['landing_page','string','First page viewed in the visit.',null],
+    ['signed_up','boolean','True when the visit ended in a trial sign-up.',null]
+  ], pre:[0]},
+  {id:'gl_entries', src:'finance', name:'gl_entries', cols:[
+    ['entry_id','string','Unique ID for a ledger entry.',null],
+    ['cost_center','string','Department cost center charged.',null],
+    ['amount','number','Entry amount in USD.','fin']
+  ], pre:[0]},
+  {id:'employees', src:'hr', name:'employees', cols:[
+    ['employee_id','string','Unique ID for an employee.',null],
+    ['department','string','Department the employee belongs to.',null],
+    ['salary','number','Annual base salary in USD.','conf'],
+    ['manager_id','string','Employee ID of the manager.',null]
+  ], pre:[0]}
+];
+TABLES.forEach(t => t.cols = t.cols.map((c,i) => ({name:c[0], type:c[1], suggest:c[2], sensSug:c[3],
+  desc: t.pre.includes(i) ? c[2] : '', status: t.pre.includes(i) ? 'approved' : 'missing', sens: 'pending'})));
+
+const METRICS = [
+  {id:'arr', name:'ARR', def:'Sum of arr on active subscriptions, as of the last day of the period.', formula:'SUM(subscriptions.arr) WHERE status = active', status:'draft'},
+  {id:'nrr', name:'Net revenue retention', def:'ARR today from accounts that were customers 12 months ago, divided by their ARR then.', formula:'ARR(cohort, today) / ARR(cohort, 12 months ago)', status:'draft'},
+  {id:'t2p', name:'Trial-to-paid rate', def:'Share of trials started in the period that converted to a paid plan within 14 days.', formula:'paid_within_14d / trials_started', status:'approved'},
+  {id:'deflect', name:'AI resolution rate', def:'Share of support tickets resolved by the AI assistant without an agent.', formula:'AVG(tickets.resolved_by_ai)', status:'draft'}
+];
+
+const DATASETS = [
+  {id:'crm', name:'CRM'}, {id:'billing', name:'Billing'}, {id:'usage', name:'Product usage'},
+  {id:'support', name:'Support desk'}, {id:'marketing', name:'Marketing'}, {id:'finance', name:'Finance'}
+];
+const ROLES = [
+  {id:'sales',  name:'Sales',            dept:['Sales'],            color:'#FFEFB0', access:{crm:'full',billing:'masked',usage:'masked',support:'none',marketing:'masked',finance:'none'}},
+  {id:'mkt',    name:'Marketing',        dept:['Marketing'],        color:'#D3E6FB', access:{crm:'masked',billing:'none',usage:'masked',support:'none',marketing:'full',finance:'none'}},
+  {id:'cs',     name:'Customer Success', dept:['Customer Success'], color:'#CDEBD3', access:{crm:'masked',billing:'masked',usage:'full',support:'full',marketing:'none',finance:'none'}},
+  {id:'support',name:'Support',          dept:['Support'],          color:'#FBDAD3', access:{crm:'masked',billing:'none',usage:'masked',support:'full',marketing:'none',finance:'none'}},
+  {id:'fin',    name:'Finance',          dept:['Finance'],          color:'#E5DCF8', access:{crm:'masked',billing:'full',usage:'none',support:'none',marketing:'none',finance:'full'}},
+  {id:'lead',   name:'Leadership',       dept:['Executive'],        color:'#F2E3C9', access:{crm:'full',billing:'full',usage:'full',support:'masked',marketing:'full',finance:'full'}}
+];
+const USERS = [
+  ['Maya Torres','Sales','Account Executive','sales'],['Jordan Lee','Sales','Sales Manager',null],['Priya Nair','Sales','SDR',null],
+  ['Sam Okafor','Marketing','Demand Gen Manager','mkt'],['Lena Fischer','Marketing','Marketing Ops',null],
+  ['Chris Park','Customer Success','CSM',null],['Ana Ruiz','Customer Success','CS Director',null],
+  ['Tom Becker','Support','Support Lead',null],['Hana Sato','Support','Support Specialist',null],
+  ['Noah Kim','Finance','FP&A Analyst',null],['Grace Liu','Finance','Controller','fin'],
+  ['Ravi Shah','Executive','CEO',null],['Elena Rossi','Executive','CIO',null],
+  ['Ben Carter','Operations','RevOps Analyst',null],['Ivy Chen','Operations','BizOps Lead',null]
+].map(u => ({name:u[0], dept:u[1], title:u[2], role:u[3]}));
+
+/* ---------------- helpers ---------------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const prio = s => Math.round((s.teams/5*0.5 + s.quality/5*0.3 + s.fresh/5*0.2) * 100);
+const inc = id => SOURCES.find(s => s.id === id).inc === true;
+const aiTables = () => TABLES.filter(t => inc(t.src));
+const roleOf = id => ROLES.find(r => r.id === id);
+const sensLabel = {pii:['PII','p-red'], fin:['Financial','p-amber'], conf:['Confidential','p-lav']};
+let toastT;
+function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),1800); }
+
+/* ---------------- readiness ---------------- */
+function progress(){
+  const src = SOURCES.filter(s => s.inc !== null).length / SOURCES.length;
+  const cols = aiTables().flatMap(t => t.cols);
+  const mets = METRICS;
+  const sem = cols.length ? (cols.filter(c => c.status==='approved').length + mets.filter(m=>m.status==='approved').length) / (cols.length + mets.length) : 0;
+  const flagged = aiTables().flatMap(t => t.cols).filter(c => c.sensSug);
+  const gov = flagged.length ? flagged.filter(c => c.sens !== 'pending').length / flagged.length : 0;
+  const acc = USERS.filter(u => u.role).length / USERS.length;
+  return {src, sem, gov, acc};
+}
+const STEPS = [
+  {id:'sources', label:'Sources', key:'src'},
+  {id:'semantic', label:'Semantic layer', key:'sem'},
+  {id:'gov', label:'Governance', key:'gov'},
+  {id:'access', label:'Roles & access', key:'acc'},
+  {id:'preview', label:'Preview', key:null}
+];
+function renderSummary(){
+  const p = progress();
+  const vals = [p.src,p.sem,p.gov,p.acc];
+  const overall = Math.round(vals.reduce((a,b)=>a+b,0)/4*100);
+  $('#ringFill').setAttribute('stroke-dashoffset', (207.3*(1-overall/100)).toFixed(1));
+  $('#ringText').textContent = overall + '%';
+  $('#readyMsg').textContent = overall >= 100 ? 'Ready for rollout' : overall >= 70 ? 'Almost there' : 'Work through the steps';
+  $('#bars').innerHTML = STEPS.slice(0,4).map((s,i) => `<div class="bar"><div class="lbl"><span>${s.label}</span><b>${Math.round(vals[i]*100)}%</b></div><div class="track"><div class="fill" style="width:${vals[i]*100}%"></div></div></div>`).join('');
+  STEPS.forEach((s,i) => { const t = document.getElementById('tab-'+s.id); if (t && s.key) t.classList.toggle('done', p[s.key] >= 1); });
+}
+
+/* ---------------- tabs ---------------- */
+let current = 'sources';
+function renderTabs(){
+  $('#tabs').innerHTML = STEPS.map((s,i) => `<button class="tab" role="tab" id="tab-${s.id}" aria-selected="${s.id===current}" data-step="${s.id}"><span class="n">${i+1}</span>${s.label}<span class="ok">✓</span></button>`).join('');
+  document.querySelectorAll('.tab').forEach(b => b.onclick = () => show(b.dataset.step));
+}
+function show(id){
+  current = id;
+  STEPS.forEach(s => document.getElementById('p-'+s.id).hidden = s.id !== id);
+  document.querySelectorAll('.tab').forEach(b => b.setAttribute('aria-selected', b.dataset.step === id));
+  ({sources:renderSources, semantic:renderSemantic, gov:renderGov, access:renderAccess, preview:renderPreview})[id]();
+}
+
+/* ---------------- 1. sources ---------------- */
+let srcSorted = false;
+function dots(n){ return `<span class="dots" aria-label="${n} of 5">${[1,2,3,4,5].map(i=>`<i class="${i<=n?'on':''}"></i>`).join('')}</span>`; }
+function renderSources(){
+  const list = srcSorted ? [...SOURCES].sort((a,b)=>prio(b)-prio(a)) : SOURCES;
+  $('#srcBody').innerHTML = list.map(s => {
+    const p = prio(s);
+    return `<tr><td><b>${esc(s.name)}</b><span class="sub">${esc(s.sys)}</span></td>
+      <td class="num">${s.teams} of 5</td><td>${dots(s.quality)}</td><td>${dots(s.fresh)}</td>
+      <td><div class="prio"><div class="track"><div class="fill" style="width:${p}%;background:${p>=75?'var(--accent-2)':p>=55?'#C9A43D':'#B9C4BC'}"></div></div><span class="num">${p}</span></div></td>
+      <td><div class="seg" role="group" aria-label="${esc(s.name)} in AI layer"><button data-src="${s.id}" data-v="1" class="${s.inc===true?'on-in':''}">Include</button><button data-src="${s.id}" data-v="0" class="${s.inc===false?'on-out':''}">Later</button></div></td></tr>`;
+  }).join('');
+  document.querySelectorAll('#srcBody .seg button').forEach(b => b.onclick = () => {
+    SOURCES.find(s=>s.id===b.dataset.src).inc = b.dataset.v === '1'; renderSources(); renderSummary();
+  });
+}
+$('#sortPrio').onclick = () => { srcSorted = true; renderSources(); };
+$('#acceptTop').onclick = () => {
+  const top = [...SOURCES].sort((a,b)=>prio(b)-prio(a)).map(s=>s.id).slice(0,5);
+  SOURCES.forEach(s => s.inc = top.includes(s.id));
+  srcSorted = true; renderSources(); renderSummary(); toast('Top 5 sources added to the AI layer');
+};
+
+/* ---------------- 2. semantic ---------------- */
+let selTable = null;
+function renderSemantic(){
+  const tabs = aiTables();
+  if (!tabs.length){ $('#tblList').innerHTML = '<p class="minor">Include sources in step 1 first.</p>'; $('#colBody').innerHTML=''; renderMetrics(); return; }
+  if (!tabs.find(t=>t.id===selTable)) selTable = tabs[0].id;
+  $('#tblList').innerHTML = tabs.map(t => {
+    const done = t.cols.filter(c=>c.status==='approved').length;
+    return `<button class="li ${t.id===selTable?'sel':''}" data-t="${t.id}"><span><b>${t.name}</b><small>${esc(SOURCES.find(s=>s.id===t.src).name)}</small></span><span class="pill ${done===t.cols.length?'p-green':'p-amber'}">${done}/${t.cols.length}</span></button>`;
+  }).join('');
+  document.querySelectorAll('#tblList .li').forEach(b => b.onclick = () => { selTable = b.dataset.t; renderSemantic(); });
+  const t = TABLES.find(x=>x.id===selTable);
+  $('#colBody').innerHTML = t.cols.map((c,i) => {
+    const st = c.status==='approved' ? '<span class="pill p-green">Approved</span>' : c.status==='draft' ? `<button class="btn sm primary" data-ap="${i}">Approve</button>` : `<button class="btn sm" data-dr="${i}">Draft with AI</button>`;
+    return `<tr><td><code>${c.name}</code><span class="sub">${c.type}</span></td>
+      <td><textarea class="desc ${c.desc?'':'empty'}" data-i="${i}" rows="1" placeholder="No description yet">${esc(c.desc)}</textarea></td><td>${st}</td></tr>`;
+  }).join('');
+  document.querySelectorAll('#colBody [data-dr]').forEach(b => b.onclick = () => { const c=t.cols[b.dataset.dr]; c.desc=c.suggest; c.status='draft'; renderSemantic(); });
+  document.querySelectorAll('#colBody [data-ap]').forEach(b => b.onclick = () => { t.cols[b.dataset.ap].status='approved'; renderSemantic(); renderSummary(); });
+  document.querySelectorAll('#colBody textarea').forEach(a => a.oninput = () => {
+    const c=t.cols[a.dataset.i]; c.desc=a.value; a.classList.toggle('empty',!a.value);
+    if (c.status==='approved' || c.status==='missing'){ c.status = a.value ? 'draft':'missing'; const cell=a.closest('tr').lastElementChild;
+      cell.innerHTML = c.status==='draft' ? `<button class="btn sm primary" data-ap="${a.dataset.i}">Approve</button>` : '';
+      const btn = cell.querySelector('button'); if (btn) btn.onclick = () => { c.status='approved'; renderSemantic(); renderSummary(); };
+      renderSummary(); }
+  });
+  renderMetrics();
+}
+function renderMetrics(){
+  $('#metrics').innerHTML = METRICS.map(m => `<div class="metric"><div class="mh"><h4>${esc(m.name)}</h4>${m.status==='approved'?'<span class="pill p-green">Approved</span>':`<button class="btn sm primary" data-m="${m.id}">Approve</button>`}</div><p>${esc(m.def)}</p><code>${esc(m.formula)}</code></div>`).join('');
+  document.querySelectorAll('#metrics [data-m]').forEach(b => b.onclick = () => { METRICS.find(m=>m.id===b.dataset.m).status='approved'; renderMetrics(); renderSummary(); toast('Metric definition approved'); });
+}
+$('#draftAll').onclick = () => { const t=TABLES.find(x=>x.id===selTable); if(!t) return; let n=0; t.cols.forEach(c=>{ if(c.status==='missing'){ c.desc=c.suggest; c.status='draft'; n++; } }); renderSemantic(); toast(n? `Drafted ${n} description${n>1?'s':''} for review` : 'Nothing missing in this table'); };
+$('#approveAll').onclick = () => { const t=TABLES.find(x=>x.id===selTable); if(!t) return; t.cols.forEach(c=>{ if(!c.desc) c.desc=c.suggest; c.status='approved'; }); renderSemantic(); renderSummary(); toast(`Approved all columns in ${t.name}`); };
+
+/* ---------------- 3. governance ---------------- */
+function renderGov(){
+  const rows = aiTables().flatMap(t => t.cols.filter(c=>c.sensSug).map(c => ({t, c})));
+  if (!rows.length){ $('#govBody').innerHTML = '<tr><td colspan="5" class="minor">Include sources in step 1 to scan their columns.</td></tr>'; return; }
+  const why = {pii:'Looks like an email or personal identifier', fin:'Holds money values or payment details', conf:'Compensation data'};
+  $('#govBody').innerHTML = rows.map(({t,c},i) => {
+    const [lbl,cls] = sensLabel[c.sensSug];
+    const dec = c.sens==='pending' ? `<span class="actions"><button class="btn sm primary" data-acc="${i}">Accept</button><button class="btn sm" data-dis="${i}">Not sensitive</button></span>`
+      : c.sens==='none' ? '<span class="pill p-gray">Not sensitive</span>' : `<span class="pill ${cls}">Flagged ${lbl}</span>`;
+    return `<tr><td><code>${c.name}</code></td><td>${t.name}</td><td><span class="pill ${cls}">${lbl}</span></td><td class="sub" style="font-size:13px">${why[c.sensSug]}</td><td>${dec}</td></tr>`;
+  }).join('');
+  document.querySelectorAll('#govBody [data-acc]').forEach(b => b.onclick = () => { const c=rows[b.dataset.acc].c; c.sens=c.sensSug; renderGov(); renderSummary(); });
+  document.querySelectorAll('#govBody [data-dis]').forEach(b => b.onclick = () => { rows[b.dataset.dis].c.sens='none'; renderGov(); renderSummary(); });
+}
+$('#acceptFlags').onclick = () => { aiTables().forEach(t=>t.cols.forEach(c=>{ if(c.sensSug && c.sens==='pending') c.sens=c.sensSug; })); renderGov(); renderSummary(); toast('Sensitive columns flagged'); };
+
+/* ---------------- 4. access ---------------- */
+const cycle = {full:'masked', masked:'none', none:'full'};
+const cellLbl = {full:'Full', masked:'Masked', none:'None'};
+function initials(n){ return n.split(' ').map(x=>x[0]).join(''); }
+function renderAccess(){
+  $('#mxHead').innerHTML = `<tr><th>Role</th>${DATASETS.map(d=>`<th>${d.name}</th>`).join('')}<th>People</th></tr>`;
+  $('#mxBody').innerHTML = ROLES.map(r => `<tr><td><b>${r.name}</b></td>${DATASETS.map(d=>`<td><button class="cell c-${r.access[d.id]}" data-r="${r.id}" data-d="${d.id}" aria-label="${r.name} access to ${d.name}: ${cellLbl[r.access[d.id]]}">${cellLbl[r.access[d.id]]}</button></td>`).join('')}<td class="num">${USERS.filter(u=>u.role===r.id).length}</td></tr>`).join('');
+  document.querySelectorAll('.matrix .cell').forEach(b => b.onclick = () => { const r=roleOf(b.dataset.r); r.access[b.dataset.d]=cycle[r.access[b.dataset.d]]; renderAccess(); });
+  const assigned = USERS.filter(u=>u.role).length;
+  $('#userCount').textContent = `· ${assigned} of ${USERS.length} assigned`;
+  $('#users').innerHTML = USERS.map((u,i) => {
+    const r = u.role && roleOf(u.role);
+    return `<div class="user ${r?'':'un'}"><span class="av" style="background:${r?r.color:'#F3E7C2'}">${initials(u.name)}</span><span class="who"><b>${esc(u.name)}</b><small>${esc(u.title)} · ${esc(u.dept)}</small></span>
+      <select class="inline" data-u="${i}" aria-label="Role for ${esc(u.name)}"><option value="">No role</option>${ROLES.map(x=>`<option value="${x.id}" ${u.role===x.id?'selected':''}>${x.name}</option>`).join('')}</select></div>`;
+  }).join('');
+  document.querySelectorAll('#users select').forEach(s => s.onchange = () => { USERS[s.dataset.u].role = s.value || null; renderAccess(); renderSummary(); });
+}
+$('#autoGroup').onclick = () => {
+  let n=0; USERS.forEach(u => { if(!u.role){ const r=ROLES.find(r=>r.dept.includes(u.dept)); if(r){ u.role=r.id; n++; } } });
+  const left = USERS.filter(u=>!u.role).length;
+  renderAccess(); renderSummary(); toast(left ? `Grouped ${n} people. ${left} need a role picked by hand.` : `Grouped ${n} people into roles`);
+};
+
+/* ---------------- 5. preview ---------------- */
+const QUESTIONS = [
+  {q:'What was our ARR last quarter?', needs:'billing', metric:'arr', col:'arr',
+   ans:'ARR closed last quarter at $48.2M, up 6% from the quarter before.'},
+  {q:'Which accounts have rising support tickets?', needs:'support', metric:null, col:null,
+   ans:'Three accounts doubled their ticket volume this month: Brightline Health, Kestrel Logistics, and Orchid Retail. Most tickets are about Integrations.'},
+  {q:'How often does the AI resolve tickets?', needs:'support', metric:'deflect', col:'resolved_by_ai',
+   ans:'The assistant resolved 68% of tickets last month without an agent, up from 61%.'},
+  {q:'Who owns the Brightline Health account?', needs:'crm', metric:null, col:'owner_email',
+   ans:'Brightline Health is owned by Maya Torres in AMER.'},
+  {q:'What is the average salary in Sales?', needs:'hr', metric:null, col:'salary', ans:''}
+];
+let pvRole = 'cs', convo = [];
+function accessFor(role, src){ const map={crm:'crm',billing:'billing',usage:'usage',support:'support',marketing:'marketing',web:'marketing',finance:'finance',hr:null}; const d=map[src]; return d ? role.access[d] : 'none'; }
+function renderPreview(){
+  $('#pvRole').innerHTML = ROLES.map(r=>`<option value="${r.id}" ${r.id===pvRole?'selected':''}>${r.name}</option>`).join('');
+  const role = roleOf(pvRole);
+  $('#chatRole').textContent = 'for ' + role.name;
+  const tabs = aiTables();
+  $('#see').innerHTML = tabs.length ? tabs.map(t => {
+    const a = accessFor(role, t.src);
+    const pill = a==='full' ? '<span class="pill p-green">Full</span>' : a==='masked' ? '<span class="pill p-amber">Masked</span>' : '<span class="pill p-gray">No access</span>';
+    const cols = t.cols.map(c => {
+      const sens = c.sens !== 'pending' && c.sens !== 'none' ? c.sens : null;
+      const cls = a==='none' || sens==='conf' ? 'h' : (a==='masked' && sens) ? 'm' : '';
+      return `<span class="col ${cls}" title="${esc(c.desc || 'No description')}">${c.name}${c.status!=='approved'?' ?':''}</span>`;
+    }).join('');
+    return `<div class="tbl"><div class="th"><span>${t.name} <span class="minor">· ${esc(SOURCES.find(s=>s.id===t.src).name)}</span></span>${pill}</div><div class="cols">${cols}</div></div>`;
+  }).join('') + '<p class="minor" style="margin-top:6px">A ? marks a column without an approved description.</p>'
+    : '<p class="minor">Nothing yet. Include sources in step 1.</p>';
+  $('#qs').innerHTML = QUESTIONS.map((q,i)=>`<button class="q" data-q="${i}">${esc(q.q)}</button>`).join('');
+  document.querySelectorAll('#qs .q').forEach(b => b.onclick = () => ask(+b.dataset.q));
+  renderMsgs();
+}
+function ask(i){
+  const q = QUESTIONS[i], role = roleOf(pvRole);
+  let a, note = '';
+  const srcInc = q.needs==='hr' ? inc('hr') : inc(q.needs==='crm'?'crm':q.needs);
+  const acc = accessFor(role, q.needs);
+  if (q.needs==='hr'){
+    a = 'I can\'t answer that. Compensation data is confidential and isn\'t available to the assistant.';
+    note = 'Governance: HR data stays out of the AI layer.';
+  } else if (!srcInc){
+    a = 'I don\'t have that data yet. The ' + SOURCES.find(s=>s.id===q.needs).name + ' source isn\'t in the AI layer.';
+    note = 'Include it in step 1 to answer this.';
+  } else if (acc==='none'){
+    a = 'Your role doesn\'t have access to ' + SOURCES.find(s=>s.id===q.needs).name + ' data, so I can\'t answer this.';
+    note = 'Access: ' + role.name + ' has no access to this dataset. Change it in step 4.';
+  } else {
+    a = q.ans;
+    const col = q.col && TABLES.flatMap(t=>t.cols).find(c=>c.name===q.col);
+    if (col && acc==='masked' && col.sens!=='pending' && col.sens!=='none'){
+      if (q.col==='owner_email') a = 'Brightline Health is owned by a rep in AMER. Their contact details are masked for your role.';
+      else a = a.replace(/\$[\d.]+M/,'[masked]').replace(/up \d+%/,'trend masked');
+      note = 'Governance: ' + q.col + ' is flagged sensitive and masked for ' + role.name + '.';
+    }
+    if (q.metric){
+      const m = METRICS.find(x=>x.id===q.metric);
+      note += (note?' ':'') + (m.status==='approved' ? 'Used the approved definition of ' + m.name + '.' : 'Warning: ' + m.name + ' has no approved definition, so this number may not match official reporting.');
+    }
+  }
+  convo.push({u:q.q, a, note}); if (convo.length>3) convo.shift(); renderMsgs();
+}
+function renderMsgs(){
+  $('#msgs').innerHTML = convo.length ? convo.map(c=>`<div class="msg u">${esc(c.u)}</div><div class="msg a">${esc(c.a)}${c.note?`<span class="note">${esc(c.note)}</span>`:''}</div>`).join('')
+    : '<p class="minor">Pick a question below to see how this role\'s answers change.</p>';
+}
+$('#pvRole').onchange = e => { pvRole = e.target.value; convo = []; renderPreview(); };
+
+/* ---------------- init ---------------- */
+renderTabs(); show('sources'); renderSummary();
+</script>
+</body>
+</html>
