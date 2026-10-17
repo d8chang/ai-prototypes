@@ -165,7 +165,23 @@ select.inline{border:1px solid var(--line-2);border-radius:8px;padding:4px 8px;b
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .foot{margin-top:18px;text-align:center;font-size:12.5px;color:var(--ink-3)}
 
+/* guide */
+.topr{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.guide{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px 20px;margin-bottom:16px}
+.guide[hidden]{display:none}
+.gh{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
+.gh h2{font-size:18px;font-weight:800}
+.gh p{color:var(--ink-2);font-size:14.5px;max-width:78ch}
+.gsteps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:0;padding:0;list-style:none}
+.gsteps li{border:1px solid var(--line);border-radius:12px;padding:11px 12px;background:#FAFDF8;display:flex;flex-direction:column;gap:4px;min-width:0}
+.gsteps .gn{width:24px;height:24px;border-radius:50%;background:var(--accent-2);color:#fff;display:grid;place-items:center;font-size:12.5px;font-weight:800}
+.gsteps b{font-size:14.5px;font-weight:800}
+.gsteps span{font-size:13px;color:var(--ink-2);line-height:1.45}
+.gsteps em{font-style:normal;font-weight:800;color:var(--accent)}
+.gtry{margin-top:12px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;font-size:13.5px;color:var(--ink-2);background:var(--tint);border-radius:12px;padding:10px 14px}
+.gtry b{color:var(--ink)}
 @media (max-width:900px){
+  .gsteps{grid-template-columns:repeat(2,minmax(0,1fr))}
   .summary{grid-template-columns:minmax(0,1fr)}
   .bars{grid-template-columns:repeat(2,minmax(0,1fr))}
   .split,.pv{grid-template-columns:minmax(0,1fr)}
@@ -175,6 +191,7 @@ select.inline{border:1px solid var(--line-2);border-radius:8px;padding:4px 8px;b
   .mgrid{grid-template-columns:minmax(0,1fr)}
 }
 @media (max-width:560px){
+  .gsteps{grid-template-columns:minmax(0,1fr)}
   .users,.policy{grid-template-columns:minmax(0,1fr)}
   .panel{padding:14px}
 }
@@ -187,8 +204,23 @@ select.inline{border:1px solid var(--line-2);border-radius:8px;padding:4px 8px;b
       <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="7" ry="2.8"/><path d="M5 6v6c0 1.5 3.1 2.8 7 2.8s7-1.3 7-2.8V6"/><path d="M5 12v6c0 1.5 3.1 2.8 7 2.8"/><path d="M16.5 17.5l1.8 1.8 3.2-3.6"/></svg></div>
       <div><h1>Groundwork</h1><p>Get marketing data ready for an AI assistant, step by step</p></div>
     </div>
-    <span class="sample">Prototype · sample data</span>
+    <div class="topr"><button class="btn" id="guideBtn" aria-expanded="true" aria-controls="guide">How it works</button><span class="sample">Prototype · sample data</span></div>
   </header>
+
+  <section class="guide" id="guide" aria-label="How Groundwork works">
+    <div class="gh">
+      <div><h2>How Groundwork works</h2><p>Before an AI assistant can answer questions about marketing performance, its data has to be chosen, explained, protected, and shared with the right people. Groundwork walks through that in five steps. The readiness score below rises as you finish each one.</p></div>
+      <button class="btn sm" id="guideHide">Hide guide</button>
+    </div>
+    <ol class="gsteps">
+      <li><span class="gn">1</span><b>Sources</b><span>Rank sources by how many teams ask for them, data quality, and freshness. Click <em>Include top 5</em> or choose Include or Later on each.</span></li>
+      <li><span class="gn">2</span><b>Semantic layer</b><span>Give each column a plain-language description. Click <em>Draft with AI</em>, edit if needed, then <em>Approve</em>. Approve metric definitions too.</span></li>
+      <li><span class="gn">3</span><b>Governance</b><span>Review columns the scan flagged as personal, financial, or confidential. <em>Accept</em> the flag or mark it not sensitive.</span></li>
+      <li><span class="gn">4</span><b>Roles &amp; access</b><span>Click a grid cell to switch between Full, Masked, and None. <em>Auto-group by department</em>, then assign anyone left over.</span></li>
+      <li><span class="gn">5</span><b>Preview</b><span>Pick a role and ask a sample question. Answers change based on your choices: masked values, blocked data, and metric warnings.</span></li>
+    </ol>
+    <div class="gtry"><b>Try it in one minute:</b> Include top 5 → Approve all in a table → Accept all suggestions → Auto-group by department → Preview the pipeline question as Marketing Leadership, then as Field &amp; Events.</div>
+  </section>
 
   <section class="summary" aria-label="AI readiness">
     <div class="score">
@@ -592,6 +624,15 @@ function renderMsgs(){
     : '<p class="minor">Pick a question below to see how this role\'s answers change.</p>';
 }
 $('#pvRole').onchange = e => { pvRole = e.target.value; convo = []; renderPreview(); };
+
+/* ---------------- guide ---------------- */
+function setGuide(open){
+  $('#guide').hidden = !open; $('#guideBtn').setAttribute('aria-expanded', open);
+  try { localStorage.setItem('gw-guide', open ? '1' : '0'); } catch(e) {}
+}
+$('#guideBtn').onclick = () => { const open = $('#guide').hidden; setGuide(open); if (open) $('#guide').scrollIntoView({behavior:'smooth', block:'start'}); };
+$('#guideHide').onclick = () => setGuide(false);
+try { if (localStorage.getItem('gw-guide') === '0') setGuide(false); } catch(e) {}
 
 /* ---------------- init ---------------- */
 renderTabs(); show('sources'); renderSummary();
