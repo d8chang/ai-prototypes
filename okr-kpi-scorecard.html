@@ -60,8 +60,16 @@ select.inline{border:1px solid var(--line-2);border-radius:9px;padding:6px 10px;
 .ch h4{font-size:15.5px;font-weight:800;line-height:1.3}
 .tip{position:relative;display:inline-flex;vertical-align:middle;margin-left:4px}
 .tip button{width:18px;height:18px;border-radius:50%;border:1px solid var(--line-2);background:var(--surface);color:var(--ink-3);font-size:11px;font-weight:800;line-height:1;cursor:help;padding:0;display:grid;place-items:center}
-.tip .tt{position:absolute;right:-8px;top:calc(100% + 8px);width:min(250px,62vw);background:var(--ink);color:#fff;border-radius:10px;padding:9px 11px;font-size:12.5px;font-weight:600;line-height:1.45;opacity:0;visibility:hidden;transition:opacity .15s;z-index:5;box-shadow:0 6px 18px rgba(0,0,0,.15)}
+.tip .tt{position:fixed;left:0;top:0;width:min(320px,calc(100vw - 24px));background:var(--ink);color:#fff;border-radius:10px;padding:9px 11px;font-size:12.5px;font-weight:600;line-height:1.45;opacity:0;visibility:hidden;transition:opacity .15s;z-index:5;box-shadow:0 6px 18px rgba(0,0,0,.15)}
 .tip .tt b{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#9FD0A9;margin-bottom:3px}
+.tip .fx{display:flex;align-items:center;gap:7px;margin:4px 0 8px;font-weight:800}
+.tip .lhs{white-space:nowrap}
+.tip .eq{opacity:.8}
+.tip .frac{display:inline-flex;flex-direction:column;align-items:center;text-align:center;font-size:12px;line-height:1.3;flex:1;min-width:0}
+.tip .frac .n{padding:0 4px 4px;border-bottom:1.5px solid #E4EFE1;width:100%}
+.tip .frac .d{padding:4px 4px 0}
+.tip .mult{white-space:nowrap;font-size:12.5px}
+.tip .note{display:block;font-size:12px;color:#C9D8CC;font-weight:600;border-top:1px solid rgba(255,255,255,.12);padding-top:6px}
 .tip:hover .tt,.tip:focus-within .tt{opacity:1;visibility:visible}
 .pill{display:inline-flex;align-items:center;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:800;white-space:nowrap}
 .s-on{background:var(--accent-soft);color:var(--accent)}
@@ -146,10 +154,10 @@ const SCOPES = [
     M({id:'om', name:'Operating margin', unit:'pct', better:'up', a:8.4, t:10.0, hist:[-2.1,0.4,1.8,3.5,5.2,6.9,7.7],
       ai:'Margin improved for the seventh straight quarter but is 1.6 points under target. Hiring pulled forward in Q3 added about $500K of cost.'}),
     M({id:'rde', name:'R&D efficiency', unit:'pct', better:'down', a:24.5, t:23.0, hist:[30.2,29.1,28.4,27.6,26.8,25.9,25.2],
-      def:'R&D spend as a share of revenue. R&D spend in the quarter ÷ revenue in the quarter. Lower means each dollar of revenue needs less R&D investment.',
+      def:{lhs:'R&D efficiency', num:'R&D spend in quarter', den:'Revenue in quarter', mult:'× 100%', note:'Lower is better: less R&D spend for each dollar of revenue.'},
       ai:'R&D spend is 24.5% of revenue, 1.5 points above the ceiling. It has fallen every quarter for two years; Q3 engineering hires kept it from reaching target.'}),
     M({id:'sme', name:'Sales & Marketing efficiency', unit:'x', better:'up', a:0.74, t:0.80, hist:[0.62,0.66,0.60,0.70,0.72,0.69,0.71],
-      def:'Also called the magic number. Net new ARR in the quarter ÷ Sales and Marketing spend in the prior quarter. Above 0.75x is generally considered efficient growth.',
+      def:{lhs:'Magic number', num:'Net new ARR in quarter', den:'S&M spend in prior quarter', mult:'', note:'Sales & Marketing efficiency. Above 0.75x is generally considered efficient growth.'},
       ai:'Each $1 of Sales and Marketing spend last quarter produced $0.74 of net new ARR, close to target. Marketing-sourced deals were the most efficient; paid search was the least.'})
    ],
    okrs:[
@@ -158,7 +166,7 @@ const SCOPES = [
     M({id:'ent', obj:'Win more enterprise customers', name:'Customers over $100K ARR', unit:'num', better:'up', a:312, t:300, hist:[210,224,241,256,270,284,297],
       ai:'Ahead of target with 15 new $100K+ customers. Nine came from expansion of existing Mid-Market accounts.'}),
     M({id:'grr', obj:'Keep our customers', name:'Gross retention rate', unit:'pct', better:'up', a:91.5, t:93, hist:[89.2,89.8,90.1,90.6,90.9,91.2,91.0],
-      def:'Out of all customers at the start of the quarter, the share still customers at the end. Customers at start who are still here ÷ customers at start. New customers in the quarter are not counted.',
+      def:{lhs:'GRR', num:'Customers at start of quarter still active at end', den:'Customers at start of quarter', mult:'× 100%', note:'New customers added during the quarter are not counted.'},
       ai:'Gross retention is 91.5%, 1.5 points under target. Most losses were SMB customers with low product usage in the prior 90 days; Enterprise retention held at 98%.'})
    ]},
   {id:'field', name:'Field / Sales', owner:'CRO',
@@ -271,7 +279,7 @@ function card(m, kind){
   const tgtLabel = m.better==='down' ? 'Ceiling' : 'Target';
   return `<article class="card ${drill.metric===m.id?'sel':''}" data-id="${m.id}">
     ${kind==='okr' ? `<div class="obj">${FLAG}<span>Objective: ${m.obj}</span></div>` : ''}
-    <div class="ch"><h4>${kind==='okr'?'KR: ':''}${m.name}${m.def?`<span class="tip"><button type="button" aria-label="How ${m.name} is calculated">i</button><span class="tt" role="tooltip"><b>Formula</b>${m.def}</span></span>`:''}</h4><span class="pill ${sc}">${sl}</span></div>
+    <div class="ch"><h4>${kind==='okr'?'KR: ':''}${m.name}${m.def?`<span class="tip"><button type="button" aria-label="How ${m.name} is calculated">i</button><span class="tt" role="tooltip"><b>Formula</b><span class="fx"><span class="lhs">${m.def.lhs}</span><span class="eq">=</span><span class="frac"><span class="n">${m.def.num}</span><span class="d">${m.def.den}</span></span>${m.def.mult?`<span class="mult">${m.def.mult}</span>`:''}</span><span class="note">${m.def.note}</span></span></span>`:''}</h4><span class="pill ${sc}">${sl}</span></div>
     <div class="stats">
       <div class="stat"><small>Actual</small><b>${fmt(m.a,m.unit)}</b></div>
       <div class="stat"><small>${tgtLabel}</small><b>${fmt(m.t,m.unit)}</b></div>
@@ -320,6 +328,17 @@ function drillHtml(m){
   </section>`;
 }
 function fyNote(){ $('#fyNote').innerHTML = '<b>FY26</b> runs <b>Feb 1, 2025 to Jan 31, 2026</b>. ' + (period==='q3' ? 'Q3 FY26 is <b>Aug 1 to Oct 31, 2025</b>.' : 'Q2 FY26 is <b>May 1 to Jul 31, 2025</b>.') + ' Trends show the eight quarters ending in the selected one.'; }
+/* keep formula tooltips inside the viewport */
+function placeTip(btn){
+  const tt = btn.parentElement.querySelector('.tt'); if (!tt) return;
+  const r = btn.getBoundingClientRect(), w = tt.offsetWidth, h = tt.offsetHeight;
+  let left = r.left + r.width/2 - w/2; left = Math.max(12, Math.min(left, innerWidth - w - 12));
+  let top = r.bottom + 8; if (top + h > innerHeight - 8) top = Math.max(8, r.top - h - 8);
+  tt.style.left = left + 'px'; tt.style.top = top + 'px';
+}
+document.addEventListener('mouseover', e => { const b = e.target.closest('.tip'); if (b) placeTip(b.querySelector('button')); });
+document.addEventListener('focusin', e => { const b = e.target.closest('.tip'); if (b) placeTip(b.querySelector('button')); });
+addEventListener('scroll', () => document.querySelectorAll('.tip:hover button, .tip:focus-within button').forEach(placeTip), {passive:true});
 $('#period').onchange = e => { period = e.target.value; fyNote(); render(); };
 fyNote();
 render();
