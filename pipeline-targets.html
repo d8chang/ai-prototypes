@@ -82,6 +82,8 @@ tr.l-region td{font-weight:800}
 .agrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
 .inrow input{width:72px!important}
 tr.pstart td{border-top:2px solid var(--line-2)}
+tr.gt td{background:var(--accent-2);color:#fff;font-weight:800;border-top:2px solid var(--accent);border-bottom:0;position:sticky;bottom:0}
+tr.gt td .dt{color:#D7EEDC}
 td .dt{display:block;font-size:11.5px;color:var(--ink-3);font-weight:600}
 .fy{background:var(--info-soft);color:var(--info);border-radius:12px;padding:9px 14px;font-size:13.5px;margin:0 0 14px}
 .fy b{font-weight:800}
@@ -150,7 +152,7 @@ table.ph{font-size:13px;width:100%} table.ph th,table.ph td{padding:5px 6px} tab
         <button class="btn primary" id="csv">Download CSV</button>
       </div>
     </div>
-    <div class="tw"><table><thead><tr><th>Period</th><th>Aggregation level</th><th>Name</th><th>Rolls up to</th><th class="num">Quota</th><th class="num">Coverage</th><th class="num">Pipe target</th><th class="num">Platform</th><th class="num">Add-ons</th><th class="num">Services</th></tr></thead><tbody id="outBody"></tbody></table></div>
+    <div class="tw"><table><thead><tr><th>Period</th><th>Aggregation level</th><th>Name</th><th>Rolls up to</th><th class="num">Quota</th><th class="num">Coverage</th><th class="num">Pipe target</th><th class="num">Platform</th><th class="num">Add-ons</th><th class="num">Services</th></tr></thead><tbody id="outBody"></tbody><tfoot id="outFoot"></tfoot></table></div>
     <div class="meta" id="outMeta"></div>
   </section>
 
@@ -286,6 +288,13 @@ function renderOutput(){
     <td class="num">${money(r.quota)}</td><td class="num">${r.cov.toFixed(2)}x</td><td class="num tgt">${money(r.total)}</td>
     ${PRODUCTS.map(p=>`<td class="num">${money(r.by[p])}</td>`).join('')}</tr>`;
   }).join('') || '<tr><td colspan="10" style="color:var(--ink-3)">No rows match these filters.</td></tr>';
+  // grand total: rep-level rows for the selected periods and theater, so no level is counted twice
+  const base = all.filter(r => r.level==='rep' && (g!=='all' || r.grain==='Annual') && (!pid || r.pid===pid) && (!th || r.theater===th));
+  const gt = {quota:0, total:0, by:{}}; PRODUCTS.forEach(p=>gt.by[p]=0);
+  base.forEach(r => { gt.quota+=r.quota; gt.total+=r.total; PRODUCTS.forEach(p=>gt.by[p]+=r.by[p]); });
+  const scope = (pid ? periods(g).find(x=>x.id===pid).label : (g==='all' ? 'FY26' : 'All of FY26')) + ' · ' + (th || 'All theaters');
+  $('#outFoot').innerHTML = `<tr class="gt"><td colspan="4"><b>Grand total</b><span class="dt">${scope}${g==='all'&&!pid?' · counted once at the annual grain':''}</span></td>
+    <td class="num">${money(gt.quota)}</td><td class="num">${gt.quota? (gt.total/gt.quota).toFixed(2):'0.00'}x</td><td class="num">${money(gt.total)}</td>${PRODUCTS.map(p=>`<td class="num">${money(gt.by[p])}</td>`).join('')}</tr>`;
   const fy = buildRows('year')[0], np = periods(g).length;
   $('#outMeta').innerHTML = `<span>${g==='all'?'All grains (annual, quarterly, monthly)':GRAIN_LBL[g]+' grain'}: ${np} period${np>1?'s':''} × 34 rows = ${all.length} rows (showing ${rows.length})</span><span>FY26 company pipe target <b style="color:var(--ink)">${money(fy.total)}</b> on ${money(fy.quota)} quota</span><span>Coverage ${A.cov.Coverage.toFixed(1)}x × theater mix</span>`;
   window._rows = rows;
