@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pipe Planner | GTM Pipeline Targeting Prototype</title>
+<meta name="description" content="Prototype: turn rep quotas into pipeline targets at rep, manager, region, and theater levels using coverage, product mix, and theater mix.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800&display=swap">
+<style>
+:root{
+  --bg:#F3F8F1; --surface:#FFFFFF; --tint:#EAF4E6; --line:#D9E6D4; --line-2:#C6D9C0;
+  --ink:#1F2B24; --ink-2:#4A5A50; --ink-3:#77867C;
+  --accent:#1F7A4D; --accent-2:#2E7D57; --accent-soft:#D7EEDC;
+  --warn:#9A6A12; --warn-soft:#FFF1C9; --risk:#B4443A; --risk-soft:#FBE0DB; --info:#2F5E99; --info-soft:#DCE9FA; --lav:#E9E1FA; --lav-ink:#5B4A99;
+  --font:'Nunito',ui-rounded,system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.5;font-weight:600;-webkit-font-smoothing:antialiased}
+button,select,input{font:inherit;color:inherit}
+h1,h2,h3,h4,p{margin:0}
+.app{max-width:1180px;margin:0 auto;padding:20px 16px 48px}
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.logo{width:40px;height:40px;border-radius:12px;background:var(--accent-2);display:grid;place-items:center;flex:none}
+.logo svg{width:22px;height:22px}
+.brand h1{font-size:21px;font-weight:800;line-height:1.2}
+.brand p{font-size:13.5px;color:var(--ink-3)}
+.chip{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px 12px}
+
+/* flow */
+.flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.step{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:11px 13px;cursor:pointer;text-align:left;min-width:0}
+.step:hover{background:#F8FBF6}
+.step.on{border-color:var(--accent-2);box-shadow:0 0 0 2px var(--accent-soft)}
+.step small{display:block;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.step b{display:block;font-size:14.5px;font-weight:800;margin-top:2px}
+.step span{display:block;font-size:12.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.step:not(:last-child)::after{content:'';position:absolute;right:-9px;top:50%;width:8px;height:8px;border-top:2px solid var(--line-2);border-right:2px solid var(--line-2);transform:translateY(-50%) rotate(45deg)}
+.step[data-v="none"]{cursor:default}
+.step[data-v="none"]:hover{background:var(--surface)}
+
+.formula{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin-bottom:14px;font-size:14.5px}
+.formula .lbl{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-right:4px}
+.term{border-radius:8px;padding:3px 10px;font-weight:800}
+.op{color:var(--ink-3);font-weight:800}
+.t1{background:var(--tint);color:var(--accent)} .t2{background:var(--info-soft);color:var(--info)} .t3{background:var(--warn-soft);color:var(--warn)} .t4{background:var(--lav);color:var(--lav-ink)} .t0{background:var(--accent-2);color:#fff}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px 20px}
+.panel[hidden]{display:none}
+.ph{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:14px}
+.ph h2{font-size:19px;font-weight:800}
+.ph p{color:var(--ink-2);max-width:72ch;font-size:14.5px}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+select.inline,input.search{border:1px solid var(--line-2);border-radius:9px;padding:6px 10px;background:var(--surface);font-size:14px;font-weight:700}
+input.search{min-width:170px}
+.btn{border:1px solid var(--line-2);background:var(--surface);border-radius:10px;padding:7px 13px;font-weight:800;cursor:pointer;font-size:14px}
+.btn:hover{background:var(--tint)}
+.btn.primary{background:var(--accent-2);border-color:var(--accent-2);color:#fff}
+.btn.primary:hover{background:var(--accent)}
+
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-size:11.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);background:#F8FBF6;padding:9px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+tr.l-company td{background:#EEF6EA;font-weight:800}
+tr.l-theater td{background:#F5FAF2;font-weight:800}
+tr.l-region td{font-weight:800}
+.lv{display:inline-block;border-radius:999px;padding:2px 9px;font-size:11.5px;font-weight:800}
+.lv-company{background:var(--accent-2);color:#fff} .lv-theater{background:var(--accent-soft);color:var(--accent)} .lv-region{background:var(--info-soft);color:var(--info)} .lv-manager{background:var(--lav);color:var(--lav-ink)} .lv-rep{background:#EEF1EE;color:var(--ink-2)}
+.ind1{padding-left:18px} .ind2{padding-left:34px} .ind3{padding-left:50px}
+.flag{display:inline-block;margin-left:6px;border-radius:999px;padding:1px 8px;font-size:11.5px;font-weight:800;background:var(--warn-soft);color:var(--warn)}
+.tgt{font-weight:800;color:var(--accent)}
+.meta{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px;color:var(--ink-3);margin-top:10px}
+.meta code,.code code{font-family:var(--mono)}
+
+/* assumptions */
+.agrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.box{border:1px solid var(--line);border-radius:14px;padding:14px}
+.box h3{font-size:15px;font-weight:800;margin-bottom:2px}
+.box p{font-size:13px;color:var(--ink-3);margin-bottom:10px}
+.inrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--line)}
+.inrow:first-of-type{border-top:0}
+.inrow label{font-weight:800;font-size:14px}
+.inrow input{width:86px;border:1px solid var(--line-2);border-radius:8px;padding:5px 8px;text-align:right;font-weight:800;font-variant-numeric:tabular-nums}
+.inrow input:focus{outline:2px solid var(--accent-soft);border-color:var(--accent-2)}
+.sum{margin-top:8px;font-size:13px;font-weight:800}
+.ok{color:var(--accent)} .bad{color:var(--risk)}
+
+.code{background:#1F2B24;color:#E4EFE1;border-radius:14px;padding:16px 18px;overflow-x:auto;font-size:13px;line-height:1.6}
+.code pre{margin:0;font-family:var(--mono)}
+.kw{color:#9FD0A9;font-weight:700} .cm{color:#8FA396} .st{color:#F6D58E} .fn{color:#A9C8F5}
+
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%) translateY(20px);opacity:0;background:var(--ink);color:#fff;border-radius:999px;padding:9px 18px;font-size:14px;font-weight:700;transition:all .25s ease;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.foot{margin-top:18px;text-align:center;font-size:12.5px;color:var(--ink-3)}
+@media (max-width:900px){ .flow{grid-template-columns:repeat(2,minmax(0,1fr))} .step::after{display:none} .agrid{grid-template-columns:minmax(0,1fr)} }
+@media (max-width:520px){ .flow{grid-template-columns:minmax(0,1fr)} .panel{padding:14px} }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2" fill="#fff"/></svg></div>
+      <div><h1>Pipe Planner</h1><p>Turn rep quotas into pipeline targets at every level of the GTM org</p></div>
+    </div>
+    <span class="chip">Prototype · sample data · Q3 FY26</span>
+  </header>
+
+  <nav class="flow" aria-label="Data flow">
+    <button class="step" data-v="none"><small>Source</small><b>Anaplan quotas</b><span>Quota plan by rep</span></button>
+    <button class="step" data-v="input"><small>Shared sheet</small><b>Quota sheet</b><span>Exported to Google Sheets</span></button>
+    <button class="step" data-v="input"><small>Snowflake</small><b>RAW.QUOTA_SHEET</b><span>Ingested daily</span></button>
+    <button class="step" data-v="assume"><small>Logic</small><b>Target rules</b><span>Coverage, product, theater mix</span></button>
+    <button class="step on" data-v="output"><small>Output view</small><b>GTM.PIPE_TARGETS</b><span>Rep to theater rollups</span></button>
+  </nav>
+
+  <div class="formula" aria-label="Formula">
+    <span class="lbl">Pipe target</span><span class="op">=</span>
+    <span class="term t1">Quota</span><span class="op">×</span>
+    <span class="term t2">Coverage by segment</span><span class="op">×</span>
+    <span class="term t3">Product mix</span><span class="op">×</span>
+    <span class="term t4">Theater mix</span>
+    <span class="op" style="margin-left:6px;font-weight:700">· defaults fill any missing value</span>
+  </div>
+
+  <!-- OUTPUT -->
+  <section class="panel" id="v-output">
+    <div class="ph">
+      <div><h2>GTM.PIPE_TARGETS</h2><p>One row per person or group at each aggregation level. Managers, regions, theaters, and the company roll up from rep-level targets.</p></div>
+      <div class="controls">
+        <select class="inline" id="fLevel" aria-label="Aggregation level"><option value="">All levels</option><option value="company">Company</option><option value="theater">Theater</option><option value="region">Region</option><option value="manager">Manager</option><option value="rep">Rep</option></select>
+        <select class="inline" id="fTheater" aria-label="Theater"><option value="">All theaters</option><option>AMER</option><option>EMEA</option><option>APAC</option></select>
+        <input class="search" id="fSearch" type="search" placeholder="Search name" aria-label="Search name">
+        <button class="btn primary" id="csv">Download CSV</button>
+      </div>
+    </div>
+    <div class="tw"><table><thead><tr><th>Aggregation level</th><th>Name</th><th>Rolls up to</th><th class="num">Quota</th><th class="num">Coverage</th><th class="num">Pipe target</th><th class="num">Platform</th><th class="num">Add-ons</th><th class="num">Services</th></tr></thead><tbody id="outBody"></tbody></table></div>
+    <div class="meta" id="outMeta"></div>
+  </section>
+
+  <!-- INPUT -->
+  <section class="panel" id="v-input" hidden>
+    <div class="ph"><div><h2>RAW.QUOTA_SHEET</h2><p>Quarterly quotas exported from Anaplan to a shared Google Sheet and ingested into Snowflake. Rows missing a segment use the default coverage.</p></div></div>
+    <div class="tw"><table><thead><tr><th>rep_name</th><th>manager</th><th>region</th><th>theater</th><th>segment</th><th class="num">q3_quota</th></tr></thead><tbody id="inBody"></tbody></table></div>
+    <div class="meta"><span>Source: <code>Anaplan › FY26 Quota Plan</code></span><span>Sheet: <code>FY26 Quotas (export)</code></span><span>Loaded: <code>RAW.QUOTA_SHEET</code>, 18 rows</span></div>
+  </section>
+
+  <!-- ASSUMPTIONS -->
+  <section class="panel" id="v-assume" hidden>
+    <div class="ph"><div><h2>Target rules</h2><p>Change any input and the output view recalculates. In Snowflake these live in a small config table so RevOps can update them without editing SQL.</p></div><button class="btn" id="reset">Reset defaults</button></div>
+    <div class="agrid">
+      <div class="box"><h3>Coverage by segment</h3><p>Pipeline needed per $1 of quota.</p><div id="covIn"></div></div>
+      <div class="box"><h3>Product mix</h3><p>Share of pipeline by product. Must total 100%.</p><div id="mixIn"></div><div class="sum" id="mixSum"></div></div>
+      <div class="box"><h3>Theater mix</h3><p>Adjusts for conversion differences by theater.</p><div id="thIn"></div></div>
+    </div>
+  </section>
+
+  <!-- SQL -->
+  <section class="panel" id="v-sql" hidden>
+    <div class="ph"><div><h2>View definition</h2><p>The Snowflake SQL behind GTM.PIPE_TARGETS.</p></div></div>
+    <div class="code"><pre id="sqlPre"></pre></div>
+  </section>
+
+  <div style="display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap">
+    <button class="btn" data-go="output">Output view</button><button class="btn" data-go="input">Quota sheet</button><button class="btn" data-go="assume">Target rules</button><button class="btn" data-go="sql">View SQL</button>
+  </div>
+  <p class="foot">Prototype built by Deborah Chang. All names, quotas, and assumptions are sample data.</p>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ------------ sample quota sheet ------------ */
+const ORG = [
+  {theater:'AMER', region:'West',   manager:'Dana Brooks',  reps:[['Maya Torres','Enterprise',900000],['Owen Hart','Mid-Market',620000],['Zoe Kim','SMB',380000]]},
+  {theater:'AMER', region:'East',   manager:'Luis Ortega',  reps:[['Jordan Lee','Enterprise',850000],['Rachel Green','Mid-Market',600000],['Sam Patel','',400000]]},
+  {theater:'EMEA', region:'UK&I',   manager:'Fiona Walsh',  reps:[['Oliver Grant','Enterprise',780000],['Amelia Price','Mid-Market',540000],['Harry Doyle','SMB',350000]]},
+  {theater:'EMEA', region:'DACH',   manager:'Jonas Weber',  reps:[['Lena Fischer','Enterprise',760000],['Max Braun','Mid-Market',520000],['Mia Wolf','',340000]]},
+  {theater:'APAC', region:'ANZ',    manager:'Chloe Tan',    reps:[['Jack Wilson','Enterprise',640000],['Ruby Chen','Mid-Market',450000],['Liam Ng','SMB',300000]]},
+  {theater:'APAC', region:'Japan',  manager:'Kenji Mori',   reps:[['Hana Sato','Enterprise',700000],['Yuto Ito','Mid-Market',480000],['Aiko Mori','SMB',320000]]}
+];
+const REPS = ORG.flatMap(g => g.reps.map(r => ({name:r[0], segment:r[1], quota:r[2], manager:g.manager, region:g.region, theater:g.theater})));
+const PRODUCTS = ['Platform','Add-ons','Services'];
+const DEFAULTS = {cov:{Enterprise:3.5,'Mid-Market':3.0,SMB:2.5,Default:3.0}, mix:{Platform:60,'Add-ons':25,Services:15}, th:{AMER:1.00,EMEA:1.10,APAC:1.20}};
+let A = JSON.parse(JSON.stringify(DEFAULTS));
+
+/* ------------ helpers ------------ */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const money = v => v>=1e6 ? '$'+(v/1e6).toFixed(2)+'M' : '$'+Math.round(v/1e3)+'K';
+let toastT; function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),1800); }
+
+/* ------------ target logic ------------ */
+function repTargets(r){
+  const cov = r.segment && A.cov[r.segment] != null ? A.cov[r.segment] : A.cov.Default;
+  const th = A.th[r.theater] != null ? A.th[r.theater] : 1;
+  const by = {}; let total = 0;
+  PRODUCTS.forEach(p => { by[p] = r.quota * cov * (A.mix[p]/100) * th; total += by[p]; });
+  return {cov, by, total, usedDefault: !r.segment};
+}
+function buildRows(){
+  const rows = [];
+  const add = (level, name, parent, theater, reps, extra={}) => {
+    const t = reps.map(repTargets), quota = reps.reduce((s,r)=>s+r.quota,0);
+    const by = {}; PRODUCTS.forEach(p => by[p] = t.reduce((s,x)=>s+x.by[p],0));
+    const total = t.reduce((s,x)=>s+x.total,0);
+    rows.push(Object.assign({level, name, parent, theater, quota, total, by, cov: total/quota}, extra));
+  };
+  add('company','All GTM','',  'Global', REPS);
+  ['AMER','EMEA','APAC'].forEach(th => {
+    add('theater', th, 'All GTM', th, REPS.filter(r=>r.theater===th));
+    ORG.filter(g=>g.theater===th).forEach(g => {
+      add('region', th+' '+g.region, th, th, REPS.filter(r=>r.region===g.region));
+      add('manager', g.manager, th+' '+g.region, th, REPS.filter(r=>r.manager===g.manager));
+      REPS.filter(r=>r.manager===g.manager).forEach(r => add('rep', r.name, g.manager, th, [r], {usedDefault: !r.segment, segment:r.segment}));
+    });
+  });
+  return rows;
+}
+const IND = {company:'', theater:'', region:'ind1', manager:'ind2', rep:'ind3'};
+const LVL = {company:'Company', theater:'Theater', region:'Region', manager:'Manager', rep:'Rep'};
+
+/* ------------ views ------------ */
+function renderOutput(){
+  const lv = $('#fLevel').value, th = $('#fTheater').value, q = $('#fSearch').value.trim().toLowerCase();
+  const rows = buildRows().filter(r => (!lv || r.level===lv) && (!th || r.theater===th) && (!q || r.name.toLowerCase().includes(q)));
+  const flat = !!lv || !!q;
+  $('#outBody').innerHTML = rows.map(r => `<tr class="l-${r.level}">
+    <td><span class="lv lv-${r.level}">${LVL[r.level]}</span></td>
+    <td class="${flat?'':IND[r.level]}">${esc(r.name)}${r.usedDefault?'<span class="flag" title="Segment missing in quota sheet">default coverage</span>':''}</td>
+    <td>${esc(r.parent)}</td>
+    <td class="num">${money(r.quota)}</td><td class="num">${r.cov.toFixed(2)}x</td><td class="num tgt">${money(r.total)}</td>
+    ${PRODUCTS.map(p=>`<td class="num">${money(r.by[p])}</td>`).join('')}</tr>`).join('') || '<tr><td colspan="9" style="color:var(--ink-3)">No rows match these filters.</td></tr>';
+  const all = buildRows(), co = all[0];
+  $('#outMeta').innerHTML = `<span>${all.length} rows: 1 company, 3 theaters, 6 regions, 6 managers, 18 reps</span><span>Company pipe target <b style="color:var(--ink)">${money(co.total)}</b> on ${money(co.quota)} quota (${co.cov.toFixed(2)}x)</span><span>${REPS.filter(r=>!r.segment).length} reps used default coverage</span>`;
+  window._rows = all;
+}
+function renderInput(){
+  $('#inBody').innerHTML = REPS.map(r => `<tr><td>${esc(r.name)}</td><td>${esc(r.manager)}</td><td>${esc(r.region)}</td><td>${r.theater}</td><td>${r.segment ? r.segment : '<span class="flag" style="margin:0">missing</span>'}</td><td class="num">${money(r.quota)}</td></tr>`).join('');
+}
+function inputRow(group, key, val, step, suffix){
+  return `<div class="inrow"><label for="in-${group}-${key}">${key==='Default'?'Default (segment missing)':key}</label><span><input id="in-${group}-${key}" data-g="${group}" data-k="${key}" type="number" step="${step}" min="0" value="${val}"> <span style="color:var(--ink-3);font-weight:800">${suffix}</span></span></div>`;
+}
+function renderAssume(){
+  $('#covIn').innerHTML = Object.entries(A.cov).map(([k,v])=>inputRow('cov',k,v,0.1,'x')).join('');
+  $('#mixIn').innerHTML = Object.entries(A.mix).map(([k,v])=>inputRow('mix',k,v,1,'%')).join('');
+  $('#thIn').innerHTML = Object.entries(A.th).map(([k,v])=>inputRow('th',k,v.toFixed(2),0.05,'×')).join('');
+  mixCheck();
+  document.querySelectorAll('.box input').forEach(i => i.oninput = () => {
+    const v = parseFloat(i.value); if (isNaN(v) || v<0) return;
+    A[i.dataset.g][i.dataset.k] = v; mixCheck(); renderSql();
+  });
+}
+function mixCheck(){
+  const s = Object.values(A.mix).reduce((a,b)=>a+b,0);
+  $('#mixSum').innerHTML = s===100 ? '<span class="ok">Total 100% ✓</span>' : `<span class="bad">Total ${s}%. Adjust to 100% so targets add up to the full coverage amount.</span>`;
+}
+function renderSql(){
+  const c=A.cov, m=A.mix, t=A.th;
+  $('#sqlPre').innerHTML = `<span class="cm">-- GTM.PIPE_TARGETS: pipeline targets by aggregation level</span>
+<span class="kw">create or replace view</span> GTM.PIPE_TARGETS <span class="kw">as</span>
+<span class="kw">with</span> quotas <span class="kw">as</span> (
+  <span class="kw">select</span> rep_name, manager, region, theater, segment, q3_quota <span class="kw">as</span> quota
+  <span class="kw">from</span> RAW.QUOTA_SHEET                      <span class="cm">-- Anaplan export via Google Sheets</span>
+),
+rules <span class="kw">as</span> (
+  <span class="kw">select</span> q.*,
+    <span class="fn">coalesce</span>(cov.multiple, ${c.Default.toFixed(1)})      <span class="kw">as</span> coverage,       <span class="cm">-- default when segment is missing</span>
+    <span class="fn">coalesce</span>(th.factor, 1.00)        <span class="kw">as</span> theater_mix
+  <span class="kw">from</span> quotas q
+  <span class="kw">left join</span> CONFIG.COVERAGE_BY_SEGMENT cov <span class="kw">on</span> cov.segment = q.segment   <span class="cm">-- Ent ${c.Enterprise}x, MM ${c['Mid-Market']}x, SMB ${c.SMB}x</span>
+  <span class="kw">left join</span> CONFIG.THEATER_MIX th          <span class="kw">on</span> th.theater = q.theater    <span class="cm">-- AMER ${t.AMER.toFixed(2)}, EMEA ${t.EMEA.toFixed(2)}, APAC ${t.APAC.toFixed(2)}</span>
+),
+rep_targets <span class="kw">as</span> (
+  <span class="kw">select</span> r.*, pm.product,
+    r.quota * r.coverage * pm.mix_pct * r.theater_mix <span class="kw">as</span> pipe_target
+  <span class="kw">from</span> rules r
+  <span class="kw">cross join</span> CONFIG.PRODUCT_MIX pm             <span class="cm">-- Platform ${m.Platform}%, Add-ons ${m['Add-ons']}%, Services ${m.Services}%</span>
+)
+<span class="kw">select</span> <span class="st">'Rep'</span>     <span class="kw">as</span> aggregation_level, rep_name <span class="kw">as</span> name, manager <span class="kw">as</span> parent, theater, product, <span class="fn">sum</span>(quota) <span class="kw">as</span> quota, <span class="fn">sum</span>(pipe_target) <span class="kw">as</span> pipe_target <span class="kw">from</span> rep_targets <span class="kw">group by</span> 1,2,3,4,5
+<span class="kw">union all</span>
+<span class="kw">select</span> <span class="st">'Manager'</span>, manager, theater || <span class="st">' '</span> || region, theater, product, <span class="fn">sum</span>(quota), <span class="fn">sum</span>(pipe_target) <span class="kw">from</span> rep_targets <span class="kw">group by</span> 1,2,3,4,5
+<span class="kw">union all</span>
+<span class="kw">select</span> <span class="st">'Region'</span>,  theater || <span class="st">' '</span> || region, theater, theater, product, <span class="fn">sum</span>(quota), <span class="fn">sum</span>(pipe_target) <span class="kw">from</span> rep_targets <span class="kw">group by</span> 1,2,3,4,5
+<span class="kw">union all</span>
+<span class="kw">select</span> <span class="st">'Theater'</span>, theater, <span class="st">'All GTM'</span>, theater, product, <span class="fn">sum</span>(quota), <span class="fn">sum</span>(pipe_target) <span class="kw">from</span> rep_targets <span class="kw">group by</span> 1,2,3,4,5
+<span class="kw">union all</span>
+<span class="kw">select</span> <span class="st">'Company'</span>, <span class="st">'All GTM'</span>, <span class="kw">null</span>, <span class="st">'Global'</span>, product, <span class="fn">sum</span>(quota), <span class="fn">sum</span>(pipe_target) <span class="kw">from</span> rep_targets <span class="kw">group by</span> 1,2,3,4,5;
+<span class="cm">-- note: quota is repeated per product row; sum it once per name when reporting</span>`;
+}
+
+/* ------------ navigation ------------ */
+let view = 'output';
+function show(v){
+  view = v;
+  ['output','input','assume','sql'].forEach(x => document.getElementById('v-'+x).hidden = x!==v);
+  document.querySelectorAll('.step').forEach(s => s.classList.toggle('on', s.dataset.v===v));
+  if (v==='output') renderOutput();
+}
+document.querySelectorAll('.step').forEach(s => s.onclick = () => { if (s.dataset.v!=='none') show(s.dataset.v); });
+document.querySelectorAll('[data-go]').forEach(b => b.onclick = () => { show(b.dataset.go); window.scrollTo({top:0, behavior:'smooth'}); });
+['fLevel','fTheater'].forEach(id => $('#'+id).onchange = renderOutput);
+$('#fSearch').oninput = renderOutput;
+$('#reset').onclick = () => { A = JSON.parse(JSON.stringify(DEFAULTS)); renderAssume(); renderSql(); toast('Target rules reset'); };
+$('#csv').onclick = () => {
+  const head = ['aggregation_level','name','parent','theater','quota','coverage','pipe_target',...PRODUCTS.map(p=>'pipe_'+p.toLowerCase().replace(/[^a-z]/g,''))];
+  const lines = [head.join(',')].concat(window._rows.map(r => [LVL[r.level], r.name, r.parent, r.theater, Math.round(r.quota), r.cov.toFixed(2), Math.round(r.total), ...PRODUCTS.map(p=>Math.round(r.by[p]))].map(v => /[",]/.test(String(v)) ? '"'+String(v).replace(/"/g,'""')+'"' : v).join(',')));
+  const url = URL.createObjectURL(new Blob([lines.join('\n')], {type:'text/csv'}));
+  const a = document.createElement('a'); a.href = url; a.download = 'pipe_targets_q3_fy26.csv'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  toast('Downloaded pipe_targets_q3_fy26.csv');
+};
+
+renderInput(); renderAssume(); renderSql(); show('output');
+</script>
+</body>
+</html>

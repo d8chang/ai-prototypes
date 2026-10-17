@@ -10,3 +10,5 @@ Click around these prototypes!
 - [14-Day Trial Funnel](https://d8chang.github.io/ai-prototypes/trial-funnel-prototype.html)
 - [ARR Attribution](https://d8chang.github.io/ai-prototypes/arr-attribution-prototype.html)
 - [Groundwork: AI Data Readiness](https://d8chang.github.io/ai-prototypes/data-readiness-prototype.html)
+- [Compass: OKR and KPI Scorecard](https://d8chang.github.io/ai-prototypes/okr-kpi-scorecard.html)
+- [Pipe Planner: GTM Pipeline Targeting](https://d8chang.github.io/ai-prototypes/pipeline-targets.html)
