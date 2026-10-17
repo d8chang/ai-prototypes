@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compass | OKR and KPI Scorecard Prototype</title>
+<meta name="description" content="Prototype: company and department OKR and KPI scorecard with Pulse-style metric cards, attainment, trends, AI insights, and ARR drilldowns.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800&display=swap">
+<style>
+:root{
+  --bg:#F3F8F1; --surface:#FFFFFF; --tint:#EAF4E6; --line:#D9E6D4; --line-2:#C6D9C0;
+  --ink:#1F2B24; --ink-2:#4A5A50; --ink-3:#77867C;
+  --accent:#1F7A4D; --accent-2:#2E7D57; --accent-soft:#D7EEDC;
+  --warn:#9A6A12; --warn-soft:#FFF1C9; --risk:#B4443A; --risk-soft:#FBE0DB;
+  --font:'Nunito',ui-rounded,system-ui,-apple-system,'Segoe UI',sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.5;font-weight:600;-webkit-font-smoothing:antialiased}
+button,select{font:inherit;color:inherit}
+h1,h2,h3,h4,p{margin:0}
+.app{max-width:1180px;margin:0 auto;padding:20px 16px 48px}
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.logo{width:40px;height:40px;border-radius:12px;background:var(--accent-2);display:grid;place-items:center;flex:none}
+.logo svg{width:22px;height:22px}
+.brand h1{font-size:21px;font-weight:800;line-height:1.2}
+.brand p{font-size:13.5px;color:var(--ink-3)}
+.topr{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.chip{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px 12px}
+select.inline{border:1px solid var(--line-2);border-radius:9px;padding:6px 10px;background:var(--surface);font-size:14px;font-weight:800}
+.btn{border:1px solid var(--line-2);background:var(--surface);border-radius:10px;padding:7px 13px;font-weight:800;cursor:pointer;font-size:14px}
+.btn:hover{background:var(--tint)}
+.btn.sm{padding:4px 10px;font-size:13px;border-radius:8px}
+
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;margin-bottom:14px}
+.tab{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 16px;cursor:pointer;font-weight:800;color:var(--ink-2)}
+.tab[aria-selected="true"]{background:var(--accent-2);border-color:var(--accent-2);color:#fff}
+
+.summary{display:flex;flex-wrap:wrap;align-items:center;gap:10px 22px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 18px;margin-bottom:18px}
+.summary h2{font-size:18px;font-weight:800;margin-right:auto}
+.count{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink-2)}
+.count b{font-size:20px;color:var(--ink)}
+.dot{width:10px;height:10px;border-radius:50%}
+
+.sec{margin-bottom:22px}
+.sech{display:flex;align-items:baseline;gap:10px;margin-bottom:10px}
+.sech h3{font-size:13px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3)}
+.sech span{font-size:13px;color:var(--ink-3)}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card.sel{border-color:var(--accent-2);box-shadow:0 0 0 2px var(--accent-soft)}
+.obj{font-size:12.5px;font-weight:800;color:var(--accent);display:flex;gap:6px;align-items:flex-start}
+.obj svg{flex:none;margin-top:2px}
+.ch{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.ch h4{font-size:15.5px;font-weight:800;line-height:1.3}
+.pill{display:inline-flex;align-items:center;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:800;white-space:nowrap}
+.s-on{background:var(--accent-soft);color:var(--accent)}
+.s-risk{background:var(--warn-soft);color:var(--warn)}
+.s-behind{background:var(--risk-soft);color:var(--risk)}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.stat{padding:8px 10px;min-width:0}
+.stat+.stat{border-left:1px solid var(--line)}
+.stat small{display:block;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.stat b{display:block;font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat b.on{color:var(--accent)} .stat b.risk{color:var(--warn)} .stat b.behind{color:var(--risk)}
+.trend{display:flex;align-items:flex-end;gap:10px}
+.trend svg{flex:1;min-width:0;height:52px}
+.delta{font-size:12.5px;color:var(--ink-3);text-align:right;white-space:nowrap}
+.delta b{display:block;font-size:14px}
+.up{color:var(--accent)} .down{color:var(--risk)}
+.insight{display:flex;gap:8px;background:#F6FAF4;border-radius:10px;padding:8px 10px;font-size:13.5px;color:var(--ink-2);line-height:1.45}
+.insight svg{flex:none;margin-top:2px}
+.cf{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:auto}
+.cf .minor{font-size:12px;color:var(--ink-3)}
+
+.drill{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 18px;margin:-8px 0 22px}
+.drill[hidden]{display:none}
+.dh{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+.dh h3{font-size:17px;font-weight:800}
+.dh p{font-size:13.5px;color:var(--ink-3)}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:9px;overflow:hidden}
+.seg button{border:0;background:var(--surface);padding:5px 12px;font-size:13px;font-weight:800;cursor:pointer;color:var(--ink-2)}
+.seg button+button{border-left:1px solid var(--line-2)}
+.seg button.on{background:var(--accent-2);color:#fff}
+.bars{display:flex;flex-direction:column;gap:10px}
+.brow{display:grid;grid-template-columns:120px minmax(0,1fr) 150px;gap:12px;align-items:center}
+.brow .nm{font-weight:800;font-size:14px}
+.btrack{position:relative;height:22px;background:var(--tint);border-radius:7px}
+.bfill{position:absolute;left:0;top:0;bottom:0;border-radius:7px}
+.btgt{position:absolute;top:-4px;bottom:-4px;width:3px;border-radius:2px;background:var(--ink)}
+.bv{font-size:13px;color:var(--ink-2);font-variant-numeric:tabular-nums;text-align:right}
+.bv b{color:var(--ink)}
+.legend{display:flex;gap:16px;font-size:12.5px;color:var(--ink-3);margin-top:12px;flex-wrap:wrap}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.foot{margin-top:10px;text-align:center;font-size:12.5px;color:var(--ink-3)}
+@media (max-width:980px){ .grid{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:620px){ .grid{grid-template-columns:minmax(0,1fr)} .brow{grid-template-columns:90px minmax(0,1fr)} .brow .bv{grid-column:1/-1;text-align:left} }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg></div>
+      <div><h1>Compass</h1><p>Company and department OKRs and KPIs in one scorecard</p></div>
+    </div>
+    <div class="topr"><label class="chip" for="period" style="border:0;background:none;padding:0">Period</label><select class="inline" id="period"><option value="q3">Q3 FY26</option><option value="q2">Q2 FY26</option></select><span class="chip">Prototype · sample data</span></div>
+  </header>
+
+  <nav class="tabs" role="tablist" id="tabs"></nav>
+  <section class="summary" id="summary"></section>
+  <div id="body"></div>
+  <p class="foot">Prototype built by Deborah Chang. Metric cards follow a Pulse-style layout: actual, target, and attainment on top, then the trend and an AI summary. All numbers are sample data.</p>
+</div>
+
+<script>
+/* ------------ metric definitions ------------
+   unit: usd | pct | num | days | x | score
+   better: up | down
+   hist: the 7 quarters before the current one, current = actual */
+const M = (o) => o;
+const SCOPES = [
+  {id:'company', name:'Company', owner:'Executive team',
+   kpis:[
+    M({id:'nna', name:'Net new ARR', unit:'usd', better:'up', a:4.2e6, t:4.5e6, hist:[3.1,3.4,3.0,3.6,3.9,3.7,4.0].map(x=>x*1e6), drill:true,
+      ai:'Net new ARR is 7% short of target. New ARR beat plan, but churn and downgrades ran $200K above target, mostly in SMB.'}),
+    M({id:'new', name:'New ARR', unit:'usd', better:'up', a:3.6e6, t:3.5e6, hist:[2.6,2.9,2.7,3.0,3.2,3.1,3.4].map(x=>x*1e6), drill:true,
+      ai:'New ARR beat target by 3%, led by Enterprise in AMER. EMEA closed two of its largest deals in the last two weeks of the quarter.'}),
+    M({id:'exp', name:'Expansion ARR', unit:'usd', better:'up', a:1.9e6, t:2.1e6, hist:[1.3,1.4,1.4,1.6,1.7,1.6,1.8].map(x=>x*1e6), drill:true,
+      ai:'Expansion is 10% behind. Add-on attach slowed in Mid-Market after the pricing change; Platform upsells are on plan.'}),
+    M({id:'churn', name:'ARR churn and downgrade', unit:'usd', better:'down', a:1.3e6, t:1.1e6, hist:[0.8,0.9,1.1,1.0,1.0,1.2,1.2].map(x=>x*1e6), drill:true,
+      ai:'Churn and downgrades are 18% above the ceiling. 60% of the loss came from SMB accounts with low product usage in the prior 90 days.'}),
+    M({id:'rev', name:'Revenue', unit:'usd', better:'up', a:31.8e6, t:31.0e6, hist:[24.1,25.3,26.2,27.4,28.5,29.6,30.7].map(x=>x*1e6),
+      ai:'Revenue grew 4% over last quarter and beat target by $800K, helped by earlier-than-planned starts on new Enterprise contracts.'}),
+    M({id:'om', name:'Operating margin', unit:'pct', better:'up', a:8.4, t:10.0, hist:[-2.1,0.4,1.8,3.5,5.2,6.9,7.7],
+      ai:'Margin improved for the seventh straight quarter but is 1.6 points under target. Hiring pulled forward in Q3 added about $500K of cost.'})
+   ],
+   okrs:[
+    M({id:'cust', obj:'Grow our customer base', name:'Total customers', unit:'num', better:'up', a:4180, t:4300, hist:[3420,3550,3660,3780,3890,3990,4080],
+      ai:'100 customers added this quarter, about 20 fewer than plan. Self-serve sign-ups converted well; sales-assisted SMB lagged.'}),
+    M({id:'ent', obj:'Win more enterprise customers', name:'Customers over $100K ARR', unit:'num', better:'up', a:312, t:300, hist:[210,224,241,256,270,284,297],
+      ai:'Ahead of target with 15 new $100K+ customers. Nine came from expansion of existing Mid-Market accounts.'}),
+    M({id:'nrr', obj:'Keep and grow our customers', name:'Net revenue retention', unit:'pct', better:'up', a:108, t:112, hist:[104,105,105,106,107,107,108],
+      ai:'NRR held flat at 108%, 4 points under target. Lower expansion and higher SMB churn offset gains in Enterprise.'})
+   ]},
+  {id:'field', name:'Field / Sales', owner:'CRO',
+   kpis:[
+    M({id:'fnna', name:'Net new ARR (Field)', unit:'usd', better:'up', a:3.5e6, t:3.8e6, hist:[2.5,2.8,2.5,3.0,3.2,3.1,3.3].map(x=>x*1e6),
+      ai:'Field net new ARR is 8% behind. AMER is on plan; EMEA and APAC together are $300K short, mostly from slipped deals.'}),
+    M({id:'win', name:'Win rate', unit:'pct', better:'up', a:24, t:26, hist:[21,22,22,23,23,24,25],
+      ai:'Win rate dipped one point from last quarter. Losses to a lower-priced competitor rose in Mid-Market deals under $50K.'}),
+    M({id:'cov', name:'Next-quarter pipeline coverage', unit:'x', better:'up', a:3.1, t:3.0, hist:[2.6,2.7,2.9,2.8,3.0,2.9,3.0],
+      ai:'Coverage for next quarter is 3.1x, above the 3.0x target. Marketing-sourced pipeline drove most of the increase.'}),
+    M({id:'ads', name:'Average deal size', unit:'usd', better:'up', a:48000, t:45000, hist:[39,40,41,43,44,45,46].map(x=>x*1000),
+      ai:'Average deal size rose to $48K as more deals included the Platform bundle.'})
+   ],
+   okrs:[
+    M({id:'ramp', obj:'Ramp new reps faster', name:'New reps fully productive within 6 months', unit:'pct', better:'up', a:62, t:75, hist:[48,50,53,55,57,58,60],
+      ai:'62% of reps hired in the last year reached full productivity in 6 months. Reps who finished the new onboarding path ramped 5 weeks faster.'})
+   ]},
+  {id:'mkt', name:'Marketing', owner:'CMO',
+   kpis:[
+    M({id:'msp', name:'Marketing-sourced pipeline', unit:'usd', better:'up', a:14.2e6, t:13.5e6, hist:[9.8,10.4,10.9,11.6,12.3,12.8,13.4].map(x=>x*1e6),
+      ai:'Marketing-sourced pipeline beat target by 5%. Webinars and LinkedIn ABM produced 58% of it.'}),
+    M({id:'mql', name:'MQLs', unit:'num', better:'up', a:6850, t:7200, hist:[5200,5500,5900,6100,6400,6600,6900],
+      ai:'MQLs are 5% under target after paid search spend was cut mid-quarter. Lead quality improved, so pipeline still beat plan.'}),
+    M({id:'m2s', name:'MQL-to-SQL rate', unit:'pct', better:'up', a:23, t:22, hist:[18,19,19,20,21,21,22],
+      ai:'MQL-to-SQL conversion reached 23%, the highest in two years, after the new lead-scoring model went live.'}),
+    M({id:'cpm', name:'Cost per MQL', unit:'usd', better:'down', a:186, t:170, hist:[205,201,198,194,190,184,180],
+      ai:'Cost per MQL rose to $186, 9% over the ceiling, because fewer MQLs came in on a similar budget.'})
+   ],
+   okrs:[
+    M({id:'abm', obj:'Build a scalable ABM engine', name:'Target accounts engaged', unit:'pct', better:'up', a:38, t:45, hist:[12,15,19,24,28,32,35],
+      ai:'38% of the 600 target accounts engaged this quarter. Engaged accounts are 2.4x more likely to open an opportunity.'})
+   ]},
+  {id:'people', name:'People', owner:'CPO',
+   kpis:[
+    M({id:'hires', name:'Hires vs. plan', unit:'num', better:'up', a:86, t:95, hist:[52,61,58,70,74,80,83],
+      ai:'86 of 95 planned hires started. Engineering is on plan; 7 of the 9 open roles are in Sales.'}),
+    M({id:'tth', name:'Time to hire', unit:'days', better:'down', a:41, t:38, hist:[52,50,47,46,44,43,42],
+      ai:'Time to hire improved by one day but is still 3 days over target. Final-round scheduling is the slowest step.'}),
+    M({id:'attr', name:'Regretted attrition (annualized)', unit:'pct', better:'down', a:6.2, t:5.0, hist:[7.4,7.1,6.8,6.5,6.0,5.8,5.9],
+      ai:'Regretted attrition ticked up to 6.2%, mostly in Customer Success. Exit interviews point to career growth.'}),
+    M({id:'eng', name:'Employee engagement score', unit:'score', better:'up', a:78, t:80, hist:[72,73,74,75,76,77,77],
+      ai:'Engagement rose to 78. Scores for manager support improved most; workload scores fell slightly.'})
+   ],
+   okrs:[
+    M({id:'mgr', obj:'Grow great managers', name:'Managers completed leadership program', unit:'pct', better:'up', a:71, t:80, hist:[0,8,20,33,45,56,64],
+      ai:'71% of managers finished the program. Teams whose managers completed it report 6 points higher engagement.'})
+   ]}
+];
+
+/* Q2 view: shift everything one quarter back */
+function forPeriod(m, period){
+  if (period === 'q3') return m;
+  const a = m.hist[6], prev = m.hist.slice(0,6);
+  const t = m.better==='up' ? a / (m.a/m.t > 1 ? 0.98 : 1.04) : a * (m.a/m.t < 1 ? 1.03 : 0.96);
+  return Object.assign({}, m, {a, t: m.unit==='pct'||m.unit==='x'||m.unit==='score' ? Math.round(t*10)/10 : Math.round(t), hist:[prev[0]*0.95, ...prev],
+    ai: 'Q2 view. ' + (m.better==='up' ? (a>=t?'Finished at or above target.':'Finished below target.') : (a<=t?'Stayed under the ceiling.':'Finished above the ceiling.')) + ' Switch to Q3 FY26 for the latest AI summary.'});
+}
+
+/* ------------ drilldown dimensions ------------ */
+const DIMS = {
+  theater:{label:'Theater', members:['AMER','EMEA','APAC'], wa:[0.60,0.25,0.15], wt:[0.57,0.27,0.16]},
+  segment:{label:'Segment', members:['Enterprise','Mid-Market','SMB'], wa:[0.49,0.33,0.18], wt:[0.45,0.34,0.21]},
+  product:{label:'Product', members:['Platform','Add-ons','Services'], wa:[0.64,0.24,0.12], wt:[0.60,0.28,0.12]}
+};
+const CHURN_DIMS = {theater:[0.52,0.28,0.20], segment:[0.22,0.18,0.60], product:[0.55,0.35,0.10]};
+
+/* ------------ formatting + status ------------ */
+const $ = s => document.querySelector(s);
+function fmt(v, unit){
+  if (unit==='usd'){ const a=Math.abs(v); return (v<0?'-':'') + (a>=1e6 ? '$'+(a/1e6).toFixed(a>=1e7?1:2).replace(/\.?0+$/,'')+'M' : a>=1e3 ? '$'+Math.round(a/1e3)+'K' : '$'+Math.round(a)); }
+  if (unit==='pct') return (Math.round(v*10)/10)+'%';
+  if (unit==='x') return v.toFixed(1)+'x';
+  if (unit==='days') return Math.round(v)+' days';
+  return Math.round(v).toLocaleString('en-US');
+}
+function attain(m){ return m.better==='up' ? m.a/m.t : m.t/m.a; }
+function status(m){ const r=attain(m); return r>=1 ? 'on' : r>=0.92 ? 'risk' : 'behind'; }
+const STATUS = {on:['On track','s-on'], risk:['At risk','s-risk'], behind:['Behind','s-behind']};
+function attainText(m){
+  if (m.unit==='pct'){ const d = m.better==='up' ? m.a-m.t : m.t-m.a; const pts=Math.abs(Math.round(d*10)/10); return d>=0 ? (pts? '+'+pts+' pts':'On target') : '−'+pts+' pts'; }
+  return Math.round(attain(m)*100)+'%';
+}
+function attainLabel(m){ return m.unit==='pct' ? 'vs. target' : (m.better==='down' ? 'Attainment' : 'Attainment'); }
+
+function spark(m){
+  const vals = [...m.hist, m.a], W=240, H=52, P=6;
+  const all = [...vals, m.t], lo=Math.min(...all), hi=Math.max(...all), span=(hi-lo)||1;
+  const x = i => P + i*(W-2*P)/(vals.length-1), y = v => H-P - (v-lo)/span*(H-2*P);
+  const pts = vals.map((v,i)=>`${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+  const st = status(m), col = st==='on' ? '#2E7D57' : st==='risk' ? '#C29A3A' : '#B4443A';
+  const area = `M${x(0)},${H-P} L` + vals.map((v,i)=>`${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' L') + ` L${x(vals.length-1)},${H-P} Z`;
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="${m.name} over the last 8 quarters">
+    <path d="${area}" fill="${col}" opacity=".08"/>
+    <line x1="${P}" x2="${W-P}" y1="${y(m.t)}" y2="${y(m.t)}" stroke="#77867C" stroke-width="1.2" stroke-dasharray="3 4" vector-effect="non-scaling-stroke"/>
+    <polyline points="${pts}" fill="none" stroke="${col}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+    <circle cx="${x(vals.length-1)}" cy="${y(m.a)}" r="3.6" fill="${col}"/></svg>`;
+}
+function delta(m){
+  const prev = m.hist[m.hist.length-1];
+  let txt, good;
+  if (m.unit==='pct'){ const d=Math.round((m.a-prev)*10)/10; txt=(d>0?'+':'')+d+' pts'; good = m.better==='up' ? d>=0 : d<=0; }
+  else { const d=(m.a-prev)/Math.abs(prev)*100; txt=(d>0?'+':'')+Math.round(d)+'%'; good = m.better==='up' ? d>=0 : d<=0; }
+  return `<div class="delta"><b class="${good?'up':'down'}">${txt}</b>vs. last quarter</div>`;
+}
+const SPARK_ICON = '<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5c.9 4.4 2.7 6.4 7.2 8-4.5 1.6-6.3 3.6-7.2 8-.9-4.4-2.7-6.4-7.2-8 4.5-1.6 6.3-3.6 7.2-8z" fill="#5A88C4"/></svg>';
+const FLAG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1F7A4D" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V4h11l-2 4 2 4H5"/></svg>';
+
+function card(m, kind){
+  const st = status(m), [sl, sc] = STATUS[st];
+  const tgtLabel = m.better==='down' ? 'Ceiling' : 'Target';
+  return `<article class="card ${drill.metric===m.id?'sel':''}" data-id="${m.id}">
+    ${kind==='okr' ? `<div class="obj">${FLAG}<span>Objective: ${m.obj}</span></div>` : ''}
+    <div class="ch"><h4>${kind==='okr'?'KR: ':''}${m.name}</h4><span class="pill ${sc}">${sl}</span></div>
+    <div class="stats">
+      <div class="stat"><small>Actual</small><b>${fmt(m.a,m.unit)}</b></div>
+      <div class="stat"><small>${tgtLabel}</small><b>${fmt(m.t,m.unit)}</b></div>
+      <div class="stat"><small>${attainLabel(m)}</small><b class="${st}">${attainText(m)}</b></div>
+    </div>
+    <div class="trend">${spark(m)}${delta(m)}</div>
+    <div class="insight">${SPARK_ICON}<span>${m.ai}</span></div>
+    <div class="cf"><span class="minor">${m.better==='down'?'Lower is better · ':''}Dashed line = target</span>${m.drill?`<button class="btn sm" data-drill="${m.id}">${drill.metric===m.id?'Hide drilldown':'Drill down'}</button>`:''}</div>
+  </article>`;
+}
+
+/* ------------ render ------------ */
+let scope = 'company', period = 'q3', drill = {metric:null, dim:'theater'};
+function scopeData(){ const s = SCOPES.find(x=>x.id===scope); return {s, kpis:s.kpis.map(m=>forPeriod(m,period)), okrs:s.okrs.map(m=>forPeriod(m,period))}; }
+function render(){
+  $('#tabs').innerHTML = SCOPES.map(s=>`<button class="tab" role="tab" aria-selected="${s.id===scope}" data-s="${s.id}">${s.name}</button>`).join('');
+  document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{ scope=b.dataset.s; drill.metric=null; render(); });
+  const {s, kpis, okrs} = scopeData(), all=[...kpis,...okrs];
+  const c = {on:0, risk:0, behind:0}; all.forEach(m=>c[status(m)]++);
+  $('#summary').innerHTML = `<h2>${s.name} scorecard <span style="font-weight:700;color:var(--ink-3);font-size:14px">· ${period==='q3'?'Q3 FY26':'Q2 FY26'} · owner: ${s.owner}</span></h2>
+    <span class="count"><span class="dot" style="background:#2E7D57"></span><b>${c.on}</b> on track</span>
+    <span class="count"><span class="dot" style="background:#C29A3A"></span><b>${c.risk}</b> at risk</span>
+    <span class="count"><span class="dot" style="background:#B4443A"></span><b>${c.behind}</b> behind</span>`;
+  let html = `<section class="sec"><div class="sech"><h3>KPIs</h3><span>Ongoing health metrics</span></div><div class="grid">${kpis.map(m=>card(m,'kpi')).join('')}</div></section>`;
+  if (drill.metric) html += drillHtml(kpis.find(m=>m.id===drill.metric));
+  html += `<section class="sec"><div class="sech"><h3>OKRs</h3><span>Objectives for the year, measured by key results</span></div><div class="grid">${okrs.map(m=>card(m,'okr')).join('')}</div></section>`;
+  $('#body').innerHTML = html;
+  document.querySelectorAll('[data-drill]').forEach(b=>b.onclick=()=>{ drill.metric = drill.metric===b.dataset.drill ? null : b.dataset.drill; render(); if (drill.metric) document.getElementById('drill').scrollIntoView({behavior:'smooth', block:'nearest'}); });
+  document.querySelectorAll('[data-dim]').forEach(b=>b.onclick=()=>{ drill.dim=b.dataset.dim; render(); });
+}
+function drillHtml(m){
+  const d = DIMS[drill.dim];
+  const wa = m.id==='churn' ? CHURN_DIMS[drill.dim] : d.wa;
+  const wt = m.id==='churn' ? d.wt : d.wt;
+  const rows = d.members.map((name,i)=>({name, a:m.a*wa[i], t:m.t*wt[i]}));
+  const max = Math.max(...rows.flatMap(r=>[r.a,r.t]))*1.08;
+  return `<section class="drill" id="drill" aria-label="${m.name} drilldown">
+    <div class="dh"><div><h3>${m.name} by ${d.label.toLowerCase()}</h3><p>${period==='q3'?'Q3 FY26':'Q2 FY26'} · bar = actual, black mark = ${m.better==='down'?'ceiling':'target'}</p></div>
+      <div class="seg" role="group" aria-label="Break down by">${Object.entries(DIMS).map(([k,v])=>`<button data-dim="${k}" class="${k===drill.dim?'on':''}">${v.label}</button>`).join('')}</div></div>
+    <div class="bars">${rows.map(r=>{
+      const mm = Object.assign({}, m, {a:r.a, t:r.t}), st = status(mm), col = st==='on'?'#2E7D57':st==='risk'?'#C29A3A':'#B4443A';
+      return `<div class="brow"><span class="nm">${r.name}</span><div class="btrack"><div class="bfill" style="width:${r.a/max*100}%;background:${col};opacity:.85"></div><div class="btgt" style="left:calc(${r.t/max*100}% - 1px)"></div></div>
+        <span class="bv"><b>${fmt(r.a,'usd')}</b> of ${fmt(r.t,'usd')} · <span class="${st==='on'?'up':'down'}">${Math.round(attain(mm)*100)}%</span></span></div>`;
+    }).join('')}</div>
+    <div class="legend"><span><i class="dot" style="background:#2E7D57"></i>On track</span><span><i class="dot" style="background:#C29A3A"></i>At risk (92-99%)</span><span><i class="dot" style="background:#B4443A"></i>Behind (under 92%)</span></div>
+  </section>`;
+}
+$('#period').onchange = e => { period = e.target.value; render(); };
+render();
+</script>
+</body>
+</html>
