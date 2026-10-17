@@ -79,7 +79,9 @@ tr.l-region td{font-weight:800}
 .meta code,.code code{font-family:var(--mono)}
 
 /* assumptions */
-.agrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.agrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.inrow input{width:72px!important}
+tr.pstart td{border-top:2px solid var(--line-2)}
 .box{border:1px solid var(--line);border-radius:14px;padding:14px}
 .box h3{font-size:15px;font-weight:800;margin-bottom:2px}
 .box p{font-size:13px;color:var(--ink-3);margin-bottom:10px}
@@ -98,8 +100,8 @@ tr.l-region td{font-weight:800}
 .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%) translateY(20px);opacity:0;background:var(--ink);color:#fff;border-radius:999px;padding:9px 18px;font-size:14px;font-weight:700;transition:all .25s ease;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .foot{margin-top:18px;text-align:center;font-size:12.5px;color:var(--ink-3)}
-@media (max-width:900px){ .flow{grid-template-columns:repeat(2,minmax(0,1fr))} .step::after{display:none} .agrid{grid-template-columns:minmax(0,1fr)} }
-@media (max-width:520px){ .flow{grid-template-columns:minmax(0,1fr)} .panel{padding:14px} }
+@media (max-width:900px){ .flow{grid-template-columns:repeat(2,minmax(0,1fr))} .step::after{display:none} .agrid{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:520px){ .agrid{grid-template-columns:minmax(0,1fr)} .flow{grid-template-columns:minmax(0,1fr)} .panel{padding:14px} }
 </style>
 </head>
 <body>
@@ -107,17 +109,17 @@ tr.l-region td{font-weight:800}
   <header class="top">
     <div class="brand">
       <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2" fill="#fff"/></svg></div>
-      <div><h1>GTM Pipeline Targeting</h1><p>Turn rep quotas into pipeline targets at every level of the GTM org</p></div>
+      <div><h1>GTM Pipeline Targeting</h1><p>Turn rep quotas into monthly and quarterly pipeline targets at every level of the GTM org</p></div>
     </div>
-    <span class="chip">Prototype · sample data · Q3 FY26</span>
+    <span class="chip">Prototype · sample data · FY26</span>
   </header>
 
   <nav class="flow" aria-label="Data flow">
-    <button class="step" data-v="none"><small>Source</small><b>Anaplan quotas</b><span>Quota plan by rep</span></button>
+    <button class="step" data-v="none"><small>Source</small><b>Anaplan quotas</b><span>FY26 quota plan by rep</span></button>
     <button class="step" data-v="input"><small>Shared sheet</small><b>Quota sheet</b><span>Exported to Google Sheets</span></button>
     <button class="step" data-v="input"><small>Snowflake</small><b>RAW.QUOTA_SHEET</b><span>Ingested daily</span></button>
     <button class="step" data-v="assume"><small>Logic</small><b>Target rules</b><span>Coverage, product, theater mix</span></button>
-    <button class="step on" data-v="output"><small>Output view</small><b>GTM.PIPE_TARGETS</b><span>Rep to theater rollups</span></button>
+    <button class="step on" data-v="output"><small>Output view</small><b>GTM.PIPE_TARGETS</b><span>By month and quarter</span></button>
   </nav>
 
   <div class="formula" aria-label="Formula">
@@ -132,22 +134,24 @@ tr.l-region td{font-weight:800}
   <!-- OUTPUT -->
   <section class="panel" id="v-output">
     <div class="ph">
-      <div><h2>GTM.PIPE_TARGETS</h2><p>One row per person or group at each aggregation level. Managers, regions, theaters, and the company roll up from rep-level targets.</p></div>
+      <div><h2>GTM.PIPE_TARGETS</h2><p>One row per period and aggregation level for FY26 (Feb 2025 to Jan 2026). Pick a monthly, quarterly, or annual grain. Managers, regions, theaters, and the company roll up from rep-level targets.</p></div>
       <div class="controls">
+        <select class="inline" id="fGrain" aria-label="Time grain"><option value="quarter">Quarterly</option><option value="month">Monthly</option><option value="year">Annual</option></select>
+        <select class="inline" id="fPeriod" aria-label="Period"></select>
         <select class="inline" id="fLevel" aria-label="Aggregation level"><option value="">All levels</option><option value="company">Company</option><option value="theater">Theater</option><option value="region">Region</option><option value="manager">Manager</option><option value="rep">Rep</option></select>
         <select class="inline" id="fTheater" aria-label="Theater"><option value="">All theaters</option><option>AMER</option><option>EMEA</option><option>APAC</option></select>
         <input class="search" id="fSearch" type="search" placeholder="Search name" aria-label="Search name">
         <button class="btn primary" id="csv">Download CSV</button>
       </div>
     </div>
-    <div class="tw"><table><thead><tr><th>Aggregation level</th><th>Name</th><th>Rolls up to</th><th class="num">Quota</th><th class="num">Coverage</th><th class="num">Pipe target</th><th class="num">Platform</th><th class="num">Add-ons</th><th class="num">Services</th></tr></thead><tbody id="outBody"></tbody></table></div>
+    <div class="tw"><table><thead><tr><th>Period</th><th>Aggregation level</th><th>Name</th><th>Rolls up to</th><th class="num">Quota</th><th class="num">Coverage</th><th class="num">Pipe target</th><th class="num">Platform</th><th class="num">Add-ons</th><th class="num">Services</th></tr></thead><tbody id="outBody"></tbody></table></div>
     <div class="meta" id="outMeta"></div>
   </section>
 
   <!-- INPUT -->
   <section class="panel" id="v-input" hidden>
-    <div class="ph"><div><h2>RAW.QUOTA_SHEET</h2><p>Quarterly quotas exported from Anaplan to a shared Google Sheet and ingested into Snowflake. Rows missing a segment use the default coverage.</p></div></div>
-    <div class="tw"><table><thead><tr><th>rep_name</th><th>manager</th><th>region</th><th>theater</th><th>segment</th><th class="num">q3_quota</th></tr></thead><tbody id="inBody"></tbody></table></div>
+    <div class="ph"><div><h2>RAW.QUOTA_SHEET</h2><p>FY26 quarterly quotas exported from Anaplan to a shared Google Sheet and ingested into Snowflake. Rows missing a segment use the default coverage.</p></div></div>
+    <div class="tw"><table><thead><tr><th>rep_name</th><th>manager</th><th>region</th><th>theater</th><th>segment</th><th class="num">q1_quota</th><th class="num">q2_quota</th><th class="num">q3_quota</th><th class="num">q4_quota</th><th class="num">fy26_total</th></tr></thead><tbody id="inBody"></tbody></table></div>
     <div class="meta"><span>Source: <code>Anaplan › FY26 Quota Plan</code></span><span>Sheet: <code>FY26 Quotas (export)</code></span><span>Loaded: <code>RAW.QUOTA_SHEET</code>, 18 rows</span></div>
   </section>
 
@@ -158,6 +162,7 @@ tr.l-region td{font-weight:800}
       <div class="box"><h3>Coverage by segment</h3><p>Pipeline needed per $1 of quota.</p><div id="covIn"></div></div>
       <div class="box"><h3>Product mix</h3><p>Share of pipeline by product. Must total 100%.</p><div id="mixIn"></div><div class="sum" id="mixSum"></div></div>
       <div class="box"><h3>Theater mix</h3><p>Adjusts for conversion differences by theater.</p><div id="thIn"></div></div>
+      <div class="box"><h3>Monthly phasing</h3><p>How each quarter's target splits across its three months. Must total 100%.</p><div id="phIn"></div><div class="sum" id="phSum"></div></div>
     </div>
   </section>
 
@@ -175,19 +180,33 @@ tr.l-region td{font-weight:800}
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
-/* ------------ sample quota sheet ------------ */
+/* ------------ sample quota sheet (FY26 = Feb 2025 to Jan 2026) ------------ */
 const ORG = [
-  {theater:'AMER', region:'West',   manager:'Dana Brooks',  reps:[['Maya Torres','Enterprise',900000],['Owen Hart','Mid-Market',620000],['Zoe Kim','SMB',380000]]},
-  {theater:'AMER', region:'East',   manager:'Luis Ortega',  reps:[['Jordan Lee','Enterprise',850000],['Rachel Green','Mid-Market',600000],['Sam Patel','',400000]]},
-  {theater:'EMEA', region:'UK&I',   manager:'Fiona Walsh',  reps:[['Oliver Grant','Enterprise',780000],['Amelia Price','Mid-Market',540000],['Harry Doyle','SMB',350000]]},
-  {theater:'EMEA', region:'DACH',   manager:'Jonas Weber',  reps:[['Lena Fischer','Enterprise',760000],['Max Braun','Mid-Market',520000],['Mia Wolf','',340000]]},
-  {theater:'APAC', region:'ANZ',    manager:'Chloe Tan',    reps:[['Jack Wilson','Enterprise',640000],['Ruby Chen','Mid-Market',450000],['Liam Ng','SMB',300000]]},
-  {theater:'APAC', region:'Japan',  manager:'Kenji Mori',   reps:[['Hana Sato','Enterprise',700000],['Yuto Ito','Mid-Market',480000],['Aiko Mori','SMB',320000]]}
+  {theater:'AMER', region:'West',   manager:'Dana Brooks',  reps:[['Maya Torres','Enterprise',3460000],['Owen Hart','Mid-Market',2380000],['Zoe Kim','SMB',1460000]]},
+  {theater:'AMER', region:'East',   manager:'Luis Ortega',  reps:[['Jordan Lee','Enterprise',3270000],['Rachel Green','Mid-Market',2310000],['Sam Patel','',1540000]]},
+  {theater:'EMEA', region:'UK&I',   manager:'Fiona Walsh',  reps:[['Oliver Grant','Enterprise',3000000],['Amelia Price','Mid-Market',2080000],['Harry Doyle','SMB',1350000]]},
+  {theater:'EMEA', region:'DACH',   manager:'Jonas Weber',  reps:[['Lena Fischer','Enterprise',2920000],['Max Braun','Mid-Market',2000000],['Mia Wolf','',1310000]]},
+  {theater:'APAC', region:'ANZ',    manager:'Chloe Tan',    reps:[['Jack Wilson','Enterprise',2460000],['Ruby Chen','Mid-Market',1730000],['Liam Ng','SMB',1150000]]},
+  {theater:'APAC', region:'Japan',  manager:'Kenji Mori',   reps:[['Hana Sato','Enterprise',2690000],['Yuto Ito','Mid-Market',1850000],['Aiko Mori','SMB',1230000]]}
 ];
-const REPS = ORG.flatMap(g => g.reps.map(r => ({name:r[0], segment:r[1], quota:r[2], manager:g.manager, region:g.region, theater:g.theater})));
+const Q_WEIGHTS = [0.22, 0.24, 0.26, 0.28];   // how Anaplan phases each rep's annual quota by quarter
+const round5k = v => Math.round(v/5000)*5000;
+const REPS = ORG.flatMap(g => g.reps.map(r => {
+  const q = Q_WEIGHTS.map(w => round5k(r[2]*w));
+  return {name:r[0], segment:r[1], q, fy:q.reduce((a,b)=>a+b,0), manager:g.manager, region:g.region, theater:g.theater};
+}));
 const PRODUCTS = ['Platform','Add-ons','Services'];
-const DEFAULTS = {cov:{Enterprise:3.5,'Mid-Market':3.0,SMB:2.5,Default:3.0}, mix:{Platform:60,'Add-ons':25,Services:15}, th:{AMER:1.00,EMEA:1.10,APAC:1.20}};
+const MONTHS = ['Feb 2025','Mar 2025','Apr 2025','May 2025','Jun 2025','Jul 2025','Aug 2025','Sep 2025','Oct 2025','Nov 2025','Dec 2025','Jan 2026'];
+const DEFAULTS = {cov:{Enterprise:3.5,'Mid-Market':3.0,SMB:2.5,Default:3.0}, mix:{Platform:60,'Add-ons':25,Services:15}, th:{AMER:1.00,EMEA:1.10,APAC:1.20}, ph:{'Month 1':30,'Month 2':33,'Month 3':37}};
 let A = JSON.parse(JSON.stringify(DEFAULTS));
+
+/* periods: each has a label and a function returning a rep's quota for it */
+function periods(grain){
+  if (grain==='year') return [{id:'FY26', label:'FY26', quota:r=>r.fy}];
+  if (grain==='quarter') return [0,1,2,3].map(i => ({id:'Q'+(i+1), label:'Q'+(i+1)+' FY26', quota:r=>r.q[i]}));
+  const ph = Object.values(A.ph);
+  return MONTHS.map((m,i) => ({id:'M'+(i+1), label:m, sub:'Q'+(Math.floor(i/3)+1), quota:r=>r.q[Math.floor(i/3)]*ph[i%3]/100}));
+}
 
 /* ------------ helpers ------------ */
 const $ = s => document.querySelector(s);
@@ -196,28 +215,32 @@ const money = v => v>=1e6 ? '$'+(v/1e6).toFixed(2)+'M' : '$'+Math.round(v/1e3)+'
 let toastT; function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),1800); }
 
 /* ------------ target logic ------------ */
-function repTargets(r){
+function repTargets(r, quota){
   const cov = r.segment && A.cov[r.segment] != null ? A.cov[r.segment] : A.cov.Default;
   const th = A.th[r.theater] != null ? A.th[r.theater] : 1;
   const by = {}; let total = 0;
-  PRODUCTS.forEach(p => { by[p] = r.quota * cov * (A.mix[p]/100) * th; total += by[p]; });
-  return {cov, by, total, usedDefault: !r.segment};
+  PRODUCTS.forEach(p => { by[p] = quota * cov * (A.mix[p]/100) * th; total += by[p]; });
+  return {by, total};
 }
-function buildRows(){
+const GRAIN_LBL = {month:'Monthly', quarter:'Quarterly', year:'Annual'};
+function buildRows(grain){
   const rows = [];
-  const add = (level, name, parent, theater, reps, extra={}) => {
-    const t = reps.map(repTargets), quota = reps.reduce((s,r)=>s+r.quota,0);
-    const by = {}; PRODUCTS.forEach(p => by[p] = t.reduce((s,x)=>s+x.by[p],0));
-    const total = t.reduce((s,x)=>s+x.total,0);
-    rows.push(Object.assign({level, name, parent, theater, quota, total, by, cov: total/quota}, extra));
-  };
-  add('company','All GTM','',  'Global', REPS);
-  ['AMER','EMEA','APAC'].forEach(th => {
-    add('theater', th, 'All GTM', th, REPS.filter(r=>r.theater===th));
-    ORG.filter(g=>g.theater===th).forEach(g => {
-      add('region', th+' '+g.region, th, th, REPS.filter(r=>r.region===g.region));
-      add('manager', g.manager, th+' '+g.region, th, REPS.filter(r=>r.manager===g.manager));
-      REPS.filter(r=>r.manager===g.manager).forEach(r => add('rep', r.name, g.manager, th, [r], {usedDefault: !r.segment, segment:r.segment}));
+  periods(grain).forEach(per => {
+    const add = (level, name, parent, theater, reps, extra={}) => {
+      const quota = reps.reduce((s,r)=>s+per.quota(r),0);
+      const t = reps.map(r => repTargets(r, per.quota(r)));
+      const by = {}; PRODUCTS.forEach(p => by[p] = t.reduce((s,x)=>s+x.by[p],0));
+      const total = t.reduce((s,x)=>s+x.total,0);
+      rows.push(Object.assign({grain:GRAIN_LBL[grain], period:per.label, pid:per.id, level, name, parent, theater, quota, total, by, cov: quota? total/quota : 0}, extra));
+    };
+    add('company','All GTM','','Global', REPS);
+    ['AMER','EMEA','APAC'].forEach(th => {
+      add('theater', th, 'All GTM', th, REPS.filter(r=>r.theater===th));
+      ORG.filter(g=>g.theater===th).forEach(g => {
+        add('region', th+' '+g.region, th, th, REPS.filter(r=>r.region===g.region));
+        add('manager', g.manager, th+' '+g.region, th, REPS.filter(r=>r.manager===g.manager));
+        REPS.filter(r=>r.manager===g.manager).forEach(r => add('rep', r.name, g.manager, th, [r], {usedDefault: !r.segment}));
+      });
     });
   });
   return rows;
@@ -226,93 +249,118 @@ const IND = {company:'', theater:'', region:'ind1', manager:'ind2', rep:'ind3'};
 const LVL = {company:'Company', theater:'Theater', region:'Region', manager:'Manager', rep:'Rep'};
 
 /* ------------ views ------------ */
+function fillPeriods(){
+  const g = $('#fGrain').value, cur = $('#fPeriod').value;
+  const opts = periods(g);
+  $('#fPeriod').innerHTML = (opts.length>1 ? '<option value="">All of FY26</option>' : '') + opts.map(p=>`<option value="${p.id}">${p.label}</option>`).join('');
+  if ([...$('#fPeriod').options].some(o=>o.value===cur)) $('#fPeriod').value = cur;
+}
 function renderOutput(){
-  const lv = $('#fLevel').value, th = $('#fTheater').value, q = $('#fSearch').value.trim().toLowerCase();
-  const rows = buildRows().filter(r => (!lv || r.level===lv) && (!th || r.theater===th) && (!q || r.name.toLowerCase().includes(q)));
+  const g = $('#fGrain').value, pid = $('#fPeriod').value, lv = $('#fLevel').value, th = $('#fTheater').value, q = $('#fSearch').value.trim().toLowerCase();
+  const all = buildRows(g);
+  const rows = all.filter(r => (!pid || r.pid===pid) && (!lv || r.level===lv) && (!th || r.theater===th) && (!q || r.name.toLowerCase().includes(q)));
   const flat = !!lv || !!q;
-  $('#outBody').innerHTML = rows.map(r => `<tr class="l-${r.level}">
+  let last = null;
+  $('#outBody').innerHTML = rows.map(r => {
+    const first = r.period !== last; last = r.period;
+    return `<tr class="l-${r.level}${first?' pstart':''}">
+    <td>${esc(r.period)}</td>
     <td><span class="lv lv-${r.level}">${LVL[r.level]}</span></td>
     <td class="${flat?'':IND[r.level]}">${esc(r.name)}${r.usedDefault?'<span class="flag" title="Segment missing in quota sheet">default coverage</span>':''}</td>
     <td>${esc(r.parent)}</td>
     <td class="num">${money(r.quota)}</td><td class="num">${r.cov.toFixed(2)}x</td><td class="num tgt">${money(r.total)}</td>
-    ${PRODUCTS.map(p=>`<td class="num">${money(r.by[p])}</td>`).join('')}</tr>`).join('') || '<tr><td colspan="9" style="color:var(--ink-3)">No rows match these filters.</td></tr>';
-  const all = buildRows(), co = all[0];
-  $('#outMeta').innerHTML = `<span>${all.length} rows: 1 company, 3 theaters, 6 regions, 6 managers, 18 reps</span><span>Company pipe target <b style="color:var(--ink)">${money(co.total)}</b> on ${money(co.quota)} quota (${co.cov.toFixed(2)}x)</span><span>${REPS.filter(r=>!r.segment).length} reps used default coverage</span>`;
-  window._rows = all;
+    ${PRODUCTS.map(p=>`<td class="num">${money(r.by[p])}</td>`).join('')}</tr>`;
+  }).join('') || '<tr><td colspan="10" style="color:var(--ink-3)">No rows match these filters.</td></tr>';
+  const fy = buildRows('year')[0], np = periods(g).length;
+  $('#outMeta').innerHTML = `<span>${GRAIN_LBL[g]} grain: ${np} period${np>1?'s':''} × 34 rows = ${all.length} rows (showing ${rows.length})</span><span>FY26 company pipe target <b style="color:var(--ink)">${money(fy.total)}</b> on ${money(fy.quota)} quota</span><span>${REPS.filter(r=>!r.segment).length} reps used default coverage</span>`;
+  window._rows = rows;
 }
 function renderInput(){
-  $('#inBody').innerHTML = REPS.map(r => `<tr><td>${esc(r.name)}</td><td>${esc(r.manager)}</td><td>${esc(r.region)}</td><td>${r.theater}</td><td>${r.segment ? r.segment : '<span class="flag" style="margin:0">missing</span>'}</td><td class="num">${money(r.quota)}</td></tr>`).join('');
+  $('#inBody').innerHTML = REPS.map(r => `<tr><td>${esc(r.name)}</td><td>${esc(r.manager)}</td><td>${esc(r.region)}</td><td>${r.theater}</td><td>${r.segment ? r.segment : '<span class="flag" style="margin:0">missing</span>'}</td>${r.q.map(v=>`<td class="num">${money(v)}</td>`).join('')}<td class="num" style="font-weight:800">${money(r.fy)}</td></tr>`).join('');
 }
 function inputRow(group, key, val, step, suffix){
-  return `<div class="inrow"><label for="in-${group}-${key}">${key==='Default'?'Default (segment missing)':key}</label><span><input id="in-${group}-${key}" data-g="${group}" data-k="${key}" type="number" step="${step}" min="0" value="${val}"> <span style="color:var(--ink-3);font-weight:800">${suffix}</span></span></div>`;
+  return `<div class="inrow"><label for="in-${group}-${key}">${key==='Default'?'Default':key}</label><span><input id="in-${group}-${key.replace(/\s/g,'')}" data-g="${group}" data-k="${key}" type="number" step="${step}" min="0" value="${val}"> <span style="color:var(--ink-3);font-weight:800">${suffix}</span></span></div>`;
 }
 function renderAssume(){
   $('#covIn').innerHTML = Object.entries(A.cov).map(([k,v])=>inputRow('cov',k,v,0.1,'x')).join('');
   $('#mixIn').innerHTML = Object.entries(A.mix).map(([k,v])=>inputRow('mix',k,v,1,'%')).join('');
   $('#thIn').innerHTML = Object.entries(A.th).map(([k,v])=>inputRow('th',k,v.toFixed(2),0.05,'×')).join('');
-  mixCheck();
+  $('#phIn').innerHTML = Object.entries(A.ph).map(([k,v])=>inputRow('ph',k,v,1,'%')).join('');
+  sumCheck();
   document.querySelectorAll('.box input').forEach(i => i.oninput = () => {
     const v = parseFloat(i.value); if (isNaN(v) || v<0) return;
-    A[i.dataset.g][i.dataset.k] = v; mixCheck(); renderSql();
+    A[i.dataset.g][i.dataset.k] = v; sumCheck(); renderSql();
   });
 }
-function mixCheck(){
-  const s = Object.values(A.mix).reduce((a,b)=>a+b,0);
-  $('#mixSum').innerHTML = s===100 ? '<span class="ok">Total 100% ✓</span>' : `<span class="bad">Total ${s}%. Adjust to 100% so targets add up to the full coverage amount.</span>`;
+function sumCheck(){
+  [['mix','#mixSum','targets add up to the full coverage amount'],['ph','#phSum','months add up to the quarter']].forEach(([g,id,why]) => {
+    const s = Object.values(A[g]).reduce((a,b)=>a+b,0);
+    $(id).innerHTML = s===100 ? '<span class="ok">Total 100% ✓</span>' : `<span class="bad">Total ${s}%. Adjust to 100% so ${why}.</span>`;
+  });
 }
 function renderSql(){
-  const c=A.cov, m=A.mix, t=A.th;
-  $('#sqlPre').innerHTML = `<span class="cm">-- GTM.PIPE_TARGETS: pipeline targets by aggregation level</span>
+  const c=A.cov, m=A.mix, t=A.th, p=Object.values(A.ph);
+  $('#sqlPre').innerHTML = `<span class="cm">-- GTM.PIPE_TARGETS: pipeline targets by time grain, period, and aggregation level (FY26)</span>
 <span class="kw">create or replace view</span> GTM.PIPE_TARGETS <span class="kw">as</span>
-<span class="kw">with</span> quotas <span class="kw">as</span> (
-  <span class="kw">select</span> rep_name, manager, region, theater, segment, q3_quota <span class="kw">as</span> quota
-  <span class="kw">from</span> RAW.QUOTA_SHEET                      <span class="cm">-- Anaplan export via Google Sheets</span>
+<span class="kw">with</span> quarterly_quota <span class="kw">as</span> (           <span class="cm">-- Anaplan export via Google Sheets, one column per quarter</span>
+  <span class="kw">select</span> rep_name, manager, region, theater, segment, fiscal_quarter, quota
+  <span class="kw">from</span> RAW.QUOTA_SHEET
+  <span class="kw">unpivot</span> (quota <span class="kw">for</span> fiscal_quarter <span class="kw">in</span> (q1_quota <span class="kw">as</span> <span class="st">'Q1'</span>, q2_quota <span class="kw">as</span> <span class="st">'Q2'</span>, q3_quota <span class="kw">as</span> <span class="st">'Q3'</span>, q4_quota <span class="kw">as</span> <span class="st">'Q4'</span>))
 ),
-rules <span class="kw">as</span> (
-  <span class="kw">select</span> q.*,
-    <span class="fn">coalesce</span>(cov.multiple, ${c.Default.toFixed(1)})      <span class="kw">as</span> coverage,       <span class="cm">-- default when segment is missing</span>
-    <span class="fn">coalesce</span>(th.factor, 1.00)        <span class="kw">as</span> theater_mix
-  <span class="kw">from</span> quotas q
-  <span class="kw">left join</span> CONFIG.COVERAGE_BY_SEGMENT cov <span class="kw">on</span> cov.segment = q.segment   <span class="cm">-- Ent ${c.Enterprise}x, MM ${c['Mid-Market']}x, SMB ${c.SMB}x</span>
-  <span class="kw">left join</span> CONFIG.THEATER_MIX th          <span class="kw">on</span> th.theater = q.theater    <span class="cm">-- AMER ${t.AMER.toFixed(2)}, EMEA ${t.EMEA.toFixed(2)}, APAC ${t.APAC.toFixed(2)}</span>
+monthly_quota <span class="kw">as</span> (             <span class="cm">-- month phasing within the quarter: ${p[0]}% / ${p[1]}% / ${p[2]}%</span>
+  <span class="kw">select</span> q.rep_name, q.manager, q.region, q.theater, q.segment, q.fiscal_quarter,
+         c.fiscal_month, q.quota * ph.pct <span class="kw">as</span> quota
+  <span class="kw">from</span> quarterly_quota q
+  <span class="kw">join</span> CONFIG.FISCAL_CALENDAR c <span class="kw">on</span> c.fiscal_year = <span class="st">'FY26'</span> <span class="kw">and</span> c.fiscal_quarter = q.fiscal_quarter
+  <span class="kw">join</span> CONFIG.MONTH_PHASING ph  <span class="kw">on</span> ph.month_of_quarter = c.month_of_quarter
 ),
 rep_targets <span class="kw">as</span> (
-  <span class="kw">select</span> r.*, pm.product,
-    r.quota * r.coverage * pm.mix_pct * r.theater_mix <span class="kw">as</span> pipe_target
-  <span class="kw">from</span> rules r
-  <span class="kw">cross join</span> CONFIG.PRODUCT_MIX pm             <span class="cm">-- Platform ${m.Platform}%, Add-ons ${m['Add-ons']}%, Services ${m.Services}%</span>
+  <span class="kw">select</span> mq.*, pm.product,
+    mq.quota
+    * <span class="fn">coalesce</span>(cov.multiple, ${c.Default.toFixed(1)})    <span class="cm">-- Ent ${c.Enterprise}x, MM ${c['Mid-Market']}x, SMB ${c.SMB}x; default when segment is missing</span>
+    * pm.mix_pct                      <span class="cm">-- Platform ${m.Platform}%, Add-ons ${m['Add-ons']}%, Services ${m.Services}%</span>
+    * <span class="fn">coalesce</span>(th.factor, 1.00)      <span class="cm">-- AMER ${t.AMER.toFixed(2)}, EMEA ${t.EMEA.toFixed(2)}, APAC ${t.APAC.toFixed(2)}</span>
+    <span class="kw">as</span> pipe_target
+  <span class="kw">from</span> monthly_quota mq
+  <span class="kw">left join</span> CONFIG.COVERAGE_BY_SEGMENT cov <span class="kw">on</span> cov.segment = mq.segment
+  <span class="kw">left join</span> CONFIG.THEATER_MIX th          <span class="kw">on</span> th.theater = mq.theater
+  <span class="kw">cross join</span> CONFIG.PRODUCT_MIX pm
+),
+grains <span class="kw">as</span> (                     <span class="cm">-- the same monthly rows, labeled at each time grain</span>
+  <span class="kw">select</span> <span class="st">'Monthly'</span>   <span class="kw">as</span> time_grain, fiscal_month          <span class="kw">as</span> period, * <span class="kw">from</span> rep_targets
+  <span class="kw">union all select</span> <span class="st">'Quarterly'</span>, fiscal_quarter || <span class="st">' FY26'</span>, * <span class="kw">from</span> rep_targets
+  <span class="kw">union all select</span> <span class="st">'Annual'</span>,    <span class="st">'FY26'</span>,                   * <span class="kw">from</span> rep_targets
 )
-<span class="kw">select</span> <span class="st">'Rep'</span>     <span class="kw">as</span> aggregation_level, rep_name <span class="kw">as</span> name, manager <span class="kw">as</span> parent, theater, product, <span class="fn">sum</span>(quota) <span class="kw">as</span> quota, <span class="fn">sum</span>(pipe_target) <span class="kw">as</span> pipe_target <span class="kw">from</span> rep_targets <span class="kw">group by</span> 1,2,3,4,5
+<span class="kw">select</span> time_grain, period, <span class="st">'Rep'</span>     <span class="kw">as</span> aggregation_level, rep_name <span class="kw">as</span> name, manager <span class="kw">as</span> parent, theater, product, <span class="fn">sum</span>(quota) <span class="kw">as</span> quota, <span class="fn">sum</span>(pipe_target) <span class="kw">as</span> pipe_target <span class="kw">from</span> grains <span class="kw">group by</span> 1,2,3,4,5,6,7
 <span class="kw">union all</span>
-<span class="kw">select</span> <span class="st">'Manager'</span>, manager, theater || <span class="st">' '</span> || region, theater, product, <span class="fn">sum</span>(quota), <span class="fn">sum</span>(pipe_target) <span class="kw">from</span> rep_targets <span class="kw">group by</span> 1,2,3,4,5
+<span class="kw">select</span> time_grain, period, <span class="st">'Manager'</span>, manager, theater || <span class="st">' '</span> || region, theater, product, <span class="fn">sum</span>(quota), <span class="fn">sum</span>(pipe_target) <span class="kw">from</span> grains <span class="kw">group by</span> 1,2,3,4,5,6,7
 <span class="kw">union all</span>
-<span class="kw">select</span> <span class="st">'Region'</span>,  theater || <span class="st">' '</span> || region, theater, theater, product, <span class="fn">sum</span>(quota), <span class="fn">sum</span>(pipe_target) <span class="kw">from</span> rep_targets <span class="kw">group by</span> 1,2,3,4,5
+<span class="kw">select</span> time_grain, period, <span class="st">'Region'</span>,  theater || <span class="st">' '</span> || region, theater, theater, product, <span class="fn">sum</span>(quota), <span class="fn">sum</span>(pipe_target) <span class="kw">from</span> grains <span class="kw">group by</span> 1,2,3,4,5,6,7
 <span class="kw">union all</span>
-<span class="kw">select</span> <span class="st">'Theater'</span>, theater, <span class="st">'All GTM'</span>, theater, product, <span class="fn">sum</span>(quota), <span class="fn">sum</span>(pipe_target) <span class="kw">from</span> rep_targets <span class="kw">group by</span> 1,2,3,4,5
+<span class="kw">select</span> time_grain, period, <span class="st">'Theater'</span>, theater, <span class="st">'All GTM'</span>, theater, product, <span class="fn">sum</span>(quota), <span class="fn">sum</span>(pipe_target) <span class="kw">from</span> grains <span class="kw">group by</span> 1,2,3,4,5,6,7
 <span class="kw">union all</span>
-<span class="kw">select</span> <span class="st">'Company'</span>, <span class="st">'All GTM'</span>, <span class="kw">null</span>, <span class="st">'Global'</span>, product, <span class="fn">sum</span>(quota), <span class="fn">sum</span>(pipe_target) <span class="kw">from</span> rep_targets <span class="kw">group by</span> 1,2,3,4,5;
-<span class="cm">-- note: quota is repeated per product row; sum it once per name when reporting</span>`;
+<span class="kw">select</span> time_grain, period, <span class="st">'Company'</span>, <span class="st">'All GTM'</span>, <span class="kw">null</span>, <span class="st">'Global'</span>, product, <span class="fn">sum</span>(quota), <span class="fn">sum</span>(pipe_target) <span class="kw">from</span> grains <span class="kw">group by</span> 1,2,3,4,5,6,7;
+<span class="cm">-- note: quota repeats on each product row; sum it once per name and period when reporting</span>`;
 }
 
 /* ------------ navigation ------------ */
-let view = 'output';
 function show(v){
-  view = v;
   ['output','input','assume','sql'].forEach(x => document.getElementById('v-'+x).hidden = x!==v);
   document.querySelectorAll('.step').forEach(s => s.classList.toggle('on', s.dataset.v===v));
-  if (v==='output') renderOutput();
+  if (v==='output'){ fillPeriods(); renderOutput(); }
 }
 document.querySelectorAll('.step').forEach(s => s.onclick = () => { if (s.dataset.v!=='none') show(s.dataset.v); });
 document.querySelectorAll('[data-go]').forEach(b => b.onclick = () => { show(b.dataset.go); window.scrollTo({top:0, behavior:'smooth'}); });
-['fLevel','fTheater'].forEach(id => $('#'+id).onchange = renderOutput);
+$('#fGrain').onchange = () => { $('#fPeriod').value=''; fillPeriods(); renderOutput(); };
+['fPeriod','fLevel','fTheater'].forEach(id => $('#'+id).onchange = renderOutput);
 $('#fSearch').oninput = renderOutput;
 $('#reset').onclick = () => { A = JSON.parse(JSON.stringify(DEFAULTS)); renderAssume(); renderSql(); toast('Target rules reset'); };
 $('#csv').onclick = () => {
-  const head = ['aggregation_level','name','parent','theater','quota','coverage','pipe_target',...PRODUCTS.map(p=>'pipe_'+p.toLowerCase().replace(/[^a-z]/g,''))];
-  const lines = [head.join(',')].concat(window._rows.map(r => [LVL[r.level], r.name, r.parent, r.theater, Math.round(r.quota), r.cov.toFixed(2), Math.round(r.total), ...PRODUCTS.map(p=>Math.round(r.by[p]))].map(v => /[",]/.test(String(v)) ? '"'+String(v).replace(/"/g,'""')+'"' : v).join(',')));
+  const head = ['time_grain','period','aggregation_level','name','parent','theater','quota','coverage','pipe_target',...PRODUCTS.map(p=>'pipe_'+p.toLowerCase().replace(/[^a-z]/g,''))];
+  const lines = [head.join(',')].concat(window._rows.map(r => [r.grain, r.period, LVL[r.level], r.name, r.parent, r.theater, Math.round(r.quota), r.cov.toFixed(2), Math.round(r.total), ...PRODUCTS.map(p=>Math.round(r.by[p]))].map(v => /[",]/.test(String(v)) ? '"'+String(v).replace(/"/g,'""')+'"' : v).join(',')));
   const url = URL.createObjectURL(new Blob([lines.join('\n')], {type:'text/csv'}));
-  const a = document.createElement('a'); a.href = url; a.download = 'pipe_targets_q3_fy26.csv'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url), 1000);
-  toast('Downloaded pipe_targets_q3_fy26.csv');
+  const a = document.createElement('a'); a.href = url; a.download = 'pipe_targets_fy26_' + $('#fGrain').value + '.csv'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  toast('Downloaded ' + a.download);
 };
 
 renderInput(); renderAssume(); renderSql(); show('output');
