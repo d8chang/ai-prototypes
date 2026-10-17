@@ -144,7 +144,13 @@ const SCOPES = [
     M({id:'rev', name:'Revenue', unit:'usd', better:'up', a:31.8e6, t:31.0e6, hist:[24.1,25.3,26.2,27.4,28.5,29.6,30.7].map(x=>x*1e6),
       ai:'Revenue grew 4% over last quarter and beat target by $800K, helped by earlier-than-planned starts on new Enterprise contracts.'}),
     M({id:'om', name:'Operating margin', unit:'pct', better:'up', a:8.4, t:10.0, hist:[-2.1,0.4,1.8,3.5,5.2,6.9,7.7],
-      ai:'Margin improved for the seventh straight quarter but is 1.6 points under target. Hiring pulled forward in Q3 added about $500K of cost.'})
+      ai:'Margin improved for the seventh straight quarter but is 1.6 points under target. Hiring pulled forward in Q3 added about $500K of cost.'}),
+    M({id:'rde', name:'R&D efficiency', unit:'pct', better:'down', a:24.5, t:23.0, hist:[30.2,29.1,28.4,27.6,26.8,25.9,25.2],
+      def:'R&D spend as a share of revenue. R&D spend in the quarter ÷ revenue in the quarter. Lower means each dollar of revenue needs less R&D investment.',
+      ai:'R&D spend is 24.5% of revenue, 1.5 points above the ceiling. It has fallen every quarter for two years; Q3 engineering hires kept it from reaching target.'}),
+    M({id:'sme', name:'Sales & Marketing efficiency', unit:'x', better:'up', a:0.74, t:0.80, hist:[0.62,0.66,0.60,0.70,0.72,0.69,0.71],
+      def:'Also called the magic number. Net new ARR in the quarter ÷ Sales and Marketing spend in the prior quarter. Above 0.75x is generally considered efficient growth.',
+      ai:'Each $1 of Sales and Marketing spend last quarter produced $0.74 of net new ARR, close to target. Marketing-sourced deals were the most efficient; paid search was the least.'})
    ],
    okrs:[
     M({id:'cust', obj:'Grow our customer base', name:'Total customers', unit:'num', better:'up', a:4180, t:4300, hist:[3420,3550,3660,3780,3890,3990,4080],
@@ -224,7 +230,7 @@ const $ = s => document.querySelector(s);
 function fmt(v, unit){
   if (unit==='usd'){ const a=Math.abs(v); return (v<0?'-':'') + (a>=1e6 ? '$'+(a/1e6).toFixed(a>=1e7?1:2).replace(/\.?0+$/,'')+'M' : a>=1e3 ? '$'+Math.round(a/1e3)+'K' : '$'+Math.round(a)); }
   if (unit==='pct') return (Math.round(v*10)/10)+'%';
-  if (unit==='x') return v.toFixed(1)+'x';
+  if (unit==='x') return v.toFixed(v<2?2:1)+'x';
   if (unit==='days') return Math.round(v)+' days';
   return Math.round(v).toLocaleString('en-US');
 }
