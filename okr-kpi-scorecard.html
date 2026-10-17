@@ -34,6 +34,8 @@ select.inline{border:1px solid var(--line-2);border-radius:9px;padding:6px 10px;
 .btn:hover{background:var(--tint)}
 .btn.sm{padding:4px 10px;font-size:13px;border-radius:8px}
 
+.fy{background:#DCE9FA;color:#2F5E99;border-radius:12px;padding:9px 14px;font-size:13.5px;margin:0 0 14px}
+.fy b{font-weight:800}
 .tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;margin-bottom:14px}
 .tab{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 16px;cursor:pointer;font-weight:800;color:var(--ink-2)}
 .tab[aria-selected="true"]{background:var(--accent-2);border-color:var(--accent-2);color:#fff}
@@ -115,6 +117,7 @@ select.inline{border:1px solid var(--line-2);border-radius:9px;padding:6px 10px;
     <div class="topr"><label class="chip" for="period" style="border:0;background:none;padding:0">Period</label><select class="inline" id="period"><option value="q3">Q3 FY26</option><option value="q2">Q2 FY26</option></select><span class="chip">Prototype · sample data</span></div>
   </header>
 
+  <p class="fy" id="fyNote"></p>
   <nav class="tabs" role="tablist" id="tabs"></nav>
   <section class="summary" id="summary"></section>
   <div id="body"></div>
@@ -310,7 +313,9 @@ function drillHtml(m){
     <div class="legend"><span><i class="dot" style="background:#2E7D57"></i>On track</span><span><i class="dot" style="background:#C29A3A"></i>At risk (92-99%)</span><span><i class="dot" style="background:#B4443A"></i>Behind (under 92%)</span></div>
   </section>`;
 }
-$('#period').onchange = e => { period = e.target.value; render(); };
+function fyNote(){ $('#fyNote').innerHTML = '<b>FY26</b> runs <b>Feb 1, 2025 to Jan 31, 2026</b>. ' + (period==='q3' ? 'Q3 FY26 is <b>Aug 1 to Oct 31, 2025</b>.' : 'Q2 FY26 is <b>May 1 to Jul 31, 2025</b>.') + ' Trends show the eight quarters ending in the selected one.'; }
+$('#period').onchange = e => { period = e.target.value; fyNote(); render(); };
+fyNote();
 render();
 </script>
 </body>
