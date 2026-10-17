@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Groundwork | AI Data Readiness Prototype</title>
-<meta name="description" content="Prototype: get company data ready for an AI assistant. Prioritize sources, build a semantic layer, flag sensitive data, and set role-based access.">
+<meta name="description" content="Prototype: get marketing data ready for an AI assistant. Prioritize sources, build a semantic layer, flag sensitive data, and set role-based access.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800&display=swap">
 <style>
 :root{
@@ -185,7 +185,7 @@ select.inline{border:1px solid var(--line-2);border-radius:8px;padding:4px 8px;b
   <header class="top">
     <div class="brand">
       <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="7" ry="2.8"/><path d="M5 6v6c0 1.5 3.1 2.8 7 2.8s7-1.3 7-2.8V6"/><path d="M5 12v6c0 1.5 3.1 2.8 7 2.8"/><path d="M16.5 17.5l1.8 1.8 3.2-3.6"/></svg></div>
-      <div><h1>Groundwork</h1><p>Get company data ready for an AI assistant, step by step</p></div>
+      <div><h1>Groundwork</h1><p>Get marketing data ready for an AI assistant, step by step</p></div>
     </div>
     <span class="sample">Prototype · sample data</span>
   </header>
@@ -228,13 +228,13 @@ select.inline{border:1px solid var(--line-2);border-radius:8px;padding:4px 8px;b
   <!-- 3. Governance -->
   <section class="panel" id="p-gov" role="tabpanel" hidden>
     <div class="ph">
-      <div><h2>3. Flag sensitive data</h2><p>A scan suggests columns that hold personal, financial, or HR data. Confirm each flag. Sensitive columns are masked or hidden by role in the next step.</p></div>
+      <div><h2>3. Flag sensitive data</h2><p>A scan suggests columns that hold personal data, spend, or contract terms. Confirm each flag. Sensitive columns are masked or hidden by role in the next step.</p></div>
       <div class="actions"><button class="btn primary" id="acceptFlags">Accept all suggestions</button></div>
     </div>
     <div class="policy">
-      <div class="pc"><h4><span class="pill p-red">PII</span>Personal data</h4><p>Names, emails, phone numbers. Masked for everyone outside the owning team.</p></div>
-      <div class="pc"><h4><span class="pill p-amber">Financial</span>Deal and billing data</h4><p>Contract values and payment details. Visible to Sales, Finance, and leadership.</p></div>
-      <div class="pc"><h4><span class="pill p-lav">Confidential</span>HR and internal</h4><p>Compensation and performance data. Hidden from the AI layer by default.</p></div>
+      <div class="pc"><h4><span class="pill p-red">PII</span>Personal data</h4><p>Lead emails, phone numbers, and IP addresses. Masked outside Marketing Ops and leadership.</p></div>
+      <div class="pc"><h4><span class="pill p-amber">Financial</span>Spend and deal values</h4><p>Ad spend, campaign budgets, and opportunity amounts. Masked for roles that don't own them.</p></div>
+      <div class="pc"><h4><span class="pill p-lav">Confidential</span>Contracts</h4><p>Vendor and agency contract terms. Hidden from the AI layer by default.</p></div>
     </div>
     <div class="tw"><table><thead><tr><th>Column</th><th>Table</th><th>Scan suggestion</th><th>Reason</th><th>Decision</th></tr></thead><tbody id="govBody"></tbody></table></div>
   </section>
@@ -271,107 +271,106 @@ select.inline{border:1px solid var(--line-2);border-radius:8px;padding:4px 8px;b
 <script>
 /* ---------------- sample data ---------------- */
 const SOURCES = [
-  {id:'crm',      name:'CRM',                 sys:'Accounts, contacts, opportunities', teams:5, quality:4, fresh:5, inc:null},
-  {id:'billing',  name:'Billing',             sys:'Subscriptions, invoices',           teams:4, quality:5, fresh:4, inc:null},
-  {id:'usage',    name:'Product usage',       sys:'Daily feature events',              teams:4, quality:4, fresh:5, inc:null},
-  {id:'support',  name:'Support desk',        sys:'Tickets, CSAT',                     teams:3, quality:4, fresh:5, inc:null},
-  {id:'marketing',name:'Marketing automation',sys:'Campaigns, leads',                  teams:3, quality:3, fresh:4, inc:null},
-  {id:'web',      name:'Web analytics',       sys:'Sessions, sign-ups',                teams:2, quality:3, fresh:5, inc:null},
-  {id:'finance',  name:'Finance ledger',      sys:'GL entries, cost centers',          teams:1, quality:5, fresh:2, inc:null},
-  {id:'hr',       name:'HR system',           sys:'Employees, compensation',           teams:1, quality:4, fresh:2, inc:null}
+  {id:'campaigns', name:'Salesforce Campaigns',     sys:'Campaigns, campaign members',        teams:5, quality:4, fresh:5, inc:null},
+  {id:'opps',      name:'Salesforce Opportunities', sys:'Opportunities, campaign influence',  teams:5, quality:5, fresh:5, inc:null},
+  {id:'mkto_leads',name:'Marketo leads',            sys:'Leads, scoring, lifecycle stage',    teams:4, quality:3, fresh:5, inc:null},
+  {id:'mkto_act',  name:'Marketo activity',         sys:'Email, form, and web activity',      teams:3, quality:4, fresh:5, inc:null},
+  {id:'ads',       name:'Paid ads',                 sys:'LinkedIn and Google Ads spend',      teams:4, quality:4, fresh:4, inc:null},
+  {id:'web',       name:'Web analytics',            sys:'Sessions, UTM parameters',           teams:3, quality:3, fresh:5, inc:null},
+  {id:'events',    name:'Events and webinars',      sys:'Registrations, attendance',          teams:2, quality:3, fresh:3, inc:null},
+  {id:'budget',    name:'Marketing budget',         sys:'Plan vs. actual, vendor contracts',  teams:1, quality:5, fresh:2, inc:null}
 ];
 
 const TABLES = [
-  {id:'accounts', src:'crm', name:'accounts', cols:[
-    ['account_id','string','Unique ID for a customer account.',null],
-    ['account_name','string','Company name of the customer account.',null],
-    ['segment','string','Customer size tier: SMB, Mid-Market, or Enterprise.',null],
-    ['owner_email','string','Email of the account owner (sales rep).','pii'],
-    ['region','string','Sales region that owns the account: AMER, EMEA, or APAC.',null],
-    ['health_score','number','0-100 score combining usage, support, and billing signals.',null]
-  ], pre:[0,1,2]},
-  {id:'opportunities', src:'crm', name:'opportunities', cols:[
+  {id:'campaigns', src:'campaigns', name:'campaigns', cols:[
+    ['campaign_id','string','Unique ID for a Salesforce campaign.',null],
+    ['campaign_name','string','Campaign name, such as "Q3 Data Week Webinar".',null],
+    ['channel','string','Marketing channel: Paid Social, Webinar, Email, Events, or Content.',null],
+    ['start_date','date','Date the campaign went live.',null],
+    ['budgeted_cost','number','Planned spend for the campaign in USD.','fin']
+  ], pre:[0,1]},
+  {id:'campaign_members', src:'campaigns', name:'campaign_members', cols:[
+    ['campaign_id','string','Campaign the person responded to.',null],
+    ['lead_id','string','Lead or contact who responded.',null],
+    ['member_status','string','Response status, such as Registered, Attended, or Clicked.',null],
+    ['first_touch','boolean','True when this campaign was the person\'s first marketing touch.',null]
+  ], pre:[0,1]},
+  {id:'opportunities', src:'opps', name:'opportunities', cols:[
     ['opp_id','string','Unique ID for a sales opportunity.',null],
-    ['account_id','string','Account the opportunity belongs to.',null],
-    ['stage','string','Current sales stage, from Discovery to Closed Won or Lost.',null],
+    ['account_name','string','Company the opportunity is with.',null],
+    ['stage','string','Sales stage, from Discovery to Closed Won or Lost.',null],
     ['amount','number','Expected annual contract value in USD.','fin'],
-    ['close_date','date','Expected or actual close date.',null]
-  ], pre:[0,1]},
-  {id:'subscriptions', src:'billing', name:'subscriptions', cols:[
-    ['sub_id','string','Unique ID for a subscription.',null],
-    ['account_id','string','Account that owns the subscription.',null],
-    ['plan','string','Plan tier: Starter, Team, or Business.',null],
-    ['arr','number','Annual recurring revenue for the subscription in USD.','fin'],
-    ['card_last4','string','Last four digits of the payment card on file.','fin'],
-    ['status','string','Trialing, active, past due, or canceled.',null]
+    ['primary_campaign_id','string','Campaign credited with sourcing the opportunity.',null],
+    ['created_date','date','Date the opportunity was created.',null]
   ], pre:[0,1,2]},
-  {id:'usage_daily', src:'usage', name:'usage_daily', cols:[
-    ['account_id','string','Account the activity belongs to.',null],
-    ['event_date','date','Day the activity happened.',null],
-    ['active_users','number','Distinct users active that day.',null],
-    ['feature','string','Product feature used, such as Reports or Automations.',null]
-  ], pre:[0,1]},
-  {id:'tickets', src:'support', name:'tickets', cols:[
-    ['ticket_id','string','Unique ID for a support ticket.',null],
-    ['account_id','string','Account that opened the ticket.',null],
-    ['requester_email','string','Email of the person who opened the ticket.','pii'],
-    ['category','string','Issue type, such as Billing, Login, or Integrations.',null],
-    ['resolved_by_ai','boolean','True when the AI assistant resolved the ticket without an agent.',null],
-    ['csat','number','Customer satisfaction rating from 1 to 5.',null]
-  ], pre:[0,1]},
-  {id:'leads', src:'marketing', name:'leads', cols:[
-    ['lead_id','string','Unique ID for a marketing lead.',null],
+  {id:'leads', src:'mkto_leads', name:'leads', cols:[
+    ['lead_id','string','Unique ID for a Marketo lead.',null],
     ['email','string','Lead email address.','pii'],
-    ['campaign','string','Campaign that sourced the lead.',null],
+    ['phone','string','Lead phone number.','pii'],
+    ['lead_score','number','0-100 Marketo score from fit and engagement.',null],
+    ['lifecycle_stage','string','Funnel stage: Inquiry, MQL, SQL, or Opportunity.',null],
     ['mql_date','date','Date the lead became marketing qualified.',null]
+  ], pre:[0,3]},
+  {id:'activities', src:'mkto_act', name:'activities', cols:[
+    ['lead_id','string','Lead who did the activity.',null],
+    ['activity_type','string','Activity, such as Email Open, Form Fill, or Web Visit.',null],
+    ['asset_name','string','Email, form, or page involved.',null],
+    ['activity_date','date','Date and time of the activity.',null],
+    ['ip_address','string','IP address recorded for the activity.','pii']
   ], pre:[0]},
+  {id:'ad_spend', src:'ads', name:'ad_spend', cols:[
+    ['campaign_id','string','Salesforce campaign the ad spend rolls up to.',null],
+    ['platform','string','Ad platform: LinkedIn Ads or Google Ads.',null],
+    ['spend','number','Daily ad spend in USD.','fin'],
+    ['clicks','number','Ad clicks that day.',null]
+  ], pre:[0,1]},
   {id:'sessions', src:'web', name:'sessions', cols:[
     ['session_id','string','Unique ID for a website visit.',null],
-    ['landing_page','string','First page viewed in the visit.',null],
-    ['signed_up','boolean','True when the visit ended in a trial sign-up.',null]
+    ['utm_campaign','string','Campaign tag from the visit URL.',null],
+    ['converted','boolean','True when the visit ended in a form fill.',null]
   ], pre:[0]},
-  {id:'gl_entries', src:'finance', name:'gl_entries', cols:[
-    ['entry_id','string','Unique ID for a ledger entry.',null],
-    ['cost_center','string','Department cost center charged.',null],
-    ['amount','number','Entry amount in USD.','fin']
+  {id:'registrations', src:'events', name:'registrations', cols:[
+    ['event_id','string','Event or webinar the person registered for.',null],
+    ['attendee_email','string','Registrant email address.','pii'],
+    ['attended','boolean','True when the registrant attended.',null]
   ], pre:[0]},
-  {id:'employees', src:'hr', name:'employees', cols:[
-    ['employee_id','string','Unique ID for an employee.',null],
-    ['department','string','Department the employee belongs to.',null],
-    ['salary','number','Annual base salary in USD.','conf'],
-    ['manager_id','string','Employee ID of the manager.',null]
+  {id:'budget_lines', src:'budget', name:'budget_lines', cols:[
+    ['line_id','string','Unique ID for a budget line.',null],
+    ['planned_spend','number','Planned quarterly spend in USD.','fin'],
+    ['vendor_terms','string','Contract terms negotiated with the vendor.','conf']
   ], pre:[0]}
 ];
 TABLES.forEach(t => t.cols = t.cols.map((c,i) => ({name:c[0], type:c[1], suggest:c[2], sensSug:c[3],
   desc: t.pre.includes(i) ? c[2] : '', status: t.pre.includes(i) ? 'approved' : 'missing', sens: 'pending'})));
 
 const METRICS = [
-  {id:'arr', name:'ARR', def:'Sum of arr on active subscriptions, as of the last day of the period.', formula:'SUM(subscriptions.arr) WHERE status = active', status:'draft'},
-  {id:'nrr', name:'Net revenue retention', def:'ARR today from accounts that were customers 12 months ago, divided by their ARR then.', formula:'ARR(cohort, today) / ARR(cohort, 12 months ago)', status:'draft'},
-  {id:'t2p', name:'Trial-to-paid rate', def:'Share of trials started in the period that converted to a paid plan within 14 days.', formula:'paid_within_14d / trials_started', status:'approved'},
-  {id:'deflect', name:'AI resolution rate', def:'Share of support tickets resolved by the AI assistant without an agent.', formula:'AVG(tickets.resolved_by_ai)', status:'draft'}
+  {id:'pipe', name:'Marketing-sourced pipeline', def:'Total amount of open and won opportunities whose primary campaign is a marketing campaign, created in the period.', formula:'SUM(opportunities.amount) WHERE primary_campaign_id IS NOT NULL', status:'draft'},
+  {id:'mql2sql', name:'MQL-to-SQL rate', def:'Share of leads that became MQLs in the period and reached SQL within 30 days.', formula:'sql_within_30d / mqls', status:'draft'},
+  {id:'cpmql', name:'Cost per MQL', def:'Ad and program spend in the period divided by new MQLs from those campaigns.', formula:'SUM(ad_spend.spend) / COUNT(mqls)', status:'approved'},
+  {id:'roi', name:'Pipeline ROI', def:'Marketing-sourced pipeline divided by marketing spend for the same campaigns.', formula:'sourced_pipeline / SUM(spend)', status:'draft'}
 ];
 
 const DATASETS = [
-  {id:'crm', name:'CRM'}, {id:'billing', name:'Billing'}, {id:'usage', name:'Product usage'},
-  {id:'support', name:'Support desk'}, {id:'marketing', name:'Marketing'}, {id:'finance', name:'Finance'}
+  {id:'campaigns', name:'Campaigns'}, {id:'opps', name:'Opportunities'}, {id:'marketo', name:'Marketo'},
+  {id:'ads', name:'Ad spend'}, {id:'web', name:'Web & events'}, {id:'budget', name:'Budget'}
 ];
+const SRC_DATASET = {campaigns:'campaigns', opps:'opps', mkto_leads:'marketo', mkto_act:'marketo', ads:'ads', web:'web', events:'web', budget:'budget'};
 const ROLES = [
-  {id:'sales',  name:'Sales',            dept:['Sales'],            color:'#FFEFB0', access:{crm:'full',billing:'masked',usage:'masked',support:'none',marketing:'masked',finance:'none'}},
-  {id:'mkt',    name:'Marketing',        dept:['Marketing'],        color:'#D3E6FB', access:{crm:'masked',billing:'none',usage:'masked',support:'none',marketing:'full',finance:'none'}},
-  {id:'cs',     name:'Customer Success', dept:['Customer Success'], color:'#CDEBD3', access:{crm:'masked',billing:'masked',usage:'full',support:'full',marketing:'none',finance:'none'}},
-  {id:'support',name:'Support',          dept:['Support'],          color:'#FBDAD3', access:{crm:'masked',billing:'none',usage:'masked',support:'full',marketing:'none',finance:'none'}},
-  {id:'fin',    name:'Finance',          dept:['Finance'],          color:'#E5DCF8', access:{crm:'masked',billing:'full',usage:'none',support:'none',marketing:'none',finance:'full'}},
-  {id:'lead',   name:'Leadership',       dept:['Executive'],        color:'#F2E3C9', access:{crm:'full',billing:'full',usage:'full',support:'masked',marketing:'full',finance:'full'}}
+  {id:'dg',     name:'Demand Gen',       dept:['Demand Gen'],        color:'#FFEFB0', access:{campaigns:'full',opps:'full',marketo:'full',ads:'full',web:'full',budget:'masked'}},
+  {id:'mops',   name:'Marketing Ops',    dept:['Marketing Ops'],     color:'#D3E6FB', access:{campaigns:'full',opps:'full',marketo:'full',ads:'full',web:'full',budget:'masked'}},
+  {id:'content',name:'Content & Brand',  dept:['Content'],           color:'#CDEBD3', access:{campaigns:'full',opps:'none',marketo:'masked',ads:'masked',web:'full',budget:'none'}},
+  {id:'field',  name:'Field & Events',   dept:['Field Marketing'],   color:'#FBDAD3', access:{campaigns:'full',opps:'masked',marketo:'masked',ads:'none',web:'full',budget:'masked'}},
+  {id:'sdr',    name:'Sales Development',dept:['Sales Development'], color:'#E5DCF8', access:{campaigns:'masked',opps:'full',marketo:'masked',ads:'none',web:'masked',budget:'none'}},
+  {id:'lead',   name:'Marketing Leadership', dept:['Executive'],     color:'#F2E3C9', access:{campaigns:'full',opps:'full',marketo:'full',ads:'full',web:'full',budget:'full'}}
 ];
 const USERS = [
-  ['Maya Torres','Sales','Account Executive','sales'],['Jordan Lee','Sales','Sales Manager',null],['Priya Nair','Sales','SDR',null],
-  ['Sam Okafor','Marketing','Demand Gen Manager','mkt'],['Lena Fischer','Marketing','Marketing Ops',null],
-  ['Chris Park','Customer Success','CSM',null],['Ana Ruiz','Customer Success','CS Director',null],
-  ['Tom Becker','Support','Support Lead',null],['Hana Sato','Support','Support Specialist',null],
-  ['Noah Kim','Finance','FP&A Analyst',null],['Grace Liu','Finance','Controller','fin'],
-  ['Ravi Shah','Executive','CEO',null],['Elena Rossi','Executive','CIO',null],
-  ['Ben Carter','Operations','RevOps Analyst',null],['Ivy Chen','Operations','BizOps Lead',null]
+  ['Maya Torres','Demand Gen','Demand Gen Manager','dg'],['Jordan Lee','Demand Gen','Paid Media Specialist',null],['Priya Nair','Demand Gen','ABM Manager',null],
+  ['Sam Okafor','Marketing Ops','Marketing Ops Manager','mops'],['Lena Fischer','Marketing Ops','Marketo Admin',null],
+  ['Chris Park','Content','Content Marketing Lead',null],['Ana Ruiz','Content','Brand Designer',null],
+  ['Tom Becker','Field Marketing','Field Marketing Manager',null],['Hana Sato','Field Marketing','Events Coordinator',null],
+  ['Noah Kim','Sales Development','SDR',null],['Grace Liu','Sales Development','SDR Manager','sdr'],
+  ['Ravi Shah','Executive','CMO',null],['Elena Rossi','Executive','VP Marketing',null],
+  ['Ben Carter','Partner Marketing','Partner Marketing Manager',null],['Ivy Chen','Product Marketing','Product Marketing Manager',null]
 ].map(u => ({name:u[0], dept:u[1], title:u[2], role:u[3]}));
 
 /* ---------------- helpers ---------------- */
@@ -489,12 +488,12 @@ $('#approveAll').onclick = () => { const t=TABLES.find(x=>x.id===selTable); if(!
 function renderGov(){
   const rows = aiTables().flatMap(t => t.cols.filter(c=>c.sensSug).map(c => ({t, c})));
   if (!rows.length){ $('#govBody').innerHTML = '<tr><td colspan="5" class="minor">Include sources in step 1 to scan their columns.</td></tr>'; return; }
-  const why = {pii:'Looks like an email or personal identifier', fin:'Holds money values or payment details', conf:'Compensation data'};
+  const why = {pii:'Looks like an email, phone, or IP address', fin:'Holds spend or deal amounts', conf:'Contract terms'};
   $('#govBody').innerHTML = rows.map(({t,c},i) => {
     const [lbl,cls] = sensLabel[c.sensSug];
     const dec = c.sens==='pending' ? `<span class="actions"><button class="btn sm primary" data-acc="${i}">Accept</button><button class="btn sm" data-dis="${i}">Not sensitive</button></span>`
       : c.sens==='none' ? '<span class="pill p-gray">Not sensitive</span>' : `<span class="pill ${cls}">Flagged ${lbl}</span>`;
-    return `<tr><td><code>${c.name}</code></td><td>${t.name}</td><td><span class="pill ${cls}">${lbl}</span></td><td class="sub" style="font-size:13px">${why[c.sensSug]}</td><td>${dec}</td></tr>`;
+    return `<tr><td><code>${c.name}</code></td><td>${t.name}</td><td><span class="pill ${cls}">${lbl}</span></td><td style="font-size:13px;color:var(--ink-3)">${why[c.sensSug]}</td><td>${dec}</td></tr>`;
   }).join('');
   document.querySelectorAll('#govBody [data-acc]').forEach(b => b.onclick = () => { const c=rows[b.dataset.acc].c; c.sens=c.sensSug; renderGov(); renderSummary(); });
   document.querySelectorAll('#govBody [data-dis]').forEach(b => b.onclick = () => { rows[b.dataset.dis].c.sens='none'; renderGov(); renderSummary(); });
@@ -526,18 +525,21 @@ $('#autoGroup').onclick = () => {
 
 /* ---------------- 5. preview ---------------- */
 const QUESTIONS = [
-  {q:'What was our ARR last quarter?', needs:'billing', metric:'arr', col:'arr',
-   ans:'ARR closed last quarter at $48.2M, up 6% from the quarter before.'},
-  {q:'Which accounts have rising support tickets?', needs:'support', metric:null, col:null,
-   ans:'Three accounts doubled their ticket volume this month: Brightline Health, Kestrel Logistics, and Orchid Retail. Most tickets are about Integrations.'},
-  {q:'How often does the AI resolve tickets?', needs:'support', metric:'deflect', col:'resolved_by_ai',
-   ans:'The assistant resolved 68% of tickets last month without an agent, up from 61%.'},
-  {q:'Who owns the Brightline Health account?', needs:'crm', metric:null, col:'owner_email',
-   ans:'Brightline Health is owned by Maya Torres in AMER.'},
-  {q:'What is the average salary in Sales?', needs:'hr', metric:null, col:'salary', ans:''}
+  {q:'Which campaigns sourced the most pipeline last quarter?', src:'opps', metric:'pipe', col:'amount',
+   ans:'The Q3 Data Week webinar series sourced the most pipeline at $2.4M, followed by LinkedIn ABM at $1.8M and the field dinner series at $1.1M.',
+   masked:'The Q3 Data Week webinar series sourced the most pipeline, followed by LinkedIn ABM and the field dinner series. Dollar amounts are masked for your role.'},
+  {q:'What is our MQL-to-SQL rate this month?', src:'mkto_leads', metric:'mql2sql', col:null,
+   ans:'MQL-to-SQL conversion is 24% this month, up from 21% last month. Webinar leads convert best at 31%.'},
+  {q:'What is our cost per MQL on LinkedIn?', src:'ads', metric:'cpmql', col:'spend',
+   ans:'Cost per MQL on LinkedIn is $182 this quarter, down 9% from last quarter.',
+   masked:'Cost per MQL on LinkedIn fell 9% from last quarter. Spend figures are masked for your role.'},
+  {q:'List webinar attendees with a lead score over 80.', src:'mkto_leads', metric:null, col:'email',
+   ans:'I found 42 webinar attendees with a lead score over 80 and no open opportunity. Here they are with emails, ready for SDR follow-up.',
+   masked:'I found 42 webinar attendees with a lead score over 80 and no open opportunity. Their emails and phone numbers are masked for your role.'},
+  {q:'What are the terms of our ad agency contract?', src:'budget', conf:true}
 ];
-let pvRole = 'cs', convo = [];
-function accessFor(role, src){ const map={crm:'crm',billing:'billing',usage:'usage',support:'support',marketing:'marketing',web:'marketing',finance:'finance',hr:null}; const d=map[src]; return d ? role.access[d] : 'none'; }
+let pvRole = 'dg', convo = [];
+function accessFor(role, src){ const d = SRC_DATASET[src]; return d ? role.access[d] : 'none'; }
 function renderPreview(){
   $('#pvRole').innerHTML = ROLES.map(r=>`<option value="${r.id}" ${r.id===pvRole?'selected':''}>${r.name}</option>`).join('');
   const role = roleOf(pvRole);
@@ -559,25 +561,23 @@ function renderPreview(){
   renderMsgs();
 }
 function ask(i){
-  const q = QUESTIONS[i], role = roleOf(pvRole);
+  const q = QUESTIONS[i], role = roleOf(pvRole), srcName = SOURCES.find(s=>s.id===q.src).name;
   let a, note = '';
-  const srcInc = q.needs==='hr' ? inc('hr') : inc(q.needs==='crm'?'crm':q.needs);
-  const acc = accessFor(role, q.needs);
-  if (q.needs==='hr'){
-    a = 'I can\'t answer that. Compensation data is confidential and isn\'t available to the assistant.';
-    note = 'Governance: HR data stays out of the AI layer.';
-  } else if (!srcInc){
-    a = 'I don\'t have that data yet. The ' + SOURCES.find(s=>s.id===q.needs).name + ' source isn\'t in the AI layer.';
+  const acc = accessFor(role, q.src);
+  if (q.conf){
+    a = 'I can\'t share that. Vendor contract terms are confidential and aren\'t available to the assistant.';
+    note = 'Governance: confidential columns stay out of the AI layer.';
+  } else if (!inc(q.src)){
+    a = 'I don\'t have that data yet. ' + srcName + ' isn\'t in the AI layer.';
     note = 'Include it in step 1 to answer this.';
   } else if (acc==='none'){
-    a = 'Your role doesn\'t have access to ' + SOURCES.find(s=>s.id===q.needs).name + ' data, so I can\'t answer this.';
+    a = 'Your role doesn\'t have access to ' + srcName + ' data, so I can\'t answer this.';
     note = 'Access: ' + role.name + ' has no access to this dataset. Change it in step 4.';
   } else {
     a = q.ans;
     const col = q.col && TABLES.flatMap(t=>t.cols).find(c=>c.name===q.col);
     if (col && acc==='masked' && col.sens!=='pending' && col.sens!=='none'){
-      if (q.col==='owner_email') a = 'Brightline Health is owned by a rep in AMER. Their contact details are masked for your role.';
-      else a = a.replace(/\$[\d.]+M/,'[masked]').replace(/up \d+%/,'trend masked');
+      a = q.masked;
       note = 'Governance: ' + q.col + ' is flagged sensitive and masked for ' + role.name + '.';
     }
     if (q.metric){
