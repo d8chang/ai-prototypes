@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>GTM Pipeline Targeting | Prototype</title>
-<meta name="description" content="Prototype: turn rep quotas into pipeline targets at rep, manager, region, and theater levels using 4x coverage, product mix, and source mix.">
+<meta name="description" content="Prototype: turn rep quotas into pipeline targets at rep, manager, region, and theater levels using 4x Coverage, product mix, and source mix.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800&display=swap">
 <style>
 :root{
@@ -132,21 +132,21 @@ table.ph{font-size:13px;width:100%} table.ph th,table.ph td{padding:5px 6px} tab
   </header>
 
   <nav class="flow" aria-label="Data flow">
-    <button class="step" data-v="none"><small>Source</small><b>Anaplan quotas</b><span>FY26 quota plan by rep</span></button>
-    <button class="step" data-v="input"><small>Shared sheet</small><b>Quota sheet</b><span>Exported to Google Sheets</span></button>
+    <button class="step" data-v="none"><small>Source</small><b>Anaplan Quotas</b><span>FY26 quota plan by rep</span></button>
+    <button class="step" data-v="input"><small>Shared sheet</small><b>Quota Sheet</b><span>Exported to Google Sheets</span></button>
     <button class="step" data-v="input"><small>Snowflake</small><b>RAW.QUOTA_SHEET</b><span>Ingested daily</span></button>
-    <button class="step" data-v="assume"><small>Logic</small><b>Target rules</b><span>4x coverage and mixes</span></button>
-    <button class="step on" data-v="output"><small>Output view</small><b>GTM.PIPE_TARGETS</b><span>By month and quarter</span></button>
+    <button class="step" data-v="assume"><small>Logic</small><b>Target Rules</b><span>4x Coverage and mixes</span></button>
+    <button class="step on" data-v="output"><small>Output View</small><b>GTM.PIPE_TARGETS</b><span>By month and quarter</span></button>
   </nav>
 
   <p class="fy"><b>FY26</b> runs <b>Feb 1, 2025 to Jan 31, 2026</b>. Q1 Feb to Apr · Q2 May to Jul · Q3 Aug to Oct · Q4 Nov to Jan.</p>
   <div class="formula" aria-label="Formula">
     <span class="lbl">Pipe target</span><span class="op">=</span>
     <span class="term t1">Quota</span><span class="op">×</span>
-    <span class="term t2">4x coverage</span>
+    <span class="term t2">4x Coverage</span>
     <span class="op" style="margin:0 4px">→ then split by</span>
-    <span class="term t3">Product mix</span><span class="op">and</span>
-    <span class="term t4">Source mix</span>
+    <span class="term t3">Product Mix</span><span class="op">and</span>
+    <span class="term t4">Source Mix</span>
     <span class="op" style="margin-left:6px;font-weight:700">· splits always add up to 100%, so coverage stays 4x</span>
   </div>
 
@@ -176,23 +176,23 @@ table.ph{font-size:13px;width:100%} table.ph th,table.ph td{padding:5px 6px} tab
 
   <!-- ASSUMPTIONS -->
   <section class="panel" id="v-assume" hidden>
-    <div class="ph"><div><h2>Target rules</h2><p>Change any input and the output view recalculates. In Snowflake these live in a small config table so RevOps can update them without editing SQL.</p></div><button class="btn" id="reset">Reset defaults</button></div>
+    <div class="ph"><div><h2>Target Rules</h2><p>Change any input and the output view recalculates. In Snowflake these live in a small config table so RevOps can update them without editing SQL.</p></div><button class="btn" id="reset">Reset defaults</button></div>
     <div class="agrid">
       <div class="box"><h3>Coverage</h3><p>Pipeline needed per $1 of quota. Default is 4x, so there is enough pipeline to cover quota.</p><div id="covIn"></div></div>
-      <div class="box"><h3>Product mix</h3><p>Share of pipeline by product. Must total 100%.</p><div id="mixIn"></div><div class="sum" id="mixSum"></div></div>
-      <div class="box"><h3>Source mix</h3><p>Where pipeline should come from. Must total 100%.</p><div id="srcIn"></div><div class="sum" id="srcSum"></div></div>
-      <div class="box"><h3>Monthly phasing</h3><p>Each month gets its share of the quarter by number of days.</p><div id="phIn"></div></div>
+      <div class="box"><h3>Product Mix</h3><p>Share of pipeline by product. Must total 100%.</p><div id="mixIn"></div><div class="sum" id="mixSum"></div></div>
+      <div class="box"><h3>Source Mix</h3><p>Where pipeline should come from. Must total 100%.</p><div id="srcIn"></div><div class="sum" id="srcSum"></div></div>
+      <div class="box"><h3>Monthly Phasing</h3><p>Each month gets its share of the quarter by number of days.</p><div id="phIn"></div></div>
     </div>
   </section>
 
   <!-- SQL -->
   <section class="panel" id="v-sql" hidden>
-    <div class="ph"><div><h2>View definition</h2><p>The Snowflake SQL behind GTM.PIPE_TARGETS.</p></div></div>
+    <div class="ph"><div><h2>View Definition</h2><p>The Snowflake SQL behind GTM.PIPE_TARGETS.</p></div></div>
     <div class="code"><pre id="sqlPre"></pre></div>
   </section>
 
   <div style="display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap">
-    <button class="btn" data-go="output">Output view</button><button class="btn" data-go="input">Quota sheet</button><button class="btn" data-go="assume">Target rules</button><button class="btn" data-go="sql">View SQL</button>
+    <button class="btn" data-go="output">Output View</button><button class="btn" data-go="input">Quota Sheet</button><button class="btn" data-go="assume">Target Rules</button><button class="btn" data-go="sql">View SQL</button>
   </div>
   <p class="foot">Prototype built by Deborah Chang. All names, quotas, and assumptions are sample data.</p>
 </div>
@@ -310,7 +310,7 @@ function renderOutput(){
   const gt = {quota:0, total:0, by:{}}; SPLIT_KEYS.forEach(p=>gt.by[p]=0);
   base.forEach(r => { gt.quota+=r.quota; gt.total+=r.total; SPLIT_KEYS.forEach(p=>gt.by[p]+=r.by[p]); });
   const scope = (pid ? periods(g).find(x=>x.id===pid).label : (g==='all' ? 'FY26' : 'All of FY26')) + ' · ' + (th || 'All theaters');
-  $('#outFoot').innerHTML = `<tr class="gt"><td colspan="4"><b>Grand total</b><span class="dt">${scope}${g==='all'&&!pid?' · counted once at the annual grain':''}</span></td>
+  $('#outFoot').innerHTML = `<tr class="gt"><td colspan="4"><b>Grand Total</b><span class="dt">${scope}${g==='all'&&!pid?' · counted once at the annual grain':''}</span></td>
     <td class="num">${money(gt.quota)}</td><td class="num">${gt.quota? (gt.total/gt.quota).toFixed(2):'0.00'}x</td><td class="num">${money(gt.total)}</td>${cols.map((p,i)=>`<td class="num${i%3===0?' sep':''}">${money(gt.by[p])}</td>`).join('')}</tr>`;
   const fy = buildRows('year')[0], np = periods(g).length;
   $('#outMeta').innerHTML = `<span>${g==='all'?'All grains (annual, quarterly, monthly)':GRAIN_LBL[g]+' grain'}: ${np} period${np>1?'s':''} × 34 rows = ${all.length} rows (showing ${rows.length})</span><span>FY26 company pipe target <b style="color:var(--ink)">${money(fy.total)}</b> on ${money(fy.quota)} quota</span><span>Coverage ${A.cov.Coverage.toFixed(1)}x at every level</span>`;
@@ -396,7 +396,7 @@ document.querySelectorAll('[data-go]').forEach(b => b.onclick = () => { show(b.d
 $('#fGrain').onchange = () => { $('#fPeriod').value=''; fillPeriods(); renderOutput(); };
 ['fPeriod','fLevel','fTheater'].forEach(id => $('#'+id).onchange = renderOutput);
 $('#fSearch').oninput = renderOutput;
-$('#reset').onclick = () => { A = JSON.parse(JSON.stringify(DEFAULTS)); renderAssume(); renderSql(); toast('Target rules reset'); };
+$('#reset').onclick = () => { A = JSON.parse(JSON.stringify(DEFAULTS)); renderAssume(); renderSql(); toast('Target Rules reset'); };
 $('#csv').onclick = () => {
   const head = ['time_grain','period','period_start','period_end','aggregation_level','name','parent','theater','quota','coverage','pipe_target',...SPLIT_KEYS.map(p=>'pipe_'+p.toLowerCase().replace(/[^a-z]/g,''))];
   const lines = [head.join(',')].concat(window._rows.map(r => [r.grain, r.period, r.start, r.end, LVL[r.level], r.name, r.parent, r.theater, Math.round(r.quota), r.cov.toFixed(2), Math.round(r.total), ...SPLIT_KEYS.map(p=>Math.round(r.by[p]))].map(v => /[",]/.test(String(v)) ? '"'+String(v).replace(/"/g,'""')+'"' : v).join(',')));

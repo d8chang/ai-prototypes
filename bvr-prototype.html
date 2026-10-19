@@ -252,7 +252,7 @@
   <h1>Business Value Realization</h1>
   <div class="tabs" role="tablist" aria-label="Views">
     <button role="tab" id="tab-dash" aria-controls="view-dash" aria-selected="true">Dashboard</button>
-    <button role="tab" id="tab-doc" aria-controls="view-doc" aria-selected="false" tabindex="-1">How to use / Measures</button>
+    <button role="tab" id="tab-doc" aria-controls="view-doc" aria-selected="false" tabindex="-1">How to Use / Measures</button>
   </div>
   <span class="badge">Prototype · synthetic data · Jan 2025 – Sep 2026</span>
 </header>
@@ -263,7 +263,7 @@
     <label class="f"><span class="lab">Customer (subdomain)</span><select id="f-customer"></select></label>
     <label class="f"><span class="lab">Start month</span><select id="f-start"></select></label>
     <label class="f"><span class="lab">End month</span><select id="f-end"></select></label>
-    <div class="f" role="radiogroup" aria-labelledby="lab-period"><span class="lab" id="lab-period">Time period</span>
+    <div class="f" role="radiogroup" aria-labelledby="lab-period"><span class="lab" id="lab-period">Time Period</span>
       <div class="seg">
         <label><input type="radio" name="period" value="month" checked><span>Monthly</span></label>
         <label><input type="radio" name="period" value="quarter"><span>Quarterly</span></label>
@@ -280,7 +280,7 @@
       <div class="labrow"><span class="lab" id="lab-pri">Priority</span><button type="button" class="linkbtn" id="pri-all">Select all</button></div>
       <div class="chips" id="f-priority"></div>
     </div>
-    <div class="f" role="radiogroup" aria-labelledby="lab-seg"><span class="lab" id="lab-seg">Segment bars by</span>
+    <div class="f" role="radiogroup" aria-labelledby="lab-seg"><span class="lab" id="lab-seg">Segment Bars By</span>
       <div class="seg">
         <label><input type="radio" name="segment" value="none" checked><span>None</span></label>
         <label><input type="radio" name="segment" value="urgency"><span>Urgency</span></label>
@@ -340,11 +340,11 @@
     <div class="doc-grid">
       <div>
         <div class="panel">
-          <h2>How to use this Dashboard</h2>
+          <h2>How to Use This Dashboard</h2>
           <ul>
-            <li>Select the <b>customer</b>, then the <b>start month</b> and <b>end month</b> to set the timeframe.</li>
-            <li>On the graphs, use <b>Segment bars by</b> to split the bars by urgency or priority.</li>
-            <li><b>Time period</b> switches the graphs between monthly and quarterly. For quarterly, pick start and end months on quarter boundaries, not the middle of a quarter, because the value metrics compare the first and last period.</li>
+            <li>Select the <b>customer</b>, then the <b>Start Month</b> and <b>End Month</b> to set the timeframe.</li>
+            <li>On the graphs, use <b>Segment Bars By</b> to split the bars by urgency or priority.</li>
+            <li><b>Time Period</b> switches the graphs between monthly and quarterly. For quarterly, pick start and End Months on quarter boundaries, not the middle of a quarter, because the value metrics compare the first and last period.</li>
             <li>Customer, month and time period apply to the whole view. Urgency and priority apply to the graphs and the MTTA/MTTR metrics, not to the funnel.</li>
             <li>Quarters are regular calendar quarters, not the fiscal calendar.</li>
             <li>Hover or focus any Value Realized tile to see its formula with the current numbers.</li>
@@ -377,7 +377,7 @@
           <li><b>Alerts:</b> number of alerts after deduplication</li>
           <li><b>Post Suppressed Alerts:</b> number of alerts where <code>is_suppressed = '0'</code></li>
           <li><b>Incidents:</b> number of unique incidents</li>
-          <li><b>Reduction % between tiers:</b> <code>1 - (lower tier / upper tier)</code></li>
+          <li><b>Reduction % Between Tiers:</b> <code>1 - (lower tier / upper tier)</code></li>
         </ul>
 
         <h3>Graphs</h3>
@@ -394,7 +394,7 @@
           <li><b>MTTA Difference:</b> absolute difference between end and start period MTTA. <code>|End Period MTTA - Start Period MTTA|</code></li>
           <li><b>MTTR Efficiency:</b> % change between the MTTR of the end period vs the start period. <code>1 - (End Period MTTR / Start Period MTTR)</code></li>
           <li><b>MTTR Difference:</b> absolute difference between end and start period MTTR. <code>|End Period MTTR - Start Period MTTR|</code></li>
-          <li><b>Hours Re-Allocated (Hours saved):</b> Noise Reduction Hours + MTTA Difference Hours + MTTR Difference Hours
+          <li><b>Hours Re-Allocated (Hours Saved):</b> Noise Reduction Hours + MTTA Difference Hours + MTTR Difference Hours
             <ol>
               <li>Noise Reduction Hours = <code>((0.5 * (Alerts - Post Suppressed Alerts)) + (10 * (Post Suppressed Alerts - Incidents))) / 60</code></li>
               <li>MTTA Difference Hours = <code>Acknowledged Incidents * MTTA Difference * 0.25 / 60</code>. Set to 0 if MTTA got worse, since that would give negative hours.</li>
@@ -807,7 +807,7 @@ function renderTiles(R) {
 
   const why = (e, name) => !e.ok ? 'no comparison available' : e.improved ? `${fMin(e.diff)} min faster` : e.worse ? `${name} got worse, counted as 0` : 'no change';
   document.getElementById('breakdown').innerHTML =
-    '<h4>Hours saved breakdown</h4>' +
+    '<h4>Hours Saved Breakdown</h4>' +
     `<div class="row"><span>Noise reduction <span class="why">· alerts never worked</span></span><b data-part="noise">${fInt(R.noiseHours)}</b></div>` +
     `<div class="row"><span>MTTA improvement <span class="why">· ${why(R.mtta, 'MTTA')}</span></span><b data-part="mtta">${fInt(R.mttaHours)}</b></div>` +
     `<div class="row"><span>MTTR improvement <span class="why">· ${why(R.mttr, 'MTTR')}</span></span><b data-part="mttr">${fInt(R.mttrHours)}</b></div>` +

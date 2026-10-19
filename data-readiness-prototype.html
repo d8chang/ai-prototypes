@@ -207,14 +207,14 @@ select.inline{border:1px solid var(--line-2);border-radius:8px;padding:4px 8px;b
     <div class="topr"><button class="btn" id="guideBtn" aria-expanded="true" aria-controls="guide">How it works</button><span class="sample">Prototype · sample data</span></div>
   </header>
 
-  <section class="guide" id="guide" aria-label="How Groundwork works">
+  <section class="guide" id="guide" aria-label="How Groundwork Works">
     <div class="gh">
-      <div><h2>How Groundwork works</h2><p>Before an AI assistant can answer questions about marketing performance, its data has to be chosen, explained, protected, and shared with the right people. Groundwork walks through that in five steps. The readiness score below rises as you finish each one.</p></div>
+      <div><h2>How Groundwork Works</h2><p>Before an AI assistant can answer questions about marketing performance, its data has to be chosen, explained, protected, and shared with the right people. Groundwork walks through that in five steps. The readiness score below rises as you finish each one.</p></div>
       <button class="btn sm" id="guideHide">Hide guide</button>
     </div>
     <ol class="gsteps">
       <li><span class="gn">1</span><b>Sources</b><span>Rank sources by how many teams ask for them, data quality, and freshness. Click <em>Include top 5</em> or choose Include or Later on each.</span></li>
-      <li><span class="gn">2</span><b>Semantic layer</b><span>Give each column a plain-language description. Click <em>Draft with AI</em>, edit if needed, then <em>Approve</em>. Approve metric definitions too.</span></li>
+      <li><span class="gn">2</span><b>Semantic Layer</b><span>Give each column a plain-language description. Click <em>Draft with AI</em>, edit if needed, then <em>Approve</em>. Approve metric definitions too.</span></li>
       <li><span class="gn">3</span><b>Governance</b><span>Review columns the scan flagged as personal, financial, or confidential. <em>Accept</em> the flag or mark it not sensitive.</span></li>
       <li><span class="gn">4</span><b>Roles &amp; access</b><span>Click a grid cell to switch between Full, Masked, and None. <em>Auto-group by department</em>, then assign anyone left over.</span></li>
       <li><span class="gn">5</span><b>Preview</b><span>Pick a role and ask a sample question. Answers change based on your choices: masked values, blocked data, and metric warnings.</span></li>
@@ -235,16 +235,16 @@ select.inline{border:1px solid var(--line-2);border-radius:8px;padding:4px 8px;b
   <!-- 1. Sources -->
   <section class="panel" id="p-sources" role="tabpanel">
     <div class="ph">
-      <div><h2>1. Prioritize data sources</h2><p>Start with the sources teams ask about most. Priority weighs demand across teams, data quality, and freshness. Decide which ones go into the AI layer first.</p></div>
+      <div><h2>1. Prioritize Data Sources</h2><p>Start with the sources teams ask about most. Priority weighs demand across teams, data quality, and freshness. Decide which ones go into the AI layer first.</p></div>
       <div class="actions"><button class="btn" id="sortPrio">Sort by priority</button><button class="btn primary" id="acceptTop">Include top 5</button></div>
     </div>
     <div class="tw"><table><thead><tr><th>Source</th><th>Teams asking</th><th>Quality</th><th>Freshness</th><th>Priority</th><th>AI layer</th></tr></thead><tbody id="srcBody"></tbody></table></div>
   </section>
 
-  <!-- 2. Semantic layer -->
+  <!-- 2. Semantic Layer -->
   <section class="panel" id="p-semantic" role="tabpanel" hidden>
     <div class="ph">
-      <div><h2>2. Build the semantic layer</h2><p>Describe what each column means in plain language and define metrics once, so the assistant answers with the same numbers the business uses.</p></div>
+      <div><h2>2. Build the Semantic Layer</h2><p>Describe what each column means in plain language and define metrics once, so the assistant answers with the same numbers the business uses.</p></div>
       <div class="actions"><button class="btn" id="draftAll">Draft missing with AI</button><button class="btn primary" id="approveAll">Approve all in table</button></div>
     </div>
     <div class="split">
@@ -260,12 +260,12 @@ select.inline{border:1px solid var(--line-2);border-radius:8px;padding:4px 8px;b
   <!-- 3. Governance -->
   <section class="panel" id="p-gov" role="tabpanel" hidden>
     <div class="ph">
-      <div><h2>3. Flag sensitive data</h2><p>A scan suggests columns that hold personal data, spend, or contract terms. Confirm each flag. Sensitive columns are masked or hidden by role in the next step.</p></div>
+      <div><h2>3. Flag Sensitive Data</h2><p>A scan suggests columns that hold personal data, spend, or contract terms. Confirm each flag. Sensitive columns are masked or hidden by role in the next step.</p></div>
       <div class="actions"><button class="btn primary" id="acceptFlags">Accept all suggestions</button></div>
     </div>
     <div class="policy">
-      <div class="pc"><h4><span class="pill p-red">PII</span>Personal data</h4><p>Lead emails, phone numbers, and IP addresses. Masked outside Marketing Ops and leadership.</p></div>
-      <div class="pc"><h4><span class="pill p-amber">Financial</span>Spend and deal values</h4><p>Ad spend, campaign budgets, and opportunity amounts. Masked for roles that don't own them.</p></div>
+      <div class="pc"><h4><span class="pill p-red">PII</span>Personal Data</h4><p>Lead emails, phone numbers, and IP addresses. Masked outside Marketing Ops and leadership.</p></div>
+      <div class="pc"><h4><span class="pill p-amber">Financial</span>Spend and Deal Values</h4><p>Ad spend, campaign budgets, and opportunity amounts. Masked for roles that don't own them.</p></div>
       <div class="pc"><h4><span class="pill p-lav">Confidential</span>Contracts</h4><p>Vendor and agency contract terms. Hidden from the AI layer by default.</p></div>
     </div>
     <div class="tw"><table><thead><tr><th>Column</th><th>Table</th><th>Scan suggestion</th><th>Reason</th><th>Decision</th></tr></thead><tbody id="govBody"></tbody></table></div>
@@ -274,7 +274,7 @@ select.inline{border:1px solid var(--line-2);border-radius:8px;padding:4px 8px;b
   <!-- 4. Roles & access -->
   <section class="panel" id="p-access" role="tabpanel" hidden>
     <div class="ph">
-      <div><h2>4. Define roles and access</h2><p>Set what each department role can see, then group people into roles. Click a cell to cycle between full access, masked sensitive columns, and no access.</p></div>
+      <div><h2>4. Define Roles and Access</h2><p>Set what each department role can see, then group people into roles. Click a cell to cycle between full access, masked sensitive columns, and no access.</p></div>
       <div class="actions"><button class="btn primary" id="autoGroup">Auto-group by department</button></div>
     </div>
     <div class="tw"><table class="matrix"><thead id="mxHead"></thead><tbody id="mxBody"></tbody></table></div>
@@ -285,7 +285,7 @@ select.inline{border:1px solid var(--line-2);border-radius:8px;padding:4px 8px;b
   <!-- 5. Preview -->
   <section class="panel" id="p-preview" role="tabpanel" hidden>
     <div class="ph">
-      <div><h2>5. Preview as a role</h2><p>See what the assistant can use for each role, and how the semantic layer and access rules change its answers.</p></div>
+      <div><h2>5. Preview as a Role</h2><p>See what the assistant can use for each role, and how the semantic layer and access rules change its answers.</p></div>
       <div class="actions"><label class="minor" for="pvRole" style="align-self:center">Viewing as</label><select class="inline" id="pvRole"></select></div>
     </div>
     <div class="pv">
@@ -305,12 +305,12 @@ select.inline{border:1px solid var(--line-2);border-radius:8px;padding:4px 8px;b
 const SOURCES = [
   {id:'campaigns', name:'Salesforce Campaigns',     sys:'Campaigns, campaign members',        teams:5, quality:4, fresh:5, inc:null},
   {id:'opps',      name:'Salesforce Opportunities', sys:'Opportunities, campaign influence',  teams:5, quality:5, fresh:5, inc:null},
-  {id:'mkto_leads',name:'Marketo leads',            sys:'Leads, scoring, lifecycle stage',    teams:4, quality:3, fresh:5, inc:null},
-  {id:'mkto_act',  name:'Marketo activity',         sys:'Email, form, and web activity',      teams:3, quality:4, fresh:5, inc:null},
-  {id:'ads',       name:'Paid ads',                 sys:'LinkedIn and Google Ads spend',      teams:4, quality:4, fresh:4, inc:null},
-  {id:'web',       name:'Web analytics',            sys:'Sessions, UTM parameters',           teams:3, quality:3, fresh:5, inc:null},
-  {id:'events',    name:'Events and webinars',      sys:'Registrations, attendance',          teams:2, quality:3, fresh:3, inc:null},
-  {id:'budget',    name:'Marketing budget',         sys:'Plan vs. actual, vendor contracts',  teams:1, quality:5, fresh:2, inc:null}
+  {id:'mkto_leads',name:'Marketo Leads',            sys:'Leads, scoring, lifecycle stage',    teams:4, quality:3, fresh:5, inc:null},
+  {id:'mkto_act',  name:'Marketo Activity',         sys:'Email, form, and web activity',      teams:3, quality:4, fresh:5, inc:null},
+  {id:'ads',       name:'Paid Ads',                 sys:'LinkedIn and Google Ads spend',      teams:4, quality:4, fresh:4, inc:null},
+  {id:'web',       name:'Web Analytics',            sys:'Sessions, UTM parameters',           teams:3, quality:3, fresh:5, inc:null},
+  {id:'events',    name:'Events and Webinars',      sys:'Registrations, attendance',          teams:2, quality:3, fresh:3, inc:null},
+  {id:'budget',    name:'Marketing Budget',         sys:'Plan vs. actual, vendor contracts',  teams:1, quality:5, fresh:2, inc:null}
 ];
 
 const TABLES = [
@@ -376,10 +376,10 @@ TABLES.forEach(t => t.cols = t.cols.map((c,i) => ({name:c[0], type:c[1], suggest
   desc: t.pre.includes(i) ? c[2] : '', status: t.pre.includes(i) ? 'approved' : 'missing', sens: 'pending'})));
 
 const METRICS = [
-  {id:'pipe', name:'Marketing-sourced pipeline', def:'Total amount of open and won opportunities whose primary campaign is a marketing campaign, created in the period.', formula:'SUM(opportunities.amount) WHERE primary_campaign_id IS NOT NULL', status:'draft'},
-  {id:'mql2sql', name:'MQL-to-SQL rate', def:'Share of leads that became MQLs in the period and reached SQL within 30 days.', formula:'sql_within_30d / mqls', status:'draft'},
+  {id:'pipe', name:'Marketing-Sourced Pipeline', def:'Total amount of open and won opportunities whose primary campaign is a marketing campaign, created in the period.', formula:'SUM(opportunities.amount) WHERE primary_campaign_id IS NOT NULL', status:'draft'},
+  {id:'mql2sql', name:'MQL-to-SQL Rate', def:'Share of leads that became MQLs in the period and reached SQL within 30 days.', formula:'sql_within_30d / mqls', status:'draft'},
   {id:'cpmql', name:'Cost per MQL', def:'Ad and program spend in the period divided by new MQLs from those campaigns.', formula:'SUM(ad_spend.spend) / COUNT(mqls)', status:'approved'},
-  {id:'roi', name:'Pipeline ROI', def:'Marketing-sourced pipeline divided by marketing spend for the same campaigns.', formula:'sourced_pipeline / SUM(spend)', status:'draft'}
+  {id:'roi', name:'Pipeline ROI', def:'Marketing-Sourced Pipeline divided by marketing spend for the same campaigns.', formula:'sourced_pipeline / SUM(spend)', status:'draft'}
 ];
 
 const DATASETS = [
@@ -429,7 +429,7 @@ function progress(){
 }
 const STEPS = [
   {id:'sources', label:'Sources', key:'src'},
-  {id:'semantic', label:'Semantic layer', key:'sem'},
+  {id:'semantic', label:'Semantic Layer', key:'sem'},
   {id:'gov', label:'Governance', key:'gov'},
   {id:'access', label:'Roles & access', key:'acc'},
   {id:'preview', label:'Preview', key:null}
@@ -560,7 +560,7 @@ const QUESTIONS = [
   {q:'Which campaigns sourced the most pipeline last quarter?', src:'opps', metric:'pipe', col:'amount',
    ans:'The Q3 Data Week webinar series sourced the most pipeline at $2.4M, followed by LinkedIn ABM at $1.8M and the field dinner series at $1.1M.',
    masked:'The Q3 Data Week webinar series sourced the most pipeline, followed by LinkedIn ABM and the field dinner series. Dollar amounts are masked for your role.'},
-  {q:'What is our MQL-to-SQL rate this month?', src:'mkto_leads', metric:'mql2sql', col:null,
+  {q:'What is our MQL-to-SQL Rate this month?', src:'mkto_leads', metric:'mql2sql', col:null,
    ans:'MQL-to-SQL conversion is 24% this month, up from 21% last month. Webinar leads convert best at 31%.'},
   {q:'What is our cost per MQL on LinkedIn?', src:'ads', metric:'cpmql', col:'spend',
    ans:'Cost per MQL on LinkedIn is $182 this quarter, down 9% from last quarter.',

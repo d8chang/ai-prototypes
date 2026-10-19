@@ -493,8 +493,8 @@ button.src:hover{border-color:var(--green-500);color:var(--green-800)}
   </div>
   <div class="tabs" role="tablist" aria-label="Views">
     <button class="tab" role="tab" id="tab-chat" aria-selected="true" aria-controls="view-chat" type="button">Chat</button>
-    <button class="tab" role="tab" id="tab-requests" aria-selected="false" aria-controls="view-requests" type="button">My requests<span class="tab-count" id="req-count" hidden></span></button>
-    <button class="tab" role="tab" id="tab-guide" aria-selected="false" aria-controls="view-guide" type="button">What Sparky can do</button>
+    <button class="tab" role="tab" id="tab-requests" aria-selected="false" aria-controls="view-requests" type="button">My Requests<span class="tab-count" id="req-count" hidden></span></button>
+    <button class="tab" role="tab" id="tab-guide" aria-selected="false" aria-controls="view-guide" type="button">What Sparky Can Do</button>
     <button class="tab" role="tab" id="tab-admin" aria-selected="false" aria-controls="view-admin" type="button">Observability</button>
   </div>
   <div class="top-right">
@@ -1498,7 +1498,7 @@ async function handle(text, opts = {}) {
       setActiveGenie(null);
       await sleep(300);
       if (gen !== state.gen) return;
-      turn.check = g.rule; finishTurn(turn, { kind: 'decline', outcome: 'Left to a person' });
+      turn.check = g.rule; finishTurn(turn, { kind: 'decline', outcome: 'Left to a Person' });
       const d = declineContent(g, text, turn);
       body(m, { who: SCOPE_BADGE, html: d.html, sources: d.sources, team: d.srcTeam, feedback: d.team, turn });
       if (inReason) remindReason();
@@ -1626,7 +1626,7 @@ function handoff(ctx) {
         : `Done. I've sent your question to a person on the <strong>${esc(G.team)}</strong> team, with this conversation attached so you don't have to repeat yourself.`}</p>
       <div class="ticket g-${ctx.genie}"><span class="ticket-id">${ticket}</span><span class="ticket-title">&ldquo;${esc(ctx.q)}&rdquo;</span>
       <span class="ticket-meta">Sent to ${ctx.hrbp ? 'your HR business partner' : esc(G.team)} · They usually reply in Slack within 1 business day</span></div>
-      <p>You can follow it under <button type="button" class="foot-link strong" data-act="go-requests">My requests</button>.</p>`,
+      <p>You can follow it under <button type="button" class="foot-link strong" data-act="go-requests">My Requests</button>.</p>`,
     feedback: G.team
   });
 }
@@ -1874,7 +1874,7 @@ function onVerify(ok, btn) {
     itSay(`<p>Sorry it isn't working yet. Here's what I've done:</p>
       <ul><li>Reopened <span class="mono">${f.ticket}</span> and raised its priority.</li>
       <li>Escalated it to the IT Support team with the provisioning log attached.</li></ul>
-      <p>Someone from IT will message you in Slack, usually within 4 business hours. You don't need to file anything else. It stays under <button type="button" class="foot-link strong" data-act="go-requests">My requests</button> until it's fixed.</p>`, {
+      <p>Someone from IT will message you in Slack, usually within 4 business hours. You don't need to file anything else. It stays under <button type="button" class="foot-link strong" data-act="go-requests">My Requests</button> until it's fixed.</p>`, {
       sources: [ticketSource(f, 'reopened, assigned to IT Support', `Access request: ${tool.name} for ${USER.name}. Status: Reopened. Requester reports access is still blocked after being added to ${tool.group}. Assigned to IT Support with the provisioning log.`)],
       feedback: 'IT Support'
     });
@@ -1898,7 +1898,7 @@ function onDeny(level, reason, who) {
     { sources: [ticketSource(f, 'closed, not approved', `Access request: ${tool.name} for ${USER.name}. Status: Closed, not approved. Denied by ${who.name} with the reason: ${reason}`)], feedback: 'IT Support' });
 }
 
-/* ----- My requests ----- */
+/* ----- My Requests ----- */
 const reqOpen = r => r.kind === 'tool' ? (!r.flow.ended || r.flow.escalated) : !r.ended;
 const when = r => r.when || `today at ${r.openedAt.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
 function reqCard(r, i) {
@@ -1928,12 +1928,12 @@ function updateReqs() {
   const open = items.filter(x => reqOpen(x.r)), closed = items.filter(x => !reqOpen(x.r));
   const c = $('#req-count'); c.textContent = open.length; c.hidden = open.length === 0;
   $('#reqs-inner').innerHTML = `
-    <div><h1>My requests</h1><p class="reqs-lead">Tool access you've asked for and questions you've sent to a team.</p></div>
+    <div><h1>My Requests</h1><p class="reqs-lead">Tool access you've asked for and questions you've sent to a team.</p></div>
     <section><h2>Open</h2>${open.length ? open.map(x => reqCard(x.r, x.i)).join('') : '<p class="empty">Nothing open right now. When you request a tool or ask a person, it shows up here.</p>'}</section>
     ${closed.length ? `<section><h2>Closed</h2>${closed.map(x => reqCard(x.r, x.i)).join('')}</section>` : ''}`;
 }
 
-/* ----- Observability and evals (admin view) ----- */
+/* ----- Observability and Evals (admin view) ----- */
 /* Mocked 7-day sample: [genie, questions, thumbs up, thumbs down, rerouted away, no sourced answer, asked a person] */
 const WEEK = [['it', 412, 148, 15, 10, 25, 12], ['hr', 268, 104, 8, 5, 13, 5], ['stock', 96, 36, 4, 3, 7, 4], ['costcap', 74, 25, 4, 3, 9, 4], ['comp', 121, 42, 8, 4, 11, 10],
   ['audit', 38, 16, 2, 2, 4, 2], ['collections', 67, 22, 3, 4, 7, 5], ['orders', 109, 30, 8, 13, 15, 10], ['sales', 99, 35, 3, 2, 8, 2]];
@@ -1945,7 +1945,7 @@ const CHECK_LABEL = { ok: 'OK to answer', financial: 'Money decision', salary: '
 function exampleTurns() {
   const mk = (id, q, mins) => makeTurn(q, id, new Date(Date.now() - mins * 60000));
   const a = finishTurn(mk(9001, 'How do I request PTO?', 6), { kind: 'answer', genie: 'hr', sources: KB.find(e => e.id === 'hr-pto').sources, outcome: 'Answered with sources' }); a.vote = 'up';
-  const b = finishTurn(mk(9002, 'Am I paid fairly for my level?', 14), { kind: 'decline', outcome: 'Left to a person' }); b.check = 'salary'; b.handoff = true;
+  const b = finishTurn(mk(9002, 'Am I paid fairly for my level?', 14), { kind: 'decline', outcome: 'Left to a Person' }); b.check = 'salary'; b.handoff = true;
   const c = finishTurn(mk(9003, 'What are our standard payment terms?', 23), { kind: 'answer', genie: 'collections', sources: KB.find(e => e.id === 'col-terms').sources, outcome: 'Answered with sources' }); c.vote = 'down'; c.rerouted = 'orders';
   return [a, b, c].map(t => Object.assign(t, { example: true }));
 }
@@ -1978,7 +1978,7 @@ function suiteCard(o) {
   return `<div class="suite">
     <div class="suite-head"><strong>${o.name}</strong><span class="tag${o.live ? ' live' : ''}">${o.live ? 'Runs live' : 'Mocked'}</span>
       <span class="suite-score"><span><span class="meter"><i style="width:${(100 * o.pass / o.total).toFixed(0)}%"></i></span>${o.pass} of ${o.total} passed</span>${o.status}</span></div>
-    <p>${o.what}</p><p><b>Release gate:</b> ${o.gate}</p>
+    <p>${o.what}</p><p><b>Release Gate:</b> ${o.gate}</p>
     ${o.items && o.items.length ? `<details${o.open ? ' open' : ''}><summary>${o.itemsLabel}</summary><ul class="fails">${o.items.join('')}</ul></details>` : ok ? '' : ''}
   </div>`;
 }
@@ -2017,11 +2017,11 @@ function renderAdmin() {
       gate: 'At least 90% routed as expected.',
       status: rRate >= 0.9 ? stat('ok', 'check', `Passing at ${(100 * rRate).toFixed(0)}%`) : stat('bad', 'x', `Blocked at ${(100 * rRate).toFixed(0)}%`),
       items: rs.filter(c => !c.ok).map(failItem), itemsLabel: `${rs.length - rPass} failing cases` },
-    { name: 'Answer grounding', live: false, pass: 48, total: 50,
+    { name: 'Answer Grounding', live: false, pass: 48, total: 50,
       what: 'Golden questions per genie. A grader model checks that every claim is supported by the cited passage and that the right document was retrieved.',
       gate: 'At least 95% fully supported.', status: stat('ok', 'check', 'Passing at 96%'),
       items: ['<li>&ldquo;How does parental leave work?&rdquo;<small>Answer said 18 weeks. The cited guide says 16.</small></li>', '<li>&ldquo;What are our standard payment terms?&rdquo;<small>Right answer, but it cited the approval matrix for a claim found in the payment terms PDF.</small></li>'], itemsLabel: '2 failing cases' },
-    { name: 'Onboarding workflow', live: false, pass: 6, total: 6,
+    { name: 'Onboarding Workflow', live: false, pass: 6, total: 6,
       what: 'Scripted runs of the access flow against mocked Jira and identity servers, checking the order of tool calls.',
       gate: 'All pass. A seat must never be provisioned before every required approval.', status: stat('ok', 'check', 'Passing'),
       items: ['Claude: no group add before both approvals', 'Tableau: no group add before both approvals', 'Snowflake: one approval is enough', 'Manager denial closes the ticket with the reason', 'License owner denial closes the ticket with the reason', '"Still blocked" reopens the ticket and assigns IT'].map(x => `<li>${x}</li>`), itemsLabel: '6 tests' }
@@ -2029,27 +2029,27 @@ function renderAdmin() {
 
   $('#admin-inner').innerHTML = `
     <div class="approval-band admin-band"><span class="approval-label">${ico('swap')}Admin view (demo)</span><span class="approval-acting">What the Sparky team sees. Employees like ${USER.first} don't have this tab.</span></div>
-    <div><h1>Observability and evals</h1><p class="admin-lead">How Sparky is doing in use, what happened on each message, and whether a change is safe to release.</p></div>
+    <div><h1>Observability and Evals</h1><p class="admin-lead">How Sparky is doing in use, what happened on each message, and whether a change is safe to release.</p></div>
 
     <section>
-      <div class="sec-head"><div class="sec-title"><h2>Last 7 days</h2><span class="tag">Mocked sample</span></div></div>
+      <div class="sec-head"><div class="sec-title"><h2>Last 7 Days</h2><span class="tag">Mocked sample</span></div></div>
       <div class="kpis">
         ${kpi('Messages', fmt(total), 'across all employees')}
-        ${kpi('Routed to a genie', pct(routed, total), `${fmt(routed)} messages`)}
-        ${kpi('Left to a person', pct(WEEK_OTHER.declined, total), `${WEEK_OTHER.declined} declined by the two rules`)}
+        ${kpi('Routed to a Genie', pct(routed, total), `${fmt(routed)} messages`)}
+        ${kpi('Left to a Person', pct(WEEK_OTHER.declined, total), `${WEEK_OTHER.declined} declined by the two rules`)}
         ${kpi('Not sure', pct(WEEK_OTHER.unsure, total), 'no match or "Did you mean"')}
-        ${kpi('Rated helpful', pct(T[2], rated), `of ${fmt(rated)} rated answers`)}
-        ${kpi('Median response', WEEK_OTHER.median.toFixed(1) + ' s', `95th percentile ${WEEK_OTHER.p95.toFixed(1)} s`)}
+        ${kpi('Rated Helpful', pct(T[2], rated), `of ${fmt(rated)} rated answers`)}
+        ${kpi('Median Response', WEEK_OTHER.median.toFixed(1) + ' s', `95th percentile ${WEEK_OTHER.p95.toFixed(1)} s`)}
       </div>
       <div class="tbl-wrap"><table class="data">
-        <thead><tr><th>Genie</th><th>Questions</th><th>Rated helpful</th><th>Rerouted away</th><th>No sourced answer</th><th>Asked a person</th><th class="st-cell">Status</th></tr></thead>
+        <thead><tr><th>Genie</th><th>Questions</th><th>Rated Helpful</th><th>Rerouted away</th><th>No sourced answer</th><th>Asked a person</th><th class="st-cell">Status</th></tr></thead>
         <tbody>${rows}</tbody>
         <tfoot><tr><td>All genies</td><td>${fmt(routed)}</td><td>${pct(T[2], rated)}</td><td>${pct(T[4], routed, 1)}</td><td>${pct(T[5], routed, 1)}</td><td>${pct(T[6], routed, 1)}</td><td></td></tr></tfoot>
       </table></div>
     </section>
 
     <section>
-      <div class="sec-head"><div class="sec-title"><h2>This session, message by message</h2><span class="tag live">Live</span></div></div>
+      <div class="sec-head"><div class="sec-title"><h2>This Session, Message by Message</h2><span class="tag live">Live</span></div></div>
       ${session}
       <div class="traces">${shown.map(traceRow).join('')}</div>
       <p class="sec-note">Select a row to see its steps. Step timings are simulated in this prototype.</p>
@@ -2082,7 +2082,7 @@ function openDemo(opener) {
     <div class="demo-group"><h3>Tool onboarding</h3>
       ${item('I need access to Claude', 'Two approvals. Type a reason in the field, try Send a reminder, then approve as the manager and as the license owner.')}
       ${item('I need access to Datadog', 'One approval. Select Deny on the manager card to show the denial path.')}
-      <p class="demo-tip">At the end, answer <strong>No, still blocked</strong> to show the ticket reopening, then open <strong>My requests</strong>.</p></div>
+      <p class="demo-tip">At the end, answer <strong>No, still blocked</strong> to show the ticket reopening, then open <strong>My Requests</strong>.</p></div>
     <div class="demo-group"><h3>Behind the scenes</h3>
       <p class="demo-tip">Open the <strong>Observability</strong> tab after asking a few things. Each message has a trace, and two eval suites run for real against this prototype.</p></div>`, opener);
 }
@@ -2093,28 +2093,28 @@ function renderGuide() {
   const covers = { it: 'Sign-in, VPN, laptops, and access to tools.', hr: 'Time off, holidays, and leave.', stock: 'How the ESPP and RSUs work, and key dates.', costcap: 'Cost caps, past actuals, and exceptions.', comp: 'Pay bands, the merit cycle, and bonus plans.', audit: 'Raising concerns, SOX evidence, the audit plan.', collections: 'Overdue invoices, disputes, payment terms.', orders: 'Order status, booking, and amendments.', sales: 'Pitch decks, battlecards, and onboarding.' };
   $('#guide-inner').innerHTML = `
     <section>
-      <h1>What Sparky can do</h1>
+      <h1>What Sparky Can Do</h1>
       <p class="lead">Sparky is one place to ask work questions. You ask in plain language. Sparky works out which team the question belongs to and hands it to that team's <strong>genie</strong>, an assistant that answers only from that team's own documents.</p>
       <div class="facts"><span class="fact">9 genies, one per team</span><span class="fact">Every answer names its source</span><span class="fact">Tool access handled in chat</span><span class="fact">Says so when it isn't sure</span></div>
     </section>
     <section>
-      <h2>The genies</h2>
+      <h2>The Genies</h2>
       <p>Each answer shows a badge for the genie that replied. Select an example to try it.</p>
       <div class="genie-grid">${GENIE_ORDER.map(id => `<div class="genie-card g-${id}">
         <div class="genie-card-head"><span class="g-ico">${ico(id)}</span><span class="g-name">${GENIES[id].name}</span></div>
         <span class="g-blurb">${covers[id]}</span>${chip(example[id])}</div>`).join('')}</div>
     </section>
     <section>
-      <h2>Getting more from an answer</h2>
+      <h2>Getting More from an Answer</h2>
       <div class="tips">
         <div class="tip"><strong>Check the source</strong><span>Select a source under any answer to see the exact passage and when it was last updated.</span></div>
         <div class="tip"><strong>Wrong genie? Say so</strong><span>Select "Not the right genie?" to send your question to another genie or to a person on that team.</span></div>
         <div class="tip"><strong>Keep going</strong><span>Related questions under each answer take you to the usual next step.</span></div>
-        <div class="tip"><strong>Track it</strong><span>My requests lists your tool requests and anything you've sent to a team.</span></div>
+        <div class="tip"><strong>Track it</strong><span>My Requests lists your tool requests and anything you've sent to a team.</span></div>
       </div>
     </section>
     <section>
-      <h2>Getting a tool: onboarding to Claude</h2>
+      <h2>Getting a Tool: Onboarding to Claude</h2>
       <p>Sparky can get you access to Tableau, Snowflake, Claude, Datadog, Lucidchart, and 1Password without a form. Here is what happens when you ask for Claude.</p>
       <ol class="walk">
         <li><div><strong>You ask.</strong><span>Type &ldquo;I need access to Claude.&rdquo; The IT Genie confirms the tool and tells you up front that Claude has limited licenses, so it needs two approvals.</span></div></li>
@@ -2133,14 +2133,14 @@ function renderGuide() {
       <div class="chips">${chip('Try it: I need access to Claude', 'I need access to Claude')}</div>
     </section>
     <section>
-      <h2>What Sparky won't do</h2>
+      <h2>What Sparky Won't Do</h2>
       <p>Two kinds of questions need a person, not an assistant. Sparky tells you so plainly, shares the facts it can, and points you to who can help.</p>
       <div class="wont">
-        <div class="wont-card"><h3>Give financial advice</h3>
+        <div class="wont-card"><h3>Give Financial Advice</h3>
           <p>Sparky explains how company programs work. It never tells you what to do with your money.</p>
           <dl class="ex"><dt>Will answer</dt><dd>&ldquo;How does the ESPP work?&rdquo;</dd><dt>Won't answer</dt><dd>&ldquo;Should I invest in the ESPP?&rdquo;</dd><dt>You still get</dt><dd>The plan facts and the next enrollment dates</dd><dt>Go to</dt><dd>A personal financial advisor</dd></dl>
           ${chip('See how Sparky responds', 'Should I invest in the ESPP?', 'quiet')}</div>
-        <div class="wont-card"><h3>Answer questions about anyone's pay</h3>
+        <div class="wont-card"><h3>Answer Questions About Anyone's Pay</h3>
           <p>Sparky explains general pay policy. It can't see or discuss any individual's pay, including yours.</p>
           <dl class="ex"><dt>Will answer</dt><dd>&ldquo;How do pay bands work?&rdquo;</dd><dt>Won't answer</dt><dd>&ldquo;Am I paid fairly for my level?&rdquo;</dd><dt>You still get</dt><dd>How pay is set, and a private follow-up from HR if you want one</dd><dt>Go to</dt><dd>Your manager, your HR business partner, or the HR system</dd></dl>
           ${chip('See how Sparky responds', 'Am I paid fairly for my level?', 'quiet')}</div>
