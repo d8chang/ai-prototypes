@@ -776,8 +776,8 @@ function effTile(R, name, e, word) {
     arrow = e.improved ? ICON_DOWN : e.worse ? ICON_UP : '';
     small = `${fMin(e.start)} → ${fMin(e.end)} min` + (e.improved ? ` · ${word[0]}` : e.worse ? ` · ${word[1]}` : ' · no change');
     calc = `1 − (${fMin(e.end)} / ${fMin(e.start)}) = ${fPct(e.eff)}`;
-    note = `Start period ${a}, end period ${z}. ${name} ${e.improved ? 'improved' : e.worse ? 'got worse' : 'did not change'} by ${fMin(e.diff)} min.` +
-      (same ? ' Start and end period are the same, so there is nothing to compare.' : '') +
+    note = `Start Period ${a}, End Period ${z}. ${name} ${e.improved ? 'improved' : e.worse ? 'got worse' : 'did not change'} by ${fMin(e.diff)} min.` +
+      (same ? ' Start Period and End Period are the same, so there is nothing to compare.' : '') +
       (R.filtered ? ' Urgency / Priority filters are applied.' : '');
   } else {
     small = R.noneSelected ? 'No priorities selected' : 'No incidents in the start or end period';
@@ -785,7 +785,7 @@ function effTile(R, name, e, word) {
   }
   return `<div class="tile" tabindex="0" data-kpi="${name.toLowerCase()}-eff">${ICON_INFO}<div class="v"><span class="num">${value}</span>${arrow}</div>` +
     `<div class="lb"><b>${name}</b> Efficiency</div><div class="sm">${small}</div>` +
-    explainBox(`${name} Efficiency`, `1 − (End period ${name} / Start period ${name})`, calc, note) + '</div>';
+    explainBox(`${name} Efficiency`, `1 − (End Period ${name} / Start Period ${name})`, calc, note) + '</div>';
 }
 
 function renderTiles(R) {
@@ -801,9 +801,9 @@ function renderTiles(R) {
     effTile(R, 'MTTA', R.mtta, ['faster', 'slower']) +
     effTile(R, 'MTTR', R.mttr, ['faster', 'slower']) +
     tile('fte', nf1.format(R.fte) + ' FTE', 're-allocated to<br>high value work', '',
-      explainBox('FTE re-allocated', 'Hours saved / 2,000 working hours', `${fInt(R.hours)} / ${fInt(WORKING_HOURS)} = ${nf1.format(R.fte)}`, '')) +
+      explainBox('FTE Re-Allocated', 'Hours Saved / 2,000 Working Hours', `${fInt(R.hours)} / ${fInt(WORKING_HOURS)} = ${nf1.format(R.fte)}`, '')) +
     tile('hours', fInt(R.hours), 'hours saved', '',
-      explainBox('Hours saved', 'Noise Reduction Hours + MTTA Hours + MTTR Hours', `${fInt(R.noiseHours)} + ${fInt(R.mttaHours)} + ${fInt(R.mttrHours)} = ${fInt(R.hours)}`, 'See the breakdown below the tiles.'));
+      explainBox('Hours Saved', 'Noise Reduction Hours + MTTA Hours + MTTR Hours', `${fInt(R.noiseHours)} + ${fInt(R.mttaHours)} + ${fInt(R.mttrHours)} = ${fInt(R.hours)}`, 'See the breakdown below the tiles.'));
 
   const why = (e, name) => !e.ok ? 'no comparison available' : e.improved ? `${fMin(e.diff)} min faster` : e.worse ? `${name} got worse, counted as 0` : 'no change';
   document.getElementById('breakdown').innerHTML =
