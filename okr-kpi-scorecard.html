@@ -154,10 +154,10 @@ const SCOPES = [
     M({id:'om', name:'Operating Margin', unit:'pct', better:'up', a:8.4, t:10.0, hist:[-2.1,0.4,1.8,3.5,5.2,6.9,7.7],
       ai:'Margin improved for the seventh straight quarter but is 1.6 points under target. Hiring pulled forward in Q3 added about $500K of cost.'}),
     M({id:'rde', name:'R&D Efficiency', unit:'pct', better:'down', a:24.5, t:23.0, hist:[30.2,29.1,28.4,27.6,26.8,25.9,25.2],
-      def:{lhs:'R&D efficiency', num:'R&D spend in quarter', den:'Revenue in quarter', mult:'× 100%', note:'Lower is better: less R&D spend for each dollar of revenue.'},
+      def:{lhs:'R&D Efficiency', num:'R&D Spend in Quarter', den:'Revenue in Quarter', mult:'× 100%', note:'Lower is better: less R&D spend for each dollar of revenue.'},
       ai:'R&D spend is 24.5% of revenue, 1.5 points above the ceiling. It has fallen every quarter for two years; Q3 engineering hires kept it from reaching target.'}),
     M({id:'sme', name:'Sales & Marketing Efficiency', unit:'x', better:'up', a:0.74, t:0.80, hist:[0.62,0.66,0.60,0.70,0.72,0.69,0.71],
-      def:{lhs:'Magic number', num:'Net new ARR in quarter', den:'S&M spend in prior quarter', mult:'', note:'Sales & Marketing efficiency. Above 0.75x is generally considered efficient growth.'},
+      def:{lhs:'Magic Number', num:'Net New ARR in Quarter', den:'S&M Spend in Prior Quarter', mult:'', note:'Sales & Marketing efficiency. Above 0.75x is generally considered efficient growth.'},
       ai:'Each $1 of Sales and Marketing spend last quarter produced $0.74 of net new ARR, close to target. Marketing-sourced deals were the most efficient; paid search was the least.'})
    ],
    okrs:[
@@ -166,7 +166,7 @@ const SCOPES = [
     M({id:'ent', obj:'Win More Enterprise Customers', name:'Customers Over $100K ARR', unit:'num', better:'up', a:312, t:300, hist:[210,224,241,256,270,284,297],
       ai:'Ahead of target with 15 new $100K+ customers. Nine came from expansion of existing Mid-Market accounts.'}),
     M({id:'grr', obj:'Keep Our Customers', name:'Gross Retention Rate', unit:'pct', better:'up', a:91.5, t:93, hist:[89.2,89.8,90.1,90.6,90.9,91.2,91.0],
-      def:{lhs:'GRR', num:'Customers at start of quarter still active at end', den:'Customers at start of quarter', mult:'× 100%', note:'New customers added during the quarter are not counted.'},
+      def:{lhs:'GRR', num:'Customers at Start of Quarter Still Active at End', den:'Customers at Start of Quarter', mult:'× 100%', note:'New customers added during the quarter are not counted.'},
       ai:'Gross retention is 91.5%, 1.5 points under target. Most losses were SMB customers with low product usage in the prior 90 days; Enterprise retention held at 98%.'})
    ]},
   {id:'field', name:'Field / Sales', owner:'CRO',
