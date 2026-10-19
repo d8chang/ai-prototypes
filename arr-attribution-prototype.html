@@ -138,7 +138,7 @@ button.arr-filter::after { content: '\00d7'; color: var(--color-fg-muted); }
 <div class="arr">
   <div class="arr-head">
     <div class="arr-head-text">
-      <h1 class="arr-title">ARR attribution</h1>
+      <h1 class="arr-title">ARR Attribution</h1>
       <p class="arr-takeaway" id="takeaway" data-source="arr_kpis">—</p>
       <p class="arr-proto">Prototype on synthetic data. Figures are illustrative, not real bookings. Click a tile, a point on a chart, a flow band or a table row to filter the detail at the bottom.</p>
     </div>
@@ -148,26 +148,26 @@ button.arr-filter::after { content: '\00d7'; color: var(--color-fg-muted); }
   </div>
 
   <section class="arr-tiles" id="kpis">
-    <div class="arr-tile" role="button" tabindex="0" id="tile-net" data-metric="Net new" data-good="up" data-label="Net new ARR">
-      <div class="arr-tile-label">Net new ARR</div>
+    <div class="arr-tile" role="button" tabindex="0" id="tile-net" data-metric="Net new" data-good="up" data-label="Net New ARR">
+      <div class="arr-tile-label">Net New ARR</div>
       <div class="arr-tile-value dash-skeleton" data-source="arr_kpis" data-field="arr">—</div>
       <div class="arr-tile-delta">—</div>
-      <div class="arr-tile-sub">New + expansion, less churn and downgrade</div>
+      <div class="arr-tile-sub">New + Expansion, less churn and downgrade</div>
     </div>
-    <div class="arr-tile" role="button" tabindex="0" id="tile-gain" data-metric="New + Expansion" data-good="up" data-label="New + expansion ARR">
-      <div class="arr-tile-label">New + expansion ARR</div>
+    <div class="arr-tile" role="button" tabindex="0" id="tile-gain" data-metric="New + Expansion" data-good="up" data-label="New + Expansion ARR">
+      <div class="arr-tile-label">New + Expansion ARR</div>
       <div class="arr-tile-value dash-skeleton" data-source="arr_kpis" data-field="arr">—</div>
       <div class="arr-tile-delta">—</div>
       <div class="arr-tile-sub" id="tile-gain-split">New logos plus growth on existing accounts</div>
     </div>
-    <div class="arr-tile" role="button" tabindex="0" id="tile-churn" data-metric="Churn" data-good="down" data-label="ARR churn">
-      <div class="arr-tile-label">ARR churn</div>
+    <div class="arr-tile" role="button" tabindex="0" id="tile-churn" data-metric="Churn" data-good="down" data-label="ARR Churn">
+      <div class="arr-tile-label">ARR Churn</div>
       <div class="arr-tile-value dash-skeleton" data-source="arr_kpis" data-field="arr">—</div>
       <div class="arr-tile-delta">—</div>
       <div class="arr-tile-sub">ARR lost to full cancellations</div>
     </div>
-    <div class="arr-tile" role="button" tabindex="0" id="tile-downgrade" data-metric="Downgrade" data-good="down" data-label="ARR downgrade">
-      <div class="arr-tile-label">ARR downgrade</div>
+    <div class="arr-tile" role="button" tabindex="0" id="tile-downgrade" data-metric="Downgrade" data-good="down" data-label="ARR Downgrade">
+      <div class="arr-tile-label">ARR Downgrade</div>
       <div class="arr-tile-value dash-skeleton" data-source="arr_kpis" data-field="arr">—</div>
       <div class="arr-tile-delta">—</div>
       <div class="arr-tile-sub">ARR lost to contractions on retained accounts</div>
@@ -199,7 +199,7 @@ button.arr-filter::after { content: '\00d7'; color: var(--color-fg-muted); }
   </section>
 
   <section class="arr-card" id="smoothed">
-    <h2 class="arr-card-title">Smoothed view: gains vs losses</h2>
+    <h2 class="arr-card-title">Smoothed View: Gains vs Losses</h2>
     <p class="arr-card-note">Trailing average of weekly ARR movement across last quarter and this quarter. Smoothed series are reported only as new + expansion and churn + downgrade: inside a smoothing window, a new deal followed by an expansion, or a downgrade followed by a churn, on the same account reads as one movement, so the component split is not shown here.</p>
     <div class="arr-controls">
       <div class="arr-control">Smoothing window
@@ -207,19 +207,19 @@ button.arr-filter::after { content: '\00d7'; color: var(--color-fg-muted); }
           <button type="button" data-value="4">4 weeks</button><button type="button" data-value="8">8 weeks</button><button type="button" data-value="13">13 weeks</button>
         </span>
       </div>
-      <label class="arr-check"><input type="checkbox" id="raw-toggle"> Show unsmoothed weekly</label>
+      <label class="arr-check"><input type="checkbox" id="raw-toggle"> Show Unsmoothed Weekly</label>
     </div>
     <div class="arr-legend" id="smoothed-legend"></div>
     <div class="arr-chart dash-skeleton" id="smoothed-chart" data-source="arr_smoothed"></div>
   </section>
 
   <div class="arr-intro" id="attribution">
-  <h2 class="arr-section-title">Multi-rep ownership and cross-theater credit</h2>
+  <h2 class="arr-section-title">Multi-Rep Ownership and Cross-Theater Credit</h2>
   <p class="arr-section-note" id="attribution-note">—</p>
   <div class="arr-controls">
     <div class="arr-control">Movement
       <span class="arr-seg" id="credit-seg">
-        <button type="button" data-value="New + Expansion">New + expansion</button><button type="button" data-value="Churn + Downgrade">Churn + downgrade</button>
+        <button type="button" data-value="New + Expansion">New + Expansion</button><button type="button" data-value="Churn + Downgrade">Churn + Downgrade</button>
       </span>
     </div>
   </div>
@@ -227,21 +227,21 @@ button.arr-filter::after { content: '\00d7'; color: var(--color-fg-muted); }
 
   <div class="arr-two">
     <section class="arr-card" id="flow">
-      <h3 class="arr-card-title">Where ARR is booked vs who gets credit</h3>
+      <h3 class="arr-card-title">Where ARR Is Booked vs Who Gets Credit</h3>
       <p class="arr-card-note">Left: the account's home theater. Right: the theater of the reps credited, by ownership split. Bands that change theater are drawn stronger.</p>
       <div class="arr-flow dash-skeleton" id="flow-chart" data-source="arr_credit"></div>
     </section>
     <section class="arr-card" id="recon">
-      <h3 class="arr-card-title">Theater totals, three ways</h3>
+      <h3 class="arr-card-title">Theater Totals, Three Ways</h3>
       <p class="arr-card-note" id="recon-note">—</p>
       <div class="arr-table-wrap">
         <table class="arr-table arr-clicky" id="recon-table" data-source="theater_recon" data-row-key="quarter,movement,theater">
           <thead><tr>
             <th data-field="theater">Theater</th>
-            <th data-field="hq_arr" class="arr-num">Booked, by account home</th>
-            <th data-field="credited_arr" class="arr-num">Credited, by rep split</th>
+            <th data-field="hq_arr" class="arr-num">Booked, by Account Home</th>
+            <th data-field="credited_arr" class="arr-num">Credited, by Rep Split</th>
             <th data-field="shift" class="arr-num">Shift</th>
-            <th data-field="full_credit_arr" class="arr-num">Full credit to every owner</th>
+            <th data-field="full_credit_arr" class="arr-num">Full Credit to Every Owner</th>
           </tr></thead>
           <tbody></tbody>
         </table>
@@ -250,17 +250,17 @@ button.arr-filter::after { content: '\00d7'; color: var(--color-fg-muted); }
   </div>
 
   <section class="arr-card" id="accounts">
-    <h3 class="arr-card-title">Largest split-owned accounts</h3>
-    <p class="arr-card-note">Accounts with more than one owner, ranked by ARR moved in the selected quarter. Each bar is the ownership split, colored by the rep's theater. Click an account to open its detail.</p>
+    <h3 class="arr-card-title">Largest Split-Owned Accounts</h3>
+    <p class="arr-card-note">Accounts with more than one owner, ranked by ARR Moved in the selected quarter. Each bar is the ownership split, colored by the rep's theater. Click an account to open its detail.</p>
     <div class="arr-legend" id="theater-legend"></div>
     <div class="arr-table-wrap">
       <table class="arr-table arr-clicky" id="accounts-table" data-source="split_accounts" data-row-key="quarter,movement,account">
         <thead><tr>
           <th data-field="account">Account</th>
-          <th data-field="hq_theater">Home theater</th>
+          <th data-field="hq_theater">Home Theater</th>
           <th data-field="segment">Segment</th>
-          <th data-field="arr" class="arr-num">ARR moved</th>
-          <th data-field="owners">Owners and split</th>
+          <th data-field="arr" class="arr-num">ARR Moved</th>
+          <th data-field="owners">Owners and Split</th>
         </tr></thead>
         <tbody></tbody>
       </table>
@@ -269,7 +269,7 @@ button.arr-filter::after { content: '\00d7'; color: var(--color-fg-muted); }
 
   <section class="arr-card" id="detail">
     <div class="arr-card-head">
-      <h2 class="arr-card-title">Detail: movements and who gets credit</h2>
+      <h2 class="arr-card-title">Detail: Movements and Who Gets Credit</h2>
       <button type="button" class="arr-link" id="detail-clear" hidden>Clear filters</button>
     </div>
     <p class="arr-card-note">One row per ARR movement and owner, so a movement on a split-owned account appears once per owner with that owner's share. Filtered by what you click above. Click a row to open the account.</p>
@@ -279,7 +279,7 @@ button.arr-filter::after { content: '\00d7'; color: var(--color-fg-muted); }
     <div class="arr-controls">
       <div class="arr-control">Ownership
         <span class="arr-seg" id="ownership-seg">
-          <button type="button" data-value="all">All</button><button type="button" data-value="split">Split-owned</button><button type="button" data-value="cross">Credited outside home theater</button>
+          <button type="button" data-value="all">All</button><button type="button" data-value="split">Split-owned</button><button type="button" data-value="cross">Credited Outside Home Theater</button>
         </span>
       </div>
       <input class="arr-search" id="ledger-search" type="search" placeholder="Search account or owner" aria-label="Search account or owner">
@@ -290,11 +290,11 @@ button.arr-filter::after { content: '\00d7'; color: var(--color-fg-muted); }
         <thead><tr>
           <th data-field="date"><button type="button" class="arr-sort">Date</button></th>
           <th data-field="account"><button type="button" class="arr-sort">Account</button></th>
-          <th data-field="hq_theater"><button type="button" class="arr-sort">Home theater</button></th>
+          <th data-field="hq_theater"><button type="button" class="arr-sort">Home Theater</button></th>
           <th data-field="movement_type"><button type="button" class="arr-sort">Movement</button></th>
-          <th data-field="arr" class="arr-num"><button type="button" class="arr-sort">ARR moved</button></th>
+          <th data-field="arr" class="arr-num"><button type="button" class="arr-sort">ARR Moved</button></th>
           <th data-field="rep"><button type="button" class="arr-sort">Owner</button></th>
-          <th data-field="rep_theater"><button type="button" class="arr-sort">Owner theater</button></th>
+          <th data-field="rep_theater"><button type="button" class="arr-sort">Owner Theater</button></th>
           <th data-field="split_pct" class="arr-num"><button type="button" class="arr-sort">Split</button></th>
           <th data-field="credited_arr" class="arr-num"><button type="button" class="arr-sort">Credited ARR</button></th>
         </tr></thead>
@@ -314,10 +314,10 @@ button.arr-filter::after { content: '\00d7'; color: var(--color-fg-muted); }
       <table class="arr-table" id="owner-table" data-source="account_owner_credit" data-row-key="account,rep">
         <thead><tr>
           <th data-field="rep">Owner</th>
-          <th data-field="rep_theater">Owner theater</th>
+          <th data-field="rep_theater">Owner Theater</th>
           <th data-field="split_pct" class="arr-num">Split</th>
-          <th data-field="gains_credited" class="arr-num">New + expansion credited</th>
-          <th data-field="losses_credited" class="arr-num">Churn + downgrade credited</th>
+          <th data-field="gains_credited" class="arr-num">New + Expansion credited</th>
+          <th data-field="losses_credited" class="arr-num">Churn + Downgrade credited</th>
           <th data-field="net_credited" class="arr-num">Net credited</th>
         </tr></thead>
         <tbody></tbody>
@@ -330,9 +330,9 @@ button.arr-filter::after { content: '\00d7'; color: var(--color-fg-muted); }
           <th data-field="date">Date</th>
           <th data-field="quarter">Quarter</th>
           <th data-field="movement_type">Movement</th>
-          <th data-field="arr" class="arr-num">ARR moved</th>
+          <th data-field="arr" class="arr-num">ARR Moved</th>
           <th data-field="rep">Owner</th>
-          <th data-field="rep_theater">Owner theater</th>
+          <th data-field="rep_theater">Owner Theater</th>
           <th data-field="split_pct" class="arr-num">Split</th>
           <th data-field="credited_arr" class="arr-num">Credited ARR</th>
         </tr></thead>
@@ -1402,7 +1402,7 @@ dash.calc('cross_theater_summary', {
 });
 
 dash.calc('theater_recon', {
-  title: 'Theater totals, three ways',
+  title: 'Theater Totals, Three Ways',
   description: 'ARR per theater by account home, by rep split credit, and with every owner given full credit. Shift is split credit less account home; overcount is full credit over account home, less one.',
   inputs: ['arr_movements', 'account_ownership'],
   fn: (arr_movements, account_ownership) => {
@@ -1431,7 +1431,7 @@ dash.calc('theater_recon', {
 
 dash.calc('split_accounts', {
   title: 'Split-owned account movements',
-  description: 'ARR moved per quarter and movement for accounts with more than one owner, with each owner, their theater and split percent.',
+  description: 'ARR Moved per quarter and movement for accounts with more than one owner, with each owner, their theater and split percent.',
   inputs: ['arr_movements', 'account_ownership'],
   fn: (arr_movements, account_ownership) => {
     const owners = new Map();
@@ -1505,10 +1505,10 @@ const root = document.querySelector('.arr');
 const $ = (selector, el = root) => el.querySelector(selector);
 const C = dash.colors;
 const METRICS = ['New', 'Expansion', 'Downgrade', 'Churn'];
-const METRIC_LABEL = {New: 'New ARR', Expansion: 'Expansion ARR', Downgrade: 'ARR downgrade', Churn: 'ARR churn'};
+const METRIC_LABEL = {New: 'New ARR', Expansion: 'Expansion ARR', Downgrade: 'ARR Downgrade', Churn: 'ARR Churn'};
 const METRIC_COLOR = {New: C[0], Expansion: C[1], Downgrade: C[2], Churn: C[3]};
 const GROUPS = ['New + Expansion', 'Churn + Downgrade'];
-const GROUP_LABEL = {'New + Expansion': 'New + expansion', 'Churn + Downgrade': 'Churn + downgrade'};
+const GROUP_LABEL = {'New + Expansion': 'New + Expansion', 'Churn + Downgrade': 'Churn + Downgrade'};
 const GROUP_COLOR = {'New + Expansion': C[0], 'Churn + Downgrade': C[3]};
 const GROUP_TYPES = {'New + Expansion': ['New', 'Expansion'], 'Churn + Downgrade': ['Churn', 'Downgrade']};
 const DETAIL_KEYS = ['detail_types', 'detail_dimension', 'detail_value', 'detail_weeks', 'detail_days', 'detail_span', 'detail_home', 'detail_credit_theater'];
@@ -1677,7 +1677,7 @@ function drawHeader(p, state, kpis, quarter, prior) {
     const partial = net.through_day < net.days_in_quarter;
     take.replaceChildren(
       `${quarter} net new ARR${partial ? ` through day ${net.through_day}` : ''} was `, cited(money(net.arr), 'arr_kpis', 'arr', {quarter, metric: 'Net new'}),
-      ', ', cited(signedPct(net.change), 'arr_kpis', 'change', {quarter, metric: 'Net new'}), ` against ${prior}. New + expansion moved `,
+      ', ', cited(signedPct(net.change), 'arr_kpis', 'change', {quarter, metric: 'Net new'}), ` against ${prior}. New + Expansion moved `,
       cited(signedPct(gain.change), 'arr_kpis', 'change', {quarter, metric: 'New + Expansion'}), ' and churn + downgrade moved ',
       cited(signedPct(loss.change), 'arr_kpis', 'change', {quarter, metric: 'Churn + Downgrade'}), partial ? `, each compared with the same day of ${prior}.` : '.');
   }
@@ -2013,10 +2013,10 @@ function detailFilters(p, quarter, quarters) {
     clear: {detail_days: null}, test: (r) => { const d = dayOfQuarter(r); return d >= p.detail_days[0] && d <= p.detail_days[1]; }});
   if (p.detail_types) out.push({label: p.detail_types.join(' + '), clear: {detail_types: null}, test: (r) => p.detail_types.includes(r.movement_type)});
   const column = {Theater: 'hq_theater', Segment: 'segment', Product: 'product'}[p.detail_dimension];
-  if (column && p.detail_value) out.push({label: `${column === 'hq_theater' ? 'Home theater' : p.detail_dimension}: ${p.detail_value}`,
+  if (column && p.detail_value) out.push({label: `${column === 'hq_theater' ? 'Home Theater' : p.detail_dimension}: ${p.detail_value}`,
     clear: {detail_dimension: null, detail_value: null}, test: (r) => r[column] === p.detail_value});
-  if (p.detail_home) out.push({label: `Home theater: ${p.detail_home}`, clear: {detail_home: null}, test: (r) => r.hq_theater === p.detail_home});
-  if (p.detail_credit_theater) out.push({label: `Owner theater: ${p.detail_credit_theater}`, clear: {detail_credit_theater: null}, test: (r) => r.rep_theater === p.detail_credit_theater});
+  if (p.detail_home) out.push({label: `Home Theater: ${p.detail_home}`, clear: {detail_home: null}, test: (r) => r.hq_theater === p.detail_home});
+  if (p.detail_credit_theater) out.push({label: `Owner Theater: ${p.detail_credit_theater}`, clear: {detail_credit_theater: null}, test: (r) => r.rep_theater === p.detail_credit_theater});
   return out;
 }
 
@@ -2045,7 +2045,7 @@ function drawLedger() {
   const moved = new Map(rows.map((r) => [r.credit_id.split('-')[0], r.arr]));
   summary.textContent = rows.length
     ? `${count(rows.length)} credit lines from ${count(moved.size)} movements on ${count(new Set(rows.map((r) => r.account)).size)} accounts. ` +
-      `${money(d3.sum(moved.values()))} ARR moved, ${money(d3.sum(rows, (r) => r.credited_arr))} of it credited to the owners shown.`
+      `${money(d3.sum(moved.values()))} ARR Moved, ${money(d3.sum(rows, (r) => r.credited_arr))} of it credited to the owners shown.`
     : 'No movements match these filters.';
   for (const r of rows) {
     const tr = el('tr', r.account === p.account ? 'arr-picked' : '');
