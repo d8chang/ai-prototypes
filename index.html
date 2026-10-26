@@ -277,6 +277,18 @@ footer p{color:var(--ink-2);max-width:46ch}
           </div>
         </div>
       </article>
+      <article class="tile">
+        <div class="shot"><img src="img/tabitha.jpg" alt="Tabitha screens: a side panel with a While you were away recap and an Undo button, a quick finder listing matching tabs, and a card saying You already have this open."></div>
+        <div class="body">
+          <span class="eyebrow">Productivity · Work in progress</span>
+          <h3>Tabitha</h3>
+          <p class="what">A Chrome extension for people with too many tabs. It points you to a tab you already have open, finds any tab with ⌘⇧K, quietly puts away tabs you opened once and forgot (one click brings them back), and answers questions about your tabs in a free chat that runs on your own computer.</p>
+          <p class="win">Still a work in progress. So far, designed and built solo: in daily use, with each change tested against a simulated browser, and a friends-and-family beta coming next.</p>
+          <div class="foot">
+            <span class="soon">Work in progress</span>
+          </div>
+        </div>
+      </article>
     </div>
     <p class="fine">All company names, people, and numbers inside the prototypes are sample data.</p>
   </div>
@@ -312,7 +324,8 @@ const VIDEOS = [
   'https://www.loom.com/share/49170f24350e43d095ecf1e546a843de', // Groundwork
   'https://www.loom.com/share/5a1dcb4d3e7d4d28ab93a94a50518d1d', // OKR and KPI Scorecard
   'https://www.loom.com/share/4fd02ca7c4f44cbe9bb5f6127e5f84ab', // GTM Pipeline Targeting
-  ''                                                              // Reset
+  '',                                                             // Reset
+  ''                                                              // Tabitha
 ];
 document.querySelectorAll('.tile').forEach((tile, i) => {
   if (!VIDEOS[i]) return;
