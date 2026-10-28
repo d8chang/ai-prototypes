@@ -289,7 +289,7 @@
       </div>
     </div>
     <div class="fcap">
-      <span>Team applies to the whole view. Urgency and Priority filters don't apply to the funnel</span>
+      <span>Team, Urgency and Priority filter incidents only (MTTA/MTTR graphs and metrics). The funnel, Incidents Avoided and Noise Reduction stay customer-wide, because events and alerts aren't assigned to a team.</span>
       <span class="note" id="range-note" hidden></span>
     </div>
   </div>
@@ -346,7 +346,8 @@
             <li>Select the <b>customer</b>, then optionally a <b>Team</b> (the on-call teams whose responders get paged for incidents), then the <b>Start Month</b> and <b>End Month</b> to set the timeframe.</li>
             <li>On the graphs, use <b>Segment Bars By</b> to split the bars by urgency or priority.</li>
             <li><b>Time Period</b> switches the graphs between monthly and quarterly. For quarterly, pick start and End Months on quarter boundaries, not the middle of a quarter, because the value metrics compare the first and last period.</li>
-            <li>Customer, team, month and time period apply to the whole view. Urgency and priority apply to the graphs and the MTTA/MTTR metrics, not to the funnel.</li>
+            <li>Customer, month and time period apply to the whole view. Team, urgency and priority filter incidents only: the MTTA/MTTR graphs, MTTA/MTTR Efficiency and their hours saved.</li>
+            <li><b>Why Team doesn't filter the funnel:</b> teams are the groups whose users are on call for incidents. Events and alerts arrive before an incident is routed to a team, so the funnel, Incidents Avoided and Noise Reduction always show the whole customer.</li>
             <li>Quarters are regular calendar quarters, not the fiscal calendar.</li>
             <li>Hover or focus any Value Realized tile to see its formula with the current numbers.</li>
           </ul>
@@ -732,11 +733,11 @@ function compute(s) {
     b.ack = b.res = b.tta = b.ttr = 0; b.segAck = {}; b.segRes = {};
     for (const k of segs) { b.segAck[k] = 0; b.segRes[k] = 0; }
     for (const mi of b.months) {
-      const mo = src[mi];
+      const mo = c.months[mi], tm = src[mi];             // funnel = whole customer; incidents = selected team
       F.events += mo.events; F.alerts += mo.alerts; F.supp += mo.supp;
       for (let p = 0; p < 6; p++) for (let u = 0; u < 2; u++) {
-        const cell = mo.cells[p * 2 + u];
-        F.incidents += cell.inc;
+        F.incidents += mo.cells[p * 2 + u].inc;
+        const cell = tm.cells[p * 2 + u];
         if (!pSel[p] || !uSel[u]) continue;
         b.ack += cell.ack; b.res += cell.res; b.tta += cell.tta; b.ttr += cell.ttr;
         const k = s.segment === 'urgency' ? URGENCIES[u] : s.segment === 'priority' ? PRIORITIES[p] : null;
@@ -759,7 +760,7 @@ function compute(s) {
     red: [ratio(F.alerts, F.events), ratio(F.supp, F.alerts), ratio(F.incidents, F.supp)],
     avoided: F.alerts - F.incidents, noise: ratio(F.incidents, F.alerts),
     mtta, mttr, noiseHours, mttaHours, mttrHours, hours, fte: hours / WORKING_HOURS,
-    filtered: s.urgency !== 'all' || s.priorities.size < PRIORITIES.length,
+    filtered: s.team !== 'all' || s.urgency !== 'all' || s.priorities.size < PRIORITIES.length,
     noneSelected: s.priorities.size === 0
   };
 }
@@ -841,7 +842,7 @@ function effTile(R, name, e, word) {
     calc = `1 − (${fMin(e.end)} / ${fMin(e.start)}) = ${fPct(e.eff)}`;
     note = `Start Period ${a}, End Period ${z}. ${name} ${e.improved ? 'improved' : e.worse ? 'got worse' : 'did not change'} by ${fMin(e.diff)} min.` +
       (same ? ' Start Period and End Period are the same, so there is nothing to compare.' : '') +
-      (R.filtered ? ' Urgency / Priority filters are applied.' : '');
+      (R.filtered ? ' Team / Urgency / Priority filters are applied.' : '');
   } else {
     small = R.noneSelected ? 'No priorities selected' : 'No incidents in the start or end period';
     note = `Needs at least one ${name === 'MTTA' ? 'acknowledged' : 'resolved'} incident in both ${a} and ${z} for the current filters.`;
@@ -875,7 +876,7 @@ function renderTiles(R) {
     `<div class="row"><span>MTTA improvement <span class="why">· ${why(R.mtta, 'MTTA')}</span></span><b data-part="mtta">${fInt(R.mttaHours)}</b></div>` +
     `<div class="row"><span>MTTR improvement <span class="why">· ${why(R.mttr, 'MTTR')}</span></span><b data-part="mttr">${fInt(R.mttrHours)}</b></div>` +
     `<div class="row tot"><span>Hours saved</span><b data-part="total">${fInt(R.hours)}</b></div>` +
-    (R.filtered ? '<p class="scope">Urgency / Priority filters change the MTTA and MTTR rows only.</p>' : '');
+    (R.filtered ? '<p class="scope">Team / Urgency / Priority filters change the MTTA and MTTR rows only.</p>' : '');
 
   const c = R.customer, days = Math.round((c.renewal - AS_OF) / 864e5), soon = days <= 90;
   const el = document.getElementById('renewal');
