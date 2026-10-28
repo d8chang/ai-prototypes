@@ -261,6 +261,7 @@
 <section class="view" id="view-dash" role="tabpanel" aria-labelledby="tab-dash">
   <div class="filters" id="filters">
     <label class="f"><span class="lab">Customer (subdomain)</span><select id="f-customer"></select></label>
+    <label class="f"><span class="lab">Team</span><select id="f-team"></select></label>
     <label class="f"><span class="lab">Start month</span><select id="f-start"></select></label>
     <label class="f"><span class="lab">End month</span><select id="f-end"></select></label>
     <div class="f" role="radiogroup" aria-labelledby="lab-period"><span class="lab" id="lab-period">Time Period</span>
@@ -288,7 +289,7 @@
       </div>
     </div>
     <div class="fcap">
-      <span>Urgency and Priority filters don't apply to the funnel</span>
+      <span>Team applies to the whole view. Urgency and Priority filters don't apply to the funnel</span>
       <span class="note" id="range-note" hidden></span>
     </div>
   </div>
@@ -342,10 +343,10 @@
         <div class="panel">
           <h2>How to Use This Dashboard</h2>
           <ul>
-            <li>Select the <b>customer</b>, then the <b>Start Month</b> and <b>End Month</b> to set the timeframe.</li>
+            <li>Select the <b>customer</b>, then optionally a <b>Team</b> (the on-call teams whose responders get paged for incidents), then the <b>Start Month</b> and <b>End Month</b> to set the timeframe.</li>
             <li>On the graphs, use <b>Segment Bars By</b> to split the bars by urgency or priority.</li>
             <li><b>Time Period</b> switches the graphs between monthly and quarterly. For quarterly, pick start and End Months on quarter boundaries, not the middle of a quarter, because the value metrics compare the first and last period.</li>
-            <li>Customer, month and time period apply to the whole view. Urgency and priority apply to the graphs and the MTTA/MTTR metrics, not to the funnel.</li>
+            <li>Customer, team, month and time period apply to the whole view. Urgency and priority apply to the graphs and the MTTA/MTTR metrics, not to the funnel.</li>
             <li>Quarters are regular calendar quarters, not the fiscal calendar.</li>
             <li>Hover or focus any Value Realized tile to see its formula with the current numbers.</li>
           </ul>
@@ -610,6 +611,65 @@ const CUSTOMER_DEFS = [
     })) }
 ];
 
+/* On-call teams per customer: the teams whose users are on call for incidents.
+   share = rough share of volume; ack/res = response-time factor (below 1 = faster);
+   trend = how that factor drifts over the range (negative = improving). */
+const TEAM_DEFS = {
+  meridian: [
+    { name: 'AWS-Team-1',          share: 0.30, ack: 0.85, res: 0.90, trend: -0.20, noise: 1.00 },
+    { name: 'AWS-Team-2',          share: 0.22, ack: 1.05, res: 1.10, trend: 0.10,  noise: 0.97 },
+    { name: 'Payments-OnCall',     share: 0.18, ack: 0.70, res: 0.80, trend: -0.10, noise: 1.01 },
+    { name: 'Data-Pipeline-SRE',   share: 0.17, ack: 1.25, res: 1.20, trend: -0.30, noise: 0.95 },
+    { name: 'Network-Ops',         share: 0.13, ack: 1.10, res: 1.05, trend: 0.15,  noise: 1.02 }
+  ],
+  larkspur: [
+    { name: 'AWS-Team-1',          share: 0.28, ack: 0.90, res: 0.85, trend: -0.15, noise: 1.00 },
+    { name: 'Trading-Platform',    share: 0.24, ack: 0.65, res: 0.75, trend: -0.05, noise: 1.02 },
+    { name: 'Core-Banking-SRE',    share: 0.20, ack: 1.10, res: 1.15, trend: -0.25, noise: 0.98 },
+    { name: 'Identity-Security',   share: 0.15, ack: 1.20, res: 1.10, trend: 0.05,  noise: 0.96 },
+    { name: 'Mobile-App-OnCall',   share: 0.13, ack: 1.15, res: 1.20, trend: 0.10,  noise: 1.01 }
+  ],
+  pinecrest: [
+    { name: 'AWS-Team-1',          share: 0.40, ack: 0.90, res: 0.90, trend: -0.20, noise: 1.00 },
+    { name: 'Lab-Systems',         share: 0.25, ack: 1.15, res: 1.10, trend: -0.10, noise: 0.97 },
+    { name: 'Data-Science-Infra',  share: 0.20, ack: 1.05, res: 1.05, trend: 0.10,  noise: 1.01 },
+    { name: 'IT-Helpdesk',         share: 0.15, ack: 1.00, res: 1.00, trend: 0.00,  noise: 1.02 }
+  ],
+  kestrel: [
+    { name: 'AWS-Team-1',          share: 0.22, ack: 0.90, res: 0.95, trend: -0.10, noise: 1.00 },
+    { name: 'AWS-Team-2',          share: 0.18, ack: 1.00, res: 1.00, trend: 0.05,  noise: 0.99 },
+    { name: 'Network-Core-NOC',    share: 0.26, ack: 0.80, res: 0.90, trend: 0.00,  noise: 1.01 },
+    { name: 'Billing-OnCall',      share: 0.14, ack: 1.20, res: 1.15, trend: 0.15,  noise: 0.97 },
+    { name: 'Customer-Portal-SRE', share: 0.12, ack: 1.10, res: 1.10, trend: -0.15, noise: 1.00 },
+    { name: '5G-Edge-Ops',         share: 0.08, ack: 1.30, res: 1.25, trend: -0.25, noise: 1.03 }
+  ]
+};
+
+/* Splits each customer month across its teams so the teams always add up to the customer total. */
+function splitTeams(months, defs, r) {
+  const n = defs.length, out = defs.map(() => []);
+  months.forEach((mo, i) => {
+    const t = i / (N_MONTHS - 1);
+    const sh = defs.map(d => d.share * jit(r, 0.08));
+    const fA = defs.map(d => d.ack * (1 + d.trend * (t - 0.5)));
+    const fR = defs.map(d => d.res * (1 + d.trend * (t - 0.5)));
+    const ev = allocate(mo.events, sh);
+    const al = allocate(mo.alerts, sh.map((w, k) => w * defs[k].noise), ev);
+    const sp = allocate(mo.supp, al.map(v => v), al);
+    const cells = defs.map(() => []);
+    mo.cells.forEach(cell => {
+      const inc = allocate(cell.inc, sh);
+      const ack = allocate(cell.ack, inc.map(v => v), inc);
+      const res = allocate(cell.res, inc.map(v => v), inc);
+      const tta = allocate(cell.tta, ack.map((v, k) => v * fA[k]));
+      const ttr = allocate(cell.ttr, res.map((v, k) => v * fR[k]));
+      for (let k = 0; k < n; k++) cells[k].push({ inc: inc[k], ack: ack[k], res: res[k], tta: tta[k], ttr: ttr[k] });
+    });
+    for (let k = 0; k < n; k++) out[k].push({ events: ev[k], alerts: al[k], supp: sp[k], cells: cells[k] });
+  });
+  return defs.map((d, k) => ({ id: 't' + k, name: d.name, months: out[k] }));
+}
+
 const DATA = {};
 for (const def of CUSTOMER_DEFS) {
   const r = mulberry32(hashSeed(SEED + ':' + def.id));
@@ -619,13 +679,14 @@ for (const def of CUSTOMER_DEFS) {
     renewal: new Date(def.renewal[0], def.renewal[1] - 1, def.renewal[2]),
     months: top.map(t => splitMonth(t, r))
   };
+  DATA[def.id].teams = splitTeams(DATA[def.id].months, TEAM_DEFS[def.id], mulberry32(hashSeed(SEED + ':teams:' + def.id)));
 }
 
 /* =====================================================================
    3. STATE + CALCULATIONS (every displayed number comes from here)
    ===================================================================== */
 const state = {
-  customer: 'meridian', start: 0, end: 11, period: 'month',
+  customer: 'meridian', team: 'all', start: 0, end: 11, period: 'month',
   urgency: 'all', priorities: new Set(PRIORITIES), segment: 'none'
 };
 
@@ -658,6 +719,8 @@ function compareEnds(startV, endV) {
 
 function compute(s) {
   const c = DATA[s.customer];
+  const team = s.team === 'all' ? null : c.teams.find(t => t.id === s.team);
+  const src = team ? team.months : c.months;
   const buckets = getBuckets(s);
   const uSel = URGENCIES.map(u => s.urgency === 'all' || s.urgency === u.toLowerCase());
   const pSel = PRIORITIES.map(p => s.priorities.has(p));
@@ -669,7 +732,7 @@ function compute(s) {
     b.ack = b.res = b.tta = b.ttr = 0; b.segAck = {}; b.segRes = {};
     for (const k of segs) { b.segAck[k] = 0; b.segRes[k] = 0; }
     for (const mi of b.months) {
-      const mo = c.months[mi];
+      const mo = src[mi];
       F.events += mo.events; F.alerts += mo.alerts; F.supp += mo.supp;
       for (let p = 0; p < 6; p++) for (let u = 0; u < 2; u++) {
         const cell = mo.cells[p * 2 + u];
@@ -692,7 +755,7 @@ function compute(s) {
   const mttrHours = mttr.ok && mttr.improved ? T.res * mttr.diff * 0.1 / 60 : 0;
   const hours = noiseHours + mttaHours + mttrHours;
   return {
-    customer: c, buckets, segs, segment: s.segment, first, last, F, T,
+    customer: c, team, buckets, segs, segment: s.segment, first, last, F, T,
     red: [ratio(F.alerts, F.events), ratio(F.supp, F.alerts), ratio(F.incidents, F.supp)],
     avoided: F.alerts - F.incidents, noise: ratio(F.incidents, F.alerts),
     mtta, mttr, noiseHours, mttaHours, mttrHours, hours, fte: hours / WORKING_HOURS,
@@ -1114,8 +1177,13 @@ const monthOpts = MONTHS.map(M => `<option value="${M.i}">${M.label}</option>`).
 $('f-start').innerHTML = monthOpts; $('f-end').innerHTML = monthOpts;
 $('f-priority').innerHTML = PRIORITIES.map(p => `<label><input type="checkbox" value="${p}" checked><span>${p}</span></label>`).join('');
 
+function fillTeams() {
+  $('f-team').innerHTML = '<option value="all">All Teams</option>' +
+    DATA[state.customer].teams.map(t => `<option value="${t.id}">${esc(t.name)}</option>`).join('');
+}
+fillTeams();
 function syncControls() {
-  $('f-customer').value = state.customer; $('f-start').value = state.start; $('f-end').value = state.end;
+  $('f-customer').value = state.customer; $('f-team').value = state.team; $('f-start').value = state.start; $('f-end').value = state.end;
   for (const name of ['period', 'urgency', 'segment']) {
     document.querySelectorAll(`input[name="${name}"]`).forEach(i => { i.checked = i.value === state[name]; });
   }
@@ -1124,7 +1192,8 @@ function syncControls() {
 }
 function update() { syncControls(); render(); }
 
-$('f-customer').addEventListener('change', e => { state.customer = e.target.value; update(); });
+$('f-customer').addEventListener('change', e => { state.customer = e.target.value; state.team = 'all'; fillTeams(); update(); });
+$('f-team').addEventListener('change', e => { state.team = e.target.value; update(); });
 $('f-start').addEventListener('change', e => { state.start = +e.target.value; if (state.end < state.start) state.end = state.start; update(); });
 $('f-end').addEventListener('change', e => { state.end = +e.target.value; if (state.start > state.end) state.start = state.end; update(); });
 for (const name of ['period', 'urgency', 'segment']) {
