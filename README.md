@@ -12,3 +12,4 @@ Click around these prototypes!
 - [Groundwork: AI Data Readiness](https://d8chang.github.io/ai-prototypes/data-readiness-prototype.html)
 - [OKR and KPI Scorecard](https://d8chang.github.io/ai-prototypes/okr-kpi-scorecard.html)
 - [GTM Pipeline Targeting](https://d8chang.github.io/ai-prototypes/pipeline-targets.html)
+- [Reset: 15-second wellness check-in](https://d8chang.github.io/ai-prototypes/reset/)

@@ -1,0 +1,842 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#3E6B52">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Reset">
+<meta name="description" content="A 15-second check-in that suggests one small thing to help on a draining day.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>Reset Check-in</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF1EC; --card:#FFFFFF; --ink:#16201A; --ink2:#3B463F; --muted:#4F5A53;
+  --line:#DDE3DE; --chip:#E1E7E2; --accent:#3E6B52; --accent-ink:#FFFFFF; --accent-soft:#DCE7DF; --link:#2F5A43;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141A16; --card:#1E2621; --ink:#EEF2EE; --ink2:#CBD5CE; --muted:#A9B4AC;
+    --line:#2E3A33; --chip:#2A352E; --accent:#7FB394; --accent-ink:#0F1612; --accent-soft:#25362C; --link:#9CCBAE;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141A16; --card:#1E2621; --ink:#EEF2EE; --ink2:#CBD5CE; --muted:#A9B4AC;
+  --line:#2E3A33; --chip:#2A352E; --accent:#7FB394; --accent-ink:#0F1612; --accent-soft:#25362C; --link:#9CCBAE;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:'Figtree',system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+body{min-height:100vh;min-height:100dvh}
+.app{max-width:440px;margin:0 auto;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
+header{display:flex;align-items:center;gap:10px;padding:16px 16px 12px;padding-top:max(16px,env(safe-area-inset-top))}
+.logo{width:34px;height:34px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:flex;align-items:center;justify-content:center;font-weight:700}
+.brand{font-weight:600;font-size:17px}
+header .right{margin-left:auto;display:flex;gap:6px}
+main{flex:1;padding:4px 16px 28px;display:flex;flex-direction:column;gap:14px}
+h1{margin:0;font-size:26px;line-height:1.18;font-weight:700}
+h2{margin:0;font-size:20px;line-height:1.25;font-weight:700}
+p{margin:0;line-height:1.45}
+.lead{font-size:16px;color:var(--ink2)}
+.small{font-size:13px;color:var(--muted);line-height:1.4}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.card{background:var(--card);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.bubble{align-self:flex-start;max-width:88%;background:var(--card);border-radius:18px 18px 18px 6px;padding:12px 14px;font-size:16px;line-height:1.4}
+.mine{align-self:flex-end;background:var(--accent);color:var(--accent-ink);border-radius:18px 18px 6px 18px;padding:10px 14px;font-size:16px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+h1:focus,h2:focus{outline:none}
+.chip{display:inline-flex;align-items:center;justify-content:center;font:inherit;font-size:15px;min-height:44px;padding:0 16px;border-radius:999px;border:1.5px solid var(--accent);background:var(--card);color:var(--link);cursor:pointer}
+.chip:hover{background:var(--accent-soft)}
+.chip.sel{background:var(--accent);color:var(--accent-ink)}
+.btn{font:inherit;font-size:16px;font-weight:600;min-height:50px;border-radius:999px;border:0;background:var(--accent);color:var(--accent-ink);cursor:pointer;width:100%}
+.btn2{font:inherit;font-size:15px;min-height:46px;border-radius:999px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;width:100%}
+.link{font:inherit;font-size:15px;background:none;border:0;color:var(--link);text-decoration:underline;cursor:pointer;padding:10px 4px;min-height:44px}
+.iconbtn{font:inherit;font-size:14px;font-weight:600;min-height:40px;padding:0 12px;border-radius:999px;border:1.5px solid var(--accent);background:var(--card);color:var(--link);cursor:pointer}
+label.f{font-size:14px;font-weight:600}
+input[type=text],select{font:inherit;font-size:16px;min-height:46px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);width:100%}
+.field{display:flex;flex-direction:column;gap:6px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.timer{align-self:center;width:150px;height:150px;border-radius:50%;background:var(--accent-soft);display:flex;align-items:center;justify-content:center}
+.timer div{width:110px;height:110px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;font-variant-numeric:tabular-nums}
+ol.steps{margin:0;padding-left:20px;line-height:1.5;color:var(--ink2)}
+textarea{font:inherit;font-size:16px;width:100%;min-height:150px;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);resize:vertical}
+textarea.line{min-height:56px}
+.breath{align-self:center;width:150px;height:150px;border-radius:50%;background:var(--accent-soft);animation:breath 10s ease-in-out infinite}
+@keyframes breath{0%{transform:scale(.6)}40%{transform:scale(1)}100%{transform:scale(.6)}}
+@media (prefers-reduced-motion: reduce){.breath{animation:none}}
+.draw{position:relative;align-self:center;width:260px;height:260px;background:var(--card);border-radius:18px}
+.draw svg,.draw canvas{position:absolute;inset:0;width:100%;height:100%}
+.draw svg{fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.draw svg g{opacity:.3}
+.draw svg g.now{stroke:var(--accent);opacity:1}
+.draw svg .dot{fill:var(--muted)}
+.draw canvas{touch-action:none}
+.strip{font:inherit;font-size:15px;text-align:left;min-height:48px;padding:10px 14px;border-radius:14px;border:1px dashed var(--accent);background:var(--card);color:var(--link);cursor:pointer;width:100%}
+.entry{font:inherit;text-align:left;border:0;width:100%;cursor:pointer;color:var(--ink);height:120px;overflow:hidden;position:relative}
+.entry .body{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;line-height:1.4}
+.entry .body p{margin:0}
+.entry.open{height:auto}
+.entry.open .body{display:block}
+.entry .more{font-size:13px;color:var(--link)}
+.bar{height:8px;border-radius:4px;background:var(--chip);overflow:hidden}
+.bar>i{display:block;height:8px;background:var(--accent);border-radius:4px}
+.stat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.stat div{background:var(--card);border-radius:16px;padding:12px}
+.stat b{display:block;font-size:24px;color:var(--link)}
+.facts>div{padding:12px 0;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:3px}
+.facts>div:last-child{border-bottom:0}
+.facts b{font-size:15px}
+.facts span{font-size:14px;color:var(--ink2);line-height:1.4}
+.note{font-size:13px;color:var(--muted)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+a{color:var(--link)}
+:focus-visible{outline:3px solid var(--link);outline-offset:2px}
+.foot{margin-top:auto;padding-top:8px}
+.progress{display:flex;gap:6px;justify-content:center}
+.progress span{width:24px;height:6px;border-radius:3px;background:var(--line)}
+.progress span.on{background:var(--accent)}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo" aria-hidden="true">R</div>
+    <div class="brand">Reset</div>
+    <div class="right" id="hdr"></div>
+  </header>
+  <main id="view" aria-live="polite"></main>
+</div>
+
+<script>
+/* ======================= Reset v2 (smallest version) =======================
+   Everything is stored on this device only (localStorage). Nothing is sent
+   anywhere unless CONFIG.syncUrl is set later for a pilot.
+   Changes from v1, each tied to tester feedback (timeline item numbers):
+   - Sign-up says what you get, with a sample (3, 11, 13)
+   - Reminder at a moment you pick, added to your phone calendar, not email (1, 5, 8)
+   - "Where are you?" filters ideas (16); no social ideas unless you say so (2)
+   - No budget question: all ideas are free (15); "Not this one" and Back (14)
+   - "Did it help?" with a one-line reason why it asks (6)
+   - Weekly recap in plain counts with a clear title (9, 17)
+   - Kind silence: no streaks, "welcome back" after a gap (10)
+   - Short privacy summary + details + delete my data (6, 13)
+============================================================================ */
+var CONFIG = { syncUrl: null, version: '2.1' };
+var KEY = 'reset_v2';
+
+/* ---------- storage (safe) ---------- */
+var mem = null;
+function load(){
+  if (mem) return mem;
+  try { var raw = localStorage.getItem(KEY); mem = raw ? JSON.parse(raw) : null; } catch(e){ mem = null; }
+  if (!mem) mem = { profile:null, checkins:[], pulses:[] };
+  if (!mem.journal) mem.journal = [];
+  return mem;
+}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(mem)); } catch(e){} }
+function wipe(){ mem = { profile:null, checkins:[], pulses:[] }; try { localStorage.removeItem(KEY); } catch(e){} }
+
+/* ---------- activities (all free) ----------
+   where: desk | home | out (any = all three). energy: low | med. social: true = involves another person. */
+var ACTS = [
+ {id:'stretch', name:'Stand and stretch', cat:'Movement', min:5, where:['desk','home','out'], energy:'low', line:'Shoulders, neck, wrists. Right where you are.', steps:['Roll your shoulders back 5 times.','Tilt your head side to side, slowly.','Reach up, then fold forward gently.']},
+ {id:'shoulders', name:'Shoulder and neck release', cat:'Movement', min:5, where:['desk','home'], energy:'low', line:'Undo the desk hunch.', steps:['Drop your shoulders away from your ears.','Hold each side stretch for 20 seconds.','Finish with 3 slow breaths.']},
+ {id:'walk5', name:'Quick walk', cat:'Movement', min:5, where:['desk','home','out'], energy:'low', line:'Down the hall, around the block, anywhere.', steps:['Leave your phone in your pocket.','Walk at an easy pace.','Notice one thing you have not seen before.']},
+ {id:'walk15', name:'Walk outside', cat:'Movement', min:15, where:['home','out'], energy:'med', line:'Fresh air resets more than you think.', steps:['Pick a direction and go.','Turn back halfway.']},
+ {id:'stairs', name:'Take the stairs once', cat:'Movement', min:5, where:['desk','out'], energy:'med', line:'Short burst, quick lift.', steps:['Up one or two floors at an easy pace.','Pause at the top for 3 breaths.']},
+ {id:'yoga', name:'Gentle floor stretch', cat:'Movement', min:15, where:['home'], energy:'low', line:'Lie down and let your back unwind.', steps:['Knees to chest for 1 minute.','Gentle twist each side.','Rest flat for 2 minutes.']},
+ {id:'breath', name:'Slow breathing', cat:'Mind', min:5, where:['desk','home','out'], energy:'low', line:'In for 4, out for 6. Follow the circle.', steps:['Breathe in as the circle grows.','Breathe out as it shrinks.'], kind:'breathe'},
+ {id:'window', name:'Look out a window', cat:'Mind', min:5, where:['desk','home'], energy:'low', line:'Let your eyes rest on something far away.', steps:['Find the farthest thing you can see.','Watch it for a full minute.']},
+ {id:'see5', name:'Five things you can see', cat:'Senses', min:5, where:['desk','home','out'], energy:'low', line:'A quick way back into the room.', steps:['Name 5 things you see.','Then 4 you can hear.','Then 3 you can touch.']},
+ {id:'water', name:'Drink a glass of water', cat:'Nourishment', min:1, where:['desk','home','out'], energy:'low', line:'Simple, and it often helps.', steps:['Fill a glass.','Drink it slowly, away from the screen.']},
+ {id:'tea', name:'Make a warm drink', cat:'Nourishment', min:5, where:['desk','home'], energy:'low', line:'Tea, coffee or hot water. The ritual is the point.', steps:['Make it without your phone.','Hold the cup and take the first sip slowly.']},
+ {id:'snack', name:'Have a real snack', cat:'Nourishment', min:5, where:['desk','home'], energy:'low', line:'Low energy is sometimes just hunger.', steps:['Pick something with protein if you can.','Eat it away from your screen.']},
+ {id:'desk', name:'Clear one corner of your desk', cat:'Environment', min:5, where:['desk','home'], energy:'low', line:'A small win you can see.', steps:['Pick one corner.','Put away or toss 5 things.']},
+ {id:'air', name:'Open a window or step outside', cat:'Environment', min:1, where:['desk','home'], energy:'low', line:'A change of air changes the moment.', steps:['Open it wide for a few minutes.','Take 3 deep breaths of fresh air.']},
+ {id:'music', name:'One song, eyes closed', cat:'Senses', min:5, where:['desk','home','out'], energy:'low', line:'Headphones on, everything else off.', steps:['Pick a song you love.','Close your eyes for the whole thing.']},
+ {id:'doodle', name:'Doodle for five minutes', cat:'Play', min:5, where:['desk','home'], energy:'low', line:'No skill needed. Just shapes.', steps:['Grab any paper.','Draw circles, lines, anything.']},
+ {id:'hobby', name:'Time on your hobby', cat:'Play', min:15, where:['home'], energy:'med', line:'Something you do just because you like it.', steps:['Get it out.','Start anywhere, even badly.']},
+ {id:'cards', name:'Quick card or puzzle game', cat:'Play', min:5, where:['home'], energy:'low', line:'A small, finishable thing.', steps:['One round only.']},
+ {id:'boundary', name:'Close one tab or task for today', cat:'Boundaries', min:2, where:['desk'], energy:'low', line:'Give yourself permission to stop one thing.', steps:['Pick one thing that can wait until tomorrow.','Write it down, then close it.']},
+ {id:'endday', name:'Write tomorrow’s top three', cat:'Boundaries', min:5, where:['desk','home'], energy:'low', line:'Get them out of your head so you can stop for today.', steps:[], kind:'journal', prompts:['Most important tomorrow','Second','Third'], note:''},
+ {id:'journal1', name:'One-line journal', cat:'Journaling', min:5, where:['desk','home','out'], energy:'low', line:'One easy prompt. One line is enough.', steps:[], kind:'journal', n:1},
+ {id:'journal3', name:'Three-line journal', cat:'Journaling', min:15, where:['desk','home'], energy:'low', line:'Three easy prompts. A line each.', steps:[], kind:'journal', n:3},
+ {id:'bear', name:'Draw a simple bear', cat:'Senses', min:5, where:['desk','home'], energy:'low', line:'Six easy steps. No skill needed.', steps:[], kind:'draw'},
+ {id:'cat', name:'Draw a sleepy cat', cat:'Senses', min:5, where:['desk','home'], energy:'low', line:'Six easy steps. No skill needed.', steps:[], kind:'draw'},
+ {id:'bunny', name:'Draw a bunny with a floppy ear', cat:'Senses', min:5, where:['desk','home'], energy:'low', line:'Five easy steps. No skill needed.', steps:[], kind:'draw'},
+ {id:'shower', name:'Warm shower', cat:'Body care', min:15, where:['home'], energy:'low', line:'Let the water do the work.', steps:['Take your time.','Finish with 10 seconds of cooler water if you like.']},
+ {id:'lie', name:'Lie down with eyes closed', cat:'Rest', min:15, where:['home'], energy:'low', line:'Rest without needing to sleep.', steps:['Set the timer.','Let your body feel heavy.']},
+ {id:'bench', name:'Sit somewhere and people-watch', cat:'Mind', min:15, where:['out'], energy:'low', line:'No goal. Just watch the world.', steps:['Find a seat.','Leave your phone away.']},
+ {id:'spa', name:'Book a massage or spa visit', cat:'Body care', min:30, where:['home','out'], energy:'low', paid:true, line:'A real break you can look forward to. This one costs money.', steps:['Find a place near you.','Pick a time today or this week.'], map:'massage spa', book:true},
+ {id:'mute', name:'Mute notifications for an hour', cat:'Boundaries', min:2, where:['desk','home'], energy:'low', line:'Give yourself one quiet hour.', steps:['Phone: Do Not Disturb for 1 hour.','Slack or chat: pause notifications for 1 hour.']},
+ {id:'endtime', name:'Set an end time for today', cat:'Boundaries', min:2, where:['desk','home'], energy:'low', line:'Pick the time you will close the laptop.', steps:['Pick your stop time.','Put it on your calendar.']},
+ {id:'dayoff', name:'Book a day off', cat:'Boundaries', min:5, where:['desk','home'], energy:'low', line:'Pick a date and put it in your calendar.', steps:['Pick a date. You can change it later.','Put it on your calendar.']},
+ {id:'focus', name:'Block focus time tomorrow', cat:'Boundaries', min:2, where:['desk','home'], energy:'low', line:'Thirty minutes with nothing booked.', steps:['Find a free 30 minutes tomorrow.','Put “Focus time” on your calendar.']},
+ {id:'benefit', name:'Look up your therapy benefit', cat:'Support', min:5, where:['desk','home'], energy:'low', line:'See what your employer covers. Just look, nothing to book.', steps:['Open your benefits site.','Search for “EAP” or “mental health.”','Note how many free sessions you get.']},
+ {id:'closeeyes', name:'Close your eyes for five minutes', cat:'Rest', min:5, where:['desk','home'], energy:'low', line:'Set the timer and do nothing.', steps:['Phone face down.','Eyes closed.']},
+ {id:'walkcall', name:'Take a call while walking', cat:'Movement', min:15, where:['desk','home','out'], energy:'med', line:'Your next one-on-one, on foot.', steps:['Pick a call that needs no screen.','Earbuds in, out the door.']},
+ {id:'lunch', name:'Lunch away from your desk', cat:'Nourishment', min:15, where:['desk','home'], energy:'low', line:'No screen while you eat.', steps:['Close the laptop.','Eat somewhere else.']},
+ {id:'hobby5', name:'Five minutes on your hobby', cat:'Play', min:5, where:['home'], energy:'low', line:'Pick it up with no goal. Five minutes counts.', steps:['Get it out and start anywhere.']},
+ {id:'hobby30', name:'Ten minutes on a hobby, then more', cat:'Play', min:30, where:['home'], energy:'med', line:'Start small and see where it goes.', steps:['Get your hobby out.','Keep going if you like it.']},
+ {id:'read', name:'Read a few pages for fun', cat:'Play', min:15, where:['desk','home','out'], energy:'low', line:'Nothing for work. Something you enjoy.', steps:['Open to where you left off.']},
+ {id:'butterfly', name:'Butterfly hug', cat:'Senses', min:2, where:['desk','home','out'], energy:'low', line:'A slow, steady tap that settles you.', steps:['Cross your arms over your chest.','Tap one shoulder, then the other, slowly.']},
+ {id:'hands', name:'Slow hand massage', cat:'Senses', min:2, where:['desk','home','out'], energy:'low', line:'Lotion if you have it. Thumbs into palms.', steps:['Press your thumb into the other palm.','Move slowly, one finger at a time.']},
+ {id:'boat', name:'Fold a paper boat', cat:'Senses', min:15, where:['desk','home'], energy:'low', line:'Any rectangle of paper works.', steps:['Fold in half, top to bottom.','Fold the top corners to the middle.','Fold the bottom strips up, one each side.','Open the bottom and flatten into a diamond.','Fold the bottom points up to the top.','Open into a diamond again, then pull the top points apart.']},
+ {id:'prayer', name:'A quiet moment of prayer or reflection', cat:'Faith and meaning', min:5, where:['desk','home','out'], energy:'low', line:'However you practice, or just a still minute.', steps:['Sit somewhere quiet.','Pray, reflect, or simply be still.']},
+ {id:'sitout', name:'Sit outside', cat:'Environment', min:15, where:['home','out'], energy:'low', line:'No phone. Just sit.', steps:['Step outside and find a seat.']},
+ {id:'phonefree', name:'Phone-free hour', cat:'Rest', min:30, where:['home'], energy:'low', line:'Put it in another room.', steps:['Set a 1-hour alarm.','Put your phone in another room.','Walk, cook or read.']},
+ {id:'winddown', name:'Wind down for bed', cat:'Rest', min:30, where:['home'], energy:'low', line:'Thirty calm minutes before lights-out.', steps:['Dim the lights. Phone across the room.','Wash up.','Write tomorrow’s first task.','Read or breathe slowly.']},
+ {id:'bath', name:'Bath', cat:'Body care', min:30, where:['home'], energy:'low', line:'Light a candle if you have one.', steps:['Run warm water.','Dim the lights. No phone.']},
+ {id:'longwalk', name:'Long walk outside', cat:'Movement', min:30, where:['home','out'], energy:'med', line:'No destination needed.', steps:['Shoes on. No destination needed.']},
+ {id:'facemask', name:'Face mask', cat:'Body care', min:15, where:['home'], energy:'low', paid:true, line:'Ten minutes of doing nothing else.', steps:['Put it on, then sit back.']},
+ {id:'cook', name:'Cook one simple meal', cat:'Nourishment', min:30, where:['home'], energy:'med', paid:true, line:'Something you have made before.', steps:['One pan.','Eat sitting down.']},
+ {id:'coffee', name:'Coffee with someone', cat:'Connection', min:30, where:['desk','home','out'], energy:'med', social:true, paid:true, book:true, line:'Ask one person you like.', steps:['Ask one person.','Suggest a day.']},
+ {id:'dinner', name:'Dinner out with a friend', cat:'Connection', min:30, where:['home','out'], energy:'med', social:true, paid:true, book:true, line:'Somewhere easy and close.', steps:['Pick somewhere close.','Suggest two days.']},
+ {id:'therapy', name:'Book a therapy session', cat:'Support', min:15, where:['desk','home'], energy:'low', paid:true, line:'Talking to someone can help. Your work benefits may cover a few sessions.', steps:['Check what your benefits or insurance cover.','Reach out to book one session.'], book:true},
+ {id:'decline', name:'Decline one meeting', cat:'Boundaries', min:2, where:['desk','home'], energy:'low', line:'One less thing today.', steps:['Open your calendar.','Find one meeting you don’t need to attend.','Decline it, or ask for notes instead.']},
+ {id:'thanks', name:'Send a thank-you message', cat:'Connection', min:2, where:['desk','home','out'], energy:'low', social:true, line:'One line to someone who helped you.', steps:['Think of one person.','Send one sentence. No need to wait for a reply.']},
+ {id:'friend', name:'Text a friend', cat:'Connection', min:2, where:['desk','home','out'], energy:'low', social:true, line:'Say a quick hi, or reply to a message you’ve been meaning to answer.', steps:['Pick someone easy, or a message waiting for a reply.','Send it before you overthink it.']},
+ {id:'call', name:'Call someone you like', cat:'Connection', min:15, where:['home','out'], energy:'med', social:true, line:'A short call can lift a whole evening.', steps:['Pick someone easy to talk to.','Five minutes is enough.']}
+];
+/* Only activities where pacing helps get a countdown timer. */
+var TIMED = ['stretch','shoulders','yoga','breath','walk5','walk15','lie','closeeyes','longwalk'];
+function act(id){ for (var i=0;i<ACTS.length;i++) if (ACTS[i].id===id) return ACTS[i]; return null; }
+
+var PROMPTS = ['One thing that went okay today','What is taking up the most space in my head','One thing I can leave until tomorrow','Something small I am looking forward to','Today in three words','Someone who made today a bit easier','One thing I handled well today','One thing that would make tomorrow easier','The best five minutes of today','Something I want to stop carrying','What I need more of this week','What I need less of this week','Something that made me smile today','What I would tell a friend in my shoes','A small win nobody else noticed','What my body is asking for right now','One thing I can say no to','One kind thing I can do for myself tonight','A worry I can set down for now','Where I can be gentler with myself','What enough looks like today'];
+var DRAWINGS = {
+  bear: [['Draw a big circle for the head.','<circle cx="100" cy="112" r="56"/>'],['Add two small circles on top for ears.','<circle cx="56" cy="64" r="20"/><circle cx="144" cy="64" r="20"/>'],['Draw an oval near the bottom for the snout.','<ellipse cx="100" cy="132" rx="26" ry="19"/>'],['Fill in a little nose at the top of the oval.','<ellipse class="dot" cx="100" cy="124" rx="8" ry="6"/>'],['Two dots for eyes.','<circle class="dot" cx="78" cy="100" r="4.5"/><circle class="dot" cx="122" cy="100" r="4.5"/>'],['Finish with a small smile.','<path d="M90 138 Q100 147 110 138"/>']],
+  cat: [['Draw a wide circle for the head.','<ellipse cx="100" cy="116" rx="60" ry="52"/>'],['Add two triangles on top for ears.','<path d="M54 84 L62 38 L92 68"/><path d="M146 84 L138 38 L108 68"/>'],['Two curved lines for sleepy eyes.','<path d="M68 108 Q78 116 88 108"/><path d="M112 108 Q122 116 132 108"/>'],['A small triangle nose in the middle.','<path class="dot" d="M94 124 L106 124 L100 131 Z"/>'],['A tiny mouth under the nose.','<path d="M100 131 Q94 140 88 136"/><path d="M100 131 Q106 140 112 136"/>'],['Three whiskers on each side.','<path d="M40 122 L80 128"/><path d="M38 134 L80 134"/><path d="M40 146 L80 140"/><path d="M160 122 L120 128"/><path d="M162 134 L120 134"/><path d="M160 146 L120 140"/>']],
+  bunny: [['Draw a round, chubby head.','<ellipse cx="100" cy="128" rx="54" ry="44"/>'],['One tall ear standing up.','<path d="M80 90 C66 54 68 22 81 22 C95 22 98 56 94 87"/>'],['One ear that flops over at the tip.','<path d="M108 87 C106 58 110 40 122 34 C138 28 154 42 146 56 C140 64 128 60 122 66 C118 72 118 80 120 88"/>'],['Two happy curves for eyes.','<path d="M72 124 Q80 115 88 124"/><path d="M112 124 Q120 115 128 124"/>'],['A tiny nose and a simple smile.','<ellipse class="dot" cx="100" cy="136" rx="5.5" ry="4"/><path d="M88 144 Q100 155 112 144"/>']]
+};
+var WHYS = ['No time','No energy','Didn’t feel like it','Skip'];
+var GRACE = ['You don’t have to carry all of it.','Rest isn’t something you have to earn.','You did enough today.','The rest can wait until tomorrow.','Not everything is yours to fix.','Small counts.','Be as kind to yourself as you would to a friend.'];
+var MOODS = ['Rough','Low','Okay','Good','Great'];
+var WHERE = [['home','At home'],['office','At the office'],['out','Outside']];
+/* Ideas are tagged by what they need: desk = doable sitting at a desk, home = needs home, out = outside. At home you can do desk ideas too. */
+var FITS = { home:['home','desk'], office:['desk'], out:['out'] };
+var TIMES = [[5,'5 min'],[15,'15 min'],[30,'30 min']];
+var MOMENTS = ['My last meeting','Lunch','Morning coffee','My commute home','Before bed'];
+
+/* ---------- helpers ---------- */
+var $v = function(){ return document.getElementById('view'); };
+function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function now(){ return Date.now(); }
+function dayKey(t){ var d=new Date(t); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
+function daysSince(t){ return Math.floor((now()-t)/864e5); }
+var S = {}; // current flow state
+
+function render(html){ $v().innerHTML = html; window.scrollTo(0,0); var h = $v().querySelector('h1,h2'); if (h){ h.setAttribute('tabindex','-1'); try{ h.focus({preventScroll:true}); }catch(e){} } }
+function header(){
+  var d = load(); var h = document.getElementById('hdr');
+  h.innerHTML = d.profile ? '<button class="iconbtn" data-go="fried">I’m fried</button>' : '';
+}
+
+/* ---------- personal stats: honest counts ---------- */
+function statsByActivity(){
+  var d = load(), m = {};
+  d.checkins.forEach(function(c){
+    if (!c.helped) return;
+    var k = c.act; m[k] = m[k] || {n:0, yes:0};
+    m[k].n++; if (c.helped !== 'no') m[k].yes++;
+  });
+  return m;
+}
+
+/* ---------- picking an idea ---------- */
+function candidates(){
+  var d = load(), recent = d.checkins.slice(-3).map(function(c){ return c.act; });
+  var st = statsByActivity();
+  var list = ACTS.filter(function(a){
+    if (a.min > S.time) return false;
+    if (!a.where.some(function(w){ return FITS[S.where].indexOf(w) >= 0; })) return false;
+    if (a.social && S.people !== 'yes') return false;
+    if (a.paid && !(d.profile && d.profile.paid)) return false;  // paid ideas only if opted in
+    if (S.mood <= 2 && a.energy !== 'low') return false;
+    if (S.skipped.indexOf(a.id) >= 0) return false;
+    return true;
+  });
+  list.forEach(function(a){
+    var s = 1 + Math.random();                       // variety
+    if (recent.indexOf(a.id) >= 0) s -= 3;           // not the same thing again
+    var p = st[a.id];
+    if (p && p.n >= 2) s += 2 * (p.yes / p.n) - 1;   // only after 2 tries of your own
+    if (S.mood <= 2 && a.cat === 'Movement') s += 0.5; // pilot: movement lifted mood most often
+    a._s = s;
+  });
+  list.sort(function(x,y){ return y._s - x._s; });
+  return list;
+}
+function whyLine(a){
+  var p = statsByActivity()[a.id];
+  if (p && p.n >= 2) return 'It has helped you ' + p.yes + ' of ' + p.n + ' times.';
+  var place = S.where==='office' ? 'at the office' : S.where==='home' ? 'at home' : 'outside';
+  return (a.min <= 1 ? 'Takes about a minute' : 'Takes about ' + a.min + ' minutes') + '. Works ' + place + (a.paid ? '.' : ', and it’s free.');
+}
+
+/* =============================== SCREENS =============================== */
+var Screens = {};
+
+/* 1. Welcome: say what you get (feedback 3, 11, 13) */
+Screens.welcome = function(){
+  header();
+  render(
+  '<div style="display:flex;flex-direction:column;gap:8px"><h1>Feeling drained? Get one small thing to do right now.</h1>'+
+  '<p class="lead">Tap how you feel and how much time you have. Reset suggests one thing, like a 5-minute walk. Over time it shows what actually helps you.</p></div>'+
+  '<div class="card"><div class="eyebrow">What a check-in looks like</div>'+
+  '<div class="chips" aria-hidden="true"><span class="chip sel" style="cursor:default">Low</span><span class="chip sel" style="cursor:default">5 min</span><span class="chip sel" style="cursor:default">At the office</span></div>'+
+  '<p><strong>Stand and stretch</strong><br><span class="small">Shoulders, neck, wrists. Right where you are. With a 5-minute timer.</span></p></div>'+
+  '<div class="card"><div class="eyebrow">How it works</div><ol class="steps"><li>A reminder at a moment you pick.</li><li>Three taps, one small free idea.</li><li>Tell it if it helped. Each week, see what works for you.</li></ol></div>'+
+  '<button class="btn" data-go="setup">Get started</button>'+
+  '<p class="small">Reset is always free. No streaks. Private: your answers stay on this phone. <button class="link" data-go="privacy" style="padding:0;min-height:0">More details</button></p>'+
+  '<p class="small foot">A wellness experiment, not medical advice.</p>');
+};
+
+/* 2. Setup: name, moment + usual time, how often */
+Screens.setup = function(){
+  header();
+  var p = load().profile || {};
+  render(
+  '<h1>Two quick things</h1>'+
+  '<div class="field"><label class="f" for="nm">First name</label><input id="nm" type="text" autocomplete="given-name" value="'+esc(p.name||'')+'" placeholder="Your first name"></div>'+
+  '<div class="field"><label class="f" for="mo">Check in with me after…</label><select id="mo">'+MOMENTS.map(function(m){ return '<option'+(p.moment===m?' selected':'')+'>'+m+'</option>'; }).join('')+'</select></div>'+
+  '<div class="row"><div class="field"><label class="f" for="tm">Usually around</label><input id="tm" type="time" value="'+(p.time||'17:30')+'" style="font:inherit;font-size:16px;min-height:46px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);width:100%"></div>'+
+  '<div class="field"><label class="f" for="fq">How often</label><select id="fq"><option value="weekdays"'+(p.freq==='weekdays'?' selected':'')+'>Weekdays</option><option value="mwf"'+(p.freq!=='weekdays'&&p.freq!=='daily'?' selected':'')+'>Mon, Wed, Fri</option><option value="daily"'+(p.freq==='daily'?' selected':'')+'>Every day</option></select></div></div>'+
+  '<button class="btn" data-go="saveSetup">Continue</button>'+
+  '<p class="small">You can change these anytime.</p>');
+};
+Screens.saveSetup = function(){
+  var nm = (document.getElementById('nm').value||'').trim().slice(0,40);
+  if (!nm){ document.getElementById('nm').focus(); return; }
+  var d = load();
+  d.profile = { name:nm, moment:document.getElementById('mo').value, time:document.getElementById('tm').value||'17:30', freq:document.getElementById('fq').value, paid:!!(d.profile&&d.profile.paid), zip:(d.profile&&d.profile.zip)||'', joined:(d.profile&&d.profile.joined)||now() };
+  save(); go('remind');
+};
+
+/* 3. Reminder: phone calendar instead of email (feedback 1, 5, 8) */
+Screens.remind = function(){
+  header();
+  var p = load().profile;
+  render(
+  '<h1>Your reminder</h1>'+
+  (isNative()
+   ? '<p class="lead">A notification after '+esc(p.moment.toLowerCase())+', around '+fmtTime(p.time)+'. Each one has a tiny thing you can do right there, like three slow breaths. Tap it for a full check-in.</p>'+
+     '<button class="btn" data-go="notify">Turn on reminders</button>'
+   : '<p class="lead">Add a repeating reminder to your phone’s calendar. It pops up after '+esc(p.moment.toLowerCase())+', around '+fmtTime(p.time)+', with a link back here. No emails, so nothing lands in spam.</p>'+
+     '<button class="btn" data-go="ics">Add reminder to my calendar</button>'+
+     '<div class="card"><div class="eyebrow">Also helpful</div><p>Add Reset to your home screen so it opens like an app. On iPhone: tap Share, then “Add to Home Screen”. On Android: tap the menu, then “Install app”.</p></div>')+
+  '<button class="btn2" data-go="checkin">Do my first check-in now</button>');
+};
+
+/* 4. Home */
+Screens.home = function(){
+  header();
+  var d = load(), p = d.profile, last = d.checkins[d.checkins.length-1];
+  var gap = last ? daysSince(last.t) : null;
+  var hi = (gap !== null && gap >= 3) ? 'Welcome back, '+esc(p.name)+'. No catching up needed.' : 'Hi '+esc(p.name)+'.';
+  var pending = d.checkins.filter(function(c){ return c.did===true && !c.helped; }).slice(-1)[0];
+  var booked = d.checkins.filter(function(c){ return c.did==='booked'; }).slice(-1)[0];
+  render(
+  '<h1>'+hi+'</h1>'+
+  (booked ? '<div class="card"><p>Booked: <strong>'+esc(act(booked.act).name)+'</strong>. Did it happen?</p><div class="chips"><button class="chip" data-happened="yes" data-t="'+booked.t+'">Yes</button><button class="chip" data-happened="no" data-t="'+booked.t+'">It didn’t happen</button></div></div>' : '')+
+  (pending ? '<div class="card"><p>Last time: <strong>'+esc(act(pending.act).name)+'</strong>. Did it help?</p>'+helpChips(pending.t)+'</div>' : '')+
+  '<button class="btn" data-go="checkin">Check in</button>'+
+  '<div class="small" style="text-align:center">Background sound</div>'+soundBar()+
+  (d.checkins.length ? '<button class="btn2" data-go="week">How your activities helped</button>' : '')+
+  '<button class="btn2" data-go="journal">Vent or journal</button>'+
+  '<div class="row"><button class="link" data-go="settings">Reminder and settings</button><button class="link" data-go="privacy">Privacy</button></div>');
+};
+
+/* 5. Check-in: three taps, energy check first on low days (feedback 2) */
+Screens.checkin = function(){
+  header();
+  S = { step:'mood', skipped:[] };
+  stepMood();
+};
+Screens.fried = function(){ header(); S = { step:'time', mood:1, skipped:[], fried:true }; stepTime(); };
+function progress(n){ var s=''; for (var i=1;i<=3;i++) s+='<span class="'+(i<=n?'on':'')+'"></span>'; return '<div class="progress" aria-hidden="true">'+s+'</div>'; }
+function stepMood(){
+  render('<h2 class="sr">Check-in</h2>'+progress(1)+
+  '<div class="bubble">How are you feeling right now?</div>'+
+  '<div class="chips">'+MOODS.map(function(m,i){ return '<button class="chip" data-mood="'+(i+1)+'">'+m+'</button>'; }).join('')+'</div>'+
+  (S.vented ? '' : '<button class="strip" data-go="vent">Rough day? Get it off your chest first</button>'));
+}
+/* Vent box: the words are never saved, not even on this phone. Only the fact that it was used is kept. */
+function showVent(){
+  render('<h2>Get it off your chest.</h2><p class="lead">Type whatever you need to. Keep it in your journal, or let it go. Only you can ever see it.</p>'+
+  '<label class="sr" for="vent">Vent box</label><textarea id="vent" placeholder="Today was..."></textarea>'+
+  '<button class="btn" data-go="ventsave">Save to my journal</button>'+
+  '<button class="btn2" data-go="ventdone">Let it go (don’t save)</button>'+
+  '<button class="link" data-go="ventback">Back</button>'+
+  '<p class="small">If you ever feel unsafe, call or text 988 in the US.</p>');
+}
+function stepTime(){
+  render('<h2 class="sr">Check-in</h2>'+progress(2)+
+  (S.fried ? '<div class="bubble">Sorry it’s a lot right now. Let’s find one small thing.</div>' : '<div class="mine">'+MOODS[S.mood-1]+'</div>')+
+  '<div class="bubble">How much time do you have?</div>'+
+  '<div class="chips">'+TIMES.map(function(t){ return '<button class="chip" data-time="'+t[0]+'">'+t[1]+'</button>'; }).join('')+'</div>');
+}
+function stepWhere(){
+  render('<h2 class="sr">Check-in</h2>'+progress(3)+
+  '<div class="mine">'+S.time+' min</div>'+
+  '<div class="bubble">Where are you?</div>'+
+  '<div class="chips">'+WHERE.map(function(w){ return '<button class="chip" data-where="'+w[0]+'">'+w[1]+'</button>'; }).join('')+'</div>'+
+  '<p class="small">So ideas fit where you are.'+((load().profile||{}).paid?'':' All ideas are free.')+'</p>');
+}
+function stepPeople(){
+  render('<h2 class="sr">Check-in</h2>'+progress(3)+
+  '<div class="bubble">Up for people right now, or just you?</div>'+
+  '<div class="chips"><button class="chip" data-people="no">Just me</button><button class="chip" data-people="yes">Someone easy</button></div>');
+}
+/* On rough or low days, ask before suggesting anything social (feedback 2). */
+function afterWhere(){
+  if (S.mood <= 2 || S.fried) return stepPeople();
+  S.people = 'yes';
+  showIdea();
+}
+function showIdea(){
+  var list = candidates();
+  if (!list.length){
+    render('<h2>That’s all the ideas that fit right now.</h2><p class="lead">Want to start over with different answers?</p><button class="btn" data-go="checkin">Start over</button><button class="btn2" data-go="home">Back home</button>');
+    return;
+  }
+  var a = list[0]; S.act = a.id;
+  render('<h2 class="sr">Your idea</h2>'+
+  '<div class="card"><div class="small">One small thing · '+(a.min<=1?'1 min':a.min+' min')+' · '+(a.paid?'costs money':'free')+'</div>'+
+  '<div style="font-size:22px;font-weight:700;line-height:1.2">'+esc(a.name)+'</div>'+
+  '<p style="color:var(--ink2)">'+esc(a.line)+'</p>'+
+  '<p class="small">'+esc(whyLine(a))+'</p></div>'+
+  '<button class="btn" data-go="start">Start</button>'+
+  '<button class="btn2" data-go="another">Show me another</button>'+
+  '<button class="link" data-go="home">Not now</button>');
+}
+
+/* 6. Activity with timer, and a way back (feedback 14) */
+var tick = null;
+function startActivity(){
+  var a = act(S.act), left = a.min*60;
+  if (a.kind==='journal') return showJournal(a);
+  if (a.kind==='draw') return showDraw(a, 0);
+  if (a.kind==='breathe') return showBreathe(a);
+  S.started = now();
+  render('<h2>'+esc(a.name)+'</h2><p class="lead">'+esc(a.line)+'</p>'+
+  '<ol class="steps">'+a.steps.map(function(s){ return '<li>'+esc(s)+'</li>'; }).join('')+'</ol>'+
+  (a.map ? '<button class="btn2" data-go="map">Find one near me</button>' : '')+
+  soundBar()+
+  (TIMED.indexOf(a.id) < 0 ? '<p class="small">No timer for this one. Take your time.</p>' : '<div class="timer" role="timer" aria-label="Time left"><div id="clock">'+fmt(left)+'</div></div>')+
+  '<button class="btn" data-go="done">I’m done</button>'+
+  (a.book ? '<button class="btn2" data-go="booked">I booked it for later</button>' : '')+
+  '<button class="btn2" data-go="back">Pick something else</button>'+
+  '<button class="link" data-go="later">I’ll do it later</button>');
+  clearInterval(tick);
+  tick = setInterval(function(){ left--; var c=document.getElementById('clock'); if (!c){ clearInterval(tick); return; } c.textContent = fmt(Math.max(left,0)); if (left<=0){ clearInterval(tick); c.textContent='Done'; } }, 1000);
+}
+function actButtons(){ return '<button class="btn" data-go="done">I’m done</button><button class="btn2" data-go="back">Pick something else</button><button class="link" data-go="later">I’ll do it later</button>'; }
+function showBreathe(a){
+  clearInterval(tick);
+  render('<h2>'+esc(a.name)+'</h2><p class="lead">Breathe in as the circle grows, out as it shrinks. Two minutes is plenty.</p><div class="breath" aria-hidden="true"></div>'+soundBar()+actButtons());
+}
+/* Journal: easy prompts. The words stay on this screen and are never saved. */
+function showJournal(a){
+  clearInterval(tick);
+  var n = a.prompts ? a.prompts.length : a.n, picks = [];
+  if (S.jStart === undefined) S.jStart = Math.floor(Math.random()*PROMPTS.length);
+  for (var i=0;i<n;i++) picks.push(a.prompts ? a.prompts[i] : PROMPTS[(S.jStart+i)%PROMPTS.length]);
+  render('<div class="small">'+esc(a.name)+'</div><h2>'+(n===1 ? esc(picks[0])+'.' : 'A line for each.')+'</h2>'+
+  '<p class="small">Saved only on this phone, so you can look back later. No one else sees it, including Deborah.</p>'+soundBar()+
+  (n===1 ? '<label class="sr" for="j0">'+esc(picks[0])+'</label><textarea id="j0" class="line" placeholder="One line is enough."></textarea>'
+         : picks.map(function(p,k){ return '<div class="field"><label class="f" for="j'+k+'">'+esc(p)+'</label><textarea id="j'+k+'" class="line"></textarea></div>'; }).join(''))+
+  '<button class="btn" data-go="done">I’m done</button>'+
+  (a.prompts ? '' : '<button class="link" data-go="jnext">'+(n===1?'Give me a different prompt':'Give me different prompts')+'</button>')+
+  '<button class="link" data-go="later">I’ll do it later</button>');
+}
+/* Journal entries are kept only on this phone (never sent, and left out of any future pilot sync). */
+function saveJournal(){
+  var a = act(S.act); if (!a || a.kind!=='journal') return;
+  var labels = Array.prototype.map.call(document.querySelectorAll('textarea[id^="j"]'), function(t){
+    var l = document.querySelector('label[for="'+t.id+'"]'); return { q: l ? l.textContent : '', a: t.value.trim() };
+  }).filter(function(x){ return x.a; });
+  if (!labels.length) return;
+  var d = load(); d.journal.push({ t: now(), title: a.name, lines: labels }); save(); S.journalSaved = true;
+}
+Screens.journal = function(){
+  header();
+  S = { skipped:[], fromJournal:true };
+  var j = load().journal.slice().reverse();
+  render('<h1>Vent or journal</h1><p class="small">Only on this phone. No one else can see it, including Deborah.</p>'+
+  soundBar()+
+  '<label class="sr" for="vent">Write anything</label><textarea id="vent" placeholder="What’s on your mind?"></textarea>'+
+  '<div class="row"><button class="btn" data-go="ventsave">Save</button><button class="btn2" data-go="ventdone">Let it go</button></div>'+
+  '<button class="link" data-go="jwrite">Not sure what to write? Use a prompt</button>'+
+  '<p class="small">If you ever feel unsafe, call or text 988 in the US.</p>'+
+  '<h2 style="margin-top:8px">Past entries</h2>'+
+  (j.length ? j.map(function(e){ var d=new Date(e.t);
+     return '<button class="card entry" data-entry="1" aria-expanded="false"><span class="small">'+d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'})+' · '+esc(e.title)+'</span>'+
+       '<span class="body">'+e.lines.map(function(x){ return (x.q?'<span class="small">'+esc(x.q)+':</span> ':'')+esc(x.a); }).join(' · ')+'</span><span class="more">Tap to read all</span></button>'; }).join('')
+   : '<p class="small">Nothing saved yet.</p>')+
+  '<button class="btn2" data-go="home">Back home</button>');
+};
+/* Guided drawing: a faint guide builds step by step; draw over it with a finger, or on paper. Nothing is saved. */
+function showDraw(a, i){
+  clearInterval(tick);
+  var steps = DRAWINGS[a.id]; S.drawStep = i; if (i===0) padHist = [];
+  var guide = steps.slice(0,i+1).map(function(st,k){ return '<g'+(k===i?' class="now"':'')+'>'+st[1]+'</g>'; }).join('');
+  var last = i >= steps.length-1;
+  render('<div class="small">'+esc(a.name)+' · step '+(i+1)+' of '+steps.length+'</div><h2>'+esc(steps[i][0])+'</h2>'+
+  '<p class="small">Draw over the guide with your finger, or on any paper.</p>'+soundBar()+
+  '<div class="draw"><svg viewBox="0 0 200 200" aria-hidden="true">'+guide+'</svg><canvas id="pad" aria-label="Drawing space"></canvas></div>'+
+  '<div class="row" style="justify-content:center"><button class="iconbtn" data-go="dundo" style="flex:0 0 auto">Undo</button><button class="iconbtn" data-go="dclear" style="flex:0 0 auto">Clear</button></div>'+
+  (last ? '<button class="btn" data-go="done">I’m done</button>' : '<button class="btn" data-go="dnext">Next step</button>')+
+  '<button class="link" data-go="later">I’ll do it later</button>');
+  setupPad();
+}
+/* Drawing history: one snapshot per stroke, so Undo steps back and Clear wipes it. Nothing is saved. */
+var padHist = [], padCtx = null, padBox = null;
+function paint(){
+  if (!padCtx) return;
+  padCtx.clearRect(0,0,padBox.width,padBox.height);
+  var last = padHist[padHist.length-1]; if (!last) return;
+  var img = new Image(); img.onload=function(){ padCtx.drawImage(img,0,0,padBox.width,padBox.height); }; img.src = last;
+}
+function setupPad(){
+  var pad = document.getElementById('pad'); if (!pad) return;
+  var r = pad.getBoundingClientRect(), k = window.devicePixelRatio||1; padBox = r;
+  pad.width = Math.round(r.width*k); pad.height = Math.round(r.height*k);
+  var ctx = pad.getContext('2d'); padCtx = ctx; ctx.scale(k,k); ctx.lineWidth=3; ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.strokeStyle = (getComputedStyle(document.documentElement).getPropertyValue('--ink')||'#16201A').trim();
+  paint();
+  var down=false;
+  function at(e){ var b=pad.getBoundingClientRect(); return [e.clientX-b.left, e.clientY-b.top]; }
+  pad.addEventListener('pointerdown', function(e){ down=true; try{pad.setPointerCapture(e.pointerId);}catch(x){} var p=at(e); ctx.beginPath(); ctx.moveTo(p[0],p[1]); ctx.lineTo(p[0]+.1,p[1]+.1); ctx.stroke(); });
+  pad.addEventListener('pointermove', function(e){ if(!down) return; var p=at(e); ctx.lineTo(p[0],p[1]); ctx.stroke(); });
+  pad.addEventListener('pointerup', function(){ if(!down) return; down=false; try{ padHist.push(pad.toDataURL()); }catch(x){} });
+}
+/* Didn't do it: an optional reason helps suggest better next time. */
+function askWhy(c){
+  render('<h2>That’s okay. What got in the way?</h2><p class="small">Optional. It helps Reset suggest better.</p>'+
+  '<div class="chips">'+WHYS.map(function(w){ return '<button class="chip" data-why="'+esc(w)+'" data-t="'+c.t+'">'+esc(w)+'</button>'; }).join('')+'</div>');
+}
+function fmt(s){ var m=Math.floor(s/60), r=s%60; return m+':'+(r<10?'0':'')+r; }
+function fmtTime(hm){ var p=(hm||'17:30').split(':'), h=+p[0], m=p[1]; var ap=h>=12?'PM':'AM'; h=h%12||12; return h+':'+m+' '+ap; }
+
+/* 7. Did it help? (feedback 6: say why we ask) */
+function helpChips(t){
+  return '<div class="chips"><button class="chip" data-help="no" data-t="'+t+'">Not really</button><button class="chip" data-help="little" data-t="'+t+'">A little</button><button class="chip" data-help="lot" data-t="'+t+'">Yes, a lot</button></div>'+
+  '<p class="small">Your answer stays on this phone and helps Reset show which ideas work for you.</p>';
+}
+function record(did){
+  var d = load();
+  var c = { t:now(), mood:S.mood, time:S.time, where:S.where, people:S.people, act:S.act, cat:act(S.act).cat, swaps:S.skipped.length, did:did, fried:!!S.fried, vented:!!S.vented };
+  d.checkins.push(c); save(); return c;
+}
+function askHelped(c){
+  var saved = S.journalSaved ? '<div class="card"><p><strong>Saved to your journal.</strong> <span class="small">Only on this phone.</span></p><button class="btn2" data-go="journal">See your journal</button></div>' : '';
+  S.journalSaved = false;
+  render(saved+'<h2>Nice. How do you feel now?</h2>'+
+  '<div class="small">'+esc(act(c.act).name)+'</div><div class="bubble">Did it help?</div>'+helpChips(c.t)+
+  '<button class="link" data-go="home">Answer later</button>');
+}
+function setHelped(t, v){
+  var d = load();
+  d.checkins.forEach(function(c){ if (String(c.t)===String(t)) c.helped = v; });
+  save();
+  var p = statsByActivity(), c = d.checkins.filter(function(x){ return String(x.t)===String(t); })[0], s = p[c.act];
+  var msg = v==='no' ? 'Thanks for being honest. Reset will suggest it less.' : 'Glad it helped.';
+  var grace = GRACE[d.checkins.length % GRACE.length];
+  render('<h2>'+msg+'</h2>'+
+  (s && s.n>=2 ? '<p class="lead">'+esc(act(c.act).name)+' has helped you '+s.yes+' of '+s.n+' times.</p>' : '<p class="lead">After a few check-ins, you’ll see what helps you most.</p>')+
+  '<p>'+esc(grace)+'</p>'+
+  '<button class="btn" data-go="home">Done for today</button>'+
+  '<button class="btn2" data-go="week">How your activities helped</button>');
+}
+
+/* 8. Weekly recap: honest counts, clear title (feedback 9, 17) */
+Screens.week = function(){
+  header();
+  var d = load(), since = now() - 7*864e5;
+  var wk = d.checkins.filter(function(c){ return c.t >= since; });
+  var done = wk.filter(function(c){ return c.did===true; }).length;
+  var helped = wk.filter(function(c){ return c.helped && c.helped!=='no'; }).length;
+  var st = statsByActivity(), rows = Object.keys(st).map(function(k){ return {a:act(k), n:st[k].n, yes:st[k].yes}; })
+    .sort(function(x,y){ return (y.yes/y.n)-(x.yes/x.n) || y.n-x.n; });
+  var low = d.checkins.filter(function(c){ return c.mood<=2 && c.helped; });
+  var lowYes = low.filter(function(c){ return c.helped!=='no'; }).length;
+  var pulseDue = !d.pulses.some(function(p){ return p.t >= since; }) && wk.length>0;
+  render('<h1>How your activities helped</h1><p class="small">Real counts from your answers. Nothing to pick here.</p>'+
+  '<div class="stat"><div><b>'+wk.length+'</b><span class="small">check-ins this week</span></div><div><b>'+done+'</b><span class="small">things done</span></div><div><b>'+helped+'</b><span class="small">helped</span></div></div>'+
+  (rows.length ? '<div class="card">'+rows.map(function(r){ var pct=Math.round(100*r.yes/r.n);
+     return '<div style="display:flex;flex-direction:column;gap:4px"><div style="display:flex;justify-content:space-between;gap:8px;font-size:15px"><span>'+esc(r.a.name)+'</span><span style="color:var(--link);font-weight:600;white-space:nowrap">helped '+r.yes+' of '+r.n+'</span></div><div class="bar" aria-hidden="true"><i style="width:'+pct+'%"></i></div></div>'; }).join('')+
+     (low.length>=2 ? '<p class="small">On rough or low days, an idea helped '+lowYes+' of '+low.length+' times.</p>' : '')+'</div>'
+   : '<div class="card"><p>Nothing to show yet. Once you try an idea and say whether it helped, it shows up here.</p></div>')+
+  (pulseDue ? '<div class="card"><p><strong>How manageable did this week feel?</strong></p><div class="chips">'+[1,2,3,4,5].map(function(n){ return '<button class="chip" data-pulse="'+n+'">'+n+'</button>'; }).join('')+'</div><div style="display:flex;justify-content:space-between" class="small"><span>Not at all</span><span>Very</span></div></div>' : '')+
+  ((d.nudges||[]).filter(function(x){ return x.t>=since; }).length ? '<p class="small">Plus '+d.nudges.filter(function(x){ return x.t>=since; }).length+' quick resets straight from your reminders.</p>' : '')+
+  (d.journal.length ? '<button class="btn2" data-go="journal">Your journal</button>' : '')+
+  '<button class="btn2" data-go="home">Back home</button>');
+};
+
+/* 9. Settings: change reminder, pause, export, delete */
+Screens.settings = function(){
+  header();
+  var p = load().profile;
+  render('<h1>Reminder and settings</h1>'+
+  '<div class="card"><p>Reminder after <strong>'+esc(p.moment.toLowerCase())+'</strong>, around <strong>'+fmtTime(p.time)+'</strong> ('+({weekdays:'weekdays',mwf:'Mon, Wed, Fri',daily:'every day'})[p.freq]+').</p>'+
+  '<button class="btn2" data-go="setup">Change it</button>'+(isNative() ? '<button class="btn2" data-go="notify">Update reminders</button>' : '<button class="btn2" data-go="ics">Add to calendar again</button>')+'</div>'+
+  '<div class="card"><p><strong>Ideas that cost money</strong><br><span class="small">Like a massage or a therapy session. You\u2019d pay the place, never Reset.'+(p.paid&&p.zip?' ZIP code: '+esc(p.zip)+'.':'')+'</span></p>'+
+  '<button class="btn2" data-go="togglePaid">'+(p.paid?'Turn off':'Turn on')+'</button></div>'+
+  '<p class="small">'+(isNative() ? 'To pause, turn off notifications for Reset in your phone’s Settings.' : 'To pause, delete the Reset reminder in your calendar.')+' Your past answers stay here.</p>'+
+  '<button class="btn2" data-go="export">Download my data</button>'+
+  '<button class="btn2" data-go="confirmDelete">Delete my data</button>'+
+  '<button class="link" data-go="home">Back</button>');
+};
+Screens.confirmDelete = function(){
+  render('<h1>Delete everything?</h1><p class="lead">This removes your name, check-ins and answers from this phone. It can’t be undone.</p>'+
+  '<button class="btn" data-go="doDelete">Yes, delete my data</button><button class="btn2" data-go="settings">Keep it</button>');
+};
+Screens.doDelete = function(){ soundStop(); var ln=LN(); if (ln){ try{ ln.getPending().then(function(r){ var o=(r&&r.notifications||[]).map(function(x){ return {id:x.id}; }); if (o.length) ln.cancel({notifications:o}); }); }catch(e){} } wipe(); go('welcome'); };
+
+/* 10. Privacy in plain words (feedback 6, 13) */
+Screens.privacy = function(){
+  header();
+  render('<h1>Your data, in plain words</h1>'+
+  '<div class="card facts">'+
+  '<div><b>What Reset saves</b><span>Your first name, your check-in taps, which ideas you tried and whether they helped.</span></div>'+
+  '<div><b>Why</b><span>To show which ideas work for you, like “walks helped 3 of 4.”</span></div>'+
+  '<div><b>Where</b><span>Only on this phone. Nothing is sent to anyone.</span></div>'+
+  '<div><b>Journal and vent box</b><span>Journal entries stay on this phone so you can look back. The vent box is never saved at all.</span></div>'+
+  '<div><b>How long</b><span>Until you delete it. Clearing this site’s data also deletes it.</span></div>'+
+  '</div>'+
+  '<p class="small">A wellness experiment, not medical advice. If you are in crisis in the US, call or text 988.</p>'+
+  '<button class="btn2" data-go="'+(load().profile?'home':'welcome')+'">Back</button>');
+};
+
+/* ---------- nearby search: asks for a ZIP code first, kept on this phone ---------- */
+function openMap(){
+  var p = load().profile, a = act(S.act);
+  if (!p.zip){
+    clearInterval(tick);
+    render('<h2>Where should Reset look?</h2><p class="lead">Enter your ZIP code so results are near you. It stays on this phone.</p>'+
+      '<div class="field"><label class="f" for="zp">ZIP code</label><input id="zp" type="text" inputmode="numeric" autocomplete="postal-code" maxlength="10" placeholder="e.g. 94110"></div>'+
+      '<button class="btn" data-go="saveZip">Show places near me</button><button class="link" data-go="start">Back</button>');
+    return;
+  }
+  window.open('https://www.google.com/maps/search/' + encodeURIComponent(a.map + ' near ' + p.zip), '_blank', 'noopener');
+}
+function saveZip(){
+  var z = (document.getElementById('zp').value||'').trim().slice(0,10);
+  if (!/^[A-Za-z0-9 -]{3,10}$/.test(z)){ document.getElementById('zp').focus(); return; }
+  var d = load(); d.profile.zip = z; save();
+  openMap(); startActivity();
+}
+
+/* ---------- optional background sound: generated in the browser, no files, off by default ---------- */
+var snd = null;
+function soundStop(){ if (snd){ clearInterval(snd.timer); try{ snd.ctx.close(); }catch(e){} snd = null; } }
+/* Café: an original, slow lo-fi jazz loop made in the browser (soft keys, upright-style bass,
+   brushed drums, vinyl crackle). No recordings, so nothing to license and it works offline. */
+function cafePlay(){
+  var AC = window.AudioContext || window.webkitAudioContext; var ctx = new AC();
+  var out = ctx.createGain(); out.gain.value = 0.0001; out.gain.exponentialRampToValueAtTime(0.5, ctx.currentTime+2);
+  var warm = ctx.createBiquadFilter(); warm.type='lowpass'; warm.frequency.value = 2400;
+  var dly = ctx.createDelay(); dly.delayTime.value = 0.42; var fb = ctx.createGain(); fb.gain.value = 0.25; var wet = ctx.createGain(); wet.gain.value = 0.18;
+  warm.connect(out); warm.connect(dly); dly.connect(fb); fb.connect(dly); dly.connect(wet); wet.connect(out); out.connect(ctx.destination);
+  // vinyl: soft hiss plus sparse crackle
+  var len = ctx.sampleRate*3, vb = ctx.createBuffer(1, len, ctx.sampleRate), vd = vb.getChannelData(0);
+  for (var i=0;i<len;i++){ vd[i] = (Math.random()*2-1)*0.012 + (Math.random()<0.0004 ? (Math.random()*2-1)*0.35 : 0); }
+  var vs = ctx.createBufferSource(); vs.buffer = vb; vs.loop = true; var vh = ctx.createBiquadFilter(); vh.type='highpass'; vh.frequency.value = 1200;
+  vs.connect(vh); vh.connect(out); vs.start();
+  var nb = ctx.createBuffer(1, ctx.sampleRate*0.3, ctx.sampleRate), nd = nb.getChannelData(0); for (var k=0;k<nd.length;k++) nd[k]=Math.random()*2-1;
+  function hz(m){ return 440*Math.pow(2,(m-69)/12); }
+  // Fmaj9 – Em7 – Dm9 – G13, voiced low and close
+  var CH = [[53,57,60,64,67],[52,55,59,62,66],[50,53,57,60,64],[43,53,57,59,64]], BASS=[41,40,38,43];
+  var SCALE = [72,74,76,79,81,84];
+  function key(t, m, v, d){
+    var g = ctx.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(v,t+0.03); g.gain.exponentialRampToValueAtTime(0.0001,t+d);
+    var o1 = ctx.createOscillator(); o1.type='sine'; o1.frequency.value = hz(m);
+    var o2 = ctx.createOscillator(); o2.type='triangle'; o2.frequency.value = hz(m)*2.003; var g2 = ctx.createGain(); g2.gain.value = 0.15;
+    o1.connect(g); o2.connect(g2); g2.connect(g); g.connect(warm); o1.start(t); o2.start(t); o1.stop(t+d+0.05); o2.stop(t+d+0.05);
+  }
+  function bass(t, m, d){ var g=ctx.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.22,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+d);
+    var o=ctx.createOscillator(); o.type='sine'; o.frequency.value=hz(m-12); o.connect(g); g.connect(warm); o.start(t); o.stop(t+d+0.05); }
+  function kick(t){ var g=ctx.createGain(), o=ctx.createOscillator(); o.frequency.setValueAtTime(95,t); o.frequency.exponentialRampToValueAtTime(42,t+0.25);
+    g.gain.setValueAtTime(0.28,t); g.gain.exponentialRampToValueAtTime(0.0001,t+0.3); o.connect(g); g.connect(out); o.start(t); o.stop(t+0.32); }
+  function brush(t, v){ var s=ctx.createBufferSource(); s.buffer=nb; var f=ctx.createBiquadFilter(); f.type='bandpass'; f.frequency.value=3200; f.Q.value=0.8;
+    var g=ctx.createGain(); g.gain.setValueAtTime(v,t); g.gain.exponentialRampToValueAtTime(0.0001,t+0.18); s.connect(f); f.connect(g); g.connect(out); s.start(t); s.stop(t+0.2); }
+  var beat = 60/68, swing = beat*0.16, step = 0, next = ctx.currentTime + 0.2;
+  function schedule(){
+    while (next < ctx.currentTime + 0.6){
+      var bar = Math.floor(step/8), b = step%8, ci = Math.floor(bar/2)%4, t = next + (b%2 ? swing : 0);
+      if (b===0 && bar%2===0){ CH[ci].forEach(function(m,n){ key(t+n*0.035, m, 0.07, beat*5); }); }
+      if (b===5){ CH[ci].slice(1).forEach(function(m,n){ key(t+n*0.03, m, 0.045, beat*2); }); }
+      if (b===0) bass(t, BASS[ci], beat*1.8);
+      if (b===4) bass(t, BASS[ci]+7, beat*1.2);
+      if (b===0 || b===5) kick(t);
+      if (b===2 || b===6) brush(t, 0.05);
+      if (b%2===1) brush(t, 0.012);
+      if (b%2===0 && Math.random()<0.18) key(t, SCALE[Math.floor(Math.random()*SCALE.length)], 0.035, beat*1.5);
+      step++; next += beat/2;
+    }
+  }
+  schedule(); var timer = setInterval(schedule, 150);
+  return { ctx:ctx, kind:'cafe', timer:timer };
+}
+function soundPlay(kind){
+  soundStop(); if (!kind) return;
+  if (kind==='cafe'){ try{ snd = cafePlay(); }catch(e){ snd = null; } return; }
+  try{
+    var AC = window.AudioContext || window.webkitAudioContext; var ctx = new AC();
+    var len = ctx.sampleRate*4, buf = ctx.createBuffer(1, len, ctx.sampleRate), d = buf.getChannelData(0), last = 0;
+    for (var i=0;i<len;i++){ var w = Math.random()*2-1; last = (last + 0.02*w)/1.02; d[i] = kind==='rain' ? w*0.6 : last*3.5; }
+    var src = ctx.createBufferSource(); src.buffer = buf; src.loop = true;
+    var f = ctx.createBiquadFilter(); f.type = kind==='rain' ? 'highpass' : 'lowpass'; f.frequency.value = kind==='rain' ? 900 : 700;
+    var g = ctx.createGain(); g.gain.value = 0.0001; g.gain.exponentialRampToValueAtTime(kind==='rain'?0.08:0.25, ctx.currentTime+1.5);
+    src.connect(f); f.connect(g); g.connect(ctx.destination);
+    if (kind==='brook'){ var lfo = ctx.createOscillator(), lg = ctx.createGain(); lfo.frequency.value = 0.15; lg.gain.value = 250; lfo.connect(lg); lg.connect(f.frequency); lfo.start(); }
+    src.start(); snd = { ctx:ctx, kind:kind };
+  }catch(e){ snd = null; }
+}
+function soundBar(){
+  var cur = snd ? snd.kind : '';
+  return '<div class="row" style="justify-content:center;gap:6px;flex-wrap:wrap" aria-label="Background sound">'+
+    [['','Sound off'],['rain','Rain'],['brook','Brook'],['cafe','Café']].map(function(o){
+      return '<button class="chip'+(cur===o[0]?' sel':'')+'" data-sound="'+o[0]+'" style="flex:0 0 auto;min-height:40px" aria-pressed="'+(cur===o[0])+'">'+o[1]+'</button>'; }).join('')+'</div>';
+}
+
+/* ---------- phone notifications (iPhone/Android app only) ----------
+   In the app build (Capacitor), reminders are real notifications. Each one carries a small action
+   you can do right away, so it helps even if you never open the app (feedback 20, 18).
+   On the web, the calendar reminder below is used instead. */
+var NUDGES = [
+  ['{n}! Take a deep breath.', 'In for 4, out for 6. Three times. That’s it.'],
+  ['Shoulders check, {n}.', 'Drop them away from your ears and roll them back 5 times.'],
+  ['Water break?', 'One glass, away from the screen. Small counts.'],
+  ['Look up for a sec, {n}.', 'Find the farthest thing you can see and rest your eyes on it for 20 seconds.'],
+  ['Unclench your jaw.', 'Seriously. Now your shoulders. Nice.'],
+  ['One-minute stretch?', 'Stand up, reach for the ceiling, fold forward gently.'],
+  ['{n}, you did enough today.', 'Name one thing that went okay. Tap if you want one more idea.'],
+  ['Tiny walk?', 'Down the hall and back. Notice one thing you haven’t seen before.']
+];
+function isNative(){ try{ return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()); }catch(e){ return false; } }
+var lnPlugin = null;
+function LN(){
+  var c = window.Capacitor; if (!c || !isNative()) return null;
+  if (lnPlugin) return lnPlugin;
+  if (c.Plugins && c.Plugins.LocalNotifications) lnPlugin = c.Plugins.LocalNotifications;
+  else if (c.registerPlugin) lnPlugin = c.registerPlugin('LocalNotifications');
+  return lnPlugin;
+}
+var nudgeListening = false;
+function nudgeSetup(){
+  var ln = LN(); if (!ln || nudgeListening) return; nudgeListening = true;
+  ln.registerActionTypes({ types:[{ id:'NUDGE', actions:[{ id:'did', title:'Did it', foreground:true }, { id:'more', title:'Check in', foreground:true }] }] });
+  ln.addListener('localNotificationActionPerformed', function(e){
+    var d = load(); if (!d.profile) return Screens.welcome();
+    if (e && e.actionId === 'did'){
+      d.nudges = d.nudges || []; d.nudges.push({ t:now(), nudge:(e.notification && e.notification.extra && e.notification.extra.nudge) }); save();
+      header(); render('<h2>Nice. That counts.</h2><p class="lead">'+esc(GRACE[d.nudges.length % GRACE.length])+'</p><button class="btn" data-go="home">Done</button><button class="btn2" data-go="checkin">One more idea</button>');
+      return;
+    }
+    Screens.checkin();
+  });
+}
+function scheduleNudges(){
+  var ln = LN(), p = load().profile; if (!ln || !p) return Promise.resolve(false);
+  return ln.requestPermissions().then(function(r){
+    if (!r || r.display !== 'granted') return false;
+    return ln.getPending().then(function(pend){
+      var old = (pend && pend.notifications || []).map(function(x){ return { id:x.id }; });
+      return old.length ? ln.cancel({ notifications: old }) : null;
+    }).then(function(){
+      var hm = p.time.split(':'), days = p.freq==='daily' ? [1,2,3,4,5,6,7] : p.freq==='weekdays' ? [2,3,4,5,6] : [2,4,6];
+      var start = (load().nudgeRot || 0); var d = load(); d.nudgeRot = start + days.length; save();
+      var list = days.map(function(w, k){ var n = NUDGES[(start + k) % NUDGES.length];
+        return { id:100+w, title:n[0].replace('{n}', p.name), body:n[1].replace('{n}', p.name), actionTypeId:'NUDGE', extra:{ nudge:(start+k)%NUDGES.length },
+                 schedule:{ on:{ weekday:w, hour:+hm[0], minute:+hm[1] }, allowWhileIdle:true } }; });
+      return ln.schedule({ notifications:list }).then(function(){ var d2 = load(); d2.profile.notify = true; save(); return true; });
+    });
+  }).catch(function(){ return false; });
+}
+
+/* ---------- calendar reminder (.ics) ---------- */
+function makeIcs(){
+  var p = load().profile, hm = p.time.split(':');
+  var start = new Date(); start.setHours(+hm[0], +hm[1], 0, 0); if (start < new Date()) start.setDate(start.getDate()+1);
+  var pad = function(n){ return (n<10?'0':'')+n; };
+  var dt = function(d){ return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'T'+pad(d.getHours())+pad(d.getMinutes())+'00'; };
+  var end = new Date(start.getTime()+5*60000);
+  var rule = p.freq==='daily' ? 'FREQ=DAILY' : p.freq==='weekdays' ? 'FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR' : 'FREQ=WEEKLY;BYDAY=MO,WE,FR';
+  var url = location.href.split('#')[0];
+  var lines = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Reset//v2//EN','BEGIN:VEVENT',
+    'UID:reset-'+now()+'@reset','DTSTAMP:'+dt(new Date()),'DTSTART:'+dt(start),'DTEND:'+dt(end),'RRULE:'+rule,
+    'SUMMARY:Reset: rough day or okay day?','DESCRIPTION:A 15-second check-in. Open Reset: '+url,'URL:'+url,
+    'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:Reset check-in','TRIGGER:PT0M','END:VALARM','END:VEVENT','END:VCALENDAR'];
+  return lines.join('\r\n');
+}
+function download(name, text, type){
+  try{
+    var b = new Blob([text], {type:type}), u = URL.createObjectURL(b), a = document.createElement('a');
+    a.href=u; a.download=name; document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(u); a.remove(); }, 500);
+  }catch(e){}
+}
+
+/* ---------- router + events ---------- */
+function go(name){
+  clearInterval(tick);
+  if (name==='notify'){ var nb=document.querySelector('[data-go="notify"]'); scheduleNudges().then(function(ok){ if (nb) nb.textContent = ok ? 'Reminders are on' : 'Notifications are off. Turn them on in Settings, then try again'; }); return; }
+  if (name==='ics'){ download('reset-reminder.ics', makeIcs(), 'text/calendar'); var b=document.querySelector('[data-go="ics"]'); if (b) b.textContent='Added. Open the file to save it'; return; }
+  if (name==='export'){ download('reset-my-data.json', JSON.stringify(load(), null, 2), 'application/json'); return; }
+  if (name==='start'){ return startActivity(); }
+  if (name==='map'){ return openMap(); }
+  if (name==='saveZip'){ return saveZip(); }
+  if (name==='togglePaid'){ var d=load(); d.profile.paid=!d.profile.paid; save(); return Screens.settings(); }
+  if (name==='another'){ S.skipped.push(S.act); return showIdea(); }
+  if (name==='back'){ S.skipped.push(S.act); return showIdea(); }
+  if (name==='jwrite'){ S = { skipped:[], direct:true, act:'journal3' }; return showJournal(act('journal3')); }
+  if (name==='done'){ saveJournal(); if (S.direct){ S.journalSaved=false; return Screens.journal(); } var c = record(true); return askHelped(c); }
+  if (name==='later'){ if (S.direct) return Screens.home(); var c2 = record(false); return askWhy(c2); }
+  if (name==='booked'){ var c3 = record('booked'); render('<h2>Nice. Enjoy it.</h2><p class="lead">It’ll wait on your home screen. Tap it after you’ve been.</p><button class="btn" data-go="home">Done for today</button>'); return; }
+  if (name==='vent'){ return showVent(); }
+  if (name==='ventsave' || name==='ventdone'){
+    var v=document.getElementById('vent'), txt = v ? v.value.trim() : '';
+    if (txt){ S.vented = true; if (name==='ventsave'){ var dj=load(); dj.journal.push({ t:now(), title:'Free write', lines:[{q:'',a:txt}] }); save(); } }
+    if (v) v.value='';
+    if (S.fromJournal){ var note = name==='ventsave' && txt ? 'Saved. Only you can see it.' : 'Let go. Nothing was saved.';
+      Screens.journal(); var h=document.querySelector('#view .small'); if (h && txt) h.textContent = note; return; }
+    return stepMood(); }
+  if (name==='ventback'){ return stepMood(); }
+  if (name==='jnext'){ S.jStart = (S.jStart||0) + 3; return showJournal(act(S.act)); }
+  if (name==='dnext'){ return showDraw(act(S.act), S.drawStep+1); }
+  if (name==='dundo'){ padHist.pop(); return paint(); }
+  if (name==='dclear'){ padHist = []; return paint(); }
+  if (name==='bookeddone'){ return; }
+  (Screens[name] || Screens.home)();
+}
+document.addEventListener('click', function(e){
+  var b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.go) return go(b.dataset.go);
+  if (b.dataset.mood){ S.mood = +b.dataset.mood; return stepTime(); }
+  if (b.dataset.time){ S.time = +b.dataset.time; return stepWhere(); }
+  if (b.dataset.where){ S.where = b.dataset.where; return afterWhere(); }
+  if (b.dataset.people){ S.people = b.dataset.people; return showIdea(); }
+  if (b.dataset.sound !== undefined){ soundPlay(b.dataset.sound); b.parentNode.outerHTML = soundBar(); return; }
+  if (b.dataset.entry){ var open = b.classList.toggle('open'); b.setAttribute('aria-expanded', open); var m=b.querySelector('.more'); if (m) m.textContent = open ? 'Tap to collapse' : 'Tap to read all'; return; }
+  if (b.dataset.help){ return setHelped(b.dataset.t, b.dataset.help); }
+  if (b.dataset.why){ var d0=load(); d0.checkins.forEach(function(c){ if (String(c.t)===b.dataset.t) c.why=b.dataset.why; }); save(); return Screens.home(); }
+  if (b.dataset.happened){ var d1=load(); d1.checkins.forEach(function(c){ if (String(c.t)===b.dataset.t){ c.did = b.dataset.happened==='yes'; if (!c.did) c.why='Didn’t happen'; } }); save();
+    var c4 = d1.checkins.filter(function(c){ return String(c.t)===b.dataset.t; })[0]; return c4.did ? askHelped(c4) : Screens.home(); }
+  if (b.dataset.pulse){ var d=load(); d.pulses.push({t:now(), score:+b.dataset.pulse}); save(); b.parentNode.parentNode.innerHTML='<p>Thanks. Noted.</p>'; }
+});
+
+/* ---------- start ---------- */
+(function(){
+  var d = load();
+  if (isNative()){ nudgeSetup(); if (d.profile && d.profile.notify) scheduleNudges(); }
+  if ('serviceWorker' in navigator && !isNative() && location.protocol === 'https:'){ try{ navigator.serviceWorker.register('sw.js'); }catch(e){} }
+  if (location.hash === '#checkin' && d.profile) return Screens.checkin();
+  d.profile ? Screens.home() : Screens.welcome();
+})();
+</script>
+</body>
+</html>
