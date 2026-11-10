@@ -64,7 +64,6 @@ ul.list,ol.list{margin:0;padding-left:20px;display:flex;flex-direction:column;ga
 .theme{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 18px;display:flex;flex-direction:column;gap:6px}
 .theme .n{align-self:flex-start;font-size:12px;font-weight:800;border-radius:999px;padding:3px 10px;background:var(--p1)}
 .theme:nth-child(2) .n{background:var(--p2)} .theme:nth-child(3) .n{background:var(--p3)} .theme:nth-child(4) .n{background:var(--p4)}
-blockquote{margin:0;padding:12px 16px;border-radius:12px;background:var(--p1);font-weight:700}
 .two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 footer{border-top:1px solid var(--line);background:linear-gradient(180deg,#E6EEE9,#DCE8E1)}
 footer .wrap{padding-block:28px;display:flex;flex-wrap:wrap;gap:12px 24px;justify-content:space-between;font-size:14.5px}
@@ -176,12 +175,12 @@ footer .wrap{padding-block:28px;display:flex;flex-wrap:wrap;gap:12px 24px;justif
     <p>Three A/B tests and one observed measure, each with a hypothesis, one main metric and a decision rule written before launch. None cleared its bar, and that taught me as much as a win would have.</p>
     <div class="scroll">
       <table class="table">
-        <thead><tr><th>Test</th><th>Result</th><th>Decision</th></tr></thead>
+        <thead><tr><th>Test</th><th>Hypothesis</th><th>Result</th><th>Decision</th></tr></thead>
         <tbody>
-          <tr><td><strong>A/B test, email subject:</strong> "How are you feeling right now?" vs "Your 15-second check-in"</td><td>Check-in within a day: 36% vs 37%. After the Oct 21 email fix*: 43% vs 36%</td><td>Under the 20-point bar; keep the original</td></tr>
-          <tr><td><strong>A/B test, "why this one" line</strong> under the idea</td><td>Said yes: 90% shown vs 97% hidden; more swapping when shown</td><td>No help; hide it</td></tr>
-          <tr><td><strong>A/B test, personalized vs random</strong> idea (3:1)</td><td>Only 9 random check-ins</td><td>Too few to read</td></tr>
-          <tr><td><strong>Phone vs computer</strong> (observed)</td><td>40% on a phone</td><td>Under the 70% bar, but email links pull people to computers</td></tr>
+          <tr><td><strong>A/B test, email subject:</strong> original "Your 15-second check-in" vs new "How are you feeling right now?"</td><td>A feelings question gets more check-ins than a time promise</td><td>Check-in within a day: original 37% vs new 36%. After the Oct 21 email fix*: original 36% vs new 43%</td><td>Under the 20-point bar; keep the original</td></tr>
+          <tr><td><strong>A/B test, "why this one" line</strong> under the idea</td><td>A one-line reason makes people more likely to say yes</td><td>Said yes: 90% shown vs 97% hidden; more swapping when shown</td><td>No help; hide it</td></tr>
+          <tr><td><strong>A/B test, personalized vs random</strong> idea (3:1)</td><td>Personalized ideas get done more and help more</td><td>Only 9 random check-ins</td><td>Too few to read</td></tr>
+          <tr><td><strong>Phone vs computer</strong> (observed)</td><td>Most people (70%+) check in on a phone</td><td>40% on a phone</td><td>Under the 70% bar, but email links pull people to computers</td></tr>
         </tbody>
       </table>
     </div>
@@ -209,7 +208,11 @@ footer .wrap{padding-block:28px;display:flex;flex-wrap:wrap;gap:12px 24px;justif
       <div class="theme"><span class="n">5 of 20</span><h3>No Reason to Come Back</h3><p>Testers asked for a weekly payoff in plain counts, or a fresh tip instead of scores.</p></div>
       <div class="theme"><span class="n">3 of 20</span><h3>Ideas Don't Fit the Moment</h3><p>"I am at my desk so not feasible to spend time on hobby." Reaching out to a friend doesn't suit drained days.</p></div>
     </div>
-    <blockquote>"Self help apps require the user to be intentional." A tester who went quiet, and wished for a quick text like "Take a deep breath!"</blockquote>
+    <div class="card">
+      <ul class="list">
+        <li>"Self help apps require the user to be intentional." She rarely checks her personal email and wished for a quick text like "Take a deep breath!" <span class="small">(Email reply)</span></li>
+      </ul>
+    </div>
   </section>
 
   <section aria-labelledby="h-v2">
