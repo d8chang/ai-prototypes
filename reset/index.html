@@ -125,7 +125,7 @@ a{color:var(--link)}
    - Kind silence: no streaks, "welcome back" after a gap (10)
    - Short privacy summary + details + delete my data (6, 13)
 ============================================================================ */
-var CONFIG = { syncUrl: null, version: '2.1' };
+var CONFIG = { syncUrl: null, version: '2.2' };
 var KEY = 'reset_v2';
 
 /* ---------- storage (safe) ---------- */
@@ -313,7 +313,7 @@ Screens.saveSetup = function(){
   if (!nm){ document.getElementById('nm').focus(); return; }
   var d = load();
   d.profile = { name:nm, moment:document.getElementById('mo').value, time:document.getElementById('tm').value||'17:30', freq:document.getElementById('fq').value, paid:!!(d.profile&&d.profile.paid), zip:(d.profile&&d.profile.zip)||'', joined:(d.profile&&d.profile.joined)||now() };
-  save(); go('remind');
+  save(); if (d.profile.push) pushOn(); go('remind');
 };
 
 /* 3. Reminder: phone calendar instead of email (feedback 1, 5, 8) */
@@ -325,6 +325,12 @@ Screens.remind = function(){
   (isNative()
    ? '<p class="lead">A notification after '+esc(p.moment.toLowerCase())+', around '+fmtTime(p.time)+'. Each one has a tiny thing you can do right there, like three slow breaths. Tap it for a full check-in.</p>'+
      '<button class="btn" data-go="notify">Turn on reminders</button>'
+   : webPushOK()
+   ? '<p class="lead">A notification after '+esc(p.moment.toLowerCase())+', around '+fmtTime(p.time)+'. Each one has a tiny thing you can do right there, like three slow breaths. Tap it for a full check-in. No emails, nothing to set up.</p>'+
+     (needsHomeScreen()
+       ? '<div class="card"><div class="eyebrow">One step first on iPhone</div><p>Tap Share, then “Add to Home Screen”. Open Reset from the new icon, and turn on reminders there.</p></div>'
+       : '<button class="btn" data-go="push">Turn on reminders</button>')+
+     '<button class="link" data-go="ics">Or add a calendar reminder instead</button>'
    : '<p class="lead">Add a repeating reminder to your phone’s calendar. It pops up after '+esc(p.moment.toLowerCase())+', around '+fmtTime(p.time)+', with a link back here. No emails, so nothing lands in spam.</p>'+
      '<button class="btn" data-go="ics">Add reminder to my calendar</button>'+
      '<div class="card"><div class="eyebrow">Also helpful</div><p>Add Reset to your home screen so it opens like an app. On iPhone: tap Share, then “Add to Home Screen”. On Android: tap the menu, then “Install app”.</p></div>')+
@@ -583,10 +589,12 @@ Screens.settings = function(){
   var p = load().profile;
   render('<h1>Reminder and settings</h1>'+
   '<div class="card"><p>Reminder after <strong>'+esc(p.moment.toLowerCase())+'</strong>, around <strong>'+fmtTime(p.time)+'</strong> ('+({weekdays:'weekdays',mwf:'Mon, Wed, Fri',daily:'every day'})[p.freq]+').</p>'+
-  '<button class="btn2" data-go="setup">Change it</button>'+(isNative() ? '<button class="btn2" data-go="notify">Update reminders</button>' : '<button class="btn2" data-go="ics">Add to calendar again</button>')+'</div>'+
+  '<button class="btn2" data-go="setup">Change it</button>'+(isNative() ? '<button class="btn2" data-go="notify">Update reminders</button>'
+    : webPushOK() ? (p.push ? '<button class="btn2" data-go="pushOff">Turn off reminders</button>' : (needsHomeScreen() ? '<p class="small">On iPhone, add Reset to your Home Screen to turn on reminders.</p>' : '<button class="btn2" data-go="push">Turn on reminders</button>'))
+    : '<button class="btn2" data-go="ics">Add to calendar again</button>')+'</div>'+
   '<div class="card"><p><strong>Ideas that cost money</strong><br><span class="small">Like a massage or a therapy session. You\u2019d pay the place, never Reset.'+(p.paid&&p.zip?' ZIP code: '+esc(p.zip)+'.':'')+'</span></p>'+
   '<button class="btn2" data-go="togglePaid">'+(p.paid?'Turn off':'Turn on')+'</button></div>'+
-  '<p class="small">'+(isNative() ? 'To pause, turn off notifications for Reset in your phone’s Settings.' : 'To pause, delete the Reset reminder in your calendar.')+' Your past answers stay here.</p>'+
+  '<p class="small">'+(isNative() ? 'To pause, turn off notifications for Reset in your phone’s Settings.' : p.push ? 'To pause, tap Turn off reminders.' : 'To pause, delete the Reset reminder in your calendar.')+' Your past answers stay here.</p>'+
   '<button class="btn2" data-go="export">Download my data</button>'+
   '<button class="btn2" data-go="confirmDelete">Delete my data</button>'+
   '<button class="link" data-go="home">Back</button>');
@@ -595,7 +603,7 @@ Screens.confirmDelete = function(){
   render('<h1>Delete everything?</h1><p class="lead">This removes your name, check-ins and answers from this phone. It can’t be undone.</p>'+
   '<button class="btn" data-go="doDelete">Yes, delete my data</button><button class="btn2" data-go="settings">Keep it</button>');
 };
-Screens.doDelete = function(){ soundStop(); var ln=LN(); if (ln){ try{ ln.getPending().then(function(r){ var o=(r&&r.notifications||[]).map(function(x){ return {id:x.id}; }); if (o.length) ln.cancel({notifications:o}); }); }catch(e){} } wipe(); go('welcome'); };
+Screens.doDelete = function(){ soundStop(); var ln=LN(); if (ln){ try{ ln.getPending().then(function(r){ var o=(r&&r.notifications||[]).map(function(x){ return {id:x.id}; }); if (o.length) ln.cancel({notifications:o}); }); }catch(e){} } pushOff(); try{ caches.delete('reset-prefs'); }catch(e){} wipe(); go('welcome'); };
 
 /* 10. Privacy in plain words (feedback 6, 13) */
 Screens.privacy = function(){
@@ -605,6 +613,7 @@ Screens.privacy = function(){
   '<div><b>What Reset saves</b><span>Your first name, your check-in taps, which ideas you tried and whether they helped.</span></div>'+
   '<div><b>Why</b><span>To show which ideas work for you, like “walks helped 3 of 4.”</span></div>'+
   '<div><b>Where</b><span>Only on this phone. Nothing is sent to anyone.</span></div>'+
+  '<div><b>Reminders</b><span>If you turn them on, Reset keeps an anonymous device address, your reminder time and time zone so it can send them. No name or email. Turning reminders off removes it.</span></div>'+
   '<div><b>Journal and vent box</b><span>Journal entries stay on this phone so you can look back. The vent box is never saved at all.</span></div>'+
   '<div><b>How long</b><span>Until you delete it. Clearing this site’s data also deletes it.</span></div>'+
   '</div>'+
@@ -759,6 +768,47 @@ function scheduleNudges(){
   }).catch(function(){ return false; });
 }
 
+/* ---------- web reminders (push notifications) ----------
+   A small free server (Apps Script list + a GitHub job every 15 minutes) sends each
+   reminder at the chosen time. It stores only a random device id, the browser's push
+   address, the time, how often and the time zone. Your name stays on this phone and is
+   added to the notification by the phone itself. */
+var PUSH = { url:'https://script.google.com/macros/s/AKfycbweUfx_dGa194qy5thBIKeA-LLzKfU5RldvZTp06cyuzyGJTxTw9eEBwEWACWLnq8kc/exec', key:'BAX37UU_eqjFPBIHDjJSr8Ky790YLBLGV999b9PWPWQMDohEpasd9p_bp9w0GtbBmi-lx0wiZsb6LdfuSPqj7ME' };
+function webPushOK(){ try{ return !isNative() && PUSH.url.indexOf('https://')===0 && location.protocol==='https:' && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window; }catch(e){ return false; } }
+function isIOS(){ return /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1); }
+function standalone(){ return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone===true; }
+function needsHomeScreen(){ return isIOS() && !standalone(); }
+function keyBytes(s){ s=s.replace(/-/g,'+').replace(/_/g,'/'); while (s.length%4) s+='='; var r=atob(s), a=new Uint8Array(r.length); for (var i=0;i<r.length;i++) a[i]=r.charCodeAt(i); return a; }
+function rid(){ var c='abcdefghijklmnopqrstuvwxyz0123456789', s=''; var a=new Uint8Array(24); crypto.getRandomValues(a); for (var i=0;i<a.length;i++) s+=c[a[i]%c.length]; return s; }
+function savePrefs(){ try{ var p=load().profile||{}; caches.open('reset-prefs').then(function(c){ return c.put('prefs', new Response(JSON.stringify({ name:p.name||'' }))); }); }catch(e){} }
+function postPush(body){ return fetch(PUSH.url, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(body) }); }
+function pushOn(){
+  if (!webPushOK()) return Promise.resolve('unsupported');
+  if (needsHomeScreen()) return Promise.resolve('ios');
+  return Notification.requestPermission().then(function(perm){
+    if (perm !== 'granted') return 'denied';
+    return navigator.serviceWorker.register('sw.js').then(function(){ return navigator.serviceWorker.ready; }).then(function(reg){
+      return reg.pushManager.getSubscription().then(function(s){ return s || reg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey:keyBytes(PUSH.key) }); });
+    }).then(function(sub){
+      var d=load(), p=d.profile; d.pushId = d.pushId || rid(); save(); savePrefs();
+      return postPush({ action:'subscribe', id:d.pushId, sub:sub.toJSON(), time:p.time, freq:p.freq, tz:Intl.DateTimeFormat().resolvedOptions().timeZone }).then(function(){ var d2=load(); d2.profile.push=true; save(); return 'on'; });
+    });
+  }).catch(function(){ return 'error'; });
+}
+function pushOff(){
+  var d=load(); if (!d.pushId) return Promise.resolve();
+  var id=d.pushId; if (d.profile) d.profile.push=false; save();
+  var p1 = postPush({ action:'unsubscribe', id:id }).catch(function(){});
+  var p2 = ('serviceWorker' in navigator) ? navigator.serviceWorker.getRegistration().then(function(reg){ return reg && reg.pushManager.getSubscription(); }).then(function(s){ return s && s.unsubscribe(); }).catch(function(){}) : null;
+  return Promise.all([p1,p2]);
+}
+/* Tapped "Did it" on a reminder: count it, no check-in needed. */
+function nudgeDone(){
+  var d=load(); if (!d.profile) return Screens.welcome();
+  d.nudges = d.nudges || []; d.nudges.push({ t:now() }); save();
+  header(); render('<h2>Nice. That counts.</h2><p class="lead">'+esc(GRACE[d.nudges.length % GRACE.length])+'</p><button class="btn" data-go="home">Done</button><button class="btn2" data-go="checkin">One more idea</button>');
+}
+
 /* ---------- calendar reminder (.ics) ---------- */
 function makeIcs(){
   var p = load().profile, hm = p.time.split(':');
@@ -785,6 +835,9 @@ function download(name, text, type){
 function go(name){
   clearInterval(tick);
   if (name==='notify'){ var nb=document.querySelector('[data-go="notify"]'); scheduleNudges().then(function(ok){ if (nb) nb.textContent = ok ? 'Reminders are on' : 'Notifications are off. Turn them on in Settings, then try again'; }); return; }
+  if (name==='push'){ var pb=document.querySelector('[data-go="push"]'); if (pb) pb.textContent='Turning on…';
+    pushOn().then(function(r){ if (!pb) return; pb.textContent = r==='on' ? 'Reminders are on' : r==='denied' ? 'Notifications are blocked. Allow them in your settings, then try again' : r==='ios' ? 'First add Reset to your Home Screen' : 'Couldn’t turn them on. Try the calendar option'; }); return; }
+  if (name==='pushOff'){ pushOff().then(function(){ Screens.settings(); }); return; }
   if (name==='ics'){ download('reset-reminder.ics', makeIcs(), 'text/calendar'); var b=document.querySelector('[data-go="ics"]'); if (b) b.textContent='Added. Open the file to save it'; return; }
   if (name==='export'){ download('reset-my-data.json', JSON.stringify(load(), null, 2), 'application/json'); return; }
   if (name==='start'){ return startActivity(); }
@@ -834,8 +887,16 @@ document.addEventListener('click', function(e){
   var d = load();
   if (isNative()){ nudgeSetup(); if (d.profile && d.profile.notify) scheduleNudges(); }
   if ('serviceWorker' in navigator && !isNative() && location.protocol === 'https:'){ try{ navigator.serviceWorker.register('sw.js'); }catch(e){} }
-  if (location.hash === '#checkin' && d.profile) return Screens.checkin();
-  d.profile ? Screens.home() : Screens.welcome();
+  if (d.profile && d.profile.push) savePrefs();
+  window.addEventListener('hashchange', route);
+  route();
+  function route(){
+    var h = location.hash, dd = load();
+    if (h === '#checkin' || h === '#did'){ try{ history.replaceState(null, '', location.pathname); }catch(e){} }
+    if (h === '#checkin' && dd.profile) return Screens.checkin();
+    if (h === '#did' && dd.profile) return nudgeDone();
+    dd.profile ? Screens.home() : Screens.welcome();
+  }
 })();
 </script>
 </body>
