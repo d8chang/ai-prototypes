@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reset Case Study | Deborah Chang</title>
+<meta name="description" content="Case study: researching, building and running a 4-week pilot of Reset, a 15-second wellness check-in, with 22 people in 6 countries.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap">
+<style>
+:root{
+  --bg:#EFF8EC; --hero:#E0F1DB; --surface:#FCFEFA; --tint:#E6F3E2;
+  --ink:#24332A; --ink-2:#4A5C50; --ink-3:#5C6E61; --line:#CBE2C5;
+  --accent:#1F7A4D; --btn-bg:#2E7D57; --btn-fg:#FFFFFF;
+  --p1:#FFEFB0; --p2:#D3E6FB; --p3:#FBDAD3; --p4:#E5DCF8; --p5:#CDEBD3;
+  --font:"Nunito","Avenir Next Rounded","Segoe UI",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16.5px;line-height:1.6;font-weight:500;-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-underline-offset:3px}
+a:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
+h1,h2,h3{margin:0;line-height:1.18;text-wrap:balance}
+p{margin:0}
+.wrap{max-width:860px;margin-inline:auto;padding-inline:20px}
+.eyebrow{font-weight:800;font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--accent)}
+.mast{background:radial-gradient(46% 78% at 94% 6%,rgba(255,241,186,.6) 0%,rgba(255,241,186,0) 62%),radial-gradient(34% 62% at 30% -14%,rgba(211,230,251,.55) 0%,rgba(211,230,251,0) 64%),var(--hero);border-bottom:1px solid var(--line)}
+.mast .wrap{padding-block:28px 40px;display:flex;flex-direction:column;gap:14px}
+.back{font-weight:800;font-size:14.5px;text-decoration:none}
+h1{font-size:clamp(30px,5vw,44px);font-weight:800;letter-spacing:-.015em}
+.lede{font-size:18px;color:var(--ink-2);max-width:62ch}
+.btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px}
+.btn{display:inline-flex;align-items:center;gap:8px;font:800 15px var(--font);text-decoration:none;border-radius:999px;padding:10px 20px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.btn.primary{background:var(--btn-bg);color:var(--btn-fg);border-color:transparent}
+.role{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:4px 0 0;padding:0}
+.role li{background:var(--p5);border-radius:999px;padding:5px 13px;font-size:14px;font-weight:800}
+.role li:nth-child(2){background:var(--p1)} .role li:nth-child(3){background:var(--p2)} .role li:nth-child(4){background:var(--p4)}
+main .wrap{display:flex;flex-direction:column;gap:44px;padding-block:40px 56px}
+section{display:flex;flex-direction:column;gap:14px}
+h2{font-size:clamp(23px,3vw,30px);font-weight:800}
+h3{font-size:18px;font-weight:800}
+.muted{color:var(--ink-2)}
+.small{font-size:14.5px;color:var(--ink-3)}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:2px}
+.stat b{font-size:28px;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums;line-height:1.1}
+.stat span{font-size:14px;color:var(--ink-2);line-height:1.35}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px 20px;display:flex;flex-direction:column;gap:10px}
+ul.list,ol.list{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
+.callout{border-left:4px solid var(--accent);background:var(--tint);border-radius:0 12px 12px 0;padding:14px 18px;font-weight:700}
+.table{width:100%;border-collapse:collapse;font-size:15px}
+.table th,.table td{text-align:left;vertical-align:top;padding:10px 12px;border-bottom:1px solid var(--line)}
+.table th{font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:800}
+.table td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.scroll{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:16px}
+.bars{display:flex;flex-direction:column;gap:10px}
+.bar{display:grid;grid-template-columns:72px minmax(0,1fr) 92px;gap:12px;align-items:center;font-size:15px}
+.bar .track{height:14px;background:var(--tint);border-radius:7px;overflow:hidden}
+.bar .fill{height:100%;background:var(--accent);border-radius:7px}
+.bar .val{font-weight:800;font-variant-numeric:tabular-nums}
+.themes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.theme{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 18px;display:flex;flex-direction:column;gap:6px}
+.theme .n{align-self:flex-start;font-size:12px;font-weight:800;border-radius:999px;padding:3px 10px;background:var(--p1)}
+.theme:nth-child(2) .n{background:var(--p2)} .theme:nth-child(3) .n{background:var(--p3)} .theme:nth-child(4) .n{background:var(--p4)}
+blockquote{margin:0;padding:12px 16px;border-radius:12px;background:var(--p1);font-weight:700}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+footer{border-top:1px solid var(--line);background:var(--hero)}
+footer .wrap{padding-block:28px;display:flex;flex-wrap:wrap;gap:12px 24px;justify-content:space-between;font-size:14.5px}
+@media (max-width:700px){
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .themes,.two{grid-template-columns:minmax(0,1fr)}
+  .bar{grid-template-columns:60px minmax(0,1fr) 80px}
+}
+</style>
+</head>
+<body>
+<header class="mast">
+  <div class="wrap">
+    <a class="back" href="./">← Portfolio</a>
+    <span class="eyebrow">Case study · Consumer wellness · Oct–Nov 2026</span>
+    <h1>Reset: a 15-second check-in for draining workdays</h1>
+    <p class="lede">I researched, built and ran a 4-week pilot with 22 people in 6 countries. People reliably tried what Reset suggested, but most didn't come back on their own. That finding shaped v2.</p>
+    <ul class="role" aria-label="My role"><li>Solo founder and PM</li><li>User research</li><li>Built with AI (Claude)</li><li>Experiments and analytics</li></ul>
+    <div class="btns">
+      <a class="btn primary" href="reset/" target="_blank" rel="noopener">Try v2 ↗</a>
+      <a class="btn" href="#results">Jump to results</a>
+    </div>
+  </div>
+</header>
+
+<main>
+<div class="wrap">
+
+  <section aria-labelledby="h-results" id="results">
+    <h2 id="h-results">Results at a glance</h2>
+    <div class="stats">
+      <div class="stat"><b>86%</b><span>did a first check-in (target 70%)</span></div>
+      <div class="stat"><b>93%</b><span>said yes to the idea (target 50%)</span></div>
+      <div class="stat"><b>88%</b><span>then did it (target 60%)</span></div>
+      <div class="stat"><b>12 of 20</b><span>low-mood check-ins ended better</span></div>
+    </div>
+    <p class="callout">The gap: of the 12 people who joined in week 1, 11 checked in that week, but only 4 did in their second week.</p>
+  </section>
+
+  <section aria-labelledby="h-problem">
+    <h2 id="h-problem">The problem</h2>
+    <p>Burned-out people know they should take a break, but in the moment they lack the time or an idea of what to do, so they scroll instead and end up feeling more burned out.</p>
+    <div class="two">
+      <div class="card">
+        <h3>Survey of 11 people in tech</h3>
+        <ul class="list">
+          <li>Biggest barrier: <strong>time</strong> (7 of 11), then not knowing what to do (3).</li>
+          <li>9 of 11 scroll to unwind; only 4 of them feel better after.</li>
+          <li>8 had never tried a wellness app. <strong>10 of 11</strong> would try a 15-second check-in.</li>
+          <li>Exercise and a hobby helped most (9 each); 5 named pressure around AI.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Desk research</h3>
+        <ul class="list">
+          <li>Mental health apps keep about 3% of users at 30 days.</li>
+          <li>Data entry is a top reason people quit.</li>
+          <li>I checked where HIPAA, the FTC Health Breach Notification Rule and FDA general wellness guidance apply, so Reset stays a wellness tool with no medical claims.</li>
+        </ul>
+      </div>
+    </div>
+    <p><strong>Design principles:</strong> under 15 seconds, no typing, no streaks, and one concrete idea instead of a menu.</p>
+  </section>
+
+  <section aria-labelledby="h-built">
+    <h2 id="h-built">What I built</h2>
+    <p class="muted">A no-login web app on Google Apps Script with a Google Sheet as the database: free to run and easy to analyze.</p>
+    <ol class="list">
+      <li><strong>Sign-up:</strong> first name, email, how often, and a time for the check-in email.</li>
+      <li><strong>Three taps:</strong> mood, time available, budget.</li>
+      <li><strong>One idea</strong> from 53 activities, gentler on low-mood days, with a timer or steps built in.</li>
+      <li><strong>Follow-up:</strong> "Did you do it, and how do you feel now?" gives a before-and-after mood.</li>
+      <li><strong>Weekly recap</strong> of what helped, plus one "how manageable was your week" question.</li>
+      <li><strong>Privacy by design:</strong> minimal data, and journal and vent text never stored.</li>
+    </ol>
+  </section>
+
+  <section aria-labelledby="h-pilot">
+    <h2 id="h-pilot">The pilot</h2>
+    <p>Oct 14 to Nov 10. I invited 14 friends, then recruited strangers through product Slack communities and Reddit. 22 people signed up from the US, Chile, India, Pakistan, Egypt and Uganda.</p>
+    <div class="card">
+      <h3>Retention: the 12 people who joined in week 1</h3>
+      <div class="bars" role="img" aria-label="Week 1: 11 of 12 checked in. Week 2: 4 of 12. Week 3: 5 of 12.">
+        <div class="bar"><span>Week 1</span><span class="track"><span class="fill" style="display:block;width:92%"></span></span><span class="val">11 of 12</span></div>
+        <div class="bar"><span>Week 2</span><span class="track"><span class="fill" style="display:block;width:33%"></span></span><span class="val">4 of 12</span></div>
+        <div class="bar"><span>Week 3</span><span class="track"><span class="fill" style="display:block;width:42%"></span></span><span class="val">5 of 12</span></div>
+      </div>
+      <p class="small">Weeks count from each person's own join date. I followed only the week-1 group because they all had three full weeks; adding later joiners would make return look lower just because they had less time. 7 of the 12 came back on a later day at least once.</p>
+    </div>
+    <div class="scroll">
+      <table class="table">
+        <thead><tr><th>Measure (everyone)</th><th>Result</th><th>Target</th></tr></thead>
+        <tbody>
+          <tr><td>Did a first check-in</td><td class="num">19 of 22 (86%)</td><td>70%</td></tr>
+          <tr><td>Said yes to the idea</td><td class="num">68 of 73 (93%)</td><td>50%</td></tr>
+          <tr><td>Did the activity</td><td class="num">60 of 68 (88%)</td><td>60%</td></tr>
+          <tr><td>Mood after, all rated activities</td><td class="num">21 better, 36 same, 3 worse</td><td>Above 0</td></tr>
+          <tr><td>Mood after, starting at mood 1–2</td><td class="num">12 of 20 better</td><td>—</td></tr>
+          <tr><td>Movement vs play ideas</td><td class="num">9 of 14 vs 4 of 16 better</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="small">Per-check-in measures use everyone, because joining later doesn't change them: the week-1 group and later joiners came out nearly the same (mood +0.34 vs +0.32 per activity).</p>
+  </section>
+
+  <section aria-labelledby="h-exp">
+    <h2 id="h-exp">Experiments</h2>
+    <p>Four experiments, each with a hypothesis, one main metric and a decision rule written before launch. None cleared its bar, and that taught me as much as a win would have.</p>
+    <div class="scroll">
+      <table class="table">
+        <thead><tr><th>Test</th><th>Result</th><th>Decision</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Email subject:</strong> "How are you feeling right now?" vs "Your 15-second check-in"</td><td>Check-in within a day: 36% vs 37%. After the Oct 21 email fix: 43% vs 36%</td><td>Under the 20-point bar; keep the original</td></tr>
+          <tr><td><strong>"Why this one" line</strong> under the idea</td><td>Said yes: 90% shown vs 97% hidden; more swapping when shown</td><td>No help; hide it</td></tr>
+          <tr><td><strong>Personalized vs random</strong> idea (3:1)</td><td>Only 9 random check-ins</td><td>Too few to read</td></tr>
+          <tr><td><strong>Phone vs computer</strong> (observed)</td><td>40% on a phone</td><td>Under the 70% bar, but email links pull people to computers</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="small"><strong>Lesson:</strong> acceptance and completion were already above 85%, so those metrics had no room to move. Next time I'd test where people are unsure (low-energy days) or measure ideas skipped before picking.</p>
+  </section>
+
+  <section aria-labelledby="h-said">
+    <h2 id="h-said">What testers said</h2>
+    <p class="muted">20 pieces of feedback from comments, a feedback form, annotated screenshots, an email reply and two interviews.</p>
+    <div class="themes">
+      <div class="theme"><span class="n">8 of 20</span><h3>Reminders don't reach people</h3><p>Email gets ignored after a stressful day or lands in spam. Yet check-ins often came within minutes of an email, so the reminder works when it's seen.</p></div>
+      <div class="theme"><span class="n">8 of 20</span><h3>Unclear what you sign up for</h3><p>The sign-up didn't say what the emails contain, and "budget" read like paying for the app.</p></div>
+      <div class="theme"><span class="n">5 of 20</span><h3>No reason to come back</h3><p>Testers asked for a weekly payoff in plain counts, or a fresh tip instead of scores.</p></div>
+      <div class="theme"><span class="n">3 of 20</span><h3>Ideas don't fit the moment</h3><p>"I am at my desk so not feasible to spend time on hobby." Reaching out to a friend doesn't suit drained days.</p></div>
+    </div>
+    <blockquote>"Self help apps require the user to be intentional." A tester who went quiet, and wished for a quick text like "Take a deep breath!"</blockquote>
+  </section>
+
+  <section aria-labelledby="h-v2">
+    <h2 id="h-v2">v2: built around coming back</h2>
+    <ul class="list">
+      <li><strong>Reach:</strong> reminders at a moment you pick ("after my last meeting") instead of email. In the phone app, each notification carries one small action you can do right there, with Did it and Check in buttons.</li>
+      <li><strong>Fit:</strong> "Where are you?" (home, office, outside); "Up for people, or just you?" on low days; no budget question.</li>
+      <li><strong>Payoff:</strong> a weekly page in plain counts ("Walks helped you 3 of 4 times").</li>
+      <li><strong>Calm and trust:</strong> a private journal, optional rain, brook or lo-fi café sound, and all data kept on the phone.</li>
+    </ul>
+    <p><strong>What v2 tests:</strong> does a reminder at a chosen moment bring people back in week 2?</p>
+    <div class="btns"><a class="btn primary" href="reset/" target="_blank" rel="noopener">Try v2 ↗</a></div>
+  </section>
+
+  <section aria-labelledby="h-caveats">
+    <h2 id="h-caveats">Caveats</h2>
+    <ul class="list small">
+      <li><strong>Small sample:</strong> 22 people and 73 check-ins; one person moves retention by 8 points. Read these as direction, not proof.</li>
+      <li><strong>A few people carry the data:</strong> the three most active testers made 36 of the 73 check-ins.</li>
+      <li><strong>Friends and goodwill:</strong> the week-1 group is mostly friends; retention with strangers is likely lower.</li>
+      <li><strong>Nudges and spam:</strong> I sent three personal reminders, and some early emails landed in spam.</li>
+      <li><strong>Self-reported mood with no control group,</strong> counted only when people answered the follow-up.</li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="h-learned">
+    <h2 id="h-learned">What I learned</h2>
+    <ol class="list">
+      <li><strong>Measure return, not starts.</strong> Mixing in late joiners hid the drop. Following one group told the real story.</li>
+      <li><strong>Pick metrics with room to move.</strong> Both A/B tests used metrics already near the top.</li>
+      <li><strong>The channel is part of the product.</strong> Spam and ignored emails hurt retention more than anything inside the app.</li>
+      <li><strong>Small data shows direction; interviews explain it.</strong></li>
+      <li><strong>Say only what's true.</strong> v2 only says an idea "has helped you" after two of your own ratings.</li>
+    </ol>
+  </section>
+
+</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a href="./">← Back to portfolio</a>
+    <span class="small">A wellness experiment, not medical advice. Tester names are left out on purpose.</span>
+  </div>
+</footer>
+</body>
+</html>
