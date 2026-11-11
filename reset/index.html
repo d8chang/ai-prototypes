@@ -778,7 +778,7 @@ function standalone(){ return (window.matchMedia && matchMedia('(display-mode: s
 function needsHomeScreen(){ return isIOS() && !standalone(); }
 function keyBytes(s){ s=s.replace(/-/g,'+').replace(/_/g,'/'); while (s.length%4) s+='='; var r=atob(s), a=new Uint8Array(r.length); for (var i=0;i<r.length;i++) a[i]=r.charCodeAt(i); return a; }
 function rid(){ var c='abcdefghijklmnopqrstuvwxyz0123456789', s=''; var a=new Uint8Array(24); crypto.getRandomValues(a); for (var i=0;i<a.length;i++) s+=c[a[i]%c.length]; return s; }
-function savePrefs(){ try{ var p=load().profile||{}; caches.open('reset-prefs').then(function(c){ return c.put('prefs', new Response(JSON.stringify({ name:p.name||'' }))); }); }catch(e){} }
+function savePrefs(){ try{ var d=load(), p=d.profile||{}; caches.open('reset-prefs').then(function(c){ return c.put('prefs', new Response(JSON.stringify({ name:p.name||'', id:d.pushId||'', time:p.time||'', freq:p.freq||'', tz:Intl.DateTimeFormat().resolvedOptions().timeZone, url:PUSH.url, key:PUSH.key }))); }); }catch(e){} }
 function postPush(body){ return fetch(PUSH.url, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(body) }); }
 function pushOn(){
   if (!webPushOK()) return Promise.resolve('unsupported');
@@ -885,7 +885,7 @@ document.addEventListener('click', function(e){
   var d = load();
   if (isNative()){ nudgeSetup(); if (d.profile && d.profile.notify) scheduleNudges(); }
   if ('serviceWorker' in navigator && !isNative() && location.protocol === 'https:'){ try{ navigator.serviceWorker.register('sw.js'); }catch(e){} }
-  if (d.profile && d.profile.push) savePrefs();
+  if (d.profile && d.profile.push && webPushOK() && Notification.permission === 'granted') pushOn();
   window.addEventListener('hashchange', route);
   route();
   function route(){

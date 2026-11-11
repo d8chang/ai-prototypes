@@ -1,5 +1,5 @@
 /* Reset offline cache and reminders. Only the app shell is cached; no answers pass through here. */
-var CACHE = 'reset-v2.3';
+var CACHE = 'reset-v2.4';
 var FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-180.png'];
 self.addEventListener('install', function(e){ e.waitUntil(caches.open(CACHE).then(function(c){ return c.addAll(FILES); })); self.skipWaiting(); });
 self.addEventListener('activate', function(e){ e.waitUntil(caches.keys().then(function(ks){ return Promise.all(ks.filter(function(k){ return k !== CACHE && k !== 'reset-prefs'; }).map(function(k){ return caches.delete(k); })); })); self.clients.claim(); });
@@ -42,4 +42,15 @@ self.addEventListener('notificationclick', function(e){
     }
     return self.clients.openWindow(url);
   }));
+});
+
+/* If the browser resets the reminder address, sign up again with the new one. */
+function keyBytes(k){ k=k.replace(/-/g,'+').replace(/_/g,'/'); while (k.length%4) k+='='; var r=atob(k), a=new Uint8Array(r.length); for (var i=0;i<r.length;i++) a[i]=r.charCodeAt(i); return a; }
+self.addEventListener('pushsubscriptionchange', function(e){
+  e.waitUntil(caches.open('reset-prefs').then(function(c){ return c.match('prefs'); }).then(function(r){ return r ? r.json() : null; }).then(function(p){
+    if (!p || !p.id || !p.url) return;
+    return (e.newSubscription ? Promise.resolve(e.newSubscription) : self.registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(p.key) })).then(function(sub){
+      return fetch(p.url, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ action: 'subscribe', id: p.id, sub: sub.toJSON(), time: p.time, freq: p.freq, tz: p.tz }) });
+    });
+  }).catch(function(){}));
 });
