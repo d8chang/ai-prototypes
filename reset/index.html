@@ -290,7 +290,8 @@ Screens.welcome = function(){
   '<div class="chips" aria-hidden="true"><span class="chip sel" style="cursor:default">Low</span><span class="chip sel" style="cursor:default">5 min</span><span class="chip sel" style="cursor:default">At the office</span></div>'+
   '<p><strong>Stand and stretch</strong><br><span class="small">Shoulders, neck, wrists. Right where you are. With a 5-minute timer.</span></p></div>'+
   '<div class="card"><div class="eyebrow">How it works</div><ol class="steps"><li>A reminder at a moment you pick.</li><li>Three taps, one small free idea.</li><li>Tell it if it helped. Each week, see what works for you.</li></ol></div>'+
-  '<button class="btn" data-go="setup">Get started</button>'+
+  (needsHomeScreen() ? homeScreenSteps().replace('and come back here to turn on reminders.', 'and set it up there. That way reminders work and you only set up once.').replace(/<p class="small">Using Chrome[\s\S]*?<\/p>/, '') : '')+
+  '<button class="btn" data-go="setup">'+(needsHomeScreen() ? 'Set up here anyway' : 'Get started')+'</button>'+
   '<p class="small">Reset is always free. No streaks. Private: your answers stay on this phone. <button class="link" data-go="privacy" style="padding:0;min-height:0">More details</button></p>'+
   '<p class="small foot">A wellness experiment, not medical advice.</p>');
 };
@@ -327,11 +328,8 @@ Screens.remind = function(){
      '<button class="btn" data-go="notify">Turn on reminders</button>'
    : webPushOK()
    ? '<p class="lead">A notification after '+esc(p.moment.toLowerCase())+', around '+fmtTime(p.time)+'. Each one has a tiny thing you can do right there, like three slow breaths. Tap it for a full check-in. No emails, nothing to set up.</p>'+
-     (needsHomeScreen()
-       ? '<div class="card"><div class="eyebrow">One step first on iPhone</div><p>Tap Share, then “Add to Home Screen”. Open Reset from the new icon, and turn on reminders there.</p></div>'
-       : '<button class="btn" data-go="push">Turn on reminders</button>')+
-     ''
-   : '<p class="lead">This browser can’t show reminders. Open Reset in Chrome or Safari to turn them on. On iPhone, add it to your Home Screen first: tap Share, then “Add to Home Screen”.</p>')+
+     (needsHomeScreen() ? homeScreenSteps() : '<button class="btn" data-go="push">Turn on reminders</button>')
+   : '<p class="lead">A notification after '+esc(p.moment.toLowerCase())+', around '+fmtTime(p.time)+', with one tiny thing you can do right there.</p>'+homeScreenSteps())+
   '<button class="btn2" data-go="checkin">Do my first check-in now</button>');
 };
 
@@ -588,8 +586,8 @@ Screens.settings = function(){
   render('<h1>Reminder and settings</h1>'+
   '<div class="card"><p>Reminder after <strong>'+esc(p.moment.toLowerCase())+'</strong>, around <strong>'+fmtTime(p.time)+'</strong> ('+({weekdays:'weekdays',mwf:'Mon, Wed, Fri',daily:'every day'})[p.freq]+').</p>'+
   '<button class="btn2" data-go="setup">Change it</button>'+(isNative() ? '<button class="btn2" data-go="notify">Update reminders</button>'
-    : webPushOK() ? (p.push ? '<button class="btn2" data-go="pushOff">Turn off reminders</button>' : (needsHomeScreen() ? '<p class="small">On iPhone, add Reset to your Home Screen to turn on reminders.</p>' : '<button class="btn2" data-go="push">Turn on reminders</button>'))
-    : '<p class="small">Open Reset in Chrome or Safari to turn on reminders.</p>')+'</div>'+
+    : webPushOK() ? (p.push ? '<button class="btn2" data-go="pushOff">Turn off reminders</button>' : (needsHomeScreen() ? homeScreenSteps() : '<button class="btn2" data-go="push">Turn on reminders</button>'))
+    : homeScreenSteps())+'</div>'+
   '<div class="card"><p><strong>Ideas that cost money</strong><br><span class="small">Like a massage or a therapy session. You\u2019d pay the place, never Reset.'+(p.paid&&p.zip?' ZIP code: '+esc(p.zip)+'.':'')+'</span></p>'+
   '<button class="btn2" data-go="togglePaid">'+(p.paid?'Turn off':'Turn on')+'</button></div>'+
   '<p class="small">'+(isNative() ? 'To pause, turn off notifications for Reset in your phone’s Settings.' : p.push ? 'To pause, tap Turn off reminders.' : 'Reminders are off.')+' Your past answers stay here.</p>'+
@@ -775,7 +773,20 @@ var PUSH = { url:'https://script.google.com/macros/s/AKfycbweUfx_dGa194qy5thBIKe
 function webPushOK(){ try{ return !isNative() && PUSH.url.indexOf('https://')===0 && location.protocol==='https:' && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window; }catch(e){ return false; } }
 function isIOS(){ return /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1); }
 function standalone(){ return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone===true; }
-function needsHomeScreen(){ return isIOS() && !standalone(); }
+function needsHomeScreen(){ return !isNative() && isIOS() && !standalone(); }
+function isAndroid(){ return /Android/.test(navigator.userAgent); }
+function homeScreenSteps(){
+  if (isIOS()) return '<div class="card"><div class="eyebrow">Add Reset to your Home Screen first</div><ol class="steps">'+
+    '<li>At the bottom of Safari, tap the <strong>Share</strong> button (the square with an arrow pointing up).</li>'+
+    '<li>Scroll down and tap <strong>Add to Home Screen</strong>, then <strong>Add</strong>.</li>'+
+    '<li>Open Reset from the new icon on your Home Screen, and come back here to turn on reminders.</li></ol>'+
+    '<p class="small">Using Chrome on iPhone? Open this page in Safari first. The Home Screen app starts fresh, so you’ll set it up once more there.</p></div>';
+  if (isAndroid()) return '<div class="card"><div class="eyebrow">Add Reset to your Home Screen first</div><ol class="steps">'+
+    '<li>In Chrome, tap the <strong>⋮</strong> menu at the top right.</li>'+
+    '<li>Tap <strong>Add to Home screen</strong> or <strong>Install app</strong>.</li>'+
+    '<li>Open Reset from the new icon, and come back here to turn on reminders.</li></ol></div>';
+  return '<div class="card"><div class="eyebrow">One step first</div><p>Open Reset in Chrome or Safari, then come back here to turn on reminders.</p></div>';
+}
 function keyBytes(s){ s=s.replace(/-/g,'+').replace(/_/g,'/'); while (s.length%4) s+='='; var r=atob(s), a=new Uint8Array(r.length); for (var i=0;i<r.length;i++) a[i]=r.charCodeAt(i); return a; }
 function rid(){ var c='abcdefghijklmnopqrstuvwxyz0123456789', s=''; var a=new Uint8Array(24); crypto.getRandomValues(a); for (var i=0;i<a.length;i++) s+=c[a[i]%c.length]; return s; }
 function savePrefs(){ try{ var d=load(), p=d.profile||{}; caches.open('reset-prefs').then(function(c){ return c.put('prefs', new Response(JSON.stringify({ name:p.name||'', id:d.pushId||'', time:p.time||'', freq:p.freq||'', tz:Intl.DateTimeFormat().resolvedOptions().timeZone, url:PUSH.url, key:PUSH.key }))); }); }catch(e){} }
