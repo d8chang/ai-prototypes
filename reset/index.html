@@ -117,7 +117,7 @@ a{color:var(--link)}
    anywhere unless CONFIG.syncUrl is set later for a pilot.
    Changes from v1, each tied to tester feedback (timeline item numbers):
    - Sign-up says what you get, with a sample (3, 11, 13)
-   - Reminder at a moment you pick, added to your phone calendar, not email (1, 5, 8)
+   - Reminder at a moment you pick, as a phone notification, not email (1, 5, 8)
    - "Where are you?" filters ideas (16); no social ideas unless you say so (2)
    - No budget question: all ideas are free (15); "Not this one" and Back (14)
    - "Did it help?" with a one-line reason why it asks (6)
@@ -316,7 +316,7 @@ Screens.saveSetup = function(){
   save(); if (d.profile.push) pushOn(); go('remind');
 };
 
-/* 3. Reminder: phone calendar instead of email (feedback 1, 5, 8) */
+/* 3. Reminder: a notification at a moment you pick, instead of email (feedback 1, 5, 8) */
 Screens.remind = function(){
   header();
   var p = load().profile;
@@ -330,10 +330,8 @@ Screens.remind = function(){
      (needsHomeScreen()
        ? '<div class="card"><div class="eyebrow">One step first on iPhone</div><p>Tap Share, then “Add to Home Screen”. Open Reset from the new icon, and turn on reminders there.</p></div>'
        : '<button class="btn" data-go="push">Turn on reminders</button>')+
-     '<button class="link" data-go="ics">Or add a calendar reminder instead</button>'
-   : '<p class="lead">Add a repeating reminder to your phone’s calendar. It pops up after '+esc(p.moment.toLowerCase())+', around '+fmtTime(p.time)+', with a link back here. No emails, so nothing lands in spam.</p>'+
-     '<button class="btn" data-go="ics">Add reminder to my calendar</button>'+
-     '<div class="card"><div class="eyebrow">Also helpful</div><p>Add Reset to your home screen so it opens like an app. On iPhone: tap Share, then “Add to Home Screen”. On Android: tap the menu, then “Install app”.</p></div>')+
+     ''
+   : '<p class="lead">This browser can’t show reminders. Open Reset in Chrome or Safari to turn them on. On iPhone, add it to your Home Screen first: tap Share, then “Add to Home Screen”.</p>')+
   '<button class="btn2" data-go="checkin">Do my first check-in now</button>');
 };
 
@@ -591,10 +589,10 @@ Screens.settings = function(){
   '<div class="card"><p>Reminder after <strong>'+esc(p.moment.toLowerCase())+'</strong>, around <strong>'+fmtTime(p.time)+'</strong> ('+({weekdays:'weekdays',mwf:'Mon, Wed, Fri',daily:'every day'})[p.freq]+').</p>'+
   '<button class="btn2" data-go="setup">Change it</button>'+(isNative() ? '<button class="btn2" data-go="notify">Update reminders</button>'
     : webPushOK() ? (p.push ? '<button class="btn2" data-go="pushOff">Turn off reminders</button>' : (needsHomeScreen() ? '<p class="small">On iPhone, add Reset to your Home Screen to turn on reminders.</p>' : '<button class="btn2" data-go="push">Turn on reminders</button>'))
-    : '<button class="btn2" data-go="ics">Add to calendar again</button>')+'</div>'+
+    : '<p class="small">Open Reset in Chrome or Safari to turn on reminders.</p>')+'</div>'+
   '<div class="card"><p><strong>Ideas that cost money</strong><br><span class="small">Like a massage or a therapy session. You\u2019d pay the place, never Reset.'+(p.paid&&p.zip?' ZIP code: '+esc(p.zip)+'.':'')+'</span></p>'+
   '<button class="btn2" data-go="togglePaid">'+(p.paid?'Turn off':'Turn on')+'</button></div>'+
-  '<p class="small">'+(isNative() ? 'To pause, turn off notifications for Reset in your phone’s Settings.' : p.push ? 'To pause, tap Turn off reminders.' : 'To pause, delete the Reset reminder in your calendar.')+' Your past answers stay here.</p>'+
+  '<p class="small">'+(isNative() ? 'To pause, turn off notifications for Reset in your phone’s Settings.' : p.push ? 'To pause, tap Turn off reminders.' : 'Reminders are off.')+' Your past answers stay here.</p>'+
   '<button class="btn2" data-go="export">Download my data</button>'+
   '<button class="btn2" data-go="confirmDelete">Delete my data</button>'+
   '<button class="link" data-go="home">Back</button>');
@@ -716,7 +714,7 @@ function soundBar(){
 /* ---------- phone notifications (iPhone/Android app only) ----------
    In the app build (Capacitor), reminders are real notifications. Each one carries a small action
    you can do right away, so it helps even if you never open the app (feedback 20, 18).
-   On the web, the calendar reminder below is used instead. */
+   On the web, the push reminders below are used instead. */
 var NUDGES = [
   ['{n}! Take a deep breath.', 'In for 4, out for 6. Three times. That’s it.'],
   ['Shoulders check, {n}.', 'Drop them away from your ears and roll them back 5 times.'],
@@ -836,7 +834,7 @@ function go(name){
   clearInterval(tick);
   if (name==='notify'){ var nb=document.querySelector('[data-go="notify"]'); scheduleNudges().then(function(ok){ if (nb) nb.textContent = ok ? 'Reminders are on' : 'Notifications are off. Turn them on in Settings, then try again'; }); return; }
   if (name==='push'){ var pb=document.querySelector('[data-go="push"]'); if (pb) pb.textContent='Turning on…';
-    pushOn().then(function(r){ if (!pb) return; pb.textContent = r==='on' ? 'Reminders are on' : r==='denied' ? 'Notifications are blocked. Allow them in your settings, then try again' : r==='ios' ? 'First add Reset to your Home Screen' : 'Couldn’t turn them on. Try the calendar option'; }); return; }
+    pushOn().then(function(r){ if (!pb) return; pb.textContent = r==='on' ? 'Reminders are on' : r==='denied' ? 'Notifications are blocked. Allow them in your settings, then try again' : r==='ios' ? 'First add Reset to your Home Screen' : 'Couldn’t turn them on. Try again in a moment'; }); return; }
   if (name==='pushOff'){ pushOff().then(function(){ Screens.settings(); }); return; }
   if (name==='ics'){ download('reset-reminder.ics', makeIcs(), 'text/calendar'); var b=document.querySelector('[data-go="ics"]'); if (b) b.textContent='Added. Open the file to save it'; return; }
   if (name==='export'){ download('reset-my-data.json', JSON.stringify(load(), null, 2), 'application/json'); return; }
