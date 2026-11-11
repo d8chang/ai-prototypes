@@ -51,6 +51,10 @@ h1:focus,h2:focus{outline:none}
 .chip{display:inline-flex;align-items:center;justify-content:center;font:inherit;font-size:15px;min-height:44px;padding:0 16px;border-radius:999px;border:1.5px solid var(--accent);background:var(--card);color:var(--link);cursor:pointer}
 .chip:hover{background:var(--accent-soft)}
 .chip.sel{background:var(--accent);color:var(--accent-ink)}
+.status{align-self:flex-start;display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;border-radius:999px;padding:6px 14px}
+.status.on{background:var(--accent);color:var(--accent-ink)}
+.status.off{background:var(--chip);color:var(--ink2)}
+.status i{width:8px;height:8px;border-radius:50%;background:currentColor;display:inline-block}
 .btn{font:inherit;font-size:16px;font-weight:600;min-height:50px;border-radius:999px;border:0;background:var(--accent);color:var(--accent-ink);cursor:pointer;width:100%}
 .btn2{font:inherit;font-size:15px;min-height:46px;border-radius:999px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;width:100%}
 .link{font:inherit;font-size:15px;background:none;border:0;color:var(--link);text-decoration:underline;cursor:pointer;padding:10px 4px;min-height:44px}
@@ -584,13 +588,14 @@ Screens.settings = function(){
   header();
   var p = load().profile;
   render('<h1>Reminder and settings</h1>'+
-  '<div class="card"><p>Reminder after <strong>'+esc(p.moment.toLowerCase())+'</strong>, around <strong>'+fmtTime(p.time)+'</strong> ('+({weekdays:'weekdays',mwf:'Mon, Wed, Fri',daily:'every day'})[p.freq]+').</p>'+
+  '<div class="card">'+(webPushOK()||isNative() ? '<span class="status '+(p.push||p.notify?'on':'off')+'"><i></i>Reminders '+(p.push||p.notify?'on':'off')+'</span>' : '')+
+  '<p>Reminder after <strong>'+esc(p.moment.toLowerCase())+'</strong>, around <strong>'+fmtTime(p.time)+'</strong> ('+({weekdays:'weekdays',mwf:'Mon, Wed, Fri',daily:'every day'})[p.freq]+').</p>'+
   '<button class="btn2" data-go="setup">Change it</button>'+(isNative() ? '<button class="btn2" data-go="notify">Update reminders</button>'
-    : webPushOK() ? (p.push ? '<button class="btn2" data-go="pushOff">Turn off reminders</button>' : (needsHomeScreen() ? homeScreenSteps() : '<button class="btn2" data-go="push">Turn on reminders</button>'))
+    : webPushOK() ? (p.push ? '<button class="btn2" data-go="pushOff">Turn reminders off</button>' : (needsHomeScreen() ? homeScreenSteps() : '<button class="btn" data-go="push">Turn reminders on</button>'))
     : homeScreenSteps())+'</div>'+
   '<div class="card"><p><strong>Ideas that cost money</strong><br><span class="small">Like a massage or a therapy session. You\u2019d pay the place, never Reset.'+(p.paid&&p.zip?' ZIP code: '+esc(p.zip)+'.':'')+'</span></p>'+
   '<button class="btn2" data-go="togglePaid">'+(p.paid?'Turn off':'Turn on')+'</button></div>'+
-  '<p class="small">'+(isNative() ? 'To pause, turn off notifications for Reset in your phone’s Settings.' : p.push ? 'To pause, tap Turn off reminders.' : 'Reminders are off.')+' Your past answers stay here.</p>'+
+  '<p class="small">'+(isNative() ? 'To pause, turn off notifications for Reset in your phone’s Settings.' : p.push ? 'To pause, tap Turn reminders off.' : '')+' Your past answers stay here.</p>'+
   '<button class="btn2" data-go="export">Download my data</button>'+
   '<button class="btn2" data-go="confirmDelete">Delete my data</button>'+
   '<button class="link" data-go="home">Back</button>');
@@ -854,7 +859,7 @@ function go(name){
   clearInterval(tick);
   if (name==='notify'){ var nb=document.querySelector('[data-go="notify"]'); scheduleNudges().then(function(ok){ if (nb) nb.textContent = ok ? 'Reminders are on' : 'Notifications are off. Turn them on in Settings, then try again'; }); return; }
   if (name==='push'){ var pb=document.querySelector('[data-go="push"]'); if (pb) pb.textContent='Turning on…';
-    pushOn().then(function(r){ if (!pb) return; pb.textContent = r==='on' ? 'Reminders are on' : r==='denied' ? 'Notifications are blocked. Allow them in your settings, then try again' : r==='ios' ? 'First add Reset to your Home Screen' : 'Couldn’t turn them on. Try again in a moment'; }); return; }
+    pushOn().then(function(r){ if (r==='on' && document.querySelector('.status')) return Screens.settings(); if (r==='on'){ var st=document.createElement('span'); st.className='status on'; st.innerHTML='<i></i>Reminders on'; pb.replaceWith(st); return; } if (!pb) return; pb.textContent = r==='on' ? 'Reminders are on' : r==='denied' ? 'Notifications are blocked. Allow them in your settings, then try again' : r==='ios' ? 'First add Reset to your Home Screen' : 'Couldn’t turn them on. Try again in a moment'; }); return; }
   if (name==='nudgeDid'){ return nudgeDone(); }
   if (name==='pushOff'){ pushOff().then(function(){ Screens.settings(); }); return; }
   if (name==='ics'){ download('reset-reminder.ics', makeIcs(), 'text/calendar'); var b=document.querySelector('[data-go="ics"]'); if (b) b.textContent='Added. Open the file to save it'; return; }
