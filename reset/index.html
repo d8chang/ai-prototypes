@@ -811,6 +811,15 @@ function pushOff(){
   var p2 = ('serviceWorker' in navigator) ? navigator.serviceWorker.getRegistration().then(function(reg){ return reg && reg.pushManager.getSubscription(); }).then(function(s){ return s && s.unsubscribe(); }).catch(function(){}) : null;
   return Promise.all([p1,p2]);
 }
+/* Tapped a reminder: show its small action with big, visible choices (notification buttons can be hidden). */
+function nudgeScreen(i){
+  var d=load(); if (!d.profile) return Screens.welcome();
+  var n = NUDGES[(i||0) % NUDGES.length], name = d.profile.name;
+  header(); render('<div class="small">Your reminder</div><h1>'+esc(n[0].replace('{n}', name))+'</h1><p class="lead">'+esc(n[1].replace('{n}', name))+'</p>'+
+  '<button class="btn" data-go="nudgeDid">I did it</button>'+
+  '<button class="btn2" data-go="checkin">Give me one idea</button>'+
+  '<button class="link" data-go="home">Not now</button>');
+}
 /* Tapped "Did it" on a reminder: count it, no check-in needed. */
 function nudgeDone(){
   var d=load(); if (!d.profile) return Screens.welcome();
@@ -846,6 +855,7 @@ function go(name){
   if (name==='notify'){ var nb=document.querySelector('[data-go="notify"]'); scheduleNudges().then(function(ok){ if (nb) nb.textContent = ok ? 'Reminders are on' : 'Notifications are off. Turn them on in Settings, then try again'; }); return; }
   if (name==='push'){ var pb=document.querySelector('[data-go="push"]'); if (pb) pb.textContent='Turning on…';
     pushOn().then(function(r){ if (!pb) return; pb.textContent = r==='on' ? 'Reminders are on' : r==='denied' ? 'Notifications are blocked. Allow them in your settings, then try again' : r==='ios' ? 'First add Reset to your Home Screen' : 'Couldn’t turn them on. Try again in a moment'; }); return; }
+  if (name==='nudgeDid'){ return nudgeDone(); }
   if (name==='pushOff'){ pushOff().then(function(){ Screens.settings(); }); return; }
   if (name==='ics'){ download('reset-reminder.ics', makeIcs(), 'text/calendar'); var b=document.querySelector('[data-go="ics"]'); if (b) b.textContent='Added. Open the file to save it'; return; }
   if (name==='export'){ download('reset-my-data.json', JSON.stringify(load(), null, 2), 'application/json'); return; }
@@ -901,7 +911,8 @@ document.addEventListener('click', function(e){
   route();
   function route(){
     var h = location.hash, dd = load();
-    if (h === '#checkin' || h === '#did'){ try{ history.replaceState(null, '', location.pathname); }catch(e){} }
+    if (h === '#checkin' || h === '#did' || h.indexOf('#nudge-') === 0){ try{ history.replaceState(null, '', location.pathname); }catch(e){} }
+    if (h.indexOf('#nudge-') === 0 && dd.profile) return nudgeScreen(parseInt(h.slice(7), 10) || 0);
     if (h === '#checkin' && dd.profile) return Screens.checkin();
     if (h === '#did' && dd.profile) return nudgeDone();
     dd.profile ? Screens.home() : Screens.welcome();

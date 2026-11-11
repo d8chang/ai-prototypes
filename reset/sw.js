@@ -1,5 +1,5 @@
 /* Reset offline cache and reminders. Only the app shell is cached; no answers pass through here. */
-var CACHE = 'reset-v2.5';
+var CACHE = 'reset-v2.6';
 var FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-180.png'];
 self.addEventListener('install', function(e){ e.waitUntil(caches.open(CACHE).then(function(c){ return c.addAll(FILES); })); self.skipWaiting(); });
 self.addEventListener('activate', function(e){ e.waitUntil(caches.keys().then(function(ks){ return Promise.all(ks.filter(function(k){ return k !== CACHE && k !== 'reset-prefs'; }).map(function(k){ return caches.delete(k); })); })); self.clients.claim(); });
@@ -26,14 +26,15 @@ self.addEventListener('push', function(e){
   e.waitUntil(caches.open('reset-prefs').then(function(c){ return c.match('prefs'); }).then(function(r){ return r ? r.json() : {}; }).catch(function(){ return {}; }).then(function(p){
     var name = (p && p.name) || 'Hey', n = NUDGES[i];
     return self.registration.showNotification(n[0].replace('{n}', name), {
-      body: n[1].replace('{n}', name), icon: 'icon-192.png', badge: 'icon-192.png', tag: 'reset-reminder',
+      body: n[1].replace('{n}', name) + ' Tap when you’re done.', icon: 'icon-192.png', badge: 'icon-192.png', tag: 'reset-reminder', data: { n: i },
       actions: [{ action: 'did', title: 'Did it' }, { action: 'more', title: 'Check in' }]
     });
   }));
 });
 self.addEventListener('notificationclick', function(e){
   e.notification.close();
-  var url = new URL(e.action === 'did' ? './#did' : './#checkin', self.registration.scope).href;
+  var i = (e.notification.data && e.notification.data.n) || 0;
+  var url = new URL(e.action === 'did' ? './#did' : e.action === 'more' ? './#checkin' : './#nudge-' + i, self.registration.scope).href;
   e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(ws){
     for (var k = 0; k < ws.length; k++){
       if (ws[k].url.indexOf(self.registration.scope) === 0 && 'navigate' in ws[k]){
