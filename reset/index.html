@@ -79,6 +79,14 @@ textarea.line{min-height:56px}
 .draw svg g.now{stroke:var(--accent);opacity:1}
 .draw svg .dot{fill:var(--muted)}
 .draw canvas{touch-action:none}
+.toprow{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.toprow h1{margin:0}
+.gear{font:inherit;font-size:22px;width:44px;height:44px;flex:0 0 44px;border-radius:50%;border:1.5px solid var(--line);background:var(--card);color:var(--ink2);cursor:pointer}
+.btn.big{min-height:64px;font-size:18px}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{font:inherit;text-align:left;display:flex;flex-direction:column;gap:2px;padding:14px;border-radius:16px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;min-height:72px}
+.tile b{font-size:15px}.tile span{font-size:13px;color:var(--muted)}
+.links{display:flex;justify-content:center;flex-wrap:wrap;gap:4px 18px}
 .strip{font:inherit;font-size:15px;text-align:left;min-height:48px;padding:10px 14px;border-radius:14px;border:1px dashed var(--accent);background:var(--card);color:var(--link);cursor:pointer;width:100%}
 .entry{font:inherit;text-align:left;border:0;width:100%;cursor:pointer;color:var(--ink);height:120px;overflow:hidden;position:relative}
 .entry .body{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;line-height:1.4}
@@ -336,7 +344,8 @@ Screens.remind = function(){
    ? '<p class="lead">A notification after '+esc(p.moment.toLowerCase())+', around '+fmtTime(p.time)+'. Each one has a tiny thing you can do right there, like three slow breaths. Tap it for a full check-in. No emails, nothing to set up.</p>'+
      (needsHomeScreen() ? homeScreenSteps() : '<button class="btn" data-go="push">Turn on reminders</button>')
    : '<p class="lead">A notification after '+esc(p.moment.toLowerCase())+', around '+fmtTime(p.time)+', with one tiny thing you can do right there.</p>'+homeScreenSteps())+
-  '<button class="btn2" data-go="checkin">Do my first check-in now</button>');
+  '<button class="btn2" data-go="checkin">Do my first check-in now</button>'+
+  '<p class="small">Reset shares anonymous usage (never your name or what you write) to see what helps. You can turn it off in Settings. <a href="privacy.html">Privacy</a></p>');
 };
 
 /* 4. Home */
@@ -349,15 +358,12 @@ Screens.home = function(){
   var pending = d.checkins.filter(function(c){ return c.did===true && !c.helped; }).slice(-1)[0];
   var booked = d.checkins.filter(function(c){ return c.did==='booked'; }).slice(-1)[0];
   render(
-  '<h1>'+hi+'</h1>'+
+  '<div class="toprow"><h1>'+hi+'</h1><button class="gear" data-go="settings" aria-label="Reminder and settings">⚙︎</button></div>'+
   (booked ? '<div class="card"><p>Booked: <strong>'+esc(act(booked.act).name)+'</strong>. Did it happen?</p><div class="chips"><button class="chip" data-happened="yes" data-t="'+booked.t+'">Yes</button><button class="chip" data-happened="no" data-t="'+booked.t+'">It didn’t happen</button></div></div>' : '')+
   (pending ? '<div class="card"><p>Last time: <strong>'+esc(act(pending.act).name)+'</strong>. Did it help?</p>'+helpChips(pending.t)+'</div>' : '')+
-  (d.checkins.length && d.share===undefined ? '<div class="card"><p><strong>Help improve Reset?</strong><br><span class="small">Share anonymous usage: which days you check in and whether ideas helped. Never your name, journal or anything you type. You can turn it off anytime.</span></p><div class="row"><button class="btn2" data-go="shareYes">Yes, share</button><button class="btn2" data-go="shareNo">No thanks</button></div></div>' : '')+
-  '<button class="btn" data-go="checkin">Check in</button>'+
-  '<div class="small" style="text-align:center">Background sound</div>'+soundBar()+
-  (d.checkins.length ? '<button class="btn2" data-go="week">How your activities helped</button>' : '')+
-  '<button class="btn2" data-go="journal">Vent or journal</button>'+
-  '<div class="row"><button class="link" data-go="settings">Reminder and settings</button><button class="link" data-go="privacy">Privacy</button></div>');
+  '<button class="btn big" data-go="checkin">Check in</button>'+
+  '<div class="tiles"><button class="tile" data-go="journal"><b>Vent or journal</b><span>Write it out</span></button>'+
+  (d.checkins.length ? '<button class="tile" data-go="week"><b>What helps you</b><span>Your patterns</span></button>' : '')+'</div>');
 };
 
 /* 5. Check-in: three taps, energy check first on low days (feedback 2) */
@@ -371,7 +377,7 @@ function stepMood(){
   render('<h2 class="sr">Check-in</h2>'+progress(1)+
   '<div class="bubble">How are you feeling right now?</div>'+
   '<div class="chips">'+MOODS.map(function(m,i){ return '<button class="chip" data-mood="'+(i+1)+'">'+m+'</button>'; }).join('')+'</div>'+
-  (S.vented ? '' : '<button class="strip" data-go="vent">Rough day? Get it off your chest first</button>'));
+  (S.vented ? '' : '<div class="links"><button class="link" data-go="vent">Rough day? Vent first</button></div>'));
 }
 /* Vent box: the words are never saved, not even on this phone. Only the fact that it was used is kept. */
 function showVent(){
@@ -379,7 +385,7 @@ function showVent(){
   '<label class="sr" for="vent">Vent box</label><textarea id="vent" placeholder="Today was..."></textarea>'+
   '<button class="btn" data-go="ventsave">Save to my journal</button>'+
   '<button class="btn2" data-go="ventdone">Let it go (don’t save)</button>'+
-  '<div class="row"><button class="btn2" data-go="ventback">Back to check-in</button><button class="btn2" data-go="home">Back home</button></div>'+
+  '<div class="links"><button class="link" data-go="ventback">Back to check-in</button><button class="link" data-go="home">Back home</button></div>'+
   '<p class="small">If you ever feel unsafe, call or text 988 in the US.</p>');
 }
 function stepTime(){
@@ -419,8 +425,7 @@ function showIdea(){
   '<p style="color:var(--ink2)">'+esc(a.line)+'</p>'+
   '<p class="small">'+esc(whyLine(a))+'</p></div>'+
   '<button class="btn" data-go="start">Start</button>'+
-  '<button class="btn2" data-go="another">Show me another</button>'+
-  '<button class="link" data-go="home">Not now</button>');
+  '<div class="links"><button class="link" data-go="another">Show me another</button><button class="link" data-go="home">Not now</button></div>');
 }
 
 /* 6. Activity with timer, and a way back (feedback 14) */
@@ -437,12 +442,11 @@ function startActivity(){
   (TIMED.indexOf(a.id) < 0 ? '<p class="small">No timer for this one. Take your time.</p>' : '<div class="timer" role="timer" aria-label="Time left"><div id="clock">'+fmt(left)+'</div></div>')+
   '<button class="btn" data-go="done">I’m done</button>'+
   (a.book ? '<button class="btn2" data-go="booked">I booked it for later</button>' : '')+
-  '<button class="btn2" data-go="back">Pick something else</button>'+
-  '<button class="link" data-go="later">Never mind</button>');
+  '<div class="links"><button class="link" data-go="back">Pick something else</button><button class="link" data-go="later">Never mind</button></div>');
   clearInterval(tick);
   tick = setInterval(function(){ left--; var c=document.getElementById('clock'); if (!c){ clearInterval(tick); return; } c.textContent = fmt(Math.max(left,0)); if (left<=0){ clearInterval(tick); c.textContent='Done'; } }, 1000);
 }
-function actButtons(){ return '<button class="btn" data-go="done">I’m done</button><button class="btn2" data-go="back">Pick something else</button><button class="link" data-go="later">Never mind</button>'; }
+function actButtons(){ return '<button class="btn" data-go="done">I’m done</button><div class="links"><button class="link" data-go="back">Pick something else</button><button class="link" data-go="later">Never mind</button></div>'; }
 function showBreathe(a){
   clearInterval(tick);
   render('<h2>'+esc(a.name)+'</h2><p class="lead">Breathe in as the circle grows, out as it shrinks. Two minutes is plenty.</p><div class="breath" aria-hidden="true"></div>'+soundBar()+actButtons());
@@ -458,8 +462,8 @@ function showJournal(a){
   (n===1 ? '<label class="sr" for="j0">'+esc(picks[0])+'</label><textarea id="j0" class="line" placeholder="One line is enough."></textarea>'
          : picks.map(function(p,k){ return '<div class="field"><label class="f" for="j'+k+'">'+esc(p)+'</label><textarea id="j'+k+'" class="line"></textarea></div>'; }).join(''))+
   '<button class="btn" data-go="done">I’m done</button>'+
-  (a.prompts ? '' : '<button class="link" data-go="jnext">'+(n===1?'Give me a different prompt':'Give me different prompts')+'</button>')+
-  (S.direct ? '<button class="btn2" data-go="journal">Back</button>' : '<button class="link" data-go="later">Never mind</button>'));
+  '<div class="links">'+(a.prompts ? '' : '<button class="link" data-go="jnext">'+(n===1?'Different prompt':'Different prompts')+'</button>')+
+  (S.direct ? '<button class="link" data-go="journal">Back</button>' : '<button class="link" data-go="later">Never mind</button>')+'</div>');
 }
 /* Journal entries are kept only on this phone (never sent, and left out of any future pilot sync). */
 function saveJournal(){
@@ -544,7 +548,8 @@ function record(did){
    Never the name, journal, vent text, or which reminder moment. Used to see if people come back. */
 function dayStr(t){ var d=new Date(t); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function shareEvent(e){
-  var d=load(); if (d.share!==true || !d.uid) return;
+  var d=load(); if (d.share===false) return;
+  if (!d.uid){ d.uid=rid(); d.share=true; save(); if (e.type!=='joined') shareEvent({ type:'joined', day:dayStr(d.profile && d.profile.joined || now()) }); }
   try{ postPush({ action:'stat', uid:d.uid, e:e }).catch(function(){}); }catch(x){}
 }
 function shareCheckin(c){ shareEvent({ type:'checkin', day:dayStr(c.t), mood:c.mood, time:c.time, where:c.where, cat:c.cat, did:String(c.did), swaps:c.swaps }); }
@@ -603,7 +608,7 @@ Screens.week = function(){
 Screens.settings = function(){
   header();
   var p = load().profile;
-  render('<h1>Reminder and settings</h1>'+
+  render('<button class="iconbtn" data-go="home" style="align-self:flex-start">← Back home</button><h1>Settings</h1>'+
   '<div class="card">'+(webPushOK()||isNative() ? '<span class="status '+(p.push||p.notify?'on':'off')+'"><i></i>Reminders '+(p.push||p.notify?'on':'off')+'</span>' : '')+
   '<p>Reminder after <strong>'+esc(p.moment.toLowerCase())+'</strong>, around <strong>'+fmtTime(p.time)+'</strong> ('+({weekdays:'weekdays',mwf:'Mon, Wed, Fri',daily:'every day'})[p.freq]+').</p>'+
   '<button class="btn2" data-go="setup">Change it</button>'+(isNative() ? '<button class="btn2" data-go="notify">Update reminders</button>'
@@ -611,16 +616,15 @@ Screens.settings = function(){
     : homeScreenSteps())+'</div>'+
   '<div class="card"><p><strong>Ideas that cost money</strong><br><span class="small">Like a massage or a therapy session. You\u2019d pay the place, never Reset.</span></p>'+
   '<button class="btn2" data-go="togglePaid">'+(p.paid?'Turn off':'Turn on')+'</button></div>'+
-  (true ? '<div class="card"><span class="status '+(load().share===true?'on':'off')+'"><i></i>Sharing '+(load().share===true?'on':'off')+'</span><p><strong>Help improve Reset</strong><br><span class="small">Anonymous usage only: which days you check in and whether ideas helped. Never your name, journal or anything you type.</span></p><button class="btn2" data-go="shareToggle">'+(load().share===true?'Stop sharing':'Share anonymous usage')+'</button></div>' : '')+
+  '<div class="card"><span class="status '+(load().share!==false?'on':'off')+'"><i></i>Sharing '+(load().share!==false?'on':'off')+'</span><p><strong>Anonymous usage</strong><br><span class="small">Helps improve Reset: which days you check in and whether ideas helped. Never your name, journal or anything you type. Turning it off deletes what was shared.</span></p><button class="btn2" data-go="shareToggle">'+(load().share!==false?'Turn off':'Turn on')+'</button></div>'+
   '<p class="small">'+(isNative() ? 'To pause, turn off notifications for Reset in your phone’s Settings.' : p.push ? 'To pause, tap Turn reminders off.' : '')+' Your past answers stay here.</p>'+
-  '<button class="btn2" data-go="confirmDelete">Delete my data</button>'+
-  '<button class="link" data-go="home">Back</button>');
+  '<div class="links"><button class="link" data-go="privacy">Privacy</button><button class="link" data-go="confirmDelete">Delete my data</button></div>');
 };
 Screens.confirmDelete = function(){
   render('<h1>Delete everything?</h1><p class="lead">This removes everything Reset saved on this phone: your name, check-ins, journal entries and reminders. It can’t be undone.</p>'+
   '<button class="btn" data-go="doDelete">Yes, delete my data</button><button class="btn2" data-go="settings">Keep it</button>');
 };
-Screens.doDelete = function(){ soundStop(); var ln=LN(); if (ln){ try{ ln.getPending().then(function(r){ var o=(r&&r.notifications||[]).map(function(x){ return {id:x.id}; }); if (o.length) ln.cancel({notifications:o}); }); }catch(e){} } pushOff(); if (load().share===true) shareOff(); try{ caches.delete('reset-prefs'); }catch(e){} wipe(); go('welcome'); };
+Screens.doDelete = function(){ soundStop(); var ln=LN(); if (ln){ try{ ln.getPending().then(function(r){ var o=(r&&r.notifications||[]).map(function(x){ return {id:x.id}; }); if (o.length) ln.cancel({notifications:o}); }); }catch(e){} } pushOff(); if (load().uid) shareOff(); try{ caches.delete('reset-prefs'); }catch(e){} wipe(); go('welcome'); };
 
 /* 10. Privacy in plain words (feedback 6, 13) */
 Screens.privacy = function(){
@@ -629,15 +633,15 @@ Screens.privacy = function(){
   '<div class="card facts">'+
   '<div><b>What Reset saves</b><span>Your first name, your check-in taps, which ideas you tried and whether they helped.</span></div>'+
   '<div><b>Why</b><span>To show which ideas work for you, like “walks helped 3 of 4.”</span></div>'+
-  '<div><b>Where</b><span>Only on this phone, unless you choose to share anonymous usage (below).</span></div>'+
+  '<div><b>Where</b><span>Only on this phone, except anonymous usage (below), which you can turn off.</span></div>'+
   '<div><b>Reminders</b><span>If you turn them on, Reset keeps an anonymous device address, your reminder time and time zone so it can send them. No name or email. Turning reminders off removes it.</span></div>'+
   '<div><b>Journal and vent box</b><span>Saved entries stay only on this phone so you can look back. “Let it go” saves nothing.</span></div>'+
-  '<div><b>Anonymous usage (optional)</b><span>Only if you say yes: which days you check in, your mood taps, the type of idea, and whether it helped, under a random id. Never your name or anything you type. Turn it off anytime in Settings; that also deletes what was shared.</span></div>'+
+  '<div><b>Anonymous usage</b><span>On unless you turn it off: which days you check in, your mood taps, the type of idea, and whether it helped, under a random id. Never your name or anything you type. Turn it off anytime in Settings; that also deletes what was shared.</span></div>'+
   '<div><b>How long</b><span>Until you delete it. Clearing this site’s data also deletes it.</span></div>'+
   '</div>'+
   '<p class="small">A wellness experiment, not medical advice. If you are in crisis in the US, call or text 988.</p>'+
   '<a class="btn2" href="privacy.html" style="display:flex;align-items:center;justify-content:center;text-decoration:none">Read the full privacy policy</a>'+
-  '<button class="btn2" data-go="'+(load().profile?'home':'welcome')+'">Back</button>');
+  '<button class="btn2" data-go="'+(load().profile?'settings':'welcome')+'">Back</button>');
 };
 
 
@@ -714,12 +718,17 @@ function soundPlay(kind){
     src.start(); snd = { ctx:ctx, kind:kind };
   }catch(e){ snd = null; }
 }
+var sndOpen = false;
+var SND_NAMES = { rain:'Rain', brook:'Brook', cafe:'Café' };
 function soundBar(){
   var cur = snd ? snd.kind : '';
-  return '<div class="row" style="justify-content:center;gap:6px;flex-wrap:wrap" aria-label="Background sound">'+
-    [['','Sound off'],['rain','Rain'],['brook','Brook'],['cafe','Café']].map(function(o){
-      return '<button class="chip'+(cur===o[0]?' sel':'')+'" data-sound="'+o[0]+'" style="flex:0 0 auto;min-height:40px" aria-pressed="'+(cur===o[0])+'">'+o[1]+'</button>'; }).join('')+'</div>'+
-    (isIOS() && cur ? '<p class="small" style="text-align:center;margin-top:-4px">No sound? Turn off Silent mode on your iPhone.</p>' : '');
+  var inner = !sndOpen
+    ? '<button class="iconbtn" data-sndopen="1" aria-expanded="false">♪ '+(cur ? SND_NAMES[cur]+' · change' : 'Sound')+'</button>'
+    : '<div class="row" style="justify-content:center;gap:6px;flex-wrap:wrap">'+
+      [['rain','Rain'],['brook','Brook'],['cafe','Café'],['','Off']].map(function(o){
+        return '<button class="chip'+(cur===o[0]?' sel':'')+'" data-sound="'+o[0]+'" style="flex:0 0 auto;min-height:40px" aria-pressed="'+(cur===o[0])+'">'+o[1]+'</button>'; }).join('')+'</div>';
+  return '<div class="sndbar" aria-label="Background sound" style="display:flex;flex-direction:column;align-items:center;gap:4px">'+inner+
+    (isIOS() && cur ? '<p class="small" style="text-align:center;margin:0">No sound? Turn off Silent mode on your iPhone.</p>' : '')+'</div>';
 }
 
 /* ---------- phone notifications (iPhone/Android app only) ----------
@@ -847,9 +856,7 @@ function go(name){
   if (name==='notify'){ var nb=document.querySelector('[data-go="notify"]'); scheduleNudges().then(function(ok){ if (nb) nb.textContent = ok ? 'Reminders are on' : 'Notifications are off. Turn them on in Settings, then try again'; }); return; }
   if (name==='push'){ var pb=document.querySelector('[data-go="push"]'); if (pb) pb.textContent='Turning on…';
     pushOn().then(function(r){ if (r==='on' && document.querySelector('.status')) return Screens.settings(); if (r==='on'){ var st=document.createElement('span'); st.className='status on'; st.innerHTML='<i></i>Reminders on'; pb.replaceWith(st); return; } if (!pb) return; pb.textContent = r==='on' ? 'Reminders are on' : r==='denied' ? 'Notifications are blocked. Allow them in your settings, then try again' : r==='ios' ? 'First add Reset to your Home Screen' : 'Couldn’t turn them on. Try again in a moment'; }); return; }
-  if (name==='shareYes'){ shareOn(); return Screens.home(); }
-  if (name==='shareNo'){ var dn=load(); dn.share=false; save(); return Screens.home(); }
-  if (name==='shareToggle'){ load().share===true ? shareOff() : shareOn(); return Screens.settings(); }
+  if (name==='shareToggle'){ load().share!==false ? shareOff() : shareOn(); return Screens.settings(); }
   if (name==='nudgeDid'){ return nudgeDone(); }
   if (name==='pushOff'){ pushOff().then(function(){ Screens.settings(); }); return; }
   if (name==='start'){ return startActivity(); }
@@ -888,7 +895,8 @@ document.addEventListener('click', function(e){
   if (b.dataset.time){ S.time = +b.dataset.time; return stepWhere(); }
   if (b.dataset.where){ S.where = b.dataset.where; return afterWhere(); }
   if (b.dataset.people){ S.people = b.dataset.people; return showIdea(); }
-  if (b.dataset.sound !== undefined){ soundPlay(b.dataset.sound); b.parentNode.outerHTML = soundBar(); return; }
+  if (b.dataset.sndopen){ sndOpen = true; b.closest('.sndbar').outerHTML = soundBar(); return; }
+  if (b.dataset.sound !== undefined){ soundPlay(b.dataset.sound); sndOpen = false; b.closest('.sndbar').outerHTML = soundBar(); return; }
   if (b.dataset.entry){ var open = b.classList.toggle('open'); b.setAttribute('aria-expanded', open); var m=b.querySelector('.more'); if (m) m.textContent = open ? 'Tap to collapse' : 'Tap to read all'; return; }
   if (b.dataset.help){ return setHelped(b.dataset.t, b.dataset.help); }
   if (b.dataset.why){ var d0=load(); d0.checkins.forEach(function(c){ if (String(c.t)===b.dataset.t) c.why=b.dataset.why; }); save(); return Screens.home(); }
