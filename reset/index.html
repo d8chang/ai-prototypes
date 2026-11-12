@@ -471,7 +471,7 @@ Screens.journal = function(){
   header();
   S = { skipped:[], fromJournal:true };
   var j = load().journal.slice().reverse();
-  render('<button class="link" data-go="home" style="align-self:flex-start;padding:0;min-height:32px">← Back home</button><h1>Vent or journal</h1><p class="small">Only on this phone. No one else can see it, including Deborah.</p>'+
+  render('<button class="iconbtn" data-go="home" style="align-self:flex-start">← Back home</button><h1>Vent or journal</h1><p class="small">Only on this phone. No one else can see it, including Deborah.</p>'+
   soundBar()+
   '<label class="sr" for="vent">Write anything</label><textarea id="vent" placeholder="What’s on your mind?"></textarea>'+
   '<div class="row"><button class="btn" data-go="ventsave">Save</button><button class="btn2" data-go="ventdone">Let it go</button></div>'+
@@ -592,14 +592,14 @@ Screens.settings = function(){
     : webPushOK() ? (p.push ? '<button class="btn2" data-go="pushOff">Turn reminders off</button>' : (needsHomeScreen() ? homeScreenSteps() : '<button class="btn" data-go="push">Turn reminders on</button>'))
     : homeScreenSteps())+'</div>'+
   '<div class="card"><p><strong>Ideas that cost money</strong><br><span class="small">Like a massage or a therapy session. You\u2019d pay the place, never Reset.'+(p.paid&&p.zip?' ZIP code: '+esc(p.zip)+'.':'')+'</span></p>'+
+  (p.paid ? '<button class="btn2" data-go="askZip">'+(p.zip?'Change ZIP code':'Add ZIP code')+'</button>' : '')+
   '<button class="btn2" data-go="togglePaid">'+(p.paid?'Turn off':'Turn on')+'</button></div>'+
   '<p class="small">'+(isNative() ? 'To pause, turn off notifications for Reset in your phone’s Settings.' : p.push ? 'To pause, tap Turn reminders off.' : '')+' Your past answers stay here.</p>'+
-  '<button class="btn2" data-go="export">Download my data</button>'+
   '<button class="btn2" data-go="confirmDelete">Delete my data</button>'+
   '<button class="link" data-go="home">Back</button>');
 };
 Screens.confirmDelete = function(){
-  render('<h1>Delete everything?</h1><p class="lead">This removes your name, check-ins and answers from this phone. It can’t be undone.</p>'+
+  render('<h1>Delete everything?</h1><p class="lead">This removes everything Reset saved on this phone: your name, check-ins, journal entries and reminders. It can’t be undone.</p>'+
   '<button class="btn" data-go="doDelete">Yes, delete my data</button><button class="btn2" data-go="settings">Keep it</button>');
 };
 Screens.doDelete = function(){ soundStop(); var ln=LN(); if (ln){ try{ ln.getPending().then(function(r){ var o=(r&&r.notifications||[]).map(function(x){ return {id:x.id}; }); if (o.length) ln.cancel({notifications:o}); }); }catch(e){} } pushOff(); try{ caches.delete('reset-prefs'); }catch(e){} wipe(); go('welcome'); };
@@ -621,6 +621,13 @@ Screens.privacy = function(){
 };
 
 /* ---------- nearby search: asks for a ZIP code first, kept on this phone ---------- */
+function askZip(){
+  var p = load().profile;
+  header(); render('<button class="iconbtn" data-go="settings" style="align-self:flex-start">← Back</button>'+
+  '<h2>Your ZIP code</h2><p class="lead">So ideas like a massage can show places near you. It stays on this phone.</p>'+
+  '<div class="field"><label class="f" for="zp">ZIP code</label><input id="zp" type="text" inputmode="numeric" autocomplete="postal-code" maxlength="10" placeholder="e.g. 94110" value="'+esc(p.zip||'')+'"></div>'+
+  '<button class="btn" data-go="saveZipSettings">Save</button>');
+}
 function openMap(){
   var p = load().profile, a = act(S.act);
   if (!p.zip){
@@ -873,7 +880,9 @@ function go(name){
   if (name==='start'){ return startActivity(); }
   if (name==='map'){ return openMap(); }
   if (name==='saveZip'){ return saveZip(); }
-  if (name==='togglePaid'){ var d=load(); d.profile.paid=!d.profile.paid; save(); return Screens.settings(); }
+  if (name==='togglePaid'){ var d=load(); d.profile.paid=!d.profile.paid; save(); return d.profile.paid ? askZip() : Screens.settings(); }
+  if (name==='askZip'){ return askZip(); }
+  if (name==='saveZipSettings'){ var z=(document.getElementById('zp').value||'').trim().slice(0,10); if (!z){ document.getElementById('zp').focus(); return; } var d2=load(); d2.profile.zip=z; save(); return Screens.settings(); }
   if (name==='another'){ S.skipped.push(S.act); return showIdea(); }
   if (name==='back'){ S.skipped.push(S.act); return showIdea(); }
   if (name==='jwrite'){ S = { skipped:[], direct:true, act:'journal3' }; return showJournal(act('journal3')); }
