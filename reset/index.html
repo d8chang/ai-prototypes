@@ -297,6 +297,7 @@ Screens.welcome = function(){
   '<div class="card"><div class="eyebrow">How it works</div><ol class="steps"><li>A reminder at a moment you pick.</li><li>Three taps, one small free idea.</li><li>Tell it if it helped. Each week, see what works for you.</li></ol></div>'+
   (needsHomeScreen() ? homeScreenSteps().replace('and come back here to turn on reminders.', 'and set it up there. That way reminders work and you only set up once.').replace(/<p class="small">Using Chrome[\s\S]*?<\/p>/, '') : '')+
   '<button class="btn" data-go="setup">'+(needsHomeScreen() ? 'Set up here anyway' : 'Get started')+'</button>'+
+  '<button class="btn2" data-go="journal">Vent or journal</button>'+
   '<p class="small">Reset is always free. No streaks. Private: your answers stay on this phone. <button class="link" data-go="privacy" style="padding:0;min-height:0">More details</button></p>'+
   '<p class="small foot">A wellness experiment, not medical advice.</p>');
 };
@@ -342,6 +343,7 @@ Screens.remind = function(){
 Screens.home = function(){
   header();
   var d = load(), p = d.profile, last = d.checkins[d.checkins.length-1];
+  if (!p) return Screens.welcome();
   var gap = last ? daysSince(last.t) : null;
   var hi = (gap !== null && gap >= 3) ? 'Welcome back, '+esc(p.name)+'. No catching up needed.' : 'Hi '+esc(p.name)+'.';
   var pending = d.checkins.filter(function(c){ return c.did===true && !c.helped; }).slice(-1)[0];

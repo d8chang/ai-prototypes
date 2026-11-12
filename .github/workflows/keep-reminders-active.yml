@@ -1,0 +1,21 @@
+name: Keep reminders active
+# GitHub pauses scheduled workflows in repos with no new commits for 60 days.
+# This adds an empty commit once a month so the Reset reminders keep running.
+on:
+  schedule:
+    - cron: '17 16 1 * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add an empty commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit --allow-empty -m "Keep Reset reminders active"
+          git push
