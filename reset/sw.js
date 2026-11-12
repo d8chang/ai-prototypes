@@ -1,5 +1,5 @@
 /* Reset offline cache and reminders. Only the app shell is cached; no answers pass through here. */
-var CACHE = 'reset-v2.16';
+var CACHE = 'reset-v2.17';
 var FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-180.png'];
 self.addEventListener('install', function(e){ e.waitUntil(caches.open(CACHE).then(function(c){ return c.addAll(FILES); })); self.skipWaiting(); });
 self.addEventListener('activate', function(e){ e.waitUntil(caches.keys().then(function(ks){ return Promise.all(ks.filter(function(k){ return k !== CACHE && k !== 'reset-prefs'; }).map(function(k){ return caches.delete(k); })); })); self.clients.claim(); });
