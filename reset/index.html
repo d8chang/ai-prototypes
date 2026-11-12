@@ -236,7 +236,7 @@ var S = {}; // current flow state
 function render(html){ $v().innerHTML = html; window.scrollTo(0,0); var h = $v().querySelector('h1,h2'); if (h){ h.setAttribute('tabindex','-1'); try{ h.focus({preventScroll:true}); }catch(e){} } }
 function header(){
   var d = load(); var h = document.getElementById('hdr');
-  h.innerHTML = d.profile ? '<button class="iconbtn" data-go="fried">I’m fried</button>' : '';
+  h.innerHTML = '';
 }
 
 /* ---------- personal stats: honest counts ---------- */
@@ -362,7 +362,6 @@ Screens.checkin = function(){
   S = { step:'mood', skipped:[] };
   stepMood();
 };
-Screens.fried = function(){ header(); S = { step:'time', mood:1, skipped:[], fried:true }; stepTime(); };
 function progress(n){ var s=''; for (var i=1;i<=3;i++) s+='<span class="'+(i<=n?'on':'')+'"></span>'; return '<div class="progress" aria-hidden="true">'+s+'</div>'; }
 function stepMood(){
   render('<h2 class="sr">Check-in</h2>'+progress(1)+
@@ -472,7 +471,7 @@ Screens.journal = function(){
   header();
   S = { skipped:[], fromJournal:true };
   var j = load().journal.slice().reverse();
-  render('<h1>Vent or journal</h1><p class="small">Only on this phone. No one else can see it, including Deborah.</p>'+
+  render('<button class="link" data-go="home" style="align-self:flex-start;padding:0;min-height:32px">← Back home</button><h1>Vent or journal</h1><p class="small">Only on this phone. No one else can see it, including Deborah.</p>'+
   soundBar()+
   '<label class="sr" for="vent">Write anything</label><textarea id="vent" placeholder="What’s on your mind?"></textarea>'+
   '<div class="row"><button class="btn" data-go="ventsave">Save</button><button class="btn2" data-go="ventdone">Let it go</button></div>'+
@@ -482,8 +481,7 @@ Screens.journal = function(){
   (j.length ? j.map(function(e){ var d=new Date(e.t);
      return '<button class="card entry" data-entry="1" aria-expanded="false"><span class="small">'+d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'})+' · '+esc(e.title)+'</span>'+
        '<span class="body">'+e.lines.map(function(x){ return (x.q?'<span class="small">'+esc(x.q)+':</span> ':'')+esc(x.a); }).join(' · ')+'</span><span class="more">Tap to read all</span></button>'; }).join('')
-   : '<p class="small">Nothing saved yet.</p>')+
-  '<button class="btn2" data-go="home">Back home</button>');
+   : '<p class="small">Nothing saved yet.</p>'));
 };
 /* Guided drawing: a faint guide builds step by step; draw over it with a finger, or on paper. Nothing is saved. */
 function showDraw(a, i){
