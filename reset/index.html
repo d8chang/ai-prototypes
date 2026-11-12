@@ -458,7 +458,7 @@ function showJournal(a){
          : picks.map(function(p,k){ return '<div class="field"><label class="f" for="j'+k+'">'+esc(p)+'</label><textarea id="j'+k+'" class="line"></textarea></div>'; }).join(''))+
   '<button class="btn" data-go="done">I’m done</button>'+
   (a.prompts ? '' : '<button class="link" data-go="jnext">'+(n===1?'Give me a different prompt':'Give me different prompts')+'</button>')+
-  '<button class="link" data-go="later">I’ll do it later</button>');
+  (S.direct ? '<button class="btn2" data-go="journal">Back</button>' : '<button class="link" data-go="later">I’ll do it later</button>'));
 }
 /* Journal entries are kept only on this phone (never sent, and left out of any future pilot sync). */
 function saveJournal(){
