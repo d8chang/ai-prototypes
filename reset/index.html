@@ -647,7 +647,7 @@ function soundStop(){ if (snd){ clearInterval(snd.timer); try{ snd.ctx.close(); 
 /* Café: an original, slow lo-fi jazz loop made in the browser (soft keys, upright-style bass,
    brushed drums, vinyl crackle). No recordings, so nothing to license and it works offline. */
 function cafePlay(){
-  var AC = window.AudioContext || window.webkitAudioContext; var ctx = new AC();
+  var ctx = newAudio();
   var out = ctx.createGain(); out.gain.value = 0.0001; out.gain.exponentialRampToValueAtTime(0.5, ctx.currentTime+2);
   var warm = ctx.createBiquadFilter(); warm.type='lowpass'; warm.frequency.value = 2400;
   var dly = ctx.createDelay(); dly.delayTime.value = 0.42; var fb = ctx.createGain(); fb.gain.value = 0.25; var wet = ctx.createGain(); wet.gain.value = 0.18;
@@ -692,11 +692,18 @@ function cafePlay(){
   schedule(); var timer = setInterval(schedule, 150);
   return { ctx:ctx, kind:'cafe', timer:timer };
 }
+/* iPhone: play through the silent switch, and start audio right away on tap. */
+function newAudio(){
+  try{ if (navigator.audioSession) navigator.audioSession.type = 'playback'; }catch(e){}
+  var AC = window.AudioContext || window.webkitAudioContext; var ctx = new AC();
+  try{ if (ctx.state !== 'running') ctx.resume(); }catch(e){}
+  return ctx;
+}
 function soundPlay(kind){
   soundStop(); if (!kind) return;
   if (kind==='cafe'){ try{ snd = cafePlay(); }catch(e){ snd = null; } return; }
   try{
-    var AC = window.AudioContext || window.webkitAudioContext; var ctx = new AC();
+    var ctx = newAudio();
     var len = ctx.sampleRate*4, buf = ctx.createBuffer(1, len, ctx.sampleRate), d = buf.getChannelData(0), last = 0;
     for (var i=0;i<len;i++){ var w = Math.random()*2-1; last = (last + 0.02*w)/1.02; d[i] = kind==='rain' ? w*0.6 : last*3.5; }
     var src = ctx.createBufferSource(); src.buffer = buf; src.loop = true;
