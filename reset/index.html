@@ -168,6 +168,7 @@ var ACTS = [
  {id:'boundary', name:'Close one tab or task for today', cat:'Boundaries', min:2, where:['desk'], energy:'low', line:'Give yourself permission to stop one thing.', steps:['Pick one thing that can wait until tomorrow.','Write it down, then close it.']},
  {id:'endday', name:'Write tomorrow’s top three', cat:'Boundaries', min:5, where:['desk','home'], energy:'low', line:'Get them out of your head so you can stop for today.', steps:[], kind:'journal', prompts:['Most important tomorrow','Second','Third'], note:''},
  {id:'journal1', name:'One-line journal', cat:'Journaling', min:5, where:['desk','home','out'], energy:'low', line:'One easy prompt. One line is enough.', steps:[], kind:'journal', n:1},
+ {id:'gratitude', name:'Three things I’m grateful for', cat:'Journaling', min:5, where:['desk','home','out'], energy:'low', line:'Small things count. A warm drink, a kind message, a quiet minute.', steps:[], kind:'journal', prompts:['One thing I’m grateful for today','Another one','One more, even something small'], note:''},
  {id:'journal3', name:'Three-line journal', cat:'Journaling', min:15, where:['desk','home'], energy:'low', line:'Three easy prompts. A line each.', steps:[], kind:'journal', n:3},
  {id:'bear', name:'Draw a simple bear', cat:'Senses', min:5, where:['desk','home'], energy:'low', line:'Six easy steps. No skill needed.', steps:[], kind:'draw'},
  {id:'cat', name:'Draw a sleepy cat', cat:'Senses', min:5, where:['desk','home'], energy:'low', line:'Six easy steps. No skill needed.', steps:[], kind:'draw'},
@@ -317,7 +318,7 @@ Screens.saveSetup = function(){
   var nm = (document.getElementById('nm').value||'').trim().slice(0,40);
   if (!nm){ document.getElementById('nm').focus(); return; }
   var d = load();
-  d.profile = { name:nm, moment:document.getElementById('mo').value, time:document.getElementById('tm').value||'17:30', freq:document.getElementById('fq').value, paid:!!(d.profile&&d.profile.paid), zip:(d.profile&&d.profile.zip)||'', joined:(d.profile&&d.profile.joined)||now() };
+  d.profile = { name:nm, moment:document.getElementById('mo').value, time:document.getElementById('tm').value||'17:30', freq:document.getElementById('fq').value, paid:!!(d.profile&&d.profile.paid), joined:(d.profile&&d.profile.joined)||now() };
   save(); if (d.profile.push) pushOn(); go('remind');
 };
 
@@ -380,7 +381,7 @@ function showVent(){
 }
 function stepTime(){
   render('<h2 class="sr">Check-in</h2>'+progress(2)+
-  (S.fried ? '<div class="bubble">Sorry it’s a lot right now. Let’s find one small thing.</div>' : '<div class="mine">'+MOODS[S.mood-1]+'</div>')+
+  '<div class="mine">'+MOODS[S.mood-1]+'</div>'+
   '<div class="bubble">How much time do you have?</div>'+
   '<div class="chips">'+TIMES.map(function(t){ return '<button class="chip" data-time="'+t[0]+'">'+t[1]+'</button>'; }).join('')+'</div>');
 }
@@ -398,7 +399,7 @@ function stepPeople(){
 }
 /* On rough or low days, ask before suggesting anything social (feedback 2). */
 function afterWhere(){
-  if (S.mood <= 2 || S.fried) return stepPeople();
+  if (S.mood <= 2) return stepPeople();
   S.people = 'yes';
   showIdea();
 }
@@ -474,7 +475,7 @@ Screens.journal = function(){
   soundBar()+
   '<label class="sr" for="vent">Write anything</label><textarea id="vent" placeholder="What’s on your mind?"></textarea>'+
   '<div class="row"><button class="btn" data-go="ventsave">Save</button><button class="btn2" data-go="ventdone">Let it go</button></div>'+
-  '<button class="link" data-go="jwrite">Not sure what to write? Use a prompt</button>'+
+  '<div class="row"><button class="btn2" data-go="jgrat">Gratitude list</button><button class="btn2" data-go="jwrite">Use a prompt</button></div>'+
   '<p class="small">If you ever feel unsafe, call or text 988 in the US.</p>'+
   '<h2 style="margin-top:8px">Past entries</h2>'+
   (j.length ? j.map(function(e){ var d=new Date(e.t);
@@ -532,7 +533,7 @@ function helpChips(t){
 }
 function record(did){
   var d = load();
-  var c = { t:now(), mood:S.mood, time:S.time, where:S.where, people:S.people, act:S.act, cat:act(S.act).cat, swaps:S.skipped.length, did:did, fried:!!S.fried, vented:!!S.vented };
+  var c = { t:now(), mood:S.mood, time:S.time, where:S.where, people:S.people, act:S.act, cat:act(S.act).cat, swaps:S.skipped.length, did:did, vented:!!S.vented };
   d.checkins.push(c); save(); return c;
 }
 function askHelped(c){
@@ -618,31 +619,6 @@ Screens.privacy = function(){
   '<button class="btn2" data-go="'+(load().profile?'home':'welcome')+'">Back</button>');
 };
 
-/* ---------- nearby search: asks for a ZIP code first, kept on this phone ---------- */
-function askZip(){
-  var p = load().profile;
-  header(); render('<button class="iconbtn" data-go="settings" style="align-self:flex-start">← Back</button>'+
-  '<h2>Your ZIP code</h2><p class="lead">So ideas like a massage can show places near you. It stays on this phone.</p>'+
-  '<div class="field"><label class="f" for="zp">ZIP code</label><input id="zp" type="text" inputmode="numeric" autocomplete="postal-code" maxlength="10" placeholder="e.g. 94110" value="'+esc(p.zip||'')+'"></div>'+
-  '<button class="btn" data-go="saveZipSettings">Save</button>');
-}
-function openMap(){
-  var p = load().profile, a = act(S.act);
-  if (!p.zip){
-    clearInterval(tick);
-    render('<h2>Where should Reset look?</h2><p class="lead">Enter your ZIP code so results are near you. It stays on this phone.</p>'+
-      '<div class="field"><label class="f" for="zp">ZIP code</label><input id="zp" type="text" inputmode="numeric" autocomplete="postal-code" maxlength="10" placeholder="e.g. 94110"></div>'+
-      '<button class="btn" data-go="saveZip">Show places near me</button><button class="link" data-go="start">Back</button>');
-    return;
-  }
-  window.open('https://www.google.com/maps/search/' + encodeURIComponent(a.map + ' near ' + p.zip), '_blank', 'noopener');
-}
-function saveZip(){
-  var z = (document.getElementById('zp').value||'').trim().slice(0,10);
-  if (!/^[A-Za-z0-9 -]{3,10}$/.test(z)){ document.getElementById('zp').focus(); return; }
-  var d = load(); d.profile.zip = z; save();
-  openMap(); startActivity();
-}
 
 /* ---------- optional background sound: generated in the browser, no files, off by default ---------- */
 var snd = null;
@@ -843,27 +819,6 @@ function nudgeDone(){
   header(); render('<h2>Nice. That counts.</h2><p class="lead">'+esc(GRACE[d.nudges.length % GRACE.length])+'</p><button class="btn" data-go="home">Done</button><button class="btn2" data-go="checkin">One more idea</button>');
 }
 
-/* ---------- calendar reminder (.ics) ---------- */
-function makeIcs(){
-  var p = load().profile, hm = p.time.split(':');
-  var start = new Date(); start.setHours(+hm[0], +hm[1], 0, 0); if (start < new Date()) start.setDate(start.getDate()+1);
-  var pad = function(n){ return (n<10?'0':'')+n; };
-  var dt = function(d){ return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'T'+pad(d.getHours())+pad(d.getMinutes())+'00'; };
-  var end = new Date(start.getTime()+5*60000);
-  var rule = p.freq==='daily' ? 'FREQ=DAILY' : p.freq==='weekdays' ? 'FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR' : 'FREQ=WEEKLY;BYDAY=MO,WE,FR';
-  var url = location.href.split('#')[0];
-  var lines = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Reset//v2//EN','BEGIN:VEVENT',
-    'UID:reset-'+now()+'@reset','DTSTAMP:'+dt(new Date()),'DTSTART:'+dt(start),'DTEND:'+dt(end),'RRULE:'+rule,
-    'SUMMARY:Reset: rough day or okay day?','DESCRIPTION:A 15-second check-in. Open Reset: '+url,'URL:'+url,
-    'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:Reset check-in','TRIGGER:PT0M','END:VALARM','END:VEVENT','END:VCALENDAR'];
-  return lines.join('\r\n');
-}
-function download(name, text, type){
-  try{
-    var b = new Blob([text], {type:type}), u = URL.createObjectURL(b), a = document.createElement('a');
-    a.href=u; a.download=name; document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(u); a.remove(); }, 500);
-  }catch(e){}
-}
 
 /* ---------- router + events ---------- */
 function go(name){
@@ -873,16 +828,11 @@ function go(name){
     pushOn().then(function(r){ if (r==='on' && document.querySelector('.status')) return Screens.settings(); if (r==='on'){ var st=document.createElement('span'); st.className='status on'; st.innerHTML='<i></i>Reminders on'; pb.replaceWith(st); return; } if (!pb) return; pb.textContent = r==='on' ? 'Reminders are on' : r==='denied' ? 'Notifications are blocked. Allow them in your settings, then try again' : r==='ios' ? 'First add Reset to your Home Screen' : 'Couldn’t turn them on. Try again in a moment'; }); return; }
   if (name==='nudgeDid'){ return nudgeDone(); }
   if (name==='pushOff'){ pushOff().then(function(){ Screens.settings(); }); return; }
-  if (name==='ics'){ download('reset-reminder.ics', makeIcs(), 'text/calendar'); var b=document.querySelector('[data-go="ics"]'); if (b) b.textContent='Added. Open the file to save it'; return; }
-  if (name==='export'){ download('reset-my-data.json', JSON.stringify(load(), null, 2), 'application/json'); return; }
   if (name==='start'){ return startActivity(); }
-  if (name==='map'){ return openMap(); }
-  if (name==='saveZip'){ return saveZip(); }
   if (name==='togglePaid'){ var d=load(); d.profile.paid=!d.profile.paid; save(); return Screens.settings(); }
-  if (name==='askZip'){ return askZip(); }
-  if (name==='saveZipSettings'){ var z=(document.getElementById('zp').value||'').trim().slice(0,10); if (!z){ document.getElementById('zp').focus(); return; } var d2=load(); d2.profile.zip=z; save(); return Screens.settings(); }
   if (name==='another'){ S.skipped.push(S.act); return showIdea(); }
   if (name==='back'){ S.skipped.push(S.act); return showIdea(); }
+  if (name==='jgrat'){ S = { skipped:[], direct:true, act:'gratitude' }; return showJournal(act('gratitude')); }
   if (name==='jwrite'){ S = { skipped:[], direct:true, act:'journal3' }; return showJournal(act('journal3')); }
   if (name==='done'){ saveJournal(); if (S.direct){ S.journalSaved=false; return Screens.journal(); } var c = record(true); return askHelped(c); }
   if (name==='later'){ if (S.direct) return Screens.home(); var c2 = record(false); return askWhy(c2); }
