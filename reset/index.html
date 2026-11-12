@@ -376,7 +376,7 @@ function showVent(){
   '<label class="sr" for="vent">Vent box</label><textarea id="vent" placeholder="Today was..."></textarea>'+
   '<button class="btn" data-go="ventsave">Save to my journal</button>'+
   '<button class="btn2" data-go="ventdone">Let it go (don’t save)</button>'+
-  '<button class="link" data-go="ventback">Back</button>'+
+  '<div class="row"><button class="btn2" data-go="ventback">Back to check-in</button><button class="btn2" data-go="home">Back home</button></div>'+
   '<p class="small">If you ever feel unsafe, call or text 988 in the US.</p>');
 }
 function stepTime(){
@@ -844,7 +844,11 @@ function go(name){
     if (v) v.value='';
     if (S.fromJournal){ var note = name==='ventsave' && txt ? 'Saved. Only you can see it.' : 'Let go. Nothing was saved.';
       Screens.journal(); var h=document.querySelector('#view .small'); if (h && txt) h.textContent = note; return; }
-    return stepMood(); }
+    header(); render('<h2>'+(name==='ventsave' && txt ? 'Saved to your journal.' : txt ? 'Let go. Nothing was saved.' : 'Okay.')+'</h2>'+
+      (name==='ventsave' && txt ? '<p class="small">Only on this phone. No one else can see it.</p>' : '')+
+      '<p class="lead">Want one small thing to do now, or are you done for now?</p>'+
+      '<button class="btn" data-go="ventback">Continue check-in</button><button class="btn2" data-go="home">Back home</button>');
+    return; }
   if (name==='ventback'){ return stepMood(); }
   if (name==='jnext'){ S.jStart = (S.jStart||0) + 3; return showJournal(act(S.act)); }
   if (name==='dnext'){ return showDraw(act(S.act), S.drawStep+1); }
