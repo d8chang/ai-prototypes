@@ -913,6 +913,8 @@ document.addEventListener('click', function(e){
   if ('serviceWorker' in navigator && !isNative() && location.protocol === 'https:'){ try{ navigator.serviceWorker.register('sw.js'); }catch(e){} }
   if (d.profile && d.profile.push && webPushOK() && Notification.permission === 'granted') pushOn();
   window.addEventListener('hashchange', route);
+  /* A tapped reminder tells the open app which screen to show. */
+  try{ if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', function(ev){ if (ev.data && ev.data.reset){ location.hash = ev.data.reset; route(); } }); }catch(e){}
   route();
   function route(){
     var h = location.hash, dd = load();
