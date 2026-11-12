@@ -175,7 +175,7 @@ var ACTS = [
  {id:'shower', name:'Warm shower', cat:'Body care', min:15, where:['home'], energy:'low', line:'Let the water do the work.', steps:['Take your time.','Finish with 10 seconds of cooler water if you like.']},
  {id:'lie', name:'Lie down with eyes closed', cat:'Rest', min:15, where:['home'], energy:'low', line:'Rest without needing to sleep.', steps:['Set the timer.','Let your body feel heavy.']},
  {id:'bench', name:'Sit somewhere and people-watch', cat:'Mind', min:15, where:['out'], energy:'low', line:'No goal. Just watch the world.', steps:['Find a seat.','Leave your phone away.']},
- {id:'spa', name:'Book a massage or spa visit', cat:'Body care', min:30, where:['home','out'], energy:'low', paid:true, line:'A real break you can look forward to. This one costs money.', steps:['Find a place near you.','Pick a time today or this week.'], map:'massage spa', book:true},
+ {id:'spa', name:'Book a massage or spa visit', cat:'Body care', min:30, where:['home','out'], energy:'low', paid:true, line:'A real break you can look forward to. This one costs money.', steps:['Look up a place near you.','Pick a time today or this week.'], book:true},
  {id:'mute', name:'Mute notifications for an hour', cat:'Boundaries', min:2, where:['desk','home'], energy:'low', line:'Give yourself one quiet hour.', steps:['Phone: Do Not Disturb for 1 hour.','Slack or chat: pause notifications for 1 hour.']},
  {id:'endtime', name:'Set an end time for today', cat:'Boundaries', min:2, where:['desk','home'], energy:'low', line:'Pick the time you will close the laptop.', steps:['Pick your stop time.','Put it on your calendar.']},
  {id:'dayoff', name:'Book a day off', cat:'Boundaries', min:5, where:['desk','home'], energy:'low', line:'Pick a date and put it in your calendar.', steps:['Pick a date. You can change it later.','Put it on your calendar.']},
@@ -429,7 +429,6 @@ function startActivity(){
   S.started = now();
   render('<h2>'+esc(a.name)+'</h2><p class="lead">'+esc(a.line)+'</p>'+
   '<ol class="steps">'+a.steps.map(function(s){ return '<li>'+esc(s)+'</li>'; }).join('')+'</ol>'+
-  (a.map ? '<button class="btn2" data-go="map">Find one near me</button>' : '')+
   soundBar()+
   (TIMED.indexOf(a.id) < 0 ? '<p class="small">No timer for this one. Take your time.</p>' : '<div class="timer" role="timer" aria-label="Time left"><div id="clock">'+fmt(left)+'</div></div>')+
   '<button class="btn" data-go="done">I’m done</button>'+
@@ -591,8 +590,7 @@ Screens.settings = function(){
   '<button class="btn2" data-go="setup">Change it</button>'+(isNative() ? '<button class="btn2" data-go="notify">Update reminders</button>'
     : webPushOK() ? (p.push ? '<button class="btn2" data-go="pushOff">Turn reminders off</button>' : (needsHomeScreen() ? homeScreenSteps() : '<button class="btn" data-go="push">Turn reminders on</button>'))
     : homeScreenSteps())+'</div>'+
-  '<div class="card"><p><strong>Ideas that cost money</strong><br><span class="small">Like a massage or a therapy session. You\u2019d pay the place, never Reset.'+(p.paid&&p.zip?' ZIP code: '+esc(p.zip)+'.':'')+'</span></p>'+
-  (p.paid ? '<button class="btn2" data-go="askZip">'+(p.zip?'Change ZIP code':'Add ZIP code')+'</button>' : '')+
+  '<div class="card"><p><strong>Ideas that cost money</strong><br><span class="small">Like a massage or a therapy session. You\u2019d pay the place, never Reset.</span></p>'+
   '<button class="btn2" data-go="togglePaid">'+(p.paid?'Turn off':'Turn on')+'</button></div>'+
   '<p class="small">'+(isNative() ? 'To pause, turn off notifications for Reset in your phone’s Settings.' : p.push ? 'To pause, tap Turn reminders off.' : '')+' Your past answers stay here.</p>'+
   '<button class="btn2" data-go="confirmDelete">Delete my data</button>'+
@@ -880,7 +878,7 @@ function go(name){
   if (name==='start'){ return startActivity(); }
   if (name==='map'){ return openMap(); }
   if (name==='saveZip'){ return saveZip(); }
-  if (name==='togglePaid'){ var d=load(); d.profile.paid=!d.profile.paid; save(); return d.profile.paid ? askZip() : Screens.settings(); }
+  if (name==='togglePaid'){ var d=load(); d.profile.paid=!d.profile.paid; save(); return Screens.settings(); }
   if (name==='askZip'){ return askZip(); }
   if (name==='saveZipSettings'){ var z=(document.getElementById('zp').value||'').trim().slice(0,10); if (!z){ document.getElementById('zp').focus(); return; } var d2=load(); d2.profile.zip=z; save(); return Screens.settings(); }
   if (name==='another'){ S.skipped.push(S.act); return showIdea(); }
