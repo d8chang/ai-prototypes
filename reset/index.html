@@ -718,7 +718,8 @@ function soundBar(){
   var cur = snd ? snd.kind : '';
   return '<div class="row" style="justify-content:center;gap:6px;flex-wrap:wrap" aria-label="Background sound">'+
     [['','Sound off'],['rain','Rain'],['brook','Brook'],['cafe','Café']].map(function(o){
-      return '<button class="chip'+(cur===o[0]?' sel':'')+'" data-sound="'+o[0]+'" style="flex:0 0 auto;min-height:40px" aria-pressed="'+(cur===o[0])+'">'+o[1]+'</button>'; }).join('')+'</div>';
+      return '<button class="chip'+(cur===o[0]?' sel':'')+'" data-sound="'+o[0]+'" style="flex:0 0 auto;min-height:40px" aria-pressed="'+(cur===o[0])+'">'+o[1]+'</button>'; }).join('')+'</div>'+
+    (isIOS() && cur ? '<p class="small" style="text-align:center;margin-top:-4px">No sound? Turn off Silent mode on your iPhone.</p>' : '');
 }
 
 /* ---------- phone notifications (iPhone/Android app only) ----------
