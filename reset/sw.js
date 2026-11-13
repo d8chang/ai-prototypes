@@ -1,11 +1,11 @@
 /* Reset offline cache and reminders. Only the app shell is cached; no answers pass through here. */
-var CACHE = 'reset-v2.21';
+var CACHE = 'reset-v2.22';
 var FILES = ['./', 'index.html', 'privacy.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-180.png'];
 self.addEventListener('install', function(e){ e.waitUntil(caches.open(CACHE).then(function(c){ return c.addAll(FILES); })); self.skipWaiting(); });
 self.addEventListener('activate', function(e){ e.waitUntil(caches.keys().then(function(ks){ return Promise.all(ks.filter(function(k){ return k !== CACHE && k !== 'reset-prefs'; }).map(function(k){ return caches.delete(k); })); })); self.clients.claim(); });
 self.addEventListener('fetch', function(e){
   if (e.request.method !== 'GET' || new URL(e.request.url).origin !== location.origin) return;
-  e.respondWith(fetch(e.request).then(function(r){ if (r.ok){ var c = r.clone(); caches.open(CACHE).then(function(cc){ cc.put(e.request, c); }); } return r; })
+  e.respondWith(fetch(e.request, { cache:'no-cache' }).then(function(r){ if (r.ok){ var c = r.clone(); caches.open(CACHE).then(function(cc){ cc.put(e.request, c); }); } return r; })
     .catch(function(){ return caches.match(e.request).then(function(m){ return m || caches.match('index.html'); }); }));
 });
 

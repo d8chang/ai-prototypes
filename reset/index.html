@@ -569,7 +569,7 @@ function record(did){
   var c = { t:now(), mood:S.mood, time:S.time, where:S.where, people:S.people, act:S.act, cat:act(S.act).cat, swaps:S.skipped.length, did:did, vented:!!S.vented };
   d.checkins.push(c); save(); shareCheckin(c); return c;
 }
-/* ---------- optional anonymous usage (off unless the person says yes) ----------
+/* ---------- anonymous counts (on by default; Delete my data removes them) ----------
    Sends only: a random id, the day, mood, time, place, idea type, done or not, helped or not.
    Never the name, journal, vent text, or which reminder moment. Used to see if people come back. */
 function dayStr(t){ var d=new Date(t); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
@@ -658,10 +658,9 @@ Screens.privacy = function(){
   '<div class="card facts">'+
   '<div><b>What Reset saves</b><span>Your first name, your check-in taps, which ideas you tried and whether they helped.</span></div>'+
   '<div><b>Why</b><span>To show which ideas work for you, like “walks helped 3 of 4.”</span></div>'+
-  '<div><b>Where</b><span>Only on this phone, except anonymous usage (below), which you can turn off.</span></div>'+
+  '<div><b>Where</b><span>On this phone. Reset also shares anonymous counts, like which days you check in and whether ideas helped, never your name or what you write.</span></div>'+
   '<div><b>Reminders</b><span>If you turn them on, Reset keeps an anonymous device address, your reminder time and time zone so it can send them. No name or email. Turning reminders off removes it.</span></div>'+
   '<div><b>Journal and vent box</b><span>Saved entries stay only on this phone so you can look back. “Let it go” saves nothing.</span></div>'+
-  '<div><b>Anonymous usage</b><span>To see what helps: which days you check in, your mood taps, the type of idea, and whether it helped, under a random id. Never your name or anything you type. Delete my data also deletes what was shared.</span></div>'+
   '<div><b>How long</b><span>Until you delete it. Clearing this site’s data also deletes it.</span></div>'+
   '</div>'+
   '<p class="small">A wellness experiment, not medical advice. If you are in crisis in the US, call or text 988.</p>'+
