@@ -20,6 +20,10 @@ p,ul{margin:0}
 ul{padding-left:20px;display:flex;flex-direction:column;gap:4px}
 .card{background:var(--card);border-radius:16px;padding:16px 18px}
 .small{font-size:14px;color:var(--muted)}
+.cmp{width:100%;border-collapse:collapse;font-size:14px}
+.cmp th,.cmp td{text-align:left;vertical-align:top;padding:7px 6px;border-top:1px solid var(--line)}
+.cmp thead th{border-top:0;font-size:13px;color:var(--muted)}
+.cmp tbody th{font-weight:600;width:40%}
 </style>
 </head>
 <body>
@@ -29,21 +33,23 @@ ul{padding-left:20px;display:flex;flex-direction:column;gap:4px}
   <p class="small">Last updated November 12, 2026</p>
   <p>Reset is a small, free wellness experiment by Deborah Chang. It is built to keep as little about you as possible.</p>
 
-  <div class="card"><h2>What stays only on your phone</h2>
-    <ul>
-      <li>Your first name, reminder time and settings.</li>
-      <li>Your journal, vent and gratitude entries. "Let it go" saves nothing.</li>
-      <li>Your full check-in history, which powers "What helps you."</li>
-    </ul>
-    <p class="small" style="margin-top:8px">Nobody else, including Deborah, can see these.</p>
+  <div class="card"><h2>Your phone vs. what Deborah sees</h2>
+    <table class="cmp">
+      <thead><tr><th></th><th>On your phone</th><th>Deborah sees</th></tr></thead>
+      <tbody>
+        <tr><th>Your name</th><td>Yes</td><td>No</td></tr>
+        <tr><th>Journal, vent, gratitude</th><td>Yes</td><td>No</td></tr>
+        <tr><th>The exact idea, like "walk around the block"</th><td>Yes</td><td>No, only the type, like "movement"</td></tr>
+        <tr><th>Mood, time, place</th><td>Yes</td><td>Yes, as anonymous taps</td></tr>
+        <tr><th>Did it, did it help</th><td>Yes</td><td>Yes, as anonymous taps</td></tr>
+        <tr><th>Who you are</th><td>Yes</td><td>No, just a random id</td></tr>
+      </tbody>
+    </table>
+    <p class="small" style="margin-top:10px">Deborah sees rows like "Random id 7f3k, Tuesday: low mood, 5 minutes, at a desk, a movement idea, did it, it helped." She can tell the same anonymous person came back, but not who they are. This shows whether Reset helps people. Delete my data removes your rows.</p>
   </div>
 
   <div class="card"><h2>Reminders (if you turn them on)</h2>
     <p>To send notifications, Reset keeps a random device id, the notification address your phone gives it, your reminder time, how often, and your time zone. No name or email. Turning reminders off or deleting your data removes it.</p>
-  </div>
-
-  <div class="card"><h2>What Deborah can see: anonymous counts</h2>
-    <p>Each check-in also sends a copy of your taps, with no name attached: the day, your mood, how much time you had, the kind of place, the type of idea, and whether you did it and it helped. They're tied to a random id, never your name or anything you type. This shows whether Reset helps people and whether they come back. Delete my data removes them.</p>
   </div>
 
   <div class="card"><h2>What Reset never does</h2>
