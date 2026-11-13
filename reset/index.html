@@ -17,23 +17,24 @@
 :root{
   --bg:#EEF1EC; --card:#FFFFFF; --ink:#16201A; --ink2:#3B463F; --muted:#4F5A53;
   --line:#DDE3DE; --chip:#E1E7E2; --accent:#3E6B52; --accent-ink:#FFFFFF; --accent-soft:#DCE7DF; --link:#2F5A43;
+  --sand:#CFC6B4; --stone1:#8E9A90; --stone2:#B4BDB3; --stone3:#6F7D72; --leaf:#7FA48A; --glow:#F6F1E6;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#141A16; --card:#1E2621; --ink:#EEF2EE; --ink2:#CBD5CE; --muted:#A9B4AC;
-    --line:#2E3A33; --chip:#2A352E; --accent:#7FB394; --accent-ink:#0F1612; --accent-soft:#25362C; --link:#9CCBAE;
+    --line:#2E3A33; --chip:#2A352E; --accent:#7FB394; --accent-ink:#0F1612; --accent-soft:#25362C; --link:#9CCBAE; --sand:#3A4139; --stone1:#5E6A61; --stone2:#46514A; --stone3:#76847A; --leaf:#5F8A6C; --glow:#1B231E;
   }
 }
 :root[data-theme="dark"]{
   --bg:#141A16; --card:#1E2621; --ink:#EEF2EE; --ink2:#CBD5CE; --muted:#A9B4AC;
-  --line:#2E3A33; --chip:#2A352E; --accent:#7FB394; --accent-ink:#0F1612; --accent-soft:#25362C; --link:#9CCBAE;
+  --line:#2E3A33; --chip:#2A352E; --accent:#7FB394; --accent-ink:#0F1612; --accent-soft:#25362C; --link:#9CCBAE; --sand:#3A4139; --stone1:#5E6A61; --stone2:#46514A; --stone3:#76847A; --leaf:#5F8A6C; --glow:#1B231E;
 }
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--ink);font-family:'Figtree',system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+html,body{margin:0;background:var(--bg);background-image:radial-gradient(120% 60% at 50% 0%, var(--glow) 0%, transparent 70%);background-attachment:fixed;color:var(--ink);font-family:'Figtree',system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
 body{min-height:100vh;min-height:100dvh}
 .app{max-width:440px;margin:0 auto;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
 header{display:flex;align-items:center;gap:10px;padding:16px 16px 12px;padding-top:max(16px,env(safe-area-inset-top))}
-.logo{width:34px;height:34px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:flex;align-items:center;justify-content:center;font-weight:700}
+.logo{width:34px;height:30px;border-radius:52% 48% 46% 54% / 58% 56% 44% 42%;background:var(--accent);color:var(--accent-ink);display:flex;align-items:center;justify-content:center;font-weight:700}
 .brand{font-weight:600;font-size:17px}
 header .right{margin-left:auto;display:flex;gap:6px}
 main{flex:1;padding:4px 16px 28px;display:flex;flex-direction:column;gap:14px}
@@ -79,6 +80,10 @@ textarea.line{min-height:56px}
 .draw svg g.now{stroke:var(--accent);opacity:1}
 .draw svg .dot{fill:var(--muted)}
 .draw canvas{touch-action:none}
+.hero{display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;margin:-4px 0 4px}
+.hero h1{margin:0}.zen{width:180px;height:auto;display:block}
+.card,.tile{border-radius:20px}
+.topback{flex:0 0 auto}
 .toprow{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .toprow h1{margin:0}
 .gear{display:flex;align-items:center;justify-content:center;padding:0;width:44px;height:44px;flex:0 0 44px;border-radius:50%;border:1.5px solid var(--line);background:var(--card);color:var(--ink2);cursor:pointer}
@@ -242,7 +247,9 @@ function dayKey(t){ var d=new Date(t); return d.getFullYear()+'-'+(d.getMonth()+
 function daysSince(t){ return Math.floor((now()-t)/864e5); }
 var S = {}; // current flow state
 
-function render(html){ $v().innerHTML = html; window.scrollTo(0,0); var h = $v().querySelector('h1,h2'); if (h){ h.setAttribute('tabindex','-1'); try{ h.focus({preventScroll:true}); }catch(e){} } }
+function render(html){ $v().innerHTML = html;
+  var hd = document.getElementById('hdr'); hd.innerHTML = '';
+  Array.prototype.forEach.call($v().querySelectorAll('.topback'), function(b){ hd.appendChild(b); }); window.scrollTo(0,0); var h = $v().querySelector('h1,h2'); if (h){ h.setAttribute('tabindex','-1'); try{ h.focus({preventScroll:true}); }catch(e){} } }
 function header(){
   var d = load(); var h = document.getElementById('hdr');
   h.innerHTML = '';
@@ -345,7 +352,7 @@ Screens.remind = function(){
      (needsHomeScreen() ? homeScreenSteps() : '<button class="btn" data-go="push">Turn on reminders</button>')
    : '<p class="lead">A notification after '+esc(p.moment.toLowerCase())+', around '+fmtTime(p.time)+', with one tiny thing you can do right there.</p>'+homeScreenSteps())+
   '<button class="btn2" data-go="checkin">Do my first check-in now</button>'+
-  '<p class="small">Reset shares anonymous usage (never your name or what you write) to see what helps. You can turn it off in Settings. <a href="privacy.html">Privacy</a></p>');
+  '<p class="small">Reset shares anonymous usage (never your name or what you write) to see what helps. Delete my data in Settings removes it. <a href="privacy.html">Privacy</a></p>');
 };
 
 /* 4. Home */
@@ -358,7 +365,8 @@ Screens.home = function(){
   var pending = d.checkins.filter(function(c){ return c.did===true && !c.helped; }).slice(-1)[0];
   var booked = d.checkins.filter(function(c){ return c.did==='booked'; }).slice(-1)[0];
   render(
-  '<div class="toprow"><h1>'+hi+'</h1><button class="gear" data-go="settings" aria-label="Reminder and settings"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button></div>'+
+  '<button class="gear topback" data-go="settings" aria-label="Reminder and settings"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>'+
+  '<div class="hero">'+ZEN+'<h1>'+hi+'</h1><p class="small">One small thing is enough.</p></div>'+
   (booked ? '<div class="card"><p>Booked: <strong>'+esc(act(booked.act).name)+'</strong>. Did it happen?</p><div class="chips"><button class="chip" data-happened="yes" data-t="'+booked.t+'">Yes</button><button class="chip" data-happened="no" data-t="'+booked.t+'">It didn’t happen</button></div></div>' : '')+
   (pending ? '<div class="card"><p>Last time: <strong>'+esc(act(pending.act).name)+'</strong>. Did it help?</p>'+helpChips(pending.t)+'</div>' : '')+
   '<button class="btn big" data-go="checkin">Check in</button>'+
@@ -377,7 +385,17 @@ Screens.checkin = function(){
   S = { step:'mood', skipped:[] };
   stepMood();
 };
-function backTo(g, label){ return '<button class="iconbtn" data-go="'+g+'" style="align-self:flex-start">← '+(label||'Back')+'</button>'; }
+var ZEN = '<svg class="zen" viewBox="0 0 220 120" aria-hidden="true">'+
+  '<g fill="none" stroke="var(--sand)" stroke-width="1.6" stroke-linecap="round">'+
+  '<path d="M8 104 Q110 92 212 104"/><path d="M20 112 Q110 101 200 112"/><path d="M40 119 Q110 110 180 119"/>'+
+  '<ellipse cx="110" cy="99" rx="46" ry="7"/><ellipse cx="110" cy="99" rx="58" ry="11"/></g>'+
+  '<ellipse cx="110" cy="88" rx="34" ry="12" fill="var(--stone3)"/>'+
+  '<ellipse cx="108" cy="67" rx="25" ry="10" fill="var(--stone2)"/>'+
+  '<ellipse cx="111" cy="50" rx="17" ry="8" fill="var(--stone1)"/>'+
+  '<ellipse cx="109" cy="37" rx="10" ry="5.5" fill="var(--stone2)"/>'+
+  '<path d="M160 86 q6 -18 18 -24 q-2 14 -18 24z" fill="var(--leaf)"/>'+
+  '</svg>';
+function backTo(g, label){ return '<button class="iconbtn topback" data-go="'+g+'">← '+(label||'Back')+'</button>'; }
 function progress(n){ var s=''; for (var i=1;i<=3;i++) s+='<span class="'+(i<=n?'on':'')+'"></span>'; return '<div class="progress" aria-hidden="true">'+s+'</div>'; }
 function stepMood(){
   render(backTo('home','Back home')+'<h2 class="sr">Check-in</h2>'+progress(1)+
@@ -486,7 +504,7 @@ Screens.journal = function(){
   header();
   S = { skipped:[], fromJournal:true };
   var j = load().journal.slice().reverse();
-  render('<button class="iconbtn" data-go="home" style="align-self:flex-start">← Back home</button><h1>Vent or journal</h1><p class="small">Only on this phone. No one else can see it, including Deborah.</p>'+
+  render('<button class="iconbtn topback" data-go="home">← Back home</button><h1>Vent or journal</h1><p class="small">Only on this phone. No one else can see it, including Deborah.</p>'+
   soundBar()+
   '<label class="sr" for="vent">Write anything</label><textarea id="vent" placeholder="What’s on your mind?"></textarea>'+
   '<div class="row"><button class="btn" data-go="ventsave">Save</button><button class="btn2" data-go="ventdone">Let it go</button></div>'+
@@ -616,7 +634,7 @@ Screens.week = function(){
 Screens.settings = function(){
   header();
   var p = load().profile;
-  render('<button class="iconbtn" data-go="home" style="align-self:flex-start">← Back home</button><h1>Settings</h1>'+
+  render('<button class="iconbtn topback" data-go="home">← Back home</button><h1>Settings</h1>'+
   '<div class="card">'+(webPushOK()||isNative() ? '<span class="status '+(p.push||p.notify?'on':'off')+'"><i></i>Reminders '+(p.push||p.notify?'on':'off')+'</span>' : '')+
   '<p>Reminder after <strong>'+esc(p.moment.toLowerCase())+'</strong>, around <strong>'+fmtTime(p.time)+'</strong> ('+({weekdays:'weekdays',mwf:'Mon, Wed, Fri',daily:'every day'})[p.freq]+').</p>'+
   '<button class="btn2" data-go="setup">Change it</button>'+(isNative() ? '<button class="btn2" data-go="notify">Update reminders</button>'
@@ -624,7 +642,6 @@ Screens.settings = function(){
     : homeScreenSteps())+'</div>'+
   '<div class="card"><p><strong>Ideas that cost money</strong><br><span class="small">Like a massage or a therapy session. You\u2019d pay the place, never Reset.</span></p>'+
   '<button class="btn2" data-go="togglePaid">'+(p.paid?'Turn off':'Turn on')+'</button></div>'+
-  '<div class="card"><span class="status '+(load().share!==false?'on':'off')+'"><i></i>Sharing '+(load().share!==false?'on':'off')+'</span><p><strong>Anonymous usage</strong><br><span class="small">Helps improve Reset: which days you check in and whether ideas helped. Never your name, journal or anything you type. Turning it off deletes what was shared.</span></p><button class="btn2" data-go="shareToggle">'+(load().share!==false?'Turn off':'Turn on')+'</button></div>'+
   '<p class="small">'+(isNative() ? 'To pause, turn off notifications for Reset in your phone’s Settings.' : p.push ? 'To pause, tap Turn reminders off.' : '')+' Your past answers stay here.</p>'+
   '<div class="links"><button class="link" data-go="privacy">Privacy</button><button class="link" data-go="confirmDelete">Delete my data</button></div>');
 };
@@ -644,7 +661,7 @@ Screens.privacy = function(){
   '<div><b>Where</b><span>Only on this phone, except anonymous usage (below), which you can turn off.</span></div>'+
   '<div><b>Reminders</b><span>If you turn them on, Reset keeps an anonymous device address, your reminder time and time zone so it can send them. No name or email. Turning reminders off removes it.</span></div>'+
   '<div><b>Journal and vent box</b><span>Saved entries stay only on this phone so you can look back. “Let it go” saves nothing.</span></div>'+
-  '<div><b>Anonymous usage</b><span>On unless you turn it off: which days you check in, your mood taps, the type of idea, and whether it helped, under a random id. Never your name or anything you type. Turn it off anytime in Settings; that also deletes what was shared.</span></div>'+
+  '<div><b>Anonymous usage</b><span>To see what helps: which days you check in, your mood taps, the type of idea, and whether it helped, under a random id. Never your name or anything you type. Delete my data also deletes what was shared.</span></div>'+
   '<div><b>How long</b><span>Until you delete it. Clearing this site’s data also deletes it.</span></div>'+
   '</div>'+
   '<p class="small">A wellness experiment, not medical advice. If you are in crisis in the US, call or text 988.</p>'+
@@ -736,7 +753,7 @@ function soundBar(){
       [['rain','Rain'],['brook','Brook'],['cafe','Café'],['','Off']].map(function(o){
         return '<button class="chip'+(cur===o[0]?' sel':'')+'" data-sound="'+o[0]+'" style="flex:0 0 auto;min-height:40px" aria-pressed="'+(cur===o[0])+'">'+o[1]+'</button>'; }).join('')+'</div>';
   return '<div class="sndbar" aria-label="Background sound" style="display:flex;flex-direction:column;align-items:center;gap:4px">'+inner+
-    (isIOS() && cur ? '<p class="small" style="text-align:center;margin:0">No sound? Turn off Silent mode on your iPhone.</p>' : '')+'</div>';
+    '</div>';
 }
 
 /* ---------- phone notifications (iPhone/Android app only) ----------
