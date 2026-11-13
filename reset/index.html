@@ -81,7 +81,7 @@ textarea.line{min-height:56px}
 .draw canvas{touch-action:none}
 .toprow{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .toprow h1{margin:0}
-.gear{font:inherit;font-size:22px;width:44px;height:44px;flex:0 0 44px;border-radius:50%;border:1.5px solid var(--line);background:var(--card);color:var(--ink2);cursor:pointer}
+.gear{display:flex;align-items:center;justify-content:center;padding:0;width:44px;height:44px;flex:0 0 44px;border-radius:50%;border:1.5px solid var(--line);background:var(--card);color:var(--ink2);cursor:pointer}
 .btn.big{min-height:64px;font-size:18px}
 .tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .tile{font:inherit;text-align:left;display:flex;flex-direction:column;gap:2px;padding:14px;border-radius:16px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;min-height:72px}
@@ -358,12 +358,17 @@ Screens.home = function(){
   var pending = d.checkins.filter(function(c){ return c.did===true && !c.helped; }).slice(-1)[0];
   var booked = d.checkins.filter(function(c){ return c.did==='booked'; }).slice(-1)[0];
   render(
-  '<div class="toprow"><h1>'+hi+'</h1><button class="gear" data-go="settings" aria-label="Reminder and settings">⚙︎</button></div>'+
+  '<div class="toprow"><h1>'+hi+'</h1><button class="gear" data-go="settings" aria-label="Reminder and settings"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button></div>'+
   (booked ? '<div class="card"><p>Booked: <strong>'+esc(act(booked.act).name)+'</strong>. Did it happen?</p><div class="chips"><button class="chip" data-happened="yes" data-t="'+booked.t+'">Yes</button><button class="chip" data-happened="no" data-t="'+booked.t+'">It didn’t happen</button></div></div>' : '')+
   (pending ? '<div class="card"><p>Last time: <strong>'+esc(act(pending.act).name)+'</strong>. Did it help?</p>'+helpChips(pending.t)+'</div>' : '')+
   '<button class="btn big" data-go="checkin">Check in</button>'+
-  '<div class="tiles"><button class="tile" data-go="journal"><b>Vent or journal</b><span>Write it out</span></button>'+
-  (d.checkins.length ? '<button class="tile" data-go="week"><b>What helps you</b><span>Your patterns</span></button>' : '')+'</div>');
+  '<div class="tiles">'+
+    '<button class="tile" data-go="qbreath"><b>Breathe</b><span>2 quiet minutes</span></button>'+
+    '<button class="tile" data-go="journal"><b>Vent or journal</b><span>Write it out</span></button>'+
+    '<button class="tile" data-go="qgrat"><b>Gratitude</b><span>Three small things</span></button>'+
+    '<button class="tile" data-go="week"><b>What helps you</b><span>'+(d.checkins.length ? 'Your patterns' : 'After a few check-ins')+'</span></button>'+
+  '</div>'+soundBar()+
+  '<div class="links"><button class="link" data-go="privacy">Privacy</button></div>');
 };
 
 /* 5. Check-in: three taps, energy check first on low days (feedback 2) */
@@ -372,9 +377,10 @@ Screens.checkin = function(){
   S = { step:'mood', skipped:[] };
   stepMood();
 };
+function backTo(g, label){ return '<button class="iconbtn" data-go="'+g+'" style="align-self:flex-start">← '+(label||'Back')+'</button>'; }
 function progress(n){ var s=''; for (var i=1;i<=3;i++) s+='<span class="'+(i<=n?'on':'')+'"></span>'; return '<div class="progress" aria-hidden="true">'+s+'</div>'; }
 function stepMood(){
-  render('<h2 class="sr">Check-in</h2>'+progress(1)+
+  render(backTo('home','Back home')+'<h2 class="sr">Check-in</h2>'+progress(1)+
   '<div class="bubble">How are you feeling right now?</div>'+
   '<div class="chips">'+MOODS.map(function(m,i){ return '<button class="chip" data-mood="'+(i+1)+'">'+m+'</button>'; }).join('')+'</div>'+
   (S.vented ? '' : '<div class="links"><button class="link" data-go="vent">Rough day? Vent first</button></div>'));
@@ -389,20 +395,20 @@ function showVent(){
   '<p class="small">If you ever feel unsafe, call or text 988 in the US.</p>');
 }
 function stepTime(){
-  render('<h2 class="sr">Check-in</h2>'+progress(2)+
+  render(backTo('stepMood')+'<h2 class="sr">Check-in</h2>'+progress(2)+
   '<div class="mine">'+MOODS[S.mood-1]+'</div>'+
   '<div class="bubble">How much time do you have?</div>'+
   '<div class="chips">'+TIMES.map(function(t){ return '<button class="chip" data-time="'+t[0]+'">'+t[1]+'</button>'; }).join('')+'</div>');
 }
 function stepWhere(){
-  render('<h2 class="sr">Check-in</h2>'+progress(3)+
+  render(backTo('stepTime')+'<h2 class="sr">Check-in</h2>'+progress(3)+
   '<div class="mine">'+S.time+' min</div>'+
   '<div class="bubble">Where are you?</div>'+
   '<div class="chips">'+WHERE.map(function(w){ return '<button class="chip" data-where="'+w[0]+'">'+w[1]+'</button>'; }).join('')+'</div>'+
   '<p class="small">So ideas fit where you are.'+((load().profile||{}).paid?'':' All ideas are free.')+'</p>');
 }
 function stepPeople(){
-  render('<h2 class="sr">Check-in</h2>'+progress(3)+
+  render(backTo('stepWhere')+'<h2 class="sr">Check-in</h2>'+progress(3)+
   '<div class="bubble">Up for people right now, or just you?</div>'+
   '<div class="chips"><button class="chip" data-people="no">Just me</button><button class="chip" data-people="yes">Someone easy</button></div>');
 }
@@ -425,7 +431,8 @@ function showIdea(){
   '<p style="color:var(--ink2)">'+esc(a.line)+'</p>'+
   '<p class="small">'+esc(whyLine(a))+'</p></div>'+
   '<button class="btn" data-go="start">Start</button>'+
-  '<div class="links"><button class="link" data-go="another">Show me another</button><button class="link" data-go="home">Not now</button></div>');
+  '<button class="btn2" data-go="another">Show me another</button>'+
+  '<div class="links"><button class="link" data-go="home">Not now</button></div>');
 }
 
 /* 6. Activity with timer, and a way back (feedback 14) */
@@ -442,11 +449,12 @@ function startActivity(){
   (TIMED.indexOf(a.id) < 0 ? '<p class="small">No timer for this one. Take your time.</p>' : '<div class="timer" role="timer" aria-label="Time left"><div id="clock">'+fmt(left)+'</div></div>')+
   '<button class="btn" data-go="done">I’m done</button>'+
   (a.book ? '<button class="btn2" data-go="booked">I booked it for later</button>' : '')+
-  '<div class="links"><button class="link" data-go="back">Pick something else</button><button class="link" data-go="later">Never mind</button></div>');
+  '<button class="btn2" data-go="back">Pick something else</button>'+
+  '<div class="links"><button class="link" data-go="later">Never mind</button></div>');
   clearInterval(tick);
   tick = setInterval(function(){ left--; var c=document.getElementById('clock'); if (!c){ clearInterval(tick); return; } c.textContent = fmt(Math.max(left,0)); if (left<=0){ clearInterval(tick); c.textContent='Done'; } }, 1000);
 }
-function actButtons(){ return '<button class="btn" data-go="done">I’m done</button><div class="links"><button class="link" data-go="back">Pick something else</button><button class="link" data-go="later">Never mind</button></div>'; }
+function actButtons(){ return '<button class="btn" data-go="done">I’m done</button>'+(S.direct ? '<button class="btn2" data-go="home">Back home</button>' : '<button class="btn2" data-go="back">Pick something else</button><div class="links"><button class="link" data-go="later">Never mind</button></div>'); }
 function showBreathe(a){
   clearInterval(tick);
   render('<h2>'+esc(a.name)+'</h2><p class="lead">Breathe in as the circle grows, out as it shrinks. Two minutes is plenty.</p><div class="breath" aria-hidden="true"></div>'+soundBar()+actButtons());
@@ -463,7 +471,7 @@ function showJournal(a){
          : picks.map(function(p,k){ return '<div class="field"><label class="f" for="j'+k+'">'+esc(p)+'</label><textarea id="j'+k+'" class="line"></textarea></div>'; }).join(''))+
   '<button class="btn" data-go="done">I’m done</button>'+
   '<div class="links">'+(a.prompts ? '' : '<button class="link" data-go="jnext">'+(n===1?'Different prompt':'Different prompts')+'</button>')+
-  (S.direct ? '<button class="link" data-go="journal">Back</button>' : '<button class="link" data-go="later">Never mind</button>')+'</div>');
+  (S.direct ? '<button class="link" data-go="'+(S.fromHome?'home':'journal')+'">Back</button>' : '<button class="link" data-go="later">Never mind</button>')+'</div>');
 }
 /* Journal entries are kept only on this phone (never sent, and left out of any future pilot sync). */
 function saveJournal(){
@@ -641,7 +649,7 @@ Screens.privacy = function(){
   '</div>'+
   '<p class="small">A wellness experiment, not medical advice. If you are in crisis in the US, call or text 988.</p>'+
   '<a class="btn2" href="privacy.html" style="display:flex;align-items:center;justify-content:center;text-decoration:none">Read the full privacy policy</a>'+
-  '<button class="btn2" data-go="'+(load().profile?'settings':'welcome')+'">Back</button>');
+  '<button class="btn2" data-go="'+(load().profile?'home':'welcome')+'">Back home</button>');
 };
 
 
@@ -863,9 +871,14 @@ function go(name){
   if (name==='togglePaid'){ var d=load(); d.profile.paid=!d.profile.paid; save(); return Screens.settings(); }
   if (name==='another'){ S.skipped.push(S.act); return showIdea(); }
   if (name==='back'){ S.skipped.push(S.act); return showIdea(); }
+  if (name==='stepMood') return stepMood();
+  if (name==='stepTime') return stepTime();
+  if (name==='stepWhere') return stepWhere();
+  if (name==='qbreath'){ S = { skipped:[], direct:true, fromHome:true, act:'breath' }; return showBreathe(act('breath')); }
+  if (name==='qgrat'){ S = { skipped:[], direct:true, fromHome:true, act:'gratitude' }; return showJournal(act('gratitude')); }
   if (name==='jgrat'){ S = { skipped:[], direct:true, act:'gratitude' }; return showJournal(act('gratitude')); }
   if (name==='jwrite'){ S = { skipped:[], direct:true, act:'journal3' }; return showJournal(act('journal3')); }
-  if (name==='done'){ saveJournal(); if (S.direct){ S.journalSaved=false; return Screens.journal(); } var c = record(true); return askHelped(c); }
+  if (name==='done'){ saveJournal(); if (S.direct){ var fh=S.fromHome; S.journalSaved=false; soundStop(); return fh ? Screens.home() : Screens.journal(); } var c = record(true); return askHelped(c); }
   if (name==='later'){ if (S.direct) return Screens.home(); var c2 = record(false); return askWhy(c2); }
   if (name==='booked'){ var c3 = record('booked'); render('<h2>Nice. Enjoy it.</h2><p class="lead">It’ll wait on your home screen. Tap it after you’ve been.</p><button class="btn" data-go="home">Done for today</button>'); return; }
   if (name==='vent'){ return showVent(); }
