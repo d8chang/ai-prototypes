@@ -316,7 +316,7 @@ Screens.welcome = function(){
   (needsHomeScreen() ? homeScreenSteps().replace('and come back here to turn on reminders.', 'and set it up there. That way reminders work and you only set up once.').replace(/<p class="small">Using Chrome[\s\S]*?<\/p>/, '') : '')+
   '<button class="btn" data-go="setup">'+(needsHomeScreen() ? 'Set up here anyway' : 'Get started')+'</button>'+
   '<button class="btn2" data-go="journal">Vent or journal</button>'+
-  '<p class="small">Reset is always free. No streaks. Your answers stay on this phone. Reset shares only anonymous counts, like which days people check in, never your name or what you write. <button class="link" data-go="privacy" style="padding:0;min-height:0">More details</button></p>'+
+  '<p class="small">Reset is always free. No streaks. Your name and anything you write stay on this phone. Reset shares only anonymous counts of your check-in taps, never your name or words. <button class="link" data-go="privacy" style="padding:0;min-height:0">More details</button></p>'+
   '<p class="small foot">A wellness experiment, not medical advice.</p>');
 };
 
@@ -659,9 +659,9 @@ Screens.privacy = function(){
   header();
   render(backTo(load().profile?'home':'welcome','Back')+'<h1>Your data, in plain words</h1>'+
   '<div class="card facts">'+
-  '<div><b>What Reset saves</b><span>Your first name, your check-in taps, which ideas you tried and whether they helped.</span></div>'+
+  '<div><b>Only on this phone</b><span>Your name, journal, vent and gratitude entries, and your full check-in history. Nobody else, including Deborah, sees these.</span></div>'+
   '<div><b>Why</b><span>To show which ideas work for you, like “walks helped 3 of 4.”</span></div>'+
-  '<div><b>Where</b><span>On this phone. Reset also shares anonymous counts, like which days you check in and whether ideas helped, never your name or what you write.</span></div>'+
+  '<div><b>What Deborah sees</b><span>Anonymous counts: the day, your mood, time, kind of place, type of idea, and whether you did it and it helped. Tied to a random id, never your name or anything you type.</span></div>'+
   '<div><b>Reminders</b><span>If you turn them on, Reset keeps an anonymous device address, your reminder time and time zone so it can send them. No name or email. Turning reminders off removes it.</span></div>'+
   '<div><b>Journal and vent box</b><span>Saved entries stay only on this phone so you can look back. “Let it go” saves nothing.</span></div>'+
   '<div><b>How long</b><span>Until you delete it. Clearing this site’s data also deletes it.</span></div>'+
