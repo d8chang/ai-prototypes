@@ -313,7 +313,7 @@ Screens.welcome = function(){
   (needsHomeScreen() ? homeScreenSteps().replace('and come back here to turn on reminders.', 'and set it up there. That way reminders work and you only set up once.').replace(/<p class="small">Using Chrome[\s\S]*?<\/p>/, '') : '')+
   '<button class="btn" data-go="setup">'+(needsHomeScreen() ? 'Set up here anyway' : 'Get started')+'</button>'+
   '<button class="btn2" data-go="journal">Vent or journal</button>'+
-  '<p class="small">Reset is always free. No streaks. Private: your answers stay on this phone. <button class="link" data-go="privacy" style="padding:0;min-height:0">More details</button></p>'+
+  '<p class="small">Reset is always free. No streaks. Your answers stay on this phone. Reset shares only anonymous counts, like which days people check in, never your name or what you write. <button class="link" data-go="privacy" style="padding:0;min-height:0">More details</button></p>'+
   '<p class="small foot">A wellness experiment, not medical advice.</p>');
 };
 
@@ -351,8 +351,7 @@ Screens.remind = function(){
    ? '<p class="lead">A notification after '+esc(p.moment.toLowerCase())+', around '+fmtTime(p.time)+'. Each one has a tiny thing you can do right there, like three slow breaths. Tap it for a full check-in. No emails, nothing to set up.</p>'+
      (needsHomeScreen() ? homeScreenSteps() : '<button class="btn" data-go="push">Turn on reminders</button>')
    : '<p class="lead">A notification after '+esc(p.moment.toLowerCase())+', around '+fmtTime(p.time)+', with one tiny thing you can do right there.</p>'+homeScreenSteps())+
-  '<button class="btn2" data-go="checkin">Do my first check-in now</button>'+
-  '<p class="small">Reset shares anonymous usage (never your name or what you write) to see what helps. Delete my data in Settings removes it. <a href="privacy.html">Privacy</a></p>');
+  '<button class="btn2" data-go="checkin">Do my first check-in now</button>');
 };
 
 /* 4. Home */
@@ -574,7 +573,7 @@ function record(did){
    Never the name, journal, vent text, or which reminder moment. Used to see if people come back. */
 function dayStr(t){ var d=new Date(t); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function shareEvent(e){
-  var d=load(); if (d.share===false) return;
+  var d=load();
   if (!d.uid){ d.uid=rid(); d.share=true; save(); if (e.type!=='joined') shareEvent({ type:'joined', day:dayStr(d.profile && d.profile.joined || now()) }); }
   try{ postPush({ action:'stat', uid:d.uid, e:e }).catch(function(){}); }catch(x){}
 }
@@ -880,7 +879,6 @@ function go(name){
   if (name==='notify'){ var nb=document.querySelector('[data-go="notify"]'); scheduleNudges().then(function(ok){ if (nb) nb.textContent = ok ? 'Reminders are on' : 'Notifications are off. Turn them on in Settings, then try again'; }); return; }
   if (name==='push'){ var pb=document.querySelector('[data-go="push"]'); if (pb) pb.textContent='Turning on…';
     pushOn().then(function(r){ if (r==='on' && document.querySelector('.status')) return Screens.settings(); if (r==='on'){ var st=document.createElement('span'); st.className='status on'; st.innerHTML='<i></i>Reminders on'; pb.replaceWith(st); return; } if (!pb) return; pb.textContent = r==='on' ? 'Reminders are on' : r==='denied' ? 'Notifications are blocked. Allow them in your settings, then try again' : r==='ios' ? 'First add Reset to your Home Screen' : 'Couldn’t turn them on. Try again in a moment'; }); return; }
-  if (name==='shareToggle'){ load().share!==false ? shareOff() : shareOn(); return Screens.settings(); }
   if (name==='nudgeDid'){ return nudgeDone(); }
   if (name==='pushOff'){ pushOff().then(function(){ Screens.settings(); }); return; }
   if (name==='start'){ return startActivity(); }
