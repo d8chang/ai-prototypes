@@ -106,11 +106,13 @@ textarea.line{min-height:56px}
 .phone-steps{display:flex;flex-direction:column;gap:10px}.phone-steps b{font-size:15px}.phone-steps .steps{margin:4px 0 0}
 .links{display:flex;justify-content:center;flex-wrap:wrap;gap:4px 18px}
 .strip{font:inherit;font-size:15px;text-align:left;min-height:48px;padding:10px 14px;border-radius:14px;border:1px dashed var(--accent);background:var(--card);color:var(--link);cursor:pointer;width:100%}
-.entry{font:inherit;text-align:left;border:0;width:100%;cursor:pointer;color:var(--ink);height:120px;overflow:hidden;position:relative}
-.entry .body{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;line-height:1.4}
+.entry{font:inherit;text-align:left;border:0;width:100%;color:var(--ink);display:flex;flex-direction:column;gap:6px;position:relative}
+.entry .body{display:flex;flex-direction:column;gap:6px;line-height:1.4}
+.entry .line-a{display:flex;flex-direction:column}
+.entry.long{cursor:pointer;max-height:170px;overflow:hidden}
+.entry.long .body{overflow:hidden}
 .entry .body p{margin:0}
-.entry.open{height:auto}
-.entry.open .body{display:block}
+.entry.long.open{max-height:none}
 .entry .more{font-size:13px;color:var(--link)}
 .bar{height:8px;border-radius:4px;background:var(--chip);overflow:hidden}
 .bar>i{display:block;height:8px;background:var(--accent);border-radius:4px}
@@ -555,9 +557,14 @@ function saveJournal(){
   if (!labels.length) return;
   var d = load(); d.journal.push({ t: now(), title: a.name, lines: labels }); save(); S.journalSaved = true;
 }
+/* One saved-entry card everywhere: each answer on its own line, shown in full; only long entries fold. */
 function entryCard(e){ var d=new Date(e.t);
-  return '<button class="card entry" data-entry="1" aria-expanded="false"><span class="small">'+d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'})+' · '+esc(e.title)+'</span>'+
-    '<span class="body">'+e.lines.map(function(x){ return (x.q?'<span class="small">'+esc(x.q)+':</span> ':'')+esc(x.a); }).join(' · ')+'</span><span class="more">Tap to read all</span></button>'; }
+  var head = '<span class="small">'+d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'})+' · '+esc(e.title)+'</span>';
+  var body = e.lines.map(function(x){ return '<span class="line-a">'+(x.q?'<span class="small">'+esc(x.q)+'</span>':'')+esc(x.a)+'</span>'; }).join('');
+  var long = e.lines.reduce(function(n,x){ return n + x.a.length; }, 0) > 220;
+  return long
+    ? '<button class="card entry long" data-entry="1" aria-expanded="false">'+head+'<span class="body">'+body+'</span><span class="more">Tap to read all</span></button>'
+    : '<div class="card entry">'+head+'<span class="body">'+body+'</span></div>'; }
 Screens.journal = function(){
   header();
   S = { skipped:[], fromJournal:true };
