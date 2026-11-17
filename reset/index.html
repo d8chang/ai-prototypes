@@ -97,6 +97,7 @@ textarea.line{min-height:56px}
 .tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .tile{font:inherit;text-align:left;display:flex;flex-direction:column;gap:2px;padding:14px;border-radius:16px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;min-height:72px}
 .tile b{font-size:15px}.ti{display:block;width:30px;height:30px;margin-bottom:6px}.ti svg{width:100%;height:100%;display:block}.tile span{font-size:13px;color:var(--muted)}
+.phone-steps{display:flex;flex-direction:column;gap:10px}.phone-steps b{font-size:15px}.phone-steps .steps{margin:4px 0 0}
 .links{display:flex;justify-content:center;flex-wrap:wrap;gap:4px 18px}
 .strip{font:inherit;font-size:15px;text-align:left;min-height:48px;padding:10px 14px;border-radius:14px;border:1px dashed var(--accent);background:var(--card);color:var(--link);cursor:pointer;width:100%}
 .entry{font:inherit;text-align:left;border:0;width:100%;cursor:pointer;color:var(--ink);height:120px;overflow:hidden;position:relative}
@@ -340,7 +341,7 @@ Screens.welcome = function(){
   '<div class="chips" aria-hidden="true"><span class="chip sel" style="cursor:default">Low</span><span class="chip sel" style="cursor:default">5 min</span><span class="chip sel" style="cursor:default">At the office</span></div>'+
   '<p><strong>Stand and stretch</strong><br><span class="small">Shoulders, neck, wrists. Right where you are. With a 5-minute timer.</span></p></div>'+
   '<div class="card"><div class="eyebrow">How it works</div><ol class="steps"><li>A reminder at a moment you pick.</li><li>Three taps, one small free idea.</li><li>Tell it if it helped. Each week, see what works for you.</li></ol></div>'+
-  (needsHomeScreen() ? homeScreenSteps().replace('and come back here to turn on reminders.', 'and set it up there. That way reminders work and you only set up once.').replace(/<p class="small">Using Chrome[\s\S]*?<\/p>/, '') : '')+
+  phoneSteps()+
   '<button class="btn" data-go="setup">'+(needsHomeScreen() ? 'Set up here anyway' : 'Get started')+'</button>'+
   '<button class="btn2" data-go="journal">Vent or journal</button>'+
   '<p class="small">Reset is always free. No streaks. Your name and anything you write stay on this phone. Reset shares only anonymous counts of your check-in taps, never your name or words. <button class="link" data-go="privacy" style="padding:0;min-height:0">More details</button></p>'+
@@ -535,10 +536,7 @@ function showJournal(a){
 function pastFor(a){
   var past = load().journal.filter(function(e){ return e.title===a.name; }).slice(-3).reverse();
   if (!past.length) return '';
-  return '<h2 style="margin-top:8px">Your past '+(a.id==='gratitude'?'gratitude lists':'entries')+'</h2>'+
-    past.map(function(e){ var d=new Date(e.t);
-      return '<div class="card"><span class="small">'+d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'})+'</span><p style="margin:4px 0 0">'+
-        e.lines.map(function(x){ return esc(x.a); }).join(' · ')+'</p></div>'; }).join('')+
+  return '<h2 style="margin-top:8px">Past entries</h2>'+past.map(entryCard).join('')+
     (S.direct ? '<div class="links"><button class="link" data-go="journal">See all saved entries</button></div>' : '');
 }
 /* Journal entries are kept only on this phone (never sent, and left out of any future pilot sync). */
@@ -550,6 +548,9 @@ function saveJournal(){
   if (!labels.length) return;
   var d = load(); d.journal.push({ t: now(), title: a.name, lines: labels }); save(); S.journalSaved = true;
 }
+function entryCard(e){ var d=new Date(e.t);
+  return '<button class="card entry" data-entry="1" aria-expanded="false"><span class="small">'+d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'})+' · '+esc(e.title)+'</span>'+
+    '<span class="body">'+e.lines.map(function(x){ return (x.q?'<span class="small">'+esc(x.q)+':</span> ':'')+esc(x.a); }).join(' · ')+'</span><span class="more">Tap to read all</span></button>'; }
 Screens.journal = function(){
   header();
   S = { skipped:[], fromJournal:true };
@@ -561,9 +562,7 @@ Screens.journal = function(){
   '<div class="row"><button class="btn2" data-go="jgrat">Gratitude list</button><button class="btn2" data-go="jwrite">Use a prompt</button></div>'+
   '<p class="small">If you ever feel unsafe, call or text 988 in the US.</p>'+
   '<h2 style="margin-top:8px">Past entries</h2>'+
-  (j.length ? j.map(function(e){ var d=new Date(e.t);
-     return '<button class="card entry" data-entry="1" aria-expanded="false"><span class="small">'+d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'})+' · '+esc(e.title)+'</span>'+
-       '<span class="body">'+e.lines.map(function(x){ return (x.q?'<span class="small">'+esc(x.q)+':</span> ':'')+esc(x.a); }).join(' · ')+'</span><span class="more">Tap to read all</span></button>'; }).join('')
+  (j.length ? j.map(entryCard).join('')
    : '<p class="small">Nothing saved yet.</p>'));
 };
 /* Guided drawing: a faint guide builds step by step; draw over it with a finger, or on paper. Nothing is saved. */
@@ -870,6 +869,19 @@ function isIOS(){ return /iPhone|iPad|iPod/.test(navigator.userAgent) || (naviga
 function standalone(){ return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone===true; }
 function needsHomeScreen(){ return !isNative() && isIOS() && !standalone(); }
 function isAndroid(){ return /Android/.test(navigator.userAgent); }
+/* Signup: short reminder setup for iPhone and Android (yours first). Hidden once Reset runs from the Home Screen. */
+function phoneSteps(){
+  if (isNative() || standalone()) return '';
+  var ios = '<div><b>iPhone</b><ol class="steps">'+
+    '<li>In <strong>Safari</strong>, tap <strong>Share</strong> (square with an arrow) → <strong>Add to Home Screen</strong>.</li>'+
+    '<li>Open Reset from the new icon and set up there.</li>'+
+    '<li>Tap <strong>Allow</strong> when asked about notifications.</li></ol></div>';
+  var and = '<div><b>Android</b><ol class="steps">'+
+    '<li>In <strong>Chrome</strong>, tap <strong>Get started</strong> below.</li>'+
+    '<li>Tap <strong>Allow</strong> when asked about notifications.</li>'+
+    '<li>Optional: <strong>⋮</strong> → <strong>Add to Home screen</strong> for an app icon.</li></ol></div>';
+  return '<div class="card phone-steps"><div class="eyebrow">Get reminders on your phone</div>'+(isAndroid() ? and+ios : ios+and)+'</div>';
+}
 function homeScreenSteps(){
   if (isIOS()) return '<div class="card"><div class="eyebrow">Add Reset to your Home Screen first</div><ol class="steps">'+
     '<li>At the bottom of Safari, tap the <strong>Share</strong> button (the square with an arrow pointing up).</li>'+
