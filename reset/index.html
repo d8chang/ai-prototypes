@@ -355,7 +355,6 @@ Screens.welcome = function(){
   '<div class="card"><div class="eyebrow">How it works</div><ol class="steps"><li>A reminder at a moment you pick.</li><li>Three taps, one small free idea.</li><li>Tell it if it helped. Each week, see what works for you.</li></ol></div>'+
   phoneSteps()+
   (needsHomeScreen() ? '<button class="btn2" data-go="setup">Skip for now, set up here</button>' : '<button class="btn" data-go="setup">Get started</button>')+
-  '<button class="btn2" data-go="journal">Vent or journal</button>'+
   '<p class="small">Reset is always free. No streaks. Your name and anything you write stay on this phone. Reset shares only anonymous counts of your check-in taps, never your name or words. <button class="link" data-go="privacy" style="padding:0;min-height:0">More details</button></p>'+
   '<p class="small foot">A wellness experiment, not medical advice.</p>');
 };
@@ -364,7 +363,7 @@ Screens.welcome = function(){
 Screens.setup = function(){
   header();
   var p = load().profile || {};
-  render(
+  render(backTo(load().profile ? 'settings' : 'welcome', 'Back')+
   '<h1>Two quick things</h1>'+
   '<div class="field"><label class="f" for="nm">First name</label><input id="nm" type="text" autocomplete="given-name" value="'+esc(p.name||'')+'" placeholder="Your first name"></div>'+
   '<div class="field"><label class="f" for="mo">Check in with me after…</label><select id="mo">'+MOMENTS.map(function(m){ return '<option'+(p.moment===m?' selected':'')+'>'+m+'</option>'; }).join('')+'</select></div>'+
