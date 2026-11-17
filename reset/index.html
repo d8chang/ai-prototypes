@@ -358,28 +358,38 @@ Screens.setup = function(){
   '<div class="row"><div class="field"><label class="f" for="tm">Usually around</label><input id="tm" type="time" value="'+(p.time||'17:30')+'" style="font:inherit;font-size:16px;min-height:46px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);width:100%"></div>'+
   '<div class="field"><label class="f" for="fq">How often</label><select id="fq"><option value="weekdays"'+(p.freq==='weekdays'?' selected':'')+'>Weekdays</option><option value="mwf"'+(p.freq!=='weekdays'&&p.freq!=='daily'?' selected':'')+'>Mon, Wed, Fri</option><option value="daily"'+(p.freq==='daily'?' selected':'')+'>Every day</option></select></div></div>'+
   '<button class="btn" data-go="saveSetup">Continue</button>'+
-  '<p class="small">You can change these anytime.</p>');
+  '<p class="small">'+(webPushOK() && !needsHomeScreen() ? 'Next, your phone will ask to allow notifications so Reset can remind you. ' : '')+'You can change these anytime.</p>');
 };
 Screens.saveSetup = function(){
   var nm = (document.getElementById('nm').value||'').trim().slice(0,40);
   if (!nm){ document.getElementById('nm').focus(); return; }
   var d = load();
   d.profile = { name:nm, moment:document.getElementById('mo').value, time:document.getElementById('tm').value||'17:30', freq:document.getElementById('fq').value, paid:!!(d.profile&&d.profile.paid), joined:(d.profile&&d.profile.joined)||now() };
-  save(); if (d.profile.push) pushOn(); go('remind');
+  save();
+  if (!isNative() && webPushOK() && !needsHomeScreen()){
+    S.pushPending = true;
+    pushOn().then(function(r){ S.pushPending = false; S.pushResult = r; if (document.querySelector('[data-screen="remind"]')) Screens.remind(); });
+  }
+  go('remind');
 };
 
 /* 3. Reminder: a notification at a moment you pick, instead of email (feedback 1, 5, 8) */
 Screens.remind = function(){
   header();
   var p = load().profile;
+  var on = p.push === true;
   render(
-  '<h1>Your reminder</h1>'+
-  (isNative()
+  '<h1 data-screen="remind">Your reminder</h1>'+
+  (!isNative() && webPushOK() && !needsHomeScreen() && (on || S.pushPending)
+   ? '<span class="status '+(on?'on':'off')+'"><i></i>'+(on?'Reminders on':'Turning on…')+'</span>'+
+     '<p class="lead">A notification after '+esc(p.moment.toLowerCase())+', around '+fmtTime(p.time)+'. Each one has a tiny thing you can do right there, like three slow breaths. Tap it for a full check-in.</p>'+
+     '<p class="small">Change or turn them off anytime in Settings.</p>'
+   : isNative()
    ? '<p class="lead">A notification after '+esc(p.moment.toLowerCase())+', around '+fmtTime(p.time)+'. Each one has a tiny thing you can do right there, like three slow breaths. Tap it for a full check-in.</p>'+
      '<button class="btn" data-go="notify">Turn on reminders</button>'
    : webPushOK()
    ? '<p class="lead">A notification after '+esc(p.moment.toLowerCase())+', around '+fmtTime(p.time)+'. Each one has a tiny thing you can do right there, like three slow breaths. Tap it for a full check-in. No emails, nothing to set up.</p>'+
-     (needsHomeScreen() ? homeScreenSteps() : '<button class="btn" data-go="push">Turn on reminders</button>')
+     (needsHomeScreen() ? homeScreenSteps() : (S.pushResult==='denied' ? '<p class="small">Notifications are blocked. To allow them, open your phone’s Settings → Notifications → Reset, then tap below.</p>' : '')+'<button class="btn" data-go="push">Turn on reminders</button>')
    : '<p class="lead">A notification after '+esc(p.moment.toLowerCase())+', around '+fmtTime(p.time)+', with one tiny thing you can do right there.</p>'+homeScreenSteps())+
   '<button class="btn2" data-go="checkin">Do my first check-in now</button>');
 };
@@ -519,7 +529,17 @@ function showJournal(a){
          : picks.map(function(p,k){ return '<div class="field"><label class="f" for="j'+k+'">'+esc(p)+'</label><textarea id="j'+k+'" class="line"></textarea></div>'; }).join(''))+
   '<div class="row"><button class="btn" data-go="done">Save</button><button class="btn2" data-go="jletgo">Let it go</button></div>'+
   '<div class="links">'+(a.prompts ? '' : '<button class="link" data-go="jnext">'+(n===1?'Different prompt':'Different prompts')+'</button>')+
-  (S.direct ? '' : '<button class="link" data-go="later">Never mind</button>')+'</div>');
+  (S.direct ? '' : '<button class="link" data-go="later">Never mind</button>')+'</div>'+pastFor(a));
+}
+/* Saved entries of this kind, newest first (only on this phone). */
+function pastFor(a){
+  var past = load().journal.filter(function(e){ return e.title===a.name; }).slice(-3).reverse();
+  if (!past.length) return '';
+  return '<h2 style="margin-top:8px">Your past '+(a.id==='gratitude'?'gratitude lists':'entries')+'</h2>'+
+    past.map(function(e){ var d=new Date(e.t);
+      return '<div class="card"><span class="small">'+d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'})+'</span><p style="margin:4px 0 0">'+
+        e.lines.map(function(x){ return esc(x.a); }).join(' · ')+'</p></div>'; }).join('')+
+    (S.direct ? '<div class="links"><button class="link" data-go="journal">See all saved entries</button></div>' : '');
 }
 /* Journal entries are kept only on this phone (never sent, and left out of any future pilot sync). */
 function saveJournal(){
