@@ -101,6 +101,9 @@ textarea.line{min-height:56px}
 .add-card p{margin:6px 0 0}.add-card .steps{margin:8px 0 0}
 .share-hint{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:5;background:var(--accent);color:var(--accent-ink);font-size:14px;padding:10px 14px;border-radius:14px;box-shadow:0 6px 18px rgba(0,0,0,.18);white-space:nowrap;pointer-events:none;animation:hint 1.6s ease-in-out infinite}
 .share-hint .arrow{position:absolute;left:50%;bottom:-20px;transform:translateX(-50%);color:var(--accent);font-size:20px}
+.share-hint.top{bottom:auto;top:calc(10px + env(safe-area-inset-top));left:auto;right:12px;transform:none;animation:hint-top 1.6s ease-in-out infinite}
+.share-hint.top .arrow{bottom:auto;top:-22px;left:auto;right:18px;transform:none}
+@keyframes hint-top{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
 @keyframes hint{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,-6px)}}
 @media (prefers-reduced-motion: reduce){.share-hint{animation:none}}
 .phone-steps{display:flex;flex-direction:column;gap:10px}.phone-steps b{font-size:15px}.phone-steps .steps{margin:4px 0 0}
@@ -890,29 +893,26 @@ window.addEventListener('appinstalled', function(){ installPrompt = null; });
 function isIOSChrome(){ return /CriOS|FxiOS|EdgiOS/.test(navigator.userAgent); }
 /* iPhone, not yet on the Home Screen: one clear step, with a pointer to Safari's Share button. */
 function iosAddCard(){
-  if (isIOSChrome()) return '<div class="card add-card"><div class="eyebrow">Step 1 of 2 · 10 seconds</div><p><strong>Open this page in Safari</strong> to add Reset to your Home Screen. That’s what lets reminders reach you.</p><p class="small">Tap ⋯ or the share icon, then <strong>Open in Safari</strong>, or copy the link into Safari.</p></div>';
-  return '<div class="card add-card"><div class="eyebrow">Step 1 of 2 · 10 seconds</div>'+
-    '<p><strong>Add Reset to your Home Screen</strong> so reminders can reach you.</p><ol class="steps">'+
-    '<li>Tap <strong>Share</strong> '+'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/></svg>'+' at the bottom of Safari (or ⋯, then Share).</li>'+
-    '<li>Tap <strong>Add to Home Screen</strong>, then <strong>Add</strong>.</li>'+
-    '<li>Open Reset from the new icon. Set up there and tap <strong>Allow</strong> for reminders.</li></ol></div>'+
-    '<div class="share-hint" aria-hidden="true">Tap Share '+'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/></svg>'+', then <b>Add to Home Screen</b><span class="arrow">↓</span></div>';
+  var chrome = isIOSChrome(), where = chrome ? 'next to the address bar' : 'at the bottom of Safari';
+  var SH = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/></svg>';
+  return '<div class="card add-card"><div class="eyebrow">Turn on reminders · 10 seconds</div><ol class="steps">'+
+    '<li>Tap <strong>Share</strong> '+SH+' '+where+'.</li>'+
+    '<li>Tap <strong>Add to Home Screen</strong>.</li>'+
+    '<li>Open Reset from your Home Screen and tap <strong>Allow</strong>.</li></ol></div>'+
+    '<div class="share-hint'+(chrome?' top':'')+'" aria-hidden="true">'+(chrome?'<span class="arrow">↑</span>':'')+'Tap Share '+SH+', then <b>Add to Home Screen</b>'+(chrome?'':'<span class="arrow">↓</span>')+'</div>';
 }
 /* Signup: short reminder setup for iPhone and Android (yours first). Hidden once Reset runs from the Home Screen. */
 function phoneSteps(){
   if (isNative() || standalone()) return '';
   if (isIOS()) return '';
-  if (isAndroid()) return '<div class="card add-card"><div class="eyebrow">Reminders</div><p>Tap <strong>Get started</strong>, then <strong>Allow</strong> when your phone asks. That’s it.</p>'+
+  if (isAndroid()) return '<div class="card add-card"><div class="eyebrow">Turn on reminders</div><p>Tap <strong>Get started</strong>, then <strong>Allow</strong>. That’s it.</p>'+
     (installPrompt ? '<button class="btn2" data-go="install">Add Reset to my Home screen</button>' : '<p class="small">Optional: Chrome ⋮ → <strong>Add to Home screen</strong> for an app icon.</p>')+'</div>';
   var ios = '<div><b>iPhone</b><ol class="steps">'+
-    '<li>In <strong>Safari</strong>, tap <strong>Share</strong> (square with an arrow) → <strong>Add to Home Screen</strong>.</li>'+
-    '<li>Open Reset from the new icon and set up there.</li>'+
-    '<li>Tap <strong>Allow</strong> when asked about notifications.</li></ol></div>';
+    '<li>In Safari or Chrome, tap <strong>Share</strong> → <strong>Add to Home Screen</strong>.</li>'+
+    '<li>Open Reset from your Home Screen and tap <strong>Allow</strong>.</li></ol></div>';
   var and = '<div><b>Android</b><ol class="steps">'+
-    '<li>In <strong>Chrome</strong>, tap <strong>Get started</strong> below.</li>'+
-    '<li>Tap <strong>Allow</strong> when asked about notifications.</li>'+
-    '<li>Optional: <strong>⋮</strong> → <strong>Add to Home screen</strong> for an app icon.</li></ol></div>';
-  return '<div class="card phone-steps"><div class="eyebrow">Get reminders on your phone</div>'+(isAndroid() ? and+ios : ios+and)+'</div>';
+    '<li>Tap <strong>Get started</strong>, then <strong>Allow</strong>.</li></ol></div>';
+  return '<div class="card phone-steps"><div class="eyebrow">Turn on reminders on your phone</div>'+(isAndroid() ? and+ios : ios+and)+'</div>';
 }
 function homeScreenSteps(){
   if (isIOS()) return '<div class="card"><div class="eyebrow">Add Reset to your Home Screen first</div><ol class="steps">'+
