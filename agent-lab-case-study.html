@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marketing Agent Lab · Deborah Chang</title>
+<meta name="description" content="Two AI agents for real marketing requests, tested on 3 open-source models with 22 evals, human approval before every write, and a live monday.com integration.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #faf8f4;
+    --surface: #ffffff;
+    --ink: #1c1b19;
+    --ink-2: #57534b;
+    --ink-3: #8a857b;
+    --line: #e7e2d8;
+    --accent: #2f5bd3;
+    --accent-soft: #e8eefc;
+    --good: #2f7d4f;
+    --good-soft: #e5f3ea;
+    --bad: #b4412f;
+    --bad-soft: #fbe9e5;
+    --code-bg: #f2efe8;
+    --serif: "Fraunces", Georgia, serif;
+    --sans: "Inter", system-ui, -apple-system, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #151514; --surface: #1d1d1b; --ink: #f1eee8; --ink-2: #bdb8ae; --ink-3: #8c877e;
+      --line: #33322e; --accent: #8aa9ff; --accent-soft: #1f2a45; --good: #6fc391; --good-soft: #1b3326;
+      --bad: #f08a76; --bad-soft: #3b211c; --code-bg: #262522;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 var(--sans); }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 20px; }
+  nav { padding: 22px 0; font-size: 14px; color: var(--ink-3); display: flex; justify-content: space-between; gap: 12px; }
+  nav a { color: var(--ink-2); }
+
+  header.hero { padding: 40px 0 28px; border-bottom: 1px solid var(--line); }
+  .eyebrow { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin: 0 0 14px; }
+  h1 { font-family: var(--serif); font-weight: 600; font-size: clamp(34px, 6vw, 52px); line-height: 1.08; margin: 0 0 18px; letter-spacing: -.01em; }
+  h1 em { font-style: italic; font-weight: 500; color: var(--accent); }
+  .lede { font-size: 19px; color: var(--ink-2); max-width: 680px; margin: 0 0 22px; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { font-size: 13px; padding: 4px 10px; border: 1px solid var(--line); border-radius: 999px; color: var(--ink-2); background: var(--surface); }
+
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; margin: 32px 0 8px; }
+  .stat { background: var(--surface); padding: 18px 16px; }
+  .stat b { display: block; font-family: var(--serif); font-size: 32px; font-weight: 600; line-height: 1.1; }
+  .stat span { font-size: 13px; color: var(--ink-2); }
+
+  section { padding: 44px 0 8px; }
+  h2 { font-family: var(--serif); font-weight: 600; font-size: 28px; line-height: 1.2; margin: 0 0 6px; }
+  .kicker { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin: 0 0 8px; font-weight: 600; }
+  p { margin: 0 0 14px; max-width: 700px; }
+  .muted { color: var(--ink-2); }
+
+  .diagram { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; margin: 18px 0; }
+  .diagram svg { width: 100%; height: auto; display: block; }
+  .diagram text { font-family: var(--sans); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 15px; margin: 16px 0; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3); font-weight: 600; background: var(--bg); }
+  tr:last-child td { border-bottom: 0; }
+  td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .bar { height: 8px; border-radius: 4px; background: var(--line); margin-top: 6px; overflow: hidden; width: 120px; }
+  .bar i { display: block; height: 100%; background: var(--ink-3); border-radius: 4px; }
+  .bar.lead i { background: var(--accent); }
+  .table-scroll { overflow-x: auto; }
+
+  .cases { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 16px 0; }
+  .case { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+  .case h3 { font-size: 15px; margin: 0 0 4px; }
+  .case p { font-size: 14px; color: var(--ink-2); margin: 0 0 8px; }
+  .case code { font-family: var(--mono); font-size: 12.5px; background: var(--code-bg); padding: 2px 6px; border-radius: 4px; display: inline-block; margin: 2px 0; color: var(--ink); }
+
+  .findings { counter-reset: f; list-style: none; padding: 0; margin: 16px 0; }
+  .findings li { counter-increment: f; position: relative; padding: 16px 16px 16px 60px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; margin-bottom: 10px; }
+  .findings li::before { content: counter(f, decimal-leading-zero); position: absolute; left: 18px; top: 15px; font-family: var(--serif); font-size: 20px; color: var(--accent); font-weight: 600; }
+  .findings b { display: block; margin-bottom: 2px; }
+  .findings span { color: var(--ink-2); font-size: 15px; }
+
+  .callout { border-left: 3px solid var(--good); background: var(--good-soft); padding: 14px 16px; border-radius: 0 10px 10px 0; margin: 18px 0; max-width: 700px; }
+  .callout.warn { border-color: var(--bad); background: var(--bad-soft); }
+  .callout b { display: block; margin-bottom: 2px; }
+
+  .term { background: #16181d; border-radius: 12px; overflow: hidden; margin: 18px 0; border: 1px solid #2a2d35; }
+  .term-bar { display: flex; align-items: center; gap: 6px; padding: 10px 14px; background: #20232a; font: 12px var(--sans); color: #9aa0ab; }
+  .term-bar i { width: 10px; height: 10px; border-radius: 50%; background: #3a3e48; }
+  .term-bar span { margin-left: 8px; }
+  .term pre { background: transparent; color: #e6e8ec; margin: 0; max-width: none; border-radius: 0; font-size: 12.5px; white-space: pre-wrap; word-break: break-word; }
+  .term .c { color: #7f8796; }
+  .term .p { color: #8aa9ff; }
+  .term .w { color: #f2c46d; }
+  .term .y { color: #6fc391; font-weight: 600; }
+  .term .g { color: #6fc391; }
+  h3.sub { font-size: 18px; margin: 26px 0 6px; }
+  .bts { margin: 8px 0 14px; padding-left: 20px; max-width: 700px; }
+  .bts li { margin-bottom: 6px; }
+  .bts code { font-family: var(--mono); font-size: 13px; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+  pre { font-family: var(--mono); font-size: 13px; background: var(--code-bg); border-radius: 10px; padding: 14px 16px; overflow-x: auto; line-height: 1.55; margin: 14px 0; max-width: 700px; }
+
+  .next { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 16px 0; }
+  .next div { border: 1px dashed var(--line); border-radius: 12px; padding: 14px 16px; background: var(--surface); }
+  .next b { display: block; font-size: 15px; }
+  .next span { font-size: 14px; color: var(--ink-2); }
+
+  footer { margin: 56px 0 40px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 14px; color: var(--ink-3); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+
+  @media (max-width: 640px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .cases, .next { grid-template-columns: 1fr; }
+    .lede { font-size: 17px; }
+    th, td { padding: 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a href="./">← Deborah Chang · Product Portfolio</a>
+    <span>Case study · Work in progress</span>
+  </nav>
+
+  <header class="hero">
+    <p class="eyebrow">Independent project · Work in progress · Nov 2026</p>
+    <h1>Marketing Agent Lab: <em>which AI agent would I trust to act?</em></h1>
+    <p class="lede">I built two AI agents for everyday marketing requests, gave them tools that read and write real data, and tested three open-source models on 22 evals. A person approves every write, and a log records each decision.</p>
+    <div class="meta">
+      <span class="chip">Python</span>
+      <span class="chip">Ollama (Qwen3 4B, Qwen3 8B, Llama 3.1 8B)</span>
+      <span class="chip">monday.com GraphQL API</span>
+      <span class="chip">Postman</span>
+      <span class="chip">Built with Claude Code</span>
+    </div>
+    <div class="stats">
+      <div class="stat"><b>3</b><span>models compared</span></div>
+      <div class="stat"><b>22</b><span>eval cases, 4 from real requests</span></div>
+      <div class="stat"><b>5 → 13</b><span>routing score after one prompt fix (of 16)</span></div>
+      <div class="stat"><b>0</b><span>writes without human approval</span></div>
+    </div>
+  </header>
+
+  <section>
+    <p class="kicker">The problem</p>
+    <h2>Agents that can act need more than a good model</h2>
+    <p>Marketing teams send the same requests over and over: "set up a webinar," "chase the leads from last week's event." An AI agent can handle them, but only if it checks before it acts. It shouldn't create a campaign that already exists, email someone who opted out, or guess a launch date.</p>
+    <p>I wanted hands-on answers to three questions: which model makes the right call most often, what it costs in speed, and which safety rules belong in code rather than in the prompt.</p>
+  </section>
+
+  <section>
+    <p class="kicker">How it works</p>
+    <h2>A router, two specialist agents, and an approval step</h2>
+    <p>Each request goes to a router, which picks one agent or answers "I can't help with that." Each agent only gets the tools it needs. Reads run immediately. Every write stops for a person's approval and is logged.</p>
+    <div class="diagram" role="img" aria-label="Request flows to a router, then to the intake or follow-up agent. Each agent has a read tool and a write tool. Writes pass through human approval, then reach the monday.com board or the outbox, and every decision goes to the audit log.">
+      <svg viewBox="0 0 800 330" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink-3)"/></marker>
+        </defs>
+        <!-- request -->
+        <rect x="10" y="135" width="120" height="56" rx="10" fill="var(--surface)" stroke="var(--line)"/>
+        <text x="70" y="160" text-anchor="middle" font-size="14" font-weight="600" fill="var(--ink)">Request</text>
+        <text x="70" y="178" text-anchor="middle" font-size="12" fill="var(--ink-2)">plain English</text>
+        <line x1="130" y1="163" x2="168" y2="163" stroke="var(--ink-3)" stroke-width="1.5" marker-end="url(#arr)"/>
+        <!-- router -->
+        <rect x="170" y="135" width="120" height="56" rx="10" fill="var(--accent-soft)" stroke="var(--accent)"/>
+        <text x="230" y="160" text-anchor="middle" font-size="14" font-weight="600" fill="var(--ink)">Router</text>
+        <text x="230" y="178" text-anchor="middle" font-size="12" fill="var(--ink-2)">picks one agent</text>
+        <!-- branches -->
+        <path d="M290 150 C 320 150, 320 70, 348 70" fill="none" stroke="var(--ink-3)" stroke-width="1.5" marker-end="url(#arr)"/>
+        <path d="M290 176 C 320 176, 320 256, 348 256" fill="none" stroke="var(--ink-3)" stroke-width="1.5" marker-end="url(#arr)"/>
+        <line x1="230" y1="191" x2="230" y2="292" stroke="var(--ink-3)" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#arr)"/>
+        <text x="230" y="312" text-anchor="middle" font-size="12" fill="var(--ink-2)">"unclear": says what it can't do</text>
+        <!-- intake -->
+        <rect x="350" y="20" width="200" height="100" rx="10" fill="var(--surface)" stroke="var(--line)"/>
+        <text x="366" y="44" font-size="14" font-weight="600" fill="var(--ink)">Intake agent</text>
+        <text x="366" y="68" font-size="12" fill="var(--ink-2)">read: list_campaigns</text>
+        <text x="366" y="88" font-size="12" fill="var(--ink-2)">write: create_campaign</text>
+        <text x="366" y="108" font-size="11" fill="var(--ink-3)">checks duplicates and clashes</text>
+        <!-- followup -->
+        <rect x="350" y="206" width="200" height="100" rx="10" fill="var(--surface)" stroke="var(--line)"/>
+        <text x="366" y="230" font-size="14" font-weight="600" fill="var(--ink)">Follow-up agent</text>
+        <text x="366" y="254" font-size="12" fill="var(--ink-2)">read: list_stale_leads</text>
+        <text x="366" y="274" font-size="12" fill="var(--ink-2)">write: send_followup_email</text>
+        <text x="366" y="294" font-size="11" fill="var(--ink-3)">opted-out leads blocked in code</text>
+        <!-- approval -->
+        <path d="M550 70 C 580 70, 580 150, 606 150" fill="none" stroke="var(--ink-3)" stroke-width="1.5" marker-end="url(#arr)"/>
+        <path d="M550 256 C 580 256, 580 176, 606 176" fill="none" stroke="var(--ink-3)" stroke-width="1.5" marker-end="url(#arr)"/>
+        <rect x="608" y="130" width="180" height="66" rx="10" fill="var(--good-soft)" stroke="var(--good)"/>
+        <text x="698" y="157" text-anchor="middle" font-size="14" font-weight="600" fill="var(--ink)">Human approval</text>
+        <text x="698" y="177" text-anchor="middle" font-size="12" fill="var(--ink-2)">every write, then logged</text>
+        <line x1="698" y1="196" x2="698" y2="234" stroke="var(--ink-3)" stroke-width="1.5" marker-end="url(#arr)"/>
+        <rect x="608" y="236" width="180" height="70" rx="10" fill="var(--surface)" stroke="var(--line)"/>
+        <text x="698" y="262" text-anchor="middle" font-size="13" font-weight="600" fill="var(--ink)">monday.com board</text>
+        <text x="698" y="280" text-anchor="middle" font-size="12" fill="var(--ink-2)">or email outbox</text>
+        <text x="698" y="297" text-anchor="middle" font-size="11" fill="var(--ink-3)">+ audit log</text>
+      </svg>
+    </div>
+    <p class="muted">The same agent code runs on any model: one small adapter speaks to Claude, OpenAI or a free local model through Ollama, so comparing models means changing one flag.</p>
+  </section>
+
+  <section>
+    <p class="kicker">How I tested it</p>
+    <h2>22 evals that check the right action happened</h2>
+    <p>Each eval is a request with a known right answer. The grader checks routing, whether the agent looked before it acted, and the exact writes it tried. It doesn't check whether the reply sounds good.</p>
+    <div class="cases">
+      <div class="case"><h3>New campaigns (10)</h3><p>Create real requests; refuse duplicates, date clashes and requests with no date.</p><code>"Set up a webinar on AI SRE for VP Engineering on Dec 10" → already exists, create nothing</code></div>
+      <div class="case"><h3>Lead follow-up (8)</h3><p>Email exactly the right leads; skip recent and opted-out ones.</p><code>"Send Chris Patel a follow-up" → he opted out, email nobody</code></div>
+      <div class="case"><h3>Out of scope (4)</h3><p>Say "I can't do that" instead of making something up.</p><code>"Last 5 quarters of pipeline by source" → no analytics agent yet</code></div>
+      <div class="case"><h3>Real requests (4)</h3><p>Real marketing requests, in the words people actually used.</p><code>"Export the leads we missed and kick off a nurture brief"</code></div>
+    </div>
+  </section>
+
+  <section>
+    <p class="kicker">Results</p>
+    <h2>The bigger Qwen was most accurate but twice as slow</h2>
+    <p>Same 16 core evals, same prompts, run locally for free.</p>
+    <div class="table-scroll">
+    <table>
+      <thead><tr><th>Model</th><th>Passed</th><th>Routing</th><th>Median time</th><th>Where it failed</th></tr></thead>
+      <tbody>
+        <tr><td><b>Qwen3 8B</b></td><td class="num">14 / 16<div class="bar lead"><i style="width:87.5%"></i></div></td><td class="num">16 / 16</td><td class="num">241 s</td><td>Skipped the board check twice</td></tr>
+        <tr><td><b>Qwen3 4B</b></td><td class="num">12 / 16<div class="bar"><i style="width:75%"></i></div></td><td class="num">16 / 16</td><td class="num">112 s</td><td>Missed two creates; emailed nobody for time-window requests</td></tr>
+        <tr><td><b>Llama 3.1 8B</b></td><td class="num">4 / 16<div class="bar"><i style="width:25%"></i></div></td><td class="num">13 / 16</td><td class="num">5 s</td><td>Rarely used its tools; fast only because it did so little</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="muted">Times are on a MacBook Air. Earlier, with a weaker router prompt, the 4B model scored 13 and the 8B scored 12, a reminder that a one- or two-point gap from a single run is noise.</p>
+  </section>
+
+  <section>
+    <p class="kicker">What I learned</p>
+    <h2>Five findings I'd bring to a product team</h2>
+    <ol class="findings">
+      <li><b>The prompt mattered as much as the model.</b><span>Llama's router answered "Alex" when asked to pick an agent. Adding three examples to the prompt took its routing from 5 to 13 of 16.</span></li>
+      <li><b>Safety rules belong in code, not the prompt.</b><span>Qwen 8B tried to email a lead who had opted out. The prompt said not to; the code blocked it anyway.</span></li>
+      <li><b>A model that does nothing can look safe.</b><span>All four of Llama's passes were cases where doing nothing was correct. Evals have to check that the right action happened, not just that nothing bad did.</span></li>
+      <li><b>Real requests broke things sample cases didn't.</b><span>Asked to export leads, both Qwen models had no export tool, so they emailed three people instead. The approval step caught it. Two of four real requests were analytics, which tells me what agent to build next.</span></li>
+      <li><b>On small models, prompt fixes move failures around.</b><span>Three targeted fixes raised each model by one case but created new misroutes. Where a request is ambiguous, the agent should ask a clarifying question, not guess.</span></li>
+    </ol>
+  </section>
+
+  <section>
+    <p class="kicker">Connected to a real system</p>
+    <h2>Live on a monday.com board</h2>
+    <p>Before writing code, I called monday.com's GraphQL API by hand in Postman: reading boards, creating and updating items, and triggering errors on purpose. One finding: a bad board ID still returns HTTP 200, so an integration has to check the response's <code style="font-family:var(--mono);font-size:13px">errors</code> field, not just the status code.</p>
+    <p>Then I pointed the intake agent at the live board. Its tools make those same GraphQL calls. It read the board, created a campaign after I approved it, and, when I sent the same request again, found the new item and refused to create a duplicate.</p>
+    <div class="term" role="img" aria-label="Terminal transcript of two runs against the live monday.com board: the first creates the campaign after approval, the second refuses it as a duplicate.">
+      <div class="term-bar"><i></i><i></i><i></i><span>Terminal · live monday.com board · Qwen3 4B</span></div>
+<pre><span class="c"># Run 1: a new campaign request</span>
+<span class="p">$</span> python main.py --model ollama:qwen3:4b "New webinar: AI incident response for SRE managers, channel webinar, launch 2026-12-15, audience SRE managers"
+
+<span class="c">→ router: intake   → list_campaigns (read, live board)</span>
+
+<span class="w">PROPOSED WRITE -> create_campaign</span>
+{ "name": "AI incident response for SRE managers", "channel": "webinar",
+  "launch_date": "2026-12-15", "audience": "SRE managers" }
+<span class="w">Approve? [y/N]</span> <span class="y">y</span>
+
+Campaign "AI incident response for SRE managers" (webinar) launched for SRE managers on 2026-12-15.
+No existing duplicates or date conflicts found for this audience.
+<span class="c">[intake agent | 2 tool calls]   ✓ item created on the board, brief added as an update</span>
+
+<span class="c"># Run 2: the exact same request</span>
+<span class="p">$</span> python main.py --model ollama:qwen3:4b "New webinar: AI incident response for SRE managers, ..."
+
+The existing campaign "AI incident response for SRE managers" (webinar channel) is already active
+with the same name. This request duplicates an existing campaign (same topic and channel),
+so it cannot be created.
+<span class="g">No campaign will be added.</span></pre>
+    </div>
+    <p class="muted">One thing the transcript shows: the agent said "launched" when it had only created a request. Small, but exactly the kind of overclaim an eval should catch.</p>
+    <h3 class="sub">Behind the scenes</h3>
+    <ul class="bts">
+      <li><b>Reads:</b> the agent's <code>list_campaigns</code> tool runs a GraphQL query to pull the board's items before it decides anything.</li>
+      <li><b>Writes:</b> after a person approves, <code>create_campaign</code> runs a <code>create_item</code> mutation (plus an update with the brief), the same calls I first tested in Postman.</li>
+    </ul>
+    <div class="callout"><b>Design choice: keys stay out of the code.</b>The API token lives only in the terminal session, never in a file or on GitHub, and evals are hard-wired to sample data so a test run can never write to the real board.</div>
+  </section>
+
+  <section>
+    <p class="kicker">What's next</p>
+    <h2>What I'd build next</h2>
+    <div class="next">
+      <div><b>An analytics agent</b><span>Read-only, for pipeline and funnel questions: half of the real requests.</span></div>
+      <div><b>The same agents in LangGraph</b><span>Compare a framework with my hand-built loop on code size, approval steps and debugging.</span></div>
+      <div><b>Tools as an MCP server</b><span>So any MCP-ready assistant can use the same tools and guardrails.</span></div>
+      <div><b>Repeat runs per model</b><span>Several runs each, so small score differences mean something.</span></div>
+    </div>
+  </section>
+
+  <footer>
+    <a href="./">← Back to portfolio</a>
+    <span>Deborah Chang · Senior Product Manager, AI and data products</span>
+  </footer>
+</div>
+</body>
+</html>
