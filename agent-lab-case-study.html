@@ -102,6 +102,10 @@
   .term .w { color: #f2c46d; }
   .term .y { color: #6fc391; font-weight: 600; }
   .term .g { color: #6fc391; }
+  h3.sub { font-size: 18px; margin: 26px 0 6px; }
+  .bts { margin: 8px 0 14px; padding-left: 20px; max-width: 700px; }
+  .bts li { margin-bottom: 6px; }
+  .bts code { font-family: var(--mono); font-size: 13px; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
   pre { font-family: var(--mono); font-size: 13px; background: var(--code-bg); border-radius: 10px; padding: 14px 16px; overflow-x: auto; line-height: 1.55; margin: 14px 0; max-width: 700px; }
 
   .next { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 16px 0; }
@@ -123,11 +127,11 @@
 <div class="wrap">
   <nav>
     <a href="./">← Deborah Chang · Product Portfolio</a>
-    <span>Case study</span>
+    <span>Case study · Work in progress</span>
   </nav>
 
   <header class="hero">
-    <p class="eyebrow">Independent project · Nov 2026</p>
+    <p class="eyebrow">Independent project · Work in progress · Nov 2026</p>
     <h1>Marketing Agent Lab: <em>which AI agent would I trust to act?</em></h1>
     <p class="lede">I built two AI agents for everyday marketing requests, gave them tools that read and write real data, and tested three open-source models on 22 evals. A person approves every write, and a log records each decision.</p>
     <div class="meta">
@@ -248,7 +252,7 @@
     <p class="kicker">Connected to a real system</p>
     <h2>Live on a monday.com board</h2>
     <p>Before writing code, I called monday.com's GraphQL API by hand in Postman: reading boards, creating and updating items, and triggering errors on purpose. One finding: a bad board ID still returns HTTP 200, so an integration has to check the response's <code style="font-family:var(--mono);font-size:13px">errors</code> field, not just the status code.</p>
-    <p>Then I pointed the intake agent at the live board. It read the board, created a campaign after I approved it, and, when I sent the same request again, found the new item and refused to create a duplicate.</p>
+    <p>Then I pointed the intake agent at the live board. Its tools make those same GraphQL calls. It read the board, created a campaign after I approved it, and, when I sent the same request again, found the new item and refused to create a duplicate.</p>
     <div class="term" role="img" aria-label="Terminal transcript of two runs against the live monday.com board: the first creates the campaign after approval, the second refuses it as a duplicate.">
       <div class="term-bar"><i></i><i></i><i></i><span>Terminal · live monday.com board · Qwen3 4B</span></div>
 <pre><span class="c"># Run 1: a new campaign request</span>
@@ -274,6 +278,11 @@ so it cannot be created.
 <span class="g">No campaign will be added.</span></pre>
     </div>
     <p class="muted">One thing the transcript shows: the agent said "launched" when it had only created a request. Small, but exactly the kind of overclaim an eval should catch.</p>
+    <h3 class="sub">Behind the scenes</h3>
+    <ul class="bts">
+      <li><b>Reads:</b> the agent's <code>list_campaigns</code> tool runs a GraphQL query to pull the board's items before it decides anything.</li>
+      <li><b>Writes:</b> after a person approves, <code>create_campaign</code> runs a <code>create_item</code> mutation (plus an update with the brief), the same calls I first tested in Postman.</li>
+    </ul>
     <div class="callout"><b>Design choice: keys stay out of the code.</b>The API token lives only in the terminal session, never in a file or on GitHub, and evals are hard-wired to sample data so a test run can never write to the real board.</div>
   </section>
 
