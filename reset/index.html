@@ -97,6 +97,12 @@ textarea.line{min-height:56px}
 .tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .tile{font:inherit;text-align:left;display:flex;flex-direction:column;gap:2px;padding:14px;border-radius:16px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;min-height:72px}
 .tile b{font-size:15px}.ti{display:block;width:30px;height:30px;margin-bottom:6px}.ti svg{width:100%;height:100%;display:block}.tile span{font-size:13px;color:var(--muted)}
+.add-card{border:1.5px solid var(--accent)}
+.add-card p{margin:6px 0 0}.add-card .steps{margin:8px 0 0}
+.share-hint{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:5;background:var(--accent);color:var(--accent-ink);font-size:14px;padding:10px 14px;border-radius:14px;box-shadow:0 6px 18px rgba(0,0,0,.18);white-space:nowrap;pointer-events:none;animation:hint 1.6s ease-in-out infinite}
+.share-hint .arrow{position:absolute;left:50%;bottom:-20px;transform:translateX(-50%);color:var(--accent);font-size:20px}
+@keyframes hint{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,-6px)}}
+@media (prefers-reduced-motion: reduce){.share-hint{animation:none}}
 .phone-steps{display:flex;flex-direction:column;gap:10px}.phone-steps b{font-size:15px}.phone-steps .steps{margin:4px 0 0}
 .links{display:flex;justify-content:center;flex-wrap:wrap;gap:4px 18px}
 .strip{font:inherit;font-size:15px;text-align:left;min-height:48px;padding:10px 14px;border-radius:14px;border:1px dashed var(--accent);background:var(--card);color:var(--link);cursor:pointer;width:100%}
@@ -335,14 +341,15 @@ var Screens = {};
 Screens.welcome = function(){
   header();
   render(
-  '<div style="display:flex;flex-direction:column;gap:8px"><h1>Feeling drained? Get one small thing to do right now.</h1>'+
+  '<div style="display:flex;flex-direction:column;gap:8px"><h1 data-screen="welcome">Feeling drained? Get one small thing to do right now.</h1>'+
   '<p class="lead">Tap how you feel and how much time you have. Reset suggests one thing, like a 5-minute walk. Over time it shows what actually helps you.</p></div>'+
+  (needsHomeScreen() ? iosAddCard() : '')+
   '<div class="card"><div class="eyebrow">What a check-in looks like</div>'+
   '<div class="chips" aria-hidden="true"><span class="chip sel" style="cursor:default">Low</span><span class="chip sel" style="cursor:default">5 min</span><span class="chip sel" style="cursor:default">At the office</span></div>'+
   '<p><strong>Stand and stretch</strong><br><span class="small">Shoulders, neck, wrists. Right where you are. With a 5-minute timer.</span></p></div>'+
   '<div class="card"><div class="eyebrow">How it works</div><ol class="steps"><li>A reminder at a moment you pick.</li><li>Three taps, one small free idea.</li><li>Tell it if it helped. Each week, see what works for you.</li></ol></div>'+
   phoneSteps()+
-  '<button class="btn" data-go="setup">'+(needsHomeScreen() ? 'Set up here anyway' : 'Get started')+'</button>'+
+  (needsHomeScreen() ? '<button class="btn2" data-go="setup">Skip for now, set up here</button>' : '<button class="btn" data-go="setup">Get started</button>')+
   '<button class="btn2" data-go="journal">Vent or journal</button>'+
   '<p class="small">Reset is always free. No streaks. Your name and anything you write stay on this phone. Reset shares only anonymous counts of your check-in taps, never your name or words. <button class="link" data-go="privacy" style="padding:0;min-height:0">More details</button></p>'+
   '<p class="small foot">A wellness experiment, not medical advice.</p>');
@@ -534,7 +541,7 @@ function showJournal(a){
 }
 /* Saved entries of this kind, newest first (only on this phone). */
 function pastFor(a){
-  var past = load().journal.filter(function(e){ return e.title===a.name; }).slice(-3).reverse();
+  var past = load().journal.filter(function(e){ return e.title===a.name; }).reverse();
   if (!past.length) return '';
   return '<h2 style="margin-top:8px">Past entries</h2>'+past.map(entryCard).join('')+
     (S.direct ? '<div class="links"><button class="link" data-go="journal">See all saved entries</button></div>' : '');
@@ -869,9 +876,27 @@ function isIOS(){ return /iPhone|iPad|iPod/.test(navigator.userAgent) || (naviga
 function standalone(){ return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone===true; }
 function needsHomeScreen(){ return !isNative() && isIOS() && !standalone(); }
 function isAndroid(){ return /Android/.test(navigator.userAgent); }
+/* Android Chrome offers a one-tap install; keep it for the welcome screen. */
+var installPrompt = null;
+window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); installPrompt = e; if (document.querySelector('[data-screen="welcome"]')) Screens.welcome(); });
+window.addEventListener('appinstalled', function(){ installPrompt = null; });
+function isIOSChrome(){ return /CriOS|FxiOS|EdgiOS/.test(navigator.userAgent); }
+/* iPhone, not yet on the Home Screen: one clear step, with a pointer to Safari's Share button. */
+function iosAddCard(){
+  if (isIOSChrome()) return '<div class="card add-card"><div class="eyebrow">Step 1 of 2 · 10 seconds</div><p><strong>Open this page in Safari</strong> to add Reset to your Home Screen. That’s what lets reminders reach you.</p><p class="small">Tap ⋯ or the share icon, then <strong>Open in Safari</strong>, or copy the link into Safari.</p></div>';
+  return '<div class="card add-card"><div class="eyebrow">Step 1 of 2 · 10 seconds</div>'+
+    '<p><strong>Add Reset to your Home Screen</strong> so reminders can reach you.</p><ol class="steps">'+
+    '<li>Tap <strong>Share</strong> '+'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/></svg>'+' at the bottom of Safari (or ⋯, then Share).</li>'+
+    '<li>Tap <strong>Add to Home Screen</strong>, then <strong>Add</strong>.</li>'+
+    '<li>Open Reset from the new icon. Set up there and tap <strong>Allow</strong> for reminders.</li></ol></div>'+
+    '<div class="share-hint" aria-hidden="true">Tap Share '+'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/></svg>'+', then <b>Add to Home Screen</b><span class="arrow">↓</span></div>';
+}
 /* Signup: short reminder setup for iPhone and Android (yours first). Hidden once Reset runs from the Home Screen. */
 function phoneSteps(){
   if (isNative() || standalone()) return '';
+  if (isIOS()) return '';
+  if (isAndroid()) return '<div class="card add-card"><div class="eyebrow">Reminders</div><p>Tap <strong>Get started</strong>, then <strong>Allow</strong> when your phone asks. That’s it.</p>'+
+    (installPrompt ? '<button class="btn2" data-go="install">Add Reset to my Home screen</button>' : '<p class="small">Optional: Chrome ⋮ → <strong>Add to Home screen</strong> for an app icon.</p>')+'</div>';
   var ios = '<div><b>iPhone</b><ol class="steps">'+
     '<li>In <strong>Safari</strong>, tap <strong>Share</strong> (square with an arrow) → <strong>Add to Home Screen</strong>.</li>'+
     '<li>Open Reset from the new icon and set up there.</li>'+
@@ -939,6 +964,7 @@ function nudgeDone(){
 function go(name){
   clearInterval(tick);
   if (name==='notify'){ var nb=document.querySelector('[data-go="notify"]'); scheduleNudges().then(function(ok){ if (nb) nb.textContent = ok ? 'Reminders are on' : 'Notifications are off. Turn them on in Settings, then try again'; }); return; }
+  if (name==='install'){ if (installPrompt){ var ip=installPrompt; installPrompt=null; ip.prompt(); ip.userChoice.then(function(){ Screens.welcome(); }); } return; }
   if (name==='push'){ var pb=document.querySelector('[data-go="push"]'); if (pb) pb.textContent='Turning on…';
     pushOn().then(function(r){ if (r==='on' && document.querySelector('.status')) return Screens.settings(); if (r==='on'){ var st=document.createElement('span'); st.className='status on'; st.innerHTML='<i></i>Reminders on'; pb.replaceWith(st); return; } if (!pb) return; pb.textContent = r==='on' ? 'Reminders are on' : r==='denied' ? 'Notifications are blocked. Allow them in your settings, then try again' : r==='ios' ? 'First add Reset to your Home Screen' : 'Couldn’t turn them on. Try again in a moment'; }); return; }
   if (name==='nudgeDid'){ return nudgeDone(); }
