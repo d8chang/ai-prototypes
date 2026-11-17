@@ -278,6 +278,18 @@ footer p{color:var(--ink-2);max-width:46ch}
         </div>
       </article>
       <article class="tile">
+        <a class="shot" href="agent-lab-case-study.html"><img src="img/agentlab.jpg" alt="Marketing Agent Lab diagram: a request goes to a router, then to an intake agent or a follow-up agent, each with a read and a write tool; every write passes human approval before reaching the monday.com board."></a>
+        <div class="body">
+          <span class="eyebrow">AI agents and evals · Case study</span>
+          <h3>Marketing Agent Lab</h3>
+          <p class="what">Two AI agents for everyday marketing requests, with tools that read and write real data. A person approves every write. I tested three open-source models on 22 evals and connected the agents to a live monday.com board.</p>
+          <p class="win">Qwen3 8B passed 14 of 16 core evals; one prompt fix took Llama's routing from 5 to 13; a code-level guardrail blocked an email to an opted-out lead.</p>
+          <div class="foot">
+            <a class="open" href="agent-lab-case-study.html">Read the case study</a>
+          </div>
+        </div>
+      </article>
+      <article class="tile">
         <div class="shot"><img src="img/tabitha.jpg" alt="Tabitha screens: a side panel with a While you were away recap and an Undo button, a quick finder listing matching tabs, and a card saying You already have this open."></div>
         <div class="body">
           <span class="eyebrow">Productivity · Work in progress</span>
@@ -326,6 +338,7 @@ const VIDEOS = [
   'https://www.loom.com/share/5a1dcb4d3e7d4d28ab93a94a50518d1d', // OKR and KPI Scorecard
   'https://www.loom.com/share/4fd02ca7c4f44cbe9bb5f6127e5f84ab', // GTM Pipeline Targeting
   '',                                                             // Reset
+  '',                                                             // Marketing Agent Lab
   ''                                                              // Tabitha
 ];
 document.querySelectorAll('.tile').forEach((tile, i) => {
