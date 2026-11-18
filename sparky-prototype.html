@@ -274,6 +274,9 @@ table.data{border-collapse:collapse;width:100%;font-size:14px;font-variant-numer
 .tool-box h3{margin:0;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
 .tool-box p{color:var(--ink);font-weight:600}
 .tool-box small{color:var(--ink-3);font-size:13px}
+.cap-split{max-width:none}
+.cap-split .tool-box{align-items:flex-start}
+.cap-split .chip{margin-top:auto}
 .wont{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
 .wont-card{background:var(--scope-bg);border:1px dashed var(--scope-line);border-radius:var(--r-md);padding:16px;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
 .wont-card h3{margin:0;font-size:16px;color:var(--ink)}
@@ -480,7 +483,48 @@ button.src:hover{border-color:var(--green-500);color:var(--green-800)}
 .with-genie.holding{background:var(--green-50);border-color:var(--green-200);padding:6px 6px 6px 10px}
 .divider{display:flex;align-items:center;gap:12px;font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
 .divider::before,.divider::after{content:"";flex:1;border-top:1px solid var(--line)}
-.with-genie-text{display:flex;align-items:center;gap:6px 8px;flex-wrap:wrap;min-width:0}</style>
+.with-genie-text{display:flex;align-items:center;gap:6px 8px;flex-wrap:wrap;min-width:0}
+/* ----- how it works (architecture) ----- */
+.arch-flow{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:28px}
+.arch-step{position:relative;display:flex;flex-direction:column;gap:6px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:14px}
+.arch-step strong{font-family:var(--font-display);font-size:16px;line-height:1.2;color:var(--ink)}
+.arch-step>span:not(.arch-kicker):not(.arch-tag){font-size:13.5px;color:var(--ink-2)}
+.arch-kicker{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.04em;color:var(--ink-3)}
+.arch-tag{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:var(--r-pill)}
+.arch-auto{background:var(--green-50);border-color:var(--green-200)}
+.arch-auto .arch-tag{background:var(--green-100);color:var(--green-800)}
+.arch-ai{background:var(--green-900);border-color:var(--green-900)}
+.arch-ai strong{color:var(--on-dark)}
+.arch-ai>span:not(.arch-kicker):not(.arch-tag){color:var(--on-dark-2)}
+.arch-ai .arch-kicker{color:var(--on-dark-2)}
+.arch-ai .arch-tag{background:var(--lime);color:var(--green-900)}
+.arch-sub{margin-top:4px;width:100%;box-sizing:border-box;border-top:1px dashed var(--line);padding-top:8px;display:flex;flex-direction:column;gap:2px;font-size:12.5px;color:var(--ink-2)}
+.arch-ai .arch-sub{border-top-color:var(--dark-line);color:var(--on-dark)}
+.arch-sub small{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.arch-ai .arch-sub small{color:var(--on-dark-2)}
+.arch-step+.arch-step::before{content:"";position:absolute;left:-22px;top:28px;width:16px;height:2px;background:var(--green-600)}
+.arch-step+.arch-step::after{content:"";position:absolute;left:-10px;top:24px;border:5px solid transparent;border-left:6px solid var(--green-600)}
+.arch-skills{margin:4px 0 0;display:flex;flex-direction:column;gap:6px}
+.arch-skills dt{font-weight:700;color:var(--ink);font-size:12.5px}
+.arch-skills dd{margin:0;color:var(--ink-2);font-size:12px;line-height:1.35}
+.guide p.arch-return{font-size:14px;color:var(--green-800);font-weight:600}
+.arch-split{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+@media (max-width:900px){
+  .arch-flow{grid-template-columns:minmax(0,1fr);gap:22px}
+  .arch-step+.arch-step::before{left:28px;top:-18px;width:2px;height:12px}
+  .arch-step+.arch-step::after{left:24px;top:-8px;border:5px solid transparent;border-top:6px solid var(--green-600)}
+}
+.guide .arch-h3{margin:8px 0 0;font-family:var(--font-display);font-size:17px;line-height:1.2;color:var(--ink)}
+.arch-examples{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.arch-ex{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:14px;display:flex;flex-direction:column;gap:10px}
+.arch-ex-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.arch-tag-plain{background:var(--green-100);color:var(--green-800)}
+.arch-tag-action{background:var(--lime);color:var(--green-900)}
+.arch-path{font-family:var(--font-mono);font-size:11.5px;color:var(--ink-3);overflow-wrap:anywhere}
+.guide p.arch-q{font-weight:600;color:var(--ink);font-size:15px}
+.arch-ex-steps{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:13.5px;color:var(--ink-2)}
+.arch-ex-steps li::marker{color:var(--green-700);font-weight:700}
+</style>
 </head>
 <body>
 <header class="top">
@@ -495,6 +539,7 @@ button.src:hover{border-color:var(--green-500);color:var(--green-800)}
     <button class="tab" role="tab" id="tab-chat" aria-selected="true" aria-controls="view-chat" type="button">Chat</button>
     <button class="tab" role="tab" id="tab-requests" aria-selected="false" aria-controls="view-requests" type="button">My Requests<span class="tab-count" id="req-count" hidden></span></button>
     <button class="tab" role="tab" id="tab-guide" aria-selected="false" aria-controls="view-guide" type="button">What Sparky Can Do</button>
+    <button class="tab" role="tab" id="tab-how" aria-selected="false" aria-controls="view-how" type="button">How It Works</button>
     <button class="tab" role="tab" id="tab-admin" aria-selected="false" aria-controls="view-admin" type="button">Observability</button>
   </div>
   <div class="top-right">
@@ -548,6 +593,77 @@ button.src:hover{border-color:var(--green-500);color:var(--green-800)}
 
 <div class="guide" id="view-guide" role="tabpanel" aria-labelledby="tab-guide" hidden>
   <div class="guide-inner" id="guide-inner"></div>
+</div>
+
+<div class="guide" id="view-how" role="tabpanel" aria-labelledby="tab-how" hidden>
+  <div class="guide-inner">
+    <section class="arch" aria-labelledby="arch-title">
+      <h1 id="arch-title">How Sparky Works</h1>
+      <p>A high-level view of the production architecture. Workato orchestrates the predictable steps, and an AI assistant for each team handles the judgment calls.</p>
+      <ol class="arch-flow">
+        <li class="arch-step">
+          <span class="arch-kicker">1 · Ask</span>
+          <strong>Slack</strong>
+          <span>An employee asks a question in plain language.</span>
+        </li>
+        <li class="arch-step arch-auto">
+          <span class="arch-kicker">2 · Orchestrate</span>
+          <strong>Workato Genie Engine</strong>
+          <span>Routes the thread to the right genie and manages the conversation, so follow-ups keep their context.</span>
+          <span class="arch-tag">Automation</span>
+        </li>
+        <li class="arch-step arch-ai">
+          <span class="arch-kicker">3 · Understand</span>
+          <strong>Genies</strong>
+          <span>One OpenAI assistant per team, like IT Support and Procurement. Each retrieves from its own knowledge (RAG) and decides whether to answer or take an action.</span>
+          <span class="arch-tag">AI</span>
+          <div class="arch-sub"><small>Knowledge</small><span>Confluence, Google Drive, and Workato files, synced into each genie's vector store</span></div>
+        </li>
+        <li class="arch-step arch-auto">
+          <span class="arch-kicker">4 · Act, only if needed</span>
+          <strong>Skill Processor</strong>
+          <span>Runs the action the genie chose, using only the skills assigned to that genie. Pure questions skip this step and go straight back to Slack.</span>
+          <span class="arch-tag">Automation</span>
+          <div class="arch-sub"><small>Skills pool</small>
+            <dl class="arch-skills">
+              <dt>Jira Service Desk</dt><dd>Opens and checks support tickets</dd>
+              <dt>Okta</dt><dd>Looks up users and manages sign-in and app access</dd>
+              <dt>Entra ID</dt><dd>Manages Microsoft accounts and group permissions</dd>
+              <dt>Oomnitza</dt><dd>Looks up IT assets, like an employee's laptop</dd>
+            </dl>
+          </div>
+        </li>
+      </ol>
+      <p class="arch-return"><span aria-hidden="true">↩</span> Either way, the genie's plain-language answer, with its source, goes back to the employee in Slack. For a simple question, that happens right after step 3.</p>
+      <h3 class="arch-h3">Two Example Journeys</h3>
+      <div class="arch-examples">
+        <div class="arch-ex">
+          <div class="arch-ex-head"><span class="arch-tag arch-tag-plain">Plain question</span><span class="arch-path">Slack → Engine → IT Support Genie → Slack</span></div>
+          <p class="arch-q">&ldquo;How do I connect to the VPN?&rdquo;</p>
+          <ol class="arch-ex-steps">
+            <li>The Genie Engine links the Slack thread to an OpenAI thread and sends it to the IT Support genie.</li>
+            <li>The genie searches its knowledge, finds the VPN guide, and writes an answer that cites it.</li>
+            <li>The answer posts back in the same Slack thread. The Skill Processor is never used.</li>
+            <li>A follow-up like &ldquo;What if it still won't connect?&rdquo; keeps its context, because the thread is remembered.</li>
+          </ol>
+        </div>
+        <div class="arch-ex">
+          <div class="arch-ex-head"><span class="arch-tag arch-tag-action">Needs an action</span><span class="arch-path">Slack → Engine → IT Support Genie → Skill Processor → Jira → Slack</span></div>
+          <p class="arch-q">&ldquo;Can you check the status of my laptop ticket?&rdquo;</p>
+          <ol class="arch-ex-steps">
+            <li>The engine routes the question to the IT Support genie the same way.</li>
+            <li>The genie decides it needs live data, not a document, and asks the engine to call a skill.</li>
+            <li>The Skill Processor runs the Jira Service Desk skill, one the IT Support genie is allowed to use, and looks up the ticket.</li>
+            <li>The genie turns the result into a plain answer, &ldquo;Your laptop request is in progress and assigned to IT,&rdquo; and it posts in Slack.</li>
+          </ol>
+        </div>
+      </div>
+      <div class="arch-split">
+        <div class="tool-box"><h3>Automation handles</h3><p>Routing, conversation threads, knowledge syncing, and running actions</p><small>Predictable steps, the same every time.</small></div>
+        <div class="tool-box"><h3>AI handles</h3><p>Understanding the question, finding the right knowledge, deciding what to do</p><small>Judgment calls, with each genie limited to its own skills.</small></div>
+      </div>
+    </section>
+  </div>
 </div>
 
 <div class="admin" id="view-admin" role="tabpanel" aria-labelledby="tab-admin" hidden>
@@ -2094,7 +2210,7 @@ function renderGuide() {
   $('#guide-inner').innerHTML = `
     <section>
       <h1>What Sparky Can Do</h1>
-      <p class="lead">Sparky is one place to ask work questions. You ask in plain language. Sparky works out which team the question belongs to and hands it to that team's <strong>genie</strong>, an assistant that answers only from that team's own documents.</p>
+      <p class="lead">One place to ask work questions in plain language. Sparky sends each question to the right team's <strong>genie</strong>, which answers from that team's own documents or takes care of the request.</p>
       <div class="facts"><span class="fact">9 genies, one per team</span><span class="fact">Every answer names its source</span><span class="fact">Tool access handled in chat</span><span class="fact">Says so when it isn't sure</span></div>
     </section>
     <section>
@@ -2105,52 +2221,18 @@ function renderGuide() {
         <span class="g-blurb">${covers[id]}</span>${chip(example[id])}</div>`).join('')}</div>
     </section>
     <section>
-      <h2>Getting More from an Answer</h2>
-      <div class="tips">
-        <div class="tip"><strong>Check the source</strong><span>Select a source under any answer to see the exact passage and when it was last updated.</span></div>
-        <div class="tip"><strong>Wrong genie? Say so</strong><span>Select "Not the right genie?" to send your question to another genie or to a person on that team.</span></div>
-        <div class="tip"><strong>Keep going</strong><span>Related questions under each answer take you to the usual next step.</span></div>
-        <div class="tip"><strong>Track it</strong><span>My Requests lists your tool requests and anything you've sent to a team.</span></div>
+      <h2>Three Things to Know</h2>
+      <div class="tool-split cap-split">
+        <div class="tool-box"><h3>Answers you can check</h3><p>Every answer cites its source, and you can open the exact passage.</p><small>Wrong genie? Select &ldquo;Not the right genie?&rdquo; to reroute it.</small></div>
+        <div class="tool-box"><h3>Tool access in chat</h3><p>Ask for Tableau, Snowflake, Claude, and more. Sparky opens the ticket and tracks approvals.</p><small>Tableau and Claude need two approvals; the rest need one.</small>${chip('Try it: I need access to Claude', 'I need access to Claude')}</div>
+        <div class="tool-box"><h3>Knows its limits</h3><p>It won't give financial advice or discuss anyone's pay, and points you to the right person instead.</p><small>It also says so plainly when it isn't sure.</small>${chip('See an example', 'Should I invest in the ESPP?', 'quiet')}</div>
       </div>
-    </section>
-    <section>
-      <h2>Getting a Tool: Onboarding to Claude</h2>
-      <p>Sparky can get you access to Tableau, Snowflake, Claude, Datadog, Lucidchart, and 1Password without a form. Here is what happens when you ask for Claude.</p>
-      <ol class="walk">
-        <li><div><strong>You ask.</strong><span>Type &ldquo;I need access to Claude.&rdquo; The IT Genie confirms the tool and tells you up front that Claude has limited licenses, so it needs two approvals.</span></div></li>
-        <li><div><strong>You give a short reason.</strong><span>One sentence on what you'll use it for.</span></div></li>
-        <li><div><strong>Sparky opens the ticket.</strong><span>A Jira ticket is created for you. You get the ticket number and can follow progress in the tracker at the top of the chat.</span></div></li>
-        <li class="approval-step"><div><strong>Approval 1: your manager.</strong><span>The request waits until your manager approves or denies it. If it's slow, you can send a reminder from the tracker.</span></div></li>
-        <li class="approval-step"><div><strong>Approval 2: the Claude license owner.</strong><span>Only Tableau and Claude have this second step, because their licenses are limited.</span></div></li>
-        <li><div><strong>Your seat is set up.</strong><span>Sparky adds you to the right permissions group.</span></div></li>
-        <li><div><strong>You confirm it works.</strong><span>If you're still blocked, Sparky reopens the ticket and sends it to IT.</span></div></li>
-      </ol>
-      <div class="tool-split">
-        <div class="tool-box"><h3>Two approvals</h3><p>Tableau, Claude</p><small>Your manager, then the license owner.</small></div>
-        <div class="tool-box"><h3>One approval</h3><p>Snowflake, Datadog, Lucidchart, 1Password</p><small>Your manager only.</small></div>
-      </div>
-      <p>If an approver says no, you'll see their reason, the ticket is closed, and Sparky tells you what you can do next.</p>
-      <div class="chips">${chip('Try it: I need access to Claude', 'I need access to Claude')}</div>
-    </section>
-    <section>
-      <h2>What Sparky Won't Do</h2>
-      <p>Two kinds of questions need a person, not an assistant. Sparky tells you so plainly, shares the facts it can, and points you to who can help.</p>
-      <div class="wont">
-        <div class="wont-card"><h3>Give Financial Advice</h3>
-          <p>Sparky explains how company programs work. It never tells you what to do with your money.</p>
-          <dl class="ex"><dt>Will answer</dt><dd>&ldquo;How does the ESPP work?&rdquo;</dd><dt>Won't answer</dt><dd>&ldquo;Should I invest in the ESPP?&rdquo;</dd><dt>You still get</dt><dd>The plan facts and the next enrollment dates</dd><dt>Go to</dt><dd>A personal financial advisor</dd></dl>
-          ${chip('See how Sparky responds', 'Should I invest in the ESPP?', 'quiet')}</div>
-        <div class="wont-card"><h3>Answer Questions About Anyone's Pay</h3>
-          <p>Sparky explains general pay policy. It can't see or discuss any individual's pay, including yours.</p>
-          <dl class="ex"><dt>Will answer</dt><dd>&ldquo;How do pay bands work?&rdquo;</dd><dt>Won't answer</dt><dd>&ldquo;Am I paid fairly for my level?&rdquo;</dd><dt>You still get</dt><dd>How pay is set, and a private follow-up from HR if you want one</dd><dt>Go to</dt><dd>Your manager, your HR business partner, or the HR system</dd></dl>
-          ${chip('See how Sparky responds', 'Am I paid fairly for my level?', 'quiet')}</div>
-      </div>
-      <p>After any answer, a thumbs up or down tells the team behind that genie how it did.</p>
+      <p>See the <strong>How It Works</strong> tab for the architecture behind it.</p>
     </section>`;
 }
 
 /* ----- shell wiring ----- */
-const TABS = ['chat', 'requests', 'guide', 'admin'];
+const TABS = ['chat', 'requests', 'guide', 'how', 'admin'];
 function showTab(name) {
   if (name === 'admin') renderAdmin();
   for (const t of TABS) {
