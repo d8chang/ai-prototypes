@@ -221,19 +221,19 @@
 
   <section>
     <p class="kicker">Results</p>
-    <h2>The bigger Qwen was most accurate but twice as slow</h2>
-    <p>Same 16 core evals, same prompts, run locally for free.</p>
+    <h2>The smaller Qwen scored higher, but the bigger one was steadier</h2>
+    <p>All 22 evals, run 3 times per model and averaged, locally for free. Single runs had flipped the ranking twice, so averages are what count here.</p>
     <div class="table-scroll">
     <table>
-      <thead><tr><th>Model</th><th>Passed</th><th>Routing</th><th>Median time</th><th>Where it failed</th></tr></thead>
+      <thead><tr><th>Model</th><th>Average passed</th><th>The 3 runs</th><th>Where it failed</th></tr></thead>
       <tbody>
-        <tr><td><b>Qwen3 8B</b></td><td class="num">14 / 16<div class="bar lead"><i style="width:87.5%"></i></div></td><td class="num">16 / 16</td><td class="num">241 s</td><td>Skipped the board check twice</td></tr>
-        <tr><td><b>Qwen3 4B</b></td><td class="num">12 / 16<div class="bar"><i style="width:75%"></i></div></td><td class="num">16 / 16</td><td class="num">112 s</td><td>Missed two creates; emailed nobody for time-window requests</td></tr>
-        <tr><td><b>Llama 3.1 8B</b></td><td class="num">4 / 16<div class="bar"><i style="width:25%"></i></div></td><td class="num">13 / 16</td><td class="num">5 s</td><td>Rarely used its tools; fast only because it did so little</td></tr>
+        <tr><td><b>Qwen3 4B</b></td><td class="num">17.0 / 22<div class="bar"><i style="width:77%"></i></div></td><td class="num">17, 15, 19</td><td>Swung by 4 between runs; flaky on follow-ups (emailed nobody, or tried the same leads twice)</td></tr>
+        <tr><td><b>Qwen3 8B</b></td><td class="num">15.3 / 22<div class="bar lead"><i style="width:70%"></i></div></td><td class="num">15, 15, 16</td><td>Steady; passed every email case. Sometimes skipped the board check before asking for details</td></tr>
+        <tr><td><b>Llama 3.1 8B</b></td><td class="num">4 / 16<div class="bar"><i style="width:25%"></i></div></td><td class="num">one run</td><td>Rarely used its tools; dropped after one run</td></tr>
       </tbody>
     </table>
     </div>
-    <p class="muted">Times are on a MacBook Air. Earlier, with a weaker router prompt, the 4B model scored 13 and the 8B scored 12, a reminder that a one- or two-point gap from a single run is noise.</p>
+    <p class="muted">My pick: Qwen3 8B for anything that takes real actions. When emails actually go out, consistency matters more than a slightly higher average.</p>
   </section>
 
   <section>
@@ -242,16 +242,16 @@
     <ol class="findings">
       <li><b>The prompt mattered as much as the model.</b><span>Llama's router answered "Alex" when asked to pick an agent. Adding three examples to the prompt took its routing from 5 to 13 of 16.</span></li>
       <li><b>Safety rules belong in code, not the prompt.</b><span>Qwen 8B tried to email a lead who had opted out. The prompt said not to; the code blocked it anyway.</span></li>
-      <li><b>A model that does nothing can look safe.</b><span>All four of Llama's passes were cases where doing nothing was correct. Evals have to check that the right action happened, not just that nothing bad did.</span></li>
+      <li><b>A model that does nothing can look safe.</b><span>Some tests reward holding back, like not emailing a lead who opted out. Llama passed only those four, because it barely took any action at all. So my evals also check that the agent did the right thing when action was needed, not just that it avoided mistakes.</span></li>
       <li><b>Real requests broke things sample cases didn't.</b><span>Asked to export leads, both Qwen models had no export tool, so they emailed three people instead. The approval step caught it. Two of four real requests were analytics, which tells me what agent to build next.</span></li>
-      <li><b>On small models, prompt fixes move failures around.</b><span>Three targeted fixes raised each model by one case but created new misroutes. Where a request is ambiguous, the agent should ask a clarifying question, not guess.</span></li>
+      <li><b>One run isn't a result.</b><span>Prompt fixes on small models moved failures around, and single runs swung by up to 4 cases. Averaging 3 runs showed which failures were real and which were noise, so I only fix the steady ones.</span></li>
     </ol>
   </section>
 
   <section>
     <p class="kicker">Connected to a real system</p>
     <h2>Live on a monday.com board</h2>
-    <p>Before writing code, I called monday.com's GraphQL API by hand in Postman: reading boards, creating and updating items, and triggering errors on purpose. One finding: a bad board ID still returns HTTP 200, so an integration has to check the response's <code style="font-family:var(--mono);font-size:13px">errors</code> field, not just the status code.</p>
+    <p>Before writing code, I called monday.com's GraphQL API by hand in Postman: reading boards, creating and updating items, and triggering errors on purpose. One finding: when I sent a wrong board ID, monday.com still answered with HTTP 200, the web's code for "success", and put the error inside the response instead. Code that only checks for that success code would think a failed request worked, so my integration also checks the response for an <code style="font-family:var(--mono);font-size:13px">errors</code> field.</p>
     <p>Then I pointed the intake agent at the live board. Its tools make those same GraphQL calls. It read the board, created a campaign after I approved it, and, when I sent the same request again, found the new item and refused to create a duplicate.</p>
     <div class="term" role="img" aria-label="Terminal transcript of two runs against the live monday.com board: the first creates the campaign after approval, the second refuses it as a duplicate.">
       <div class="term-bar"><i></i><i></i><i></i><span>Terminal · live monday.com board · Qwen3 4B</span></div>
@@ -293,7 +293,7 @@ so it cannot be created.
       <div><b>An analytics agent</b><span>Read-only, for pipeline and funnel questions: half of the real requests.</span></div>
       <div><b>The same agents in LangGraph</b><span>Compare a framework with my hand-built loop on code size, approval steps and debugging.</span></div>
       <div><b>Tools as an MCP server</b><span>So any MCP-ready assistant can use the same tools and guardrails.</span></div>
-      <div><b>Repeat runs per model</b><span>Several runs each, so small score differences mean something.</span></div>
+      <div><b>Fix the steady failures</b><span>Requests naming two campaigns, and checking the board before asking for details, failed on every run.</span></div>
     </div>
   </section>
 
