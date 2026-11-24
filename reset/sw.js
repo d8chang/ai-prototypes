@@ -1,5 +1,5 @@
 /* Reset offline cache and reminders. Only the app shell is cached; no answers pass through here. */
-var CACHE = 'reset-v2.35';
+var CACHE = 'reset-v2.36';
 var FILES = ['./', 'index.html', 'privacy.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-180.png'];
 self.addEventListener('install', function(e){ e.waitUntil(caches.open(CACHE).then(function(c){ return c.addAll(FILES); })); self.skipWaiting(); });
 self.addEventListener('activate', function(e){ e.waitUntil(caches.keys().then(function(ks){ return Promise.all(ks.filter(function(k){ return k !== CACHE && k !== 'reset-prefs'; }).map(function(k){ return caches.delete(k); })); })); self.clients.claim(); });
@@ -25,8 +25,15 @@ self.addEventListener('push', function(e){
   var i = Math.abs(parseInt(d.n, 10) || 0) % NUDGES.length;
   e.waitUntil(caches.open('reset-prefs').then(function(c){ return c.match('prefs'); }).then(function(r){ return r ? r.json() : {}; }).catch(function(){ return {}; }).then(function(p){
     var name = (p && p.name) || 'Hey', n = NUDGES[i];
+    /* Mondays and Thursdays: invite a full check-in instead of a nudge. */
+    var wd = new Date().getDay();
+    if (wd === 1 || wd === 4) {
+      return self.registration.showNotification('How are you feeling right now, ' + name + '?', {
+        body: 'Three taps, one small idea for this moment.', icon: 'icon-192.png', badge: 'icon-192.png', tag: 'reset-reminder', data: { checkin: true }
+      });
+    }
     return self.registration.showNotification(n[0].replace('{n}', name), {
-      body: n[1].replace('{n}', name) + ' Tap when you’re done.', icon: 'icon-192.png', badge: 'icon-192.png', tag: 'reset-reminder', data: { n: i },
+      body: n[1].replace('{n}', name) + ' Tap to log it and see how you feel.', icon: 'icon-192.png', badge: 'icon-192.png', tag: 'reset-reminder', data: { n: i },
       actions: [{ action: 'did', title: 'Did it' }, { action: 'more', title: 'Check in' }]
     });
   }));
@@ -34,7 +41,7 @@ self.addEventListener('push', function(e){
 self.addEventListener('notificationclick', function(e){
   e.notification.close();
   var i = (e.notification.data && e.notification.data.n) || 0;
-  var hash = e.action === 'did' ? '#did' : e.action === 'more' ? '#checkin' : '#nudge-' + i;
+  var hash = (e.notification.data && e.notification.data.checkin) ? '#checkin' : e.action === 'did' ? '#did' : e.action === 'more' ? '#checkin' : '#nudge-' + i;
   var url = new URL('./' + hash, self.registration.scope).href;
   e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(ws){
     var w = null;

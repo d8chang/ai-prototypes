@@ -723,7 +723,7 @@ Screens.privacy = function(){
   '<div class="card facts">'+
   '<div><b>Only on your phone</b><span>Your name, everything you write, and the exact ideas you tried, like “walk around the block.” No one else sees these.</span></div>'+
   '<div><b>Why</b><span>To show which ideas work for you, like “walks helped 3 of 4.”</span></div>'+
-  '<div><b>What Deborah sees</b><span>Anonymous taps under a random id, like “Tuesday: low mood, 5 minutes, a movement idea, it helped,” plus how often you asked for another idea and the days you tapped “I did it” on a reminder. She can’t tell who you are.</span></div>'+
+  '<div><b>What Deborah sees</b><span>Anonymous taps under a random id, like “Tuesday: low mood, 5 minutes, a movement idea, it helped,” plus how often you asked for another idea and the days you tapped “I did it” on a reminder, with how you felt after. She can’t tell who you are.</span></div>'+
   '<div><b>Reminders</b><span>If you turn them on, Reset keeps an anonymous device address, your reminder time and time zone so it can send them. No name or email. Turning reminders off removes it.</span></div>'+
   '<div><b>Journal and vent box</b><span>Saved entries stay only on this phone so you can look back. “Let it go” saves nothing.</span></div>'+
   '<div><b>How long</b><span>Until you delete it. Clearing this site’s data also deletes it.</span></div>'+
@@ -962,7 +962,15 @@ function nudgeScreen(i){
 function nudgeDone(){
   var d=load(); if (!d.profile) return Screens.welcome();
   d.nudges = d.nudges || []; d.nudges.push({ t:now() }); save(); shareEvent({ type:'nudge', day:dayStr(now()) });
-  header(); render('<h2>Nice. That counts.</h2><p class="lead">'+esc(GRACE[d.nudges.length % GRACE.length])+'</p><button class="btn" data-go="home">Done</button><button class="btn2" data-go="checkin">One more idea</button>');
+  header(); render('<h2>Nice. That counts.</h2><div class="bubble">How do you feel now?</div>'+
+    '<div class="chips">'+MOODS.map(function(m,i){ return '<button class="chip" data-nmood="'+(i+1)+'">'+m+'</button>'; }).join('')+'</div>'+
+    '<div class="links"><button class="link" data-go="home">Skip</button></div>');
+}
+/* One tap after a nudge: how they feel now (kept with the nudge, shared as an anonymous count). */
+function nudgeMood(m){
+  var d=load(), last=(d.nudges||[]).slice(-1)[0]; if (last) last.mood=m; save();
+  shareEvent({ type:'nudgemood', day:dayStr(now()), mood:m });
+  header(); render('<h2>Thanks.</h2><p class="lead">'+esc(GRACE[(d.nudges||[]).length % GRACE.length])+'</p><button class="btn" data-go="home">Done</button><button class="btn2" data-go="checkin">One more idea</button>');
 }
 
 
@@ -1013,6 +1021,7 @@ function go(name){
 document.addEventListener('click', function(e){
   var b = e.target.closest('button'); if (!b) return;
   if (b.dataset.go) return go(b.dataset.go);
+  if (b.dataset.nmood){ return nudgeMood(+b.dataset.nmood); }
   if (b.dataset.mood){ S.mood = +b.dataset.mood; return stepTime(); }
   if (b.dataset.time){ S.time = +b.dataset.time; return stepWhere(); }
   if (b.dataset.where){ S.where = b.dataset.where; return afterWhere(); }
