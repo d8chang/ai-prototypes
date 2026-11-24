@@ -1,5 +1,5 @@
 /* Reset offline cache and reminders. Only the app shell is cached; no answers pass through here. */
-var CACHE = 'reset-v2.36';
+var CACHE = 'reset-v2.37';
 var FILES = ['./', 'index.html', 'privacy.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-180.png'];
 self.addEventListener('install', function(e){ e.waitUntil(caches.open(CACHE).then(function(c){ return c.addAll(FILES); })); self.skipWaiting(); });
 self.addEventListener('activate', function(e){ e.waitUntil(caches.keys().then(function(ks){ return Promise.all(ks.filter(function(k){ return k !== CACHE && k !== 'reset-prefs'; }).map(function(k){ return caches.delete(k); })); })); self.clients.claim(); });
@@ -25,9 +25,9 @@ self.addEventListener('push', function(e){
   var i = Math.abs(parseInt(d.n, 10) || 0) % NUDGES.length;
   e.waitUntil(caches.open('reset-prefs').then(function(c){ return c.match('prefs'); }).then(function(r){ return r ? r.json() : {}; }).catch(function(){ return {}; }).then(function(p){
     var name = (p && p.name) || 'Hey', n = NUDGES[i];
-    /* Mondays and Thursdays: invite a full check-in instead of a nudge. */
-    var wd = new Date().getDay();
-    if (wd === 1 || wd === 4) {
+    /* Every 3rd reminder (on whatever days this person chose) invites a full check-in instead of a nudge. */
+    return countReminder().then(function(k){
+    if (k % 3 === 0) {
       return self.registration.showNotification('How are you feeling right now, ' + name + '?', {
         body: 'Three taps, one small idea for this moment.', icon: 'icon-192.png', badge: 'icon-192.png', tag: 'reset-reminder', data: { checkin: true }
       });
@@ -36,8 +36,18 @@ self.addEventListener('push', function(e){
       body: n[1].replace('{n}', name) + ' Tap to log it and see how you feel.', icon: 'icon-192.png', badge: 'icon-192.png', tag: 'reset-reminder', data: { n: i },
       actions: [{ action: 'did', title: 'Did it' }, { action: 'more', title: 'Check in' }]
     });
+    });
   }));
 });
+/* How many reminders this phone has received (kept only on the phone). */
+function countReminder(){
+  return caches.open('reset-prefs').then(function(c){
+    return c.match('count').then(function(r){ return r ? r.text() : '0'; }).then(function(v){
+      var k = (parseInt(v, 10) || 0) + 1;
+      return c.put('count', new Response(String(k))).then(function(){ return k; });
+    });
+  }).catch(function(){ return 1; });
+}
 self.addEventListener('notificationclick', function(e){
   e.notification.close();
   var i = (e.notification.data && e.notification.data.n) || 0;
