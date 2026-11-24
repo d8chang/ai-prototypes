@@ -391,7 +391,7 @@ Screens.remind = function(){
   var p = load().profile;
   var on = p.push === true;
   render(
-  '<h1 data-screen="remind">Your reminder</h1>'+
+  backTo('home','Back home')+'<h1 data-screen="remind">Your reminder</h1>'+
   (!isNative() && webPushOK() && !needsHomeScreen() && (on || S.pushPending)
    ? '<span class="status '+(on?'on':'off')+'"><i></i>'+(on?'Reminders on':'Turning on…')+'</span>'+
      '<p class="lead">A notification after '+esc(p.moment.toLowerCase())+', around '+fmtTime(p.time)+'. Each one has a tiny thing you can do right there, like three slow breaths. Tap it for a full check-in.</p>'+
